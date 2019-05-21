@@ -1,0 +1,1 @@
+provides: spring-boot,spring-context,spring-beans,tomcat-embed-core,spring-web,jackson-databind,jackson-datatype-jdk8,jackson-datatype-jsr310,jackson-module-parameter-names,jackson-module-kotlin,spring-webmvc,spring-web,spring-jdbc,spring-tx,HikariCP,spring-hateoas,spring-data-rest-webmvc,spring-security-web,spring-security-config,spring-content-fs
