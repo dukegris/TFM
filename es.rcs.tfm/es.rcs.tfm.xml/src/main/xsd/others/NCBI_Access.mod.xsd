@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "access.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-Access"
+================================================= -->
+<!--
+$Revision: 6.0 $
+*********************************************************************
+
+  access.asn
+
+     messages for data access
+
+*********************************************************************
+-->
+<!-- Elements used by other modules:
+          Link-set -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ links between same class = neighbors
+ links between other classes = links
+-->
+<xs:element name="Link-set">
+  <xs:complexType>
+    <xs:sequence>
+<!-- number of links to this doc type -->
+      <xs:element name="Link-set_num" type="xs:integer"/>
+<!-- the links -->
+      <xs:element name="Link-set_uids" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Link-set_uids_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- the weights -->
+      <xs:element name="Link-set_weights" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Link-set_weights_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

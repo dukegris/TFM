@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +75,7 @@ public class JettyConfig {
 				try {
 					File keystore = new ClassPathResource(KEYSTORE_LOCATION).getFile();
 					File truststore = new ClassPathResource(TRUSTSTORE_LOCATION).getFile();
-
+					
 					SslContextFactory sslContextFactory = new SslContextFactory();
 					sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
 					sslContextFactory.setKeyStorePath(keystore.getAbsolutePath());

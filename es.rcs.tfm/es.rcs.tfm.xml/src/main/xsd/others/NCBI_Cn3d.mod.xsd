@@ -1,0 +1,720 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "cn3d.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-Cn3d"
+================================================= -->
+<!--
+$Revision: 1.15 $
+**********************************************************************
+
+  Definitions for Cn3D-specific data (rendering settings,
+    user annotations, etc.)
+
+  by Paul Thiessen
+
+  National Center for Biotechnology Information
+  National Institutes of Health
+  Bethesda, MD 20894 USA
+
+ asntool -m cn3d.asn -w 100 -o cn3d.h
+ asntool -B objcn3d -m cn3d.asn -G -w 100 -K cn3d.h -I mapcn3d.h \
+   -M ../mmdb1.asn,../mmdb2.asn,../mmdb3.asn
+**********************************************************************
+ Cn3D-specific information
+-->
+<!-- Elements used by other modules:
+          Cn3d-style-dictionary,
+          Cn3d-user-annotations -->
+
+<!-- Elements referenced from other modules:
+          Biostruc-id FROM MMDB,
+          Molecule-id,
+          Residue-id FROM MMDB-Chemical-graph -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ values of enumerations must match those in cn3d/style_manager.hpp!
+ for different types of backbones
+-->
+<xs:element name="Cn3d-backbone-type">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="off"/>
+          <xs:enumeration value="trace"/>
+          <xs:enumeration value="partial"/>
+          <xs:enumeration value="complete"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ atom/bond/object rendering styles
+ for atoms and bonds
+-->
+<xs:element name="Cn3d-drawing-style">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+    with-arrows	-  for 3d-objects
+-->
+          <xs:enumeration value="wire"/>
+          <xs:enumeration value="tubes"/>
+          <xs:enumeration value="ball-and-stick"/>
+          <xs:enumeration value="space-fill"/>
+          <xs:enumeration value="wire-worm"/>
+          <xs:enumeration value="tube-worm"/>
+          <xs:enumeration value="with-arrows"/>
+          <xs:enumeration value="without-arrows"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ available color schemes (not all
+ necessarily applicable to all objects)
+-->
+<xs:element name="Cn3d-color-scheme">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+    aligned	-  different alignment conservation coloring (currently only for proteins)
+    temperature	-  other schemes
+-->
+          <xs:enumeration value="element"/>
+          <xs:enumeration value="object"/>
+          <xs:enumeration value="molecule"/>
+          <xs:enumeration value="domain"/>
+          <xs:enumeration value="residue"/>
+          <xs:enumeration value="secondary-structure"/>
+          <xs:enumeration value="user-select"/>
+          <xs:enumeration value="aligned"/>
+          <xs:enumeration value="identity"/>
+          <xs:enumeration value="variety"/>
+          <xs:enumeration value="weighted-variety"/>
+          <xs:enumeration value="information-content"/>
+          <xs:enumeration value="fit"/>
+          <xs:enumeration value="block-fit"/>
+          <xs:enumeration value="block-z-fit"/>
+          <xs:enumeration value="block-row-fit"/>
+          <xs:enumeration value="temperature"/>
+          <xs:enumeration value="hydrophobicity"/>
+          <xs:enumeration value="charge"/>
+          <xs:enumeration value="rainbow"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ RGB triplet, interpreted (after division by the scale-factor) as floating
+ point values which should range from [0..1]. The default scale-factor is
+ 255, so that one can conveniently set integer byte values [0..255] for
+ colors with the scale-factor already set appropriately to map to [0..1].
+    An alpha value is allowed, but is currently ignored by Cn3D.
+-->
+<xs:element name="Cn3d-color">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-color_scale-factor" type="xs:integer" default="255"/>
+      <xs:element name="Cn3d-color_red" type="xs:integer"/>
+      <xs:element name="Cn3d-color_green" type="xs:integer"/>
+      <xs:element name="Cn3d-color_blue" type="xs:integer"/>
+      <xs:element name="Cn3d-color_alpha" type="xs:integer" default="255"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- style blob for backbones only -->
+<xs:element name="Cn3d-backbone-style">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-backbone-style_type">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-backbone-type"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-backbone-style_style">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-drawing-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-backbone-style_color-scheme">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color-scheme"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-backbone-style_user-color">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- style blob for other objects -->
+<xs:element name="Cn3d-general-style">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-general-style_is-on">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-general-style_style">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-drawing-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-general-style_color-scheme">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color-scheme"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-general-style_user-color">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- style blob for backbone labels -->
+<xs:element name="Cn3d-backbone-label-style">
+  <xs:complexType>
+    <xs:sequence>
+<!-- zero means none -->
+      <xs:element name="Cn3d-backbone-label-style_spacing" type="xs:integer"/>
+      <xs:element name="Cn3d-backbone-label-style_type">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="one-letter"/>
+                <xs:enumeration value="three-letter"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-backbone-label-style_number">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    sequential	-  from 1, by residues present, to match sequence
+    pdb	-  use number assigned by PDB
+-->
+                <xs:enumeration value="none"/>
+                <xs:enumeration value="sequential"/>
+                <xs:enumeration value="pdb"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-backbone-label-style_termini">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!-- all white, or (if false) color of alpha carbon -->
+      <xs:element name="Cn3d-backbone-label-style_white">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- rendering settings for Cn3D (mirrors StyleSettings class) -->
+<xs:element name="Cn3d-style-settings">
+  <xs:complexType>
+    <xs:sequence>
+<!-- a name (for favorites) -->
+      <xs:element name="Cn3d-style-settings_name" type="xs:string" minOccurs="0"/>
+<!-- backbone styles -->
+      <xs:element name="Cn3d-style-settings_protein-backbone">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-backbone-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_nucleotide-backbone">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-backbone-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- styles for other stuff -->
+      <xs:element name="Cn3d-style-settings_protein-sidechains">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_nucleotide-sidechains">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_heterogens">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_solvents">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_connections">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_helix-objects">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_strand-objects">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-general-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- virtual disulfides -->
+      <xs:element name="Cn3d-style-settings_virtual-disulfides-on">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_virtual-disulfide-color">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- hydrogens -->
+      <xs:element name="Cn3d-style-settings_hydrogens-on">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!--
+ background
+ floating point parameters - scale-factor applies to all the following:
+-->
+      <xs:element name="Cn3d-style-settings_background-color">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-color"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_scale-factor" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_space-fill-proportion" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_ball-radius" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_stick-radius" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_tube-radius" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_tube-worm-radius" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_helix-radius" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_strand-width" type="xs:integer"/>
+      <xs:element name="Cn3d-style-settings_strand-thickness" type="xs:integer"/>
+<!-- backbone labels (no labels if not present) -->
+      <xs:element name="Cn3d-style-settings_protein-labels" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-backbone-label-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-settings_nucleotide-labels" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-backbone-label-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- ion labels -->
+      <xs:element name="Cn3d-style-settings_ion-labels" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Cn3d-style-settings-set">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="Cn3d-style-settings"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Cn3d-style-table-id" type="xs:integer"/>
+
+<xs:element name="Cn3d-style-table-item">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-style-table-item_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-table-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-table-item_style">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-settings"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- the global settings, and a lookup table of styles for user annotations. -->
+<xs:element name="Cn3d-style-dictionary">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-style-dictionary_global-style">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-settings"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-style-dictionary_style-table" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Cn3d-style-table-item"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ a range of residues in a chain, identified by MMDB residue-id
+ (e.g., numbered from 1)
+-->
+<xs:element name="Cn3d-residue-range">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-residue-range_from">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-residue-range_to">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- set of locations on a particular chain -->
+<xs:element name="Cn3d-molecule-location">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ MMDB molecule id
+ which residues; whole molecule implied if absent
+-->
+      <xs:element name="Cn3d-molecule-location_molecule-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-molecule-location_residues" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Cn3d-residue-range"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ set of locations on a particular structure object (e.g., a PDB/MMDB
+ structure), which may include multiple ranges of residues each on
+ multiple chains.
+-->
+<xs:element name="Cn3d-object-location">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-object-location_structure-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-object-location_residues">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Cn3d-molecule-location"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- information for an individual user annotation -->
+<xs:element name="Cn3d-user-annotation">
+  <xs:complexType>
+    <xs:sequence>
+<!-- a (short) name for this annotation -->
+      <xs:element name="Cn3d-user-annotation_name" type="xs:string"/>
+<!-- an optional longer description -->
+      <xs:element name="Cn3d-user-annotation_description" type="xs:string" minOccurs="0"/>
+<!-- how to draw this annotation -->
+      <xs:element name="Cn3d-user-annotation_style-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-table-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- which residues to cover -->
+      <xs:element name="Cn3d-user-annotation_residues">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Cn3d-object-location"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- whether this annotation is to be turned on in Cn3D -->
+      <xs:element name="Cn3d-user-annotation_is-on">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- a GL-ordered transformation matrix -->
+<xs:element name="Cn3d-GL-matrix">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-GL-matrix_m0" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m1" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m2" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m3" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m4" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m5" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m6" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m7" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m8" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m9" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m10" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m11" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m12" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m13" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m14" type="xs:double"/>
+      <xs:element name="Cn3d-GL-matrix_m15" type="xs:double"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- a floating point 3d vector -->
+<xs:element name="Cn3d-vector">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-vector_x" type="xs:double"/>
+      <xs:element name="Cn3d-vector_y" type="xs:double"/>
+      <xs:element name="Cn3d-vector_z" type="xs:double"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- parameters used to set up the camera in Cn3D -->
+<xs:element name="Cn3d-view-settings">
+  <xs:complexType>
+    <xs:sequence>
+<!-- camera on +Z axis this distance from origin -->
+      <xs:element name="Cn3d-view-settings_camera-distance" type="xs:double"/>
+<!-- camera angle -->
+      <xs:element name="Cn3d-view-settings_camera-angle-rad" type="xs:double"/>
+<!-- X,Y of point in Z=0 plane camera points at -->
+      <xs:element name="Cn3d-view-settings_camera-look-at-X" type="xs:double"/>
+      <xs:element name="Cn3d-view-settings_camera-look-at-Y" type="xs:double"/>
+<!-- distance of clipping planes from camera -->
+      <xs:element name="Cn3d-view-settings_camera-clip-near" type="xs:double"/>
+      <xs:element name="Cn3d-view-settings_camera-clip-far" type="xs:double"/>
+<!-- transformation of objects in the scene -->
+      <xs:element name="Cn3d-view-settings_matrix">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-GL-matrix"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- center of rotation of whole scene -->
+      <xs:element name="Cn3d-view-settings_rotation-center">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-vector"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ The list of annotations for a given CDD/mime. If residue regions overlap
+ between annotations that are turned on, the last annotation in this list
+ that contains these residues will be used as the display style for these
+ residues.
+   Also contains the current viewpoint, so that user's camera angle
+ can be stored and reproduced, for illustrations, on-line figures, etc.
+-->
+<xs:element name="Cn3d-user-annotations">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cn3d-user-annotations_annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Cn3d-user-annotation"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cn3d-user-annotations_view" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-view-settings"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

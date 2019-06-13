@@ -1,0 +1,29 @@
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+        <button mat-icon-button>
+            <mat-icon (click)="sidenavToggle()">menu</mat-icon>
+        </button>
+        <h1>TFM: B&uacute;squeda de Bioentidades</h1>
+        <span class="menu-spacer"></span>
+        <div>
+            <a mat-button [routerLink]="'/corpus'"> Corpus </a>
+            <a mat-button [routerLink]="'/thesauro'"> Thesauros </a>
+            <a mat-button [routerLink]="'/search'"> Buscador </a>
+        </div>
+        <button mat-button [matMenuTriggerFor]="userMenu"> Usuario </button>
+        <mat-menu #userMenu="matMenu" xPosition="before">
+            <button mat-menu-item>
+                <mat-icon>dialpad</mat-icon>
+                <span>Redial</span>
+            </button>
+            <button mat-menu-item disabled>
+                <mat-icon>voicemail</mat-icon>
+                <span>Check voicemail</span>
+            </button>
+            <button mat-menu-item>
+                <mat-icon>notifications_off</mat-icon>
+                <span>Disable alerts</span>
+            </button>
+        </mat-menu>        
+    </mat-toolbar-row>
+</mat-toolbar>

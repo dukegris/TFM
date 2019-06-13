@@ -1,0 +1,367 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "homologene.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "HomoloGene"
+================================================= -->
+<!-- Elements referenced from other modules:
+          Date FROM NCBI-General,
+          Seq-loc FROM NCBI-Seqloc,
+          Seq-align FROM NCBI-Seqalign -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ HomoloGeneEntry taxid is the tax id of the group node, which can
+ be the same as the Gene tax id in case of singletons
+-->
+<xs:element name="HG-EntrySet">
+  <xs:complexType>
+    <xs:sequence>
+<!-- homologene entry -->
+      <xs:element name="HG-EntrySet_entries">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Entry">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Entry_hg-id" type="xs:integer"/>
+      <xs:element name="HG-Entry_version" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Entry_title" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Entry_caption" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Entry_taxid" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Entry_genes" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Gene"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_cr-date" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Date"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_up-date" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Date"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_distances" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Stats"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_commentaries" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-CommentarySet"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_warnings" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="HG-Entry_warnings_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Entry_node" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="HG-Node"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Gene">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Gene_geneid" type="xs:integer"/>
+<!-- internal use only!!!!! -->
+      <xs:element name="HG-Gene_otherid" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Gene_symbol" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Gene_aliases" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="HG-Gene_aliases_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Gene_title" type="xs:string"/>
+<!--taxid of gene node -->
+      <xs:element name="HG-Gene_taxid" type="xs:integer"/>
+      <xs:element name="HG-Gene_prot-gi" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Gene_prot-acc" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Gene_prot-len" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Gene_nuc-gi" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Gene_nuc-acc" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Gene_gene-links" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Link"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Gene_prot-links" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Link"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Gene_domains" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Domain"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Gene_chr" type="xs:string" minOccurs="0"/>
+<!-- location on the genome -->
+      <xs:element name="HG-Gene_location" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-loc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Gene_locus-tag" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Stats">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Stats_gi1" type="xs:integer"/>
+      <xs:element name="HG-Stats_gi2" type="xs:integer"/>
+      <xs:element name="HG-Stats_nuc-change" type="xs:double"/>
+      <xs:element name="HG-Stats_nuc-change-jc" type="xs:double"/>
+      <xs:element name="HG-Stats_prot-change" type="xs:double"/>
+      <xs:element name="HG-Stats_ka" type="xs:double"/>
+      <xs:element name="HG-Stats_ks" type="xs:double"/>
+      <xs:element name="HG-Stats_knr" type="xs:double"/>
+      <xs:element name="HG-Stats_knc" type="xs:double"/>
+      <xs:element name="HG-Stats_recip-best" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Commentary">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Commentary_link">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="HG-Link"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- main description -->
+      <xs:element name="HG-Commentary_description" type="xs:string" minOccurs="0"/>
+<!-- extra text -->
+      <xs:element name="HG-Commentary_caption" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Commentary_provider" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Commentary_other-links" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Link"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Commentary_other-commentaries" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Commentary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Commentary_taxid" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Commentary_geneid" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-CommentarySet">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-CommentarySet_hg-id" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-CommentarySet_title" type="xs:string"/>
+      <xs:element name="HG-CommentarySet_commentaries">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Commentary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-CommentaryContainer">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="HG-CommentarySet"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Link">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Link_hypertext" type="xs:string"/>
+      <xs:element name="HG-Link_url" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Domain">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Domain_begin" type="xs:integer"/>
+      <xs:element name="HG-Domain_end" type="xs:integer"/>
+<!-- entrez uid -->
+      <xs:element name="HG-Domain_pssm-id" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Domain_cdd-id" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Domain_cdd-name" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Node">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Node_type">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="family"/>
+                <xs:enumeration value="ortholog"/>
+                <xs:enumeration value="paralog"/>
+                <xs:enumeration value="leaf"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Node_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="HG-Node-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Node_caption" type="xs:string" minOccurs="0"/>
+      <xs:element name="HG-Node_current-node" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="optional" default="false">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Node_children" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="HG-Node"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="HG-Node_branch-len" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Node-id">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Node-id_id" type="xs:integer" minOccurs="0"/>
+      <xs:element name="HG-Node-id_id-type">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="none"/>
+                <xs:enumeration value="geneid"/>
+                <xs:enumeration value="hid"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-Alignment">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="HG-Alignment_hg-id" type="xs:integer"/>
+      <xs:element name="HG-Alignment_alignment">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-align"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="HG-AlignmentSet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="HG-Alignment"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

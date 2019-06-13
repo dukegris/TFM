@@ -1,0 +1,476 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "ncbimime.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-Mime"
+================================================= -->
+<!--
+$Revision: 6.12 $
+****************************************************************
+
+  NCBI MIME type (chemical/ncbi-asn1-ascii and chemical/ncbi-asn1-binary)
+  by Jonathan Epstein, February 1996
+
+****************************************************************
+-->
+<!-- Elements used by other modules:
+          Ncbi-mime-asn1 -->
+
+<!-- Elements referenced from other modules:
+          Biostruc,
+          Biostruc-annot-set FROM MMDB,
+          Cdd FROM NCBI-Cdd,
+          Seq-entry FROM NCBI-Seqset,
+          Seq-annot FROM NCBI-Sequence,
+          Medline-entry FROM NCBI-Medline,
+          Cn3d-style-dictionary,
+          Cn3d-user-annotations FROM NCBI-Cn3d -->
+
+<!-- ============================================ -->
+
+
+
+<xs:element name="Ncbi-mime-asn1">
+  <xs:complexType>
+    <xs:choice>
+<!-- just a structure -->
+      <xs:element name="Ncbi-mime-asn1_entrez">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Entrez-general"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- structures & sequences & alignments -->
+      <xs:element name="Ncbi-mime-asn1_alignstruc">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-align"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequence alignment -->
+      <xs:element name="Ncbi-mime-asn1_alignseq">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-align-seq"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- structure & sequences -->
+      <xs:element name="Ncbi-mime-asn1_strucseq">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-seq"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- structure & sequences & alignments -->
+      <xs:element name="Ncbi-mime-asn1_strucseqs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-seqs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ all-purpose "grab bag"
+ others may be added here in the future
+-->
+      <xs:element name="Ncbi-mime-asn1_general">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-seqs-aligns-cdd"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!-- generic bundle of sequence and alignment info -->
+<xs:element name="Bundle-seqs-aligns">
+  <xs:complexType>
+    <xs:sequence>
+<!-- sequences -->
+      <xs:element name="Bundle-seqs-aligns_sequences" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequence alignments -->
+      <xs:element name="Bundle-seqs-aligns_seqaligns" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- structure alignments -->
+      <xs:element name="Bundle-seqs-aligns_strucaligns" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-annot-set"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- imports (updates in Cn3D) -->
+      <xs:element name="Bundle-seqs-aligns_imports" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Cn3D stuff -->
+      <xs:element name="Bundle-seqs-aligns_style-dictionary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-dictionary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Bundle-seqs-aligns_user-annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-user-annotations"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-seqs-aligns-cdd">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-seqs-aligns-cdd_seq-align-data">
+        <xs:complexType>
+          <xs:choice>
+<!-- either seqs + alignments -->
+            <xs:element name="Biostruc-seqs-aligns-cdd_seq-align-data_bundle">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Bundle-seqs-aligns"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!-- or CDD (which contains these) -->
+            <xs:element name="Biostruc-seqs-aligns-cdd_seq-align-data_cdd">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Cdd"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+<!-- structures -->
+      <xs:element name="Biostruc-seqs-aligns-cdd_structures" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seqs-aligns-cdd_structure-type" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    ncbi-backbone	-  not present; meanings and
+    ncbi-all-atom	-  values are same as MMDB's
+    pdb-model	-  Model-type
+-->
+                <xs:enumeration value="ncbi-backbone"/>
+                <xs:enumeration value="ncbi-all-atom"/>
+                <xs:enumeration value="pdb-model"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-align">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-align_master">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align_slaves">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- structure alignments -->
+      <xs:element name="Biostruc-align_alignments">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-annot-set"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequences -->
+      <xs:element name="Biostruc-align_sequences">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align_seqalign">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align_style-dictionary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-dictionary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align_user-annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-user-annotations"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- display seq structure align only -->
+<xs:element name="Biostruc-align-seq">
+  <xs:complexType>
+    <xs:sequence>
+<!-- sequences -->
+      <xs:element name="Biostruc-align-seq_sequences">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align-seq_seqalign">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align-seq_style-dictionary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-dictionary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-align-seq_user-annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-user-annotations"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- display  structure seq added by yanli -->
+<xs:element name="Biostruc-seq">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-seq_structure">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seq_sequences">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seq_style-dictionary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-dictionary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seq_user-annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-user-annotations"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- display blast alignment along with neighbor's structure added by yanli -->
+<xs:element name="Biostruc-seqs">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-seqs_structure">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequences -->
+      <xs:element name="Biostruc-seqs_sequences">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seqs_seqalign">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seqs_style-dictionary" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-style-dictionary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-seqs_user-annotations" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cn3d-user-annotations"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Entrez-style">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="docsum"/>
+          <xs:enumeration value="genbank"/>
+          <xs:enumeration value="genpept"/>
+          <xs:enumeration value="fasta"/>
+          <xs:enumeration value="asn1"/>
+          <xs:enumeration value="graphic"/>
+          <xs:enumeration value="alignment"/>
+          <xs:enumeration value="globalview"/>
+          <xs:enumeration value="report"/>
+          <xs:enumeration value="medlars"/>
+          <xs:enumeration value="embl"/>
+          <xs:enumeration value="pdb"/>
+          <xs:enumeration value="kinemage"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Entrez-general">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Entrez-general_title" type="xs:string" minOccurs="0"/>
+      <xs:element name="Entrez-general_data">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Entrez-general_data_ml">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Medline-entry"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Entrez-general_data_prot">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Seq-entry"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Entrez-general_data_nuc">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Seq-entry"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Entrez-general_data_genome">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Seq-entry"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Entrez-general_data_structure">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Biostruc"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Entrez-general_data_strucAnnot">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Biostruc-annot-set"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Entrez-general_style">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Entrez-style"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Entrez-general_location" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

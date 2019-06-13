@@ -9,7 +9,6 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.server.support.EmbeddedSolrServerFactory;
 import org.springframework.util.ResourceUtils;
 import org.xml.sax.SAXException;
 

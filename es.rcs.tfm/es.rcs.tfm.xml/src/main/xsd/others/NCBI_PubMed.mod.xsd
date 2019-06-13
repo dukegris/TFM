@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "pubmed.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-PubMed"
+================================================= -->
+<!--
+$Revision: 6.0 $
+**********************************************************************
+
+  PUBMED data definitions
+
+**********************************************************************
+-->
+<!-- Elements used by other modules:
+          Pubmed-entry,
+          Pubmed-url -->
+
+<!-- Elements referenced from other modules:
+          PubMedId FROM NCBI-Biblio,
+          Medline-entry FROM NCBI-Medline -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ a PubMed entry
+ PUBMED records must include the PubMedId
+-->
+<xs:element name="Pubmed-entry">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Pubmed-entry_pmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Medline entry information -->
+      <xs:element name="Pubmed-entry_medent" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Medline-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Publisher name -->
+      <xs:element name="Pubmed-entry_publisher" type="xs:string" minOccurs="0"/>
+<!-- List of URL to publisher cite -->
+      <xs:element name="Pubmed-entry_urls" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Pubmed-url"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Publisher's article identifier -->
+      <xs:element name="Pubmed-entry_pubid" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Pubmed-url">
+  <xs:complexType>
+    <xs:sequence>
+<!-- Location code -->
+      <xs:element name="Pubmed-url_location" type="xs:string" minOccurs="0"/>
+<!-- Selected URL for location -->
+      <xs:element name="Pubmed-url_url" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

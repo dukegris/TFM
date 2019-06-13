@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "pubmed.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- NCBI_PubMed.xsd
+  This file is built from a series of basic modules.
+  The actual declarations are in the modules.
+  This file is used to put them together.
+-->
+<xs:include schemaLocation="NCBI_Biblio.mod.xsd"/>
+<xs:include schemaLocation="NCBI_General.mod.xsd"/>
+<xs:include schemaLocation="NCBI_Medline.mod.xsd"/>
+<xs:include schemaLocation="NCBI_PubMed.mod.xsd"/>
+</xs:schema>

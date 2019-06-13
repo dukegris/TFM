@@ -18,8 +18,10 @@
 	<modules>
 		<module>es.rcs.tfm.doc</module>
 		<module>es.rcs.tfm.index</module>
+		<module>es.rcs.tfm.xml</module>
 		<module>es.rcs.tfm.web</module>
 		<module>es.rcs.tfm.app</module>
+		<module>es.rcs.tfm.spa</module>
 	</modules>
 
 	<organization>
@@ -109,6 +111,9 @@
 		<!-- JETTY -->
 		<!-- SOLR -->
 		<solr.version>8.1.0</solr.version>
+
+		<!-- TEST -->
+		<junit.version>4.12</junit.version>
 		
 	</properties>
 	
@@ -136,7 +141,13 @@
 		<!-- FRAMEWORK -->
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
 			<version>${spring-framework.version}</version>
 			<scope>compile</scope>
 		</dependency>
@@ -151,6 +162,12 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring-framework.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- DATA -->
 		<dependency>
@@ -254,6 +271,17 @@
 			<artifactId>solr-solrj</artifactId>
 			<version>${solr.version}</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
+			 TEST
+			 ===================================== -->
+		<!-- JUNIT -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
 		</dependency>
 		
 	</dependencies>	

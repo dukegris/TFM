@@ -1,0 +1,166 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "biotree.asn"
+     ::DATATOOL:: by application DATATOOL version 2.4.4
+     ::DATATOOL:: on 01/25/2017 23:04:03
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-BioTree"
+================================================= -->
+<!--
+$Revision: 525462 $
+*********************************************************************
+
+  biotree.asn
+
+     BioTree ASN
+     Anatoliy Kuznetsov
+
+*********************************************************************
+-->
+<!-- Elements used by other modules:
+          BioTreeContainer,
+          FeatureDictSet,
+          DistanceMatrix -->
+
+<!-- Elements referenced from other modules:
+          User-object,
+          User-field FROM NCBI-General -->
+
+<!-- ============================================ -->
+
+
+
+<xs:element name="BioTreeContainer">
+  <xs:complexType>
+    <xs:sequence>
+<!-- hint on what kind of tree this is -->
+      <xs:element name="BioTreeContainer_treetype" type="xs:string" minOccurs="0"/>
+<!-- features dictionary  -->
+      <xs:element name="BioTreeContainer_fdict">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="FeatureDictSet"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- set of nodes with encoded topology    -->
+      <xs:element name="BioTreeContainer_nodes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="NodeSet"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- bio-tree label (short name) -->
+      <xs:element name="BioTreeContainer_label" type="xs:string" minOccurs="0"/>
+<!-- user defined object -->
+      <xs:element name="BioTreeContainer_user" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="User-object"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="NodeSet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="Node"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Node">
+  <xs:complexType>
+    <xs:sequence>
+<!-- node uid -->
+      <xs:element name="Node_id" type="xs:integer"/>
+<!-- parent node id -->
+      <xs:element name="Node_parent" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Node_features" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="NodeFeatureSet"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="NodeFeatureSet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="NodeFeature"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="NodeFeature">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="NodeFeature_featureid" type="xs:integer"/>
+      <xs:element name="NodeFeature_value" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="FeatureDictSet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="FeatureDescr"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="FeatureDescr">
+  <xs:complexType>
+    <xs:sequence>
+<!-- feature id -->
+      <xs:element name="FeatureDescr_id" type="xs:integer"/>
+<!-- feature name -->
+      <xs:element name="FeatureDescr_name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="DistanceMatrix">
+  <xs:complexType>
+    <xs:sequence>
+<!-- n labels -->
+      <xs:element name="DistanceMatrix_labels">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="DistanceMatrix_labels_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ n(n-1)/2 pairwise distances
+ (0, 1)...(0, n), (1, 2)...(1, n)...
+-->
+      <xs:element name="DistanceMatrix_distances">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="DistanceMatrix_distances_E" type="xs:double"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

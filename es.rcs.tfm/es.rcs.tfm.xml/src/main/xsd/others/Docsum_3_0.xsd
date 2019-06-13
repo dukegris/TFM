@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "docsum.asn"
+     ::DATATOOL:: by application DATATOOL version 1.9.0
+     ::DATATOOL:: on 07/01/2008 23:08:14
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- Docsum_3_0.xsd
+  This file is built from a series of basic modules.
+  The actual declarations are in the modules.
+  This file is used to put them together.
+-->
+<xs:include schemaLocation="Docsum_3_0.mod.xsd"/>
+</xs:schema>

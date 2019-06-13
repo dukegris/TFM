@@ -1,0 +1,201 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "objprt.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-ObjPrt"
+================================================= -->
+<!--
+$Revision: 6.0 $
+********************************************************************
+
+  Print Templates
+  James Ostell, 1993
+
+
+********************************************************************
+-->
+<!-- Elements used by other modules:
+          PrintTemplate,
+          PrintTemplateSet -->
+
+<!-- ============================================ -->
+
+
+
+<xs:element name="PrintTemplate">
+  <xs:complexType>
+    <xs:sequence>
+<!-- name for this template -->
+      <xs:element name="PrintTemplate_name">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="TemplateName"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- ASN.1 path to get label from -->
+      <xs:element name="PrintTemplate_labelfrom" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintTemplate_format">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintFormat"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="TemplateName" type="xs:string"/>
+
+<xs:element name="PrintTemplateSet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="PrintTemplate"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="PrintFormat">
+  <xs:complexType>
+    <xs:sequence>
+<!-- ASN.1 partial path for this -->
+      <xs:element name="PrintFormat_asn1" type="xs:string"/>
+<!-- printable label -->
+      <xs:element name="PrintFormat_label" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintFormat_prefix" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintFormat_suffix" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintFormat_form">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintForm"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Forms for various ASN.1 components -->
+<xs:element name="PrintForm">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="PrintForm_block">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintFormBlock"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrintForm_boolean">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintFormBoolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrintForm_enum">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintFormEnum"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrintForm_text">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PrintFormText"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrintForm_use-template">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="TemplateName"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrintForm_user">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="UserFormat"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- rarely used -->
+      <xs:element name="PrintForm_null">
+        <xs:complexType/>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="UserFormat">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="UserFormat_printfunc" type="xs:string"/>
+      <xs:element name="UserFormat_defaultfunc" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- for SEQUENCE, SET -->
+<xs:element name="PrintFormBlock">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PrintFormBlock_separator" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintFormBlock_components">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PrintFormat"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="PrintFormBoolean">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PrintFormBoolean_true" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrintFormBoolean_false" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="PrintFormEnum">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PrintFormEnum_values" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PrintFormEnum_values_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="PrintFormText">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PrintFormText_textfunc" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

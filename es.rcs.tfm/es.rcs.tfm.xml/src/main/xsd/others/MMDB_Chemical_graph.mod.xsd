@@ -1,0 +1,817 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "mmdb1.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "MMDB-Chemical-graph"
+================================================= -->
+<!--
+**********************************************************************
+
+  Biological Macromolecule 3-D Structure Data Types for MMDB,
+                A Molecular Modeling Database
+
+  Definitions for a chemical graph
+
+  By Hitomi Ohkawa, Jim Ostell, Chris Hogue and Steve Bryant 
+
+  National Center for Biotechnology Information
+  National Institutes of Health
+  Bethesda, MD 20894 USA
+
+  July, 1995
+
+**********************************************************************
+-->
+<!-- Elements used by other modules:
+          Biostruc-graph,
+          Biomol-descr,
+          Residue-graph,
+          Molecule-id,
+          PCSubstance-id,
+          Residue-id,
+          Atom-id -->
+
+<!-- Elements referenced from other modules:
+          Pub FROM NCBI-Pub,
+          BioSource FROM NCBI-BioSource,
+          Seq-id FROM NCBI-Seqloc,
+          Biostruc-id FROM MMDB -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ A biostruc graph contains the complete chemical graph of the biomolecular 
+ assembly.  The assembly graph is defined hierarchically, in terms of 
+ subgraphs graphs of component molecules.  For PDB-derived biostrucs,
+ the molecules forming the assembly are the individual biopolymer chains and 
+ any non-polymer or "heterogen" groups which are present. 
+ The PDB-derived  "compound name" field appears as the name within the
+ biostruc-graph description.  PDB "class" and "source" fields appear as 
+ explicit attributes.  PDB-derived structures are assigned an assembly type 
+ of "other" unless they have been further classified as the "physiological
+ form" or "crystallographic cell" contents.  If they have, the source of the 
+ type classification appears as a citation within the  assembly description. 
+ Note that the biostruc-graph also includes as literals the subgraphs of 
+ any nonstandard residues present within it. For PDB-derived biostrucs these 
+ subgraphs are constructed automatically, with validation as described below.
+-->
+<xs:element name="Biostruc-graph">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-graph_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biomol-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-graph_molecule-graphs">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Molecule-graph"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-graph_inter-molecule-bonds" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Inter-residue-bond"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-graph_residue-graphs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Residue-graph"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A biomolecule description refers to the chemical structure of a molecule or 
+ component substructures.  This descriptor type is used at the level of
+ assemblies, molecules and residues, and also for residue-graph dictionaries.
+ The BioSource object type is drawn from NCBI taxonomy data specifications,
+ and is not repeated here.
+-->
+<xs:element name="Biomol-descr">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Biomol-descr_name" type="xs:string"/>
+      <xs:element name="Biomol-descr_pdb-class" type="xs:string"/>
+      <xs:element name="Biomol-descr_pdb-source" type="xs:string"/>
+      <xs:element name="Biomol-descr_pdb-comment" type="xs:string"/>
+      <xs:element name="Biomol-descr_other-comment" type="xs:string"/>
+      <xs:element name="Biomol-descr_organism">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="BioSource"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biomol-descr_attribution">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biomol-descr_assembly-type">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="physiological-form" ncbi:intvalue="1"/>
+                    <xs:enumeration value="crystallographic-cell" ncbi:intvalue="2"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biomol-descr_molecule-type">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="dna" ncbi:intvalue="1"/>
+                    <xs:enumeration value="rna" ncbi:intvalue="2"/>
+                    <xs:enumeration value="protein" ncbi:intvalue="3"/>
+                    <xs:enumeration value="other-biopolymer" ncbi:intvalue="4"/>
+                    <xs:enumeration value="solvent" ncbi:intvalue="5"/>
+                    <xs:enumeration value="other-nonpolymer" ncbi:intvalue="6"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A molecule chemical graph is defined by a sequence of residues.  Nonpolymers
+ are described in the same way, but may contain only a single residue.  
+ Biopolymer molecules are identified within PDB entries according to their
+ appearance on SEQRES records, which formally define a biopolymer as such. 
+ Biopolymers are defined by the distinction between ATOM and HETATM 
+ coordinate records only in cases where the chemical sequence from SEQRES
+ is in conflict with coordinate data. The PDB-assigned chain code appears as 
+ the name within the molecule descriptions of the biopolymers.
+ Nonpolymer molecules from PDB correspond to individual HETEROGEN groups, 
+ excluding any HETEROGEN groups which represent modified biopolymer residues.
+ These molecules are named according to the chain, residue type and residue 
+ number fields as assigned by PDB. Any description appearing in the PDB HET 
+ record appears as a pdb-comment within the molecule description. 
+ Molecule types for PDB-derived molecule graphs are assigned by matching 
+ residue and atom names against the PDB-documented standard types for protein,
+ DNA and RNA, and against residue codes commonly used to indicate solvent.
+ Classification is by "majority rule". If more than half of the residues in
+ a biopolymer are standard groups of one type, then the molecule is of that 
+ type, and otherwise classified as "other". Note that this classification does
+ not preclude the presence of modified residues, but insists they constitute 
+ less than half the biopolymer. Non-polymers are classified only as "solvent"
+ or "other".  
+ Note that a molecule graph may also contain a set of cross references 
+ to biopolymer sequence databases.  All biopolymer molecules in MMDB contain 
+ appropriate identifiers for the corresponding entry in the NCBI-Sequences 
+ database, in particular the NCBI "gi" number, which may be used for sequence
+ retrieval. The Seq-id object type is defined in the NCBI molecular sequence 
+ specification, and not repeated here.
+-->
+<xs:element name="Molecule-graph">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Molecule-graph_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Molecule-graph_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biomol-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Molecule-graph_seq-id" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Molecule-graph_residue-sequence">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Residue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Molecule-graph_inter-residue-bonds" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Inter-residue-bond"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Molecule-graph_sid" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PCSubstance-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Molecule-id" type="xs:integer"/>
+
+<!-- Pubchem substance id -->
+<xs:element name="PCSubstance-id" type="xs:integer"/>
+
+<!--
+ Residues may be assigned a text-string name as well as an id number. PDB 
+ assigned residue numbers appear as the residue name.
+-->
+<xs:element name="Residue">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Residue_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="Residue_residue-graph">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-graph-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Residue-id" type="xs:integer"/>
+
+<!--
+ Residue graphs from different sources may be referenced within a molecule
+ graph.  The allowed choices are the nonstandard residue graphs included in 
+ the present biostruc, residue graphs within other biostrucs, or residue 
+ graphs within tables of standard residue definitions.
+-->
+<xs:element name="Residue-graph-pntr">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Residue-graph-pntr_local">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-graph-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph-pntr_biostruc">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-graph-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph-pntr_standard">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-residue-graph-set-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-graph-pntr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-graph-pntr_biostruc-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-graph-pntr_residue-graph-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-graph-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-residue-graph-set-pntr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-residue-graph-set-pntr_biostruc-residue-graph-set-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-residue-graph-set-pntr_residue-graph-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-graph-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Residue graphs define atomic formulae, connectivity, chirality, and names.
+ For standard residue graphs from the MMDB dictionary the PDB-assigned 
+ residue-type code appears as the name within the residue graph description,
+ and the full trivial name of the residue as a comment within that 
+ description.  For any nonstandard residue graphs provided with an MMDB 
+ biostruc the PDB-assigned residue-type code similarly appears as the name 
+ within the description, and any information provided on PDB HET records as 
+ a pdb-comment within that description.  
+ Note that nonstandard residue graphs for a PDB-derived biostruc may be 
+ incomplete. Current PDB format cannot represent connectivity for groups 
+ which are disordered, and for which no coordinates are given.  In these 
+ cases the residue graph defined in MMDB represents only the subgraph that 
+ could be identified from available ATOM, HETATM and CONECT records.
+-->
+<xs:element name="Residue-graph">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Residue-graph_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-graph-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biomol-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_residue-type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="deoxyribonucleotide" ncbi:intvalue="1"/>
+                    <xs:enumeration value="ribonucleotide" ncbi:intvalue="2"/>
+                    <xs:enumeration value="amino-acid" ncbi:intvalue="3"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_iupac-code" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Residue-graph_iupac-code_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_atoms">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Atom"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_bonds">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Intra-residue-bond"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-graph_chiral-centers" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Chiral-center"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Residue-graph-id" type="xs:integer"/>
+
+<!--
+ Atoms in residue graphs are defined by elemental symbols and names.  PDB-
+ assigned atom names appear here in the name field, except in cases of known 
+ PDB synonyms.  In these cases atom names are mapped to the names used in the
+ MMDB standard dictionary. This occurs primarily for hydrogen atoms, where 
+ PDB practice allows synonyms for several atom types.  For PDB atoms the 
+ elemental symbol is obtained by parsing the PDB atom name field, allowing 
+ for known special-semantics cases where the atom name does not follow the
+ documented encoding rule.  Ionizable protons are identified within standard 
+ residue graphs in the MMDB dictionary, but not within automatically-defined
+ nonstandard graphs.
+-->
+<xs:element name="Atom">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Atom_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="Atom_iupac-code" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Atom_iupac-code_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom_element">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="h"/>
+                <xs:enumeration value="he"/>
+                <xs:enumeration value="li"/>
+                <xs:enumeration value="be"/>
+                <xs:enumeration value="b"/>
+                <xs:enumeration value="c"/>
+                <xs:enumeration value="n"/>
+                <xs:enumeration value="o"/>
+                <xs:enumeration value="f"/>
+                <xs:enumeration value="ne"/>
+                <xs:enumeration value="na"/>
+                <xs:enumeration value="mg"/>
+                <xs:enumeration value="al"/>
+                <xs:enumeration value="si"/>
+                <xs:enumeration value="p"/>
+                <xs:enumeration value="s"/>
+                <xs:enumeration value="cl"/>
+                <xs:enumeration value="ar"/>
+                <xs:enumeration value="k"/>
+                <xs:enumeration value="ca"/>
+                <xs:enumeration value="sc"/>
+                <xs:enumeration value="ti"/>
+                <xs:enumeration value="v"/>
+                <xs:enumeration value="cr"/>
+                <xs:enumeration value="mn"/>
+                <xs:enumeration value="fe"/>
+                <xs:enumeration value="co"/>
+                <xs:enumeration value="ni"/>
+                <xs:enumeration value="cu"/>
+                <xs:enumeration value="zn"/>
+                <xs:enumeration value="ga"/>
+                <xs:enumeration value="ge"/>
+                <xs:enumeration value="as"/>
+                <xs:enumeration value="se"/>
+                <xs:enumeration value="br"/>
+                <xs:enumeration value="kr"/>
+                <xs:enumeration value="rb"/>
+                <xs:enumeration value="sr"/>
+                <xs:enumeration value="y"/>
+                <xs:enumeration value="zr"/>
+                <xs:enumeration value="nb"/>
+                <xs:enumeration value="mo"/>
+                <xs:enumeration value="tc"/>
+                <xs:enumeration value="ru"/>
+                <xs:enumeration value="rh"/>
+                <xs:enumeration value="pd"/>
+                <xs:enumeration value="ag"/>
+                <xs:enumeration value="cd"/>
+                <xs:enumeration value="in"/>
+                <xs:enumeration value="sn"/>
+                <xs:enumeration value="sb"/>
+                <xs:enumeration value="te"/>
+                <xs:enumeration value="i"/>
+                <xs:enumeration value="xe"/>
+                <xs:enumeration value="cs"/>
+                <xs:enumeration value="ba"/>
+                <xs:enumeration value="la"/>
+                <xs:enumeration value="ce"/>
+                <xs:enumeration value="pr"/>
+                <xs:enumeration value="nd"/>
+                <xs:enumeration value="pm"/>
+                <xs:enumeration value="sm"/>
+                <xs:enumeration value="eu"/>
+                <xs:enumeration value="gd"/>
+                <xs:enumeration value="tb"/>
+                <xs:enumeration value="dy"/>
+                <xs:enumeration value="ho"/>
+                <xs:enumeration value="er"/>
+                <xs:enumeration value="tm"/>
+                <xs:enumeration value="yb"/>
+                <xs:enumeration value="lu"/>
+                <xs:enumeration value="hf"/>
+                <xs:enumeration value="ta"/>
+                <xs:enumeration value="w"/>
+                <xs:enumeration value="re"/>
+                <xs:enumeration value="os"/>
+                <xs:enumeration value="ir"/>
+                <xs:enumeration value="pt"/>
+                <xs:enumeration value="au"/>
+                <xs:enumeration value="hg"/>
+                <xs:enumeration value="tl"/>
+                <xs:enumeration value="pb"/>
+                <xs:enumeration value="bi"/>
+                <xs:enumeration value="po"/>
+                <xs:enumeration value="at"/>
+                <xs:enumeration value="rn"/>
+                <xs:enumeration value="fr"/>
+                <xs:enumeration value="ra"/>
+                <xs:enumeration value="ac"/>
+                <xs:enumeration value="th"/>
+                <xs:enumeration value="pa"/>
+                <xs:enumeration value="u"/>
+                <xs:enumeration value="np"/>
+                <xs:enumeration value="pu"/>
+                <xs:enumeration value="am"/>
+                <xs:enumeration value="cm"/>
+                <xs:enumeration value="bk"/>
+                <xs:enumeration value="cf"/>
+                <xs:enumeration value="es"/>
+                <xs:enumeration value="fm"/>
+                <xs:enumeration value="md"/>
+                <xs:enumeration value="no"/>
+                <xs:enumeration value="lr"/>
+                <xs:enumeration value="other"/>
+                <xs:enumeration value="unknown"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom_ionizable-proton" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+                <xs:enumeration value="unknown"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Atom-id" type="xs:integer"/>
+
+<!--
+ Intra-residue-bond specifies connectivity between atoms in Residue-graph.
+ Unlike Inter-residue-bond defined later, its participating atoms are part of
+ a residue subgraph dictionary, not part of a specific biostruc-graph.
+ For residue graphs in the standard MMDB dictionary bonds are defined from
+ the known chemical structures of amino acids and nucleotides.  For 
+ nonstandard residue graphs bonds are defined from PDB CONECT records, with
+ validation for consistency with coordinate data, and from stereochemical
+ calculation to identify unreported bonds.  Validation and bond identification
+ are based on comparison of inter-atomic distances to the sum of covalent
+ radii for the corresponding elements. 
+-->
+<xs:element name="Intra-residue-bond">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Intra-residue-bond_atom-id-1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Intra-residue-bond_atom-id-2">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Intra-residue-bond_bond-order" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="single" ncbi:intvalue="1"/>
+                    <xs:enumeration value="partial-double" ncbi:intvalue="2"/>
+                    <xs:enumeration value="aromatic" ncbi:intvalue="3"/>
+                    <xs:enumeration value="double" ncbi:intvalue="4"/>
+                    <xs:enumeration value="triple" ncbi:intvalue="5"/>
+                    <xs:enumeration value="other" ncbi:intvalue="6"/>
+                    <xs:enumeration value="unknown" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Chiral centers are atoms with tetrahedral geometry.  Chirality is defined
+ by a chiral volume involving the chiral center and 3 other atoms bonded to 
+ it.  For any coordinates assigned to atoms c, n1, n2, and n3, the vector 
+ triple product (n1-c) dot ( (n2-c) cross (n3-c) ) must have the indicated
+ sign.  The calculation assumes an orthogonal right-handed coordinate system
+ as is used for MMDB model structures.  
+ Chirality is defined for standard residues in the MMDB dictionary, but is 
+ not assigned automatically for PDB-derived nonstandard residues. If assigned
+ for nonstandard residues, the source of chirality information is described 
+ by a citation within the residue description.
+-->
+<xs:element name="Chiral-center">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Chiral-center_c">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chiral-center_n1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chiral-center_n2">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chiral-center_n3">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chiral-center_sign">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="positive"/>
+                <xs:enumeration value="negative"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Inter-residue bonds are defined by a reference to two atoms. For PDB-derived 
+ structures bonds are identified from biopolymer connectivity according to
+ SEQRES and from other connectivity information on SSBOND and CONECT 
+ records. These data are validated and unreported bonds identified by
+ stereochemical calculation, using the same criteria as for intra-residue 
+ bonds.
+-->
+<xs:element name="Inter-residue-bond">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Inter-residue-bond_atom-id-1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Inter-residue-bond_atom-id-2">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Inter-residue-bond_bond-order" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="single" ncbi:intvalue="1"/>
+                    <xs:enumeration value="partial-double" ncbi:intvalue="2"/>
+                    <xs:enumeration value="aromatic" ncbi:intvalue="3"/>
+                    <xs:enumeration value="double" ncbi:intvalue="4"/>
+                    <xs:enumeration value="triple" ncbi:intvalue="5"/>
+                    <xs:enumeration value="other" ncbi:intvalue="6"/>
+                    <xs:enumeration value="unknown" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Atoms, residues and molecules within the current biostruc are referenced 
+ by hierarchical pointers.
+-->
+<xs:element name="Atom-pntr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Atom-pntr_molecule-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom-pntr_residue-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom-pntr_atom-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Atom-pntr-set">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="Atom-pntr"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>
