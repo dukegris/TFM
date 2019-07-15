@@ -1,0 +1,26 @@
+<!-- NLM QualifierRecordSet DTD -->
+<!-- MESH DTD files for Qualifiers -->
+<!-- Author: MeSH				-->
+<!-- Effective: 01/01/2019			-->
+
+<!-- ================================================================= -->
+<!--             Revision Notes Section
+
+
+-->
+<!-- ================================================================= -->
+
+<!ENTITY  % DescriptorRecordSet SYSTEM "nlmdescriptorrecordset_20190101.dtd">
+%DescriptorRecordSet;
+
+<!ELEMENT QualifierRecordSet (QualifierRecord*)>
+<!ATTLIST QualifierRecordSet LanguageCode (cze|dut|eng|fin|fre|ger|ita|jpn|lav|por|scr|slv|spa) #REQUIRED>
+<!ELEMENT QualifierRecord (%QualifierReference;,
+                            DateCreated,
+                            DateRevised?,
+                            DateEstablished?,
+                            Annotation?,
+                            HistoryNote?,
+                            OnlineNote?,
+                            TreeNumberList?,
+                            ConceptList) >
