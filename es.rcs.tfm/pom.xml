@@ -9,7 +9,7 @@
 	
 	<groupId>es.rcs.tfm</groupId>
 	<artifactId>RCS-TFM</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>TFM Maven Project</name>
 	<description>TFM Maven Project</description>	
 	<url>https://github.com/dukegris/TFM</url>
@@ -17,11 +17,12 @@
 	
 	<modules>
 		<module>es.rcs.tfm.doc</module>
-		<module>es.rcs.tfm.index</module>
 		<module>es.rcs.tfm.xml</module>
+		<module>es.rcs.tfm.idx</module>
+		<module>es.rcs.tfm.api</module>
+		<module>es.rcs.tfm.spa</module>
 		<module>es.rcs.tfm.web</module>
 		<module>es.rcs.tfm.app</module>
-		<module>es.rcs.tfm.spa</module>
 	</modules>
 
 	<organization>
@@ -89,28 +90,75 @@
 		<project.reporting.outputEncoding>ISO-8859-1</project.reporting.outputEncoding>
 		
 		<!-- J2EE -->
+		<javax-persistence.version>2.2</javax-persistence.version>
+		<javax-transaction.version>1.3</javax-transaction.version>
+		<javax-cache.version>1.1.0</javax-cache.version>
+
+		<!-- APACHE COMMONS -->
+		<commons-codec.version>1.12</commons-codec.version>
+		<commons-collections4.version>4.3</commons-collections4.version>
+		<commons-io.version>2.6</commons-io.version>
+		<commons-lang3.version>3.9</commons-lang3.version>
+		<commons-net.version>3.6</commons-net.version>
+
 		<!-- SPRING -->
-		<spring-framework.version>5.1.7.RELEASE</spring-framework.version>
-		<spring-data.version>2.1.8.RELEASE</spring-data.version>
-		<spring-data-solr.version>4.0.8.RELEASE</spring-data-solr.version>
+		<spring-framework.version>5.1.8.RELEASE</spring-framework.version>
+		<spring-security.version>5.1.5.RELEASE</spring-security.version>
+		<spring-data.version>2.1.9.RELEASE</spring-data.version>
+		<spring-data-jpa.version>2.1.9.RELEASE</spring-data-jpa.version>
+		<spring-data-envers.version>2.1.9.RELEASE</spring-data-envers.version>
+
+		<spring-data-rest.version>3.1.5.RELEASE</spring-data-rest.version>
+		<spring-data-solr.version>4.0.9.RELEASE</spring-data-solr.version>
+		<spring-data-neo4j.version>5.1.9.RELEASE</spring-data-neo4j.version>
 		<spring-boot.version>2.1.5.RELEASE</spring-boot.version>
 		
+		<!-- HIBERNATE -->
+		<hibernate-core.version>5.4.3.Final</hibernate-core.version>
+		<hibernate-commons-annotations.version>5.1.0.Final</hibernate-commons-annotations.version>
+		<hibernate-envers.version>5.4.3.Final</hibernate-envers.version>
+		<hibernate-ehcache.version>5.4.2.Final</hibernate-ehcache.version>
+		<hibernate-jcache.version>5.4.2.Final</hibernate-jcache.version>
+		<hibernate-validator.version>6.0.15.Final</hibernate-validator.version>
+		<hibernate-annotations.version>3.5.6-Final</hibernate-annotations.version>
+
 		<!-- XML -->
 		<javax-jaxb.version>2.3.1</javax-jaxb.version>
-		<jackson.version>2.9.8</jackson.version>
-		<google-guava.version>27.1-jre</google-guava.version>
+		<jackson.version>2.9.9</jackson.version>
 	
 		<!-- UTILITIES -->
 		<lombok.version>1.18.8</lombok.version>
 		<wrapper.version>3.2.3</wrapper.version>
+		<querydsl.version>4.2.1</querydsl.version>
+		<javers.version>5.2.4</javers.version>
+		
+		<!-- https://stackoverflow.com/questions/36427291/illegalaccesserror-to-guavas-stopwatch-from-org-apache-hadoop-mapreduce-lib-inp -->
+		<google-guava.version>15.0</google-guava.version>
+		<google-collections.version>1.0</google-collections.version>
+		<hikari.version>3.3.1</hikari.version>
+		<netty.version>3.10.6.Final</netty.version>
+		<netty-all.version>4.1.37.Final</netty-all.version>
 
-		<!-- =====================================
-			 SERVERS
-			 ===================================== -->
-		<!-- TOMCAT -->
-		<!-- JETTY -->
-		<!-- SOLR -->
-		<solr.version>8.1.0</solr.version>
+		<!-- SERVERS -->
+		<jetty.version>9.4.19.v20190610</jetty.version>
+		<solr.version>8.1.1</solr.version>
+		<h2.version>1.4.199</h2.version>
+		<postgresql.version>42.2.6</postgresql.version>
+	
+		<!-- NLP -->
+		<scala.main>2.11</scala.main>
+		<scala.version>2.11.12</scala.version>
+		<hadoop.version>2.9.2</hadoop.version>
+		<spark.version>2.4.3</spark.version>
+		<spark-nlp.version>2.0.9</spark-nlp.version>
+
+		<!-- LOGS -->
+		<slf4j.version>1.7.25</slf4j.version>
+		<log4j.version>1.2.17</log4j.version>
+		<!-- 
+		<log4j.version>2.12.0</log4j.version>
+		<log4j.version>1.2.17</log4j.version>
+		 -->
 
 		<!-- TEST -->
 		<junit.version>4.12</junit.version>
@@ -135,33 +183,150 @@
 
 	<dependencyManagement>
 	<dependencies>
+
+		<!-- =====================================
+			 J2EE
+			 ===================================== -->
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>javax.persistence-api</artifactId>
+			<version>${javax-persistence.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
+			<version>${javax-transaction.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+			<version>${javax-cache.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+			
+		<!-- =====================================
+			 APACHE COMMONS
+			 ===================================== -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons-codec.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${commons-collections4.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>${commons-net.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- =====================================
 			 SPRING
 			 ===================================== -->
 		<!-- FRAMEWORK -->
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring-framework.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-oxm</artifactId>
 			<version>${spring-framework.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${spring-framework.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring-framework.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jcl</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-dao</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -172,28 +337,95 @@
 		<!-- DATA -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-jpa</artifactId>
+			<artifactId>spring-data-commons</artifactId>
 			<version>${spring-data.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<version>${spring-data-jpa.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-envers</artifactId>
+			<version>${spring-data-envers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-core</artifactId>
+			<version>${spring-data-rest.version}</version>
+			<scope>runtime</scope>
+		</dependency>			
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-webmvc</artifactId>
+			<version>${spring-data-rest.version}</version>
+			<scope>runtime</scope>
+		</dependency>			
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-solr</artifactId>
 			<version>${spring-data-solr.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-neo4j</artifactId>
+			<version>${spring-data-neo4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- SECURITY -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-ldap</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-acl</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
+			<version>${spring-security.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<!-- BOOT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot</artifactId>
 			<version>${spring-boot.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>${spring-boot.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -203,17 +435,90 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
+			<version>${spring-boot.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
 			<version>${spring-boot.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+			<version>${spring-boot.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>${spring-boot.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-solr</artifactId>
 			<version>${spring-boot.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		
+		<!-- =====================================
+			 HIBERNATE
+			 ===================================== -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate-validator.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate-core.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-java8</artifactId>
+			<version>${hibernate-core.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+			<version>${hibernate-envers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>${hibernate-ehcache.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jcache</artifactId>
+			<version>${hibernate-jcache.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.hibernate.common</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+			<version>${hibernate-commons-annotations.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+<!-- 
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+			<version>${hibernate-annotations.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+ -->
+
 		<!-- =====================================
 			 XML
 			 ===================================== -->
@@ -225,27 +530,145 @@
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<!-- <version>${jackson.version}</version> -->
+			<version>2.9.9.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformats-binary</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-paranamer</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-parameter-names</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-scala_${scala.main}</artifactId>
+			<version>${jackson.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		
 		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
-		<!-- GOOGLE -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${google-guava.version}</version>
-			<scope>compile</scope>
-		</dependency>
 		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- DSL -->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-core</artifactId>
+			<version>${querydsl.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<version>${querydsl.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- JAVERS -->
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-core</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-persistence-sql</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-persistence-jpa</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-spring</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-spring-boot-starter-sql</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- GOOGLE -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${google-guava.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>${google-collections.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- HIKARI -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+		    <version>${hikari.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<!-- WRAPPER -->
 		<dependency>
@@ -253,26 +676,198 @@
 			<groupId>tanukisoft</groupId>
 			<artifactId>wrapper</artifactId>
 			<version>${wrapper.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		
 		<!-- =====================================
 			 SERVERS
 			 ===================================== -->
+		<!-- JETTY -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>${jetty.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
 		<!-- SOLR -->
 		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-core</artifactId>
 			<version>${solr.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-solrj</artifactId>
 			<version>${solr.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- H2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- POSTGRESQL -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 
+		<!-- =====================================
+			 NLP
+			 ===================================== -->
+		<!-- SCALA -->
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>${scala.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- HADOOP -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-auth</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-annotations</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- A partir de la version 2.8 -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs-client</artifactId>
+			<version>${hadoop.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- SPARK -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_${scala.main}</artifactId>
+			<version>${spark.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_${scala.main}</artifactId>
+			<version>${spark.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-mllib_${scala.main}</artifactId>
+			<version>${spark.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-graphx_${scala.main}</artifactId>
+			<version>${spark.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- NLP -->
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp_${scala.main}</artifactId>
+			<version>${spark-nlp.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp-ocr_${scala.main}</artifactId>
+			<version>${spark-nlp.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp-gpu_${scala.main}</artifactId>
+			<version>${spark-nlp.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- NETTY -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty</artifactId>
+			<version>${netty.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${netty-all.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- =====================================
+			 LOGGER
+			 ===================================== -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>${log4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		 -->
+		
 		<!-- =====================================
 			 TEST
 			 ===================================== -->
@@ -283,58 +878,87 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>	
 	</dependencyManagement>
 	
 	
 	<build>
+			
+		<pluginManagement>
+				
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+			</plugins>
+			
+		</pluginManagement>
+		
 		<plugins>
+		
 			<!-- Default compiler -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
-				<!-- <version>2.3.2</version> -->
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
-					<encoding>ISO-8859-1</encoding>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals><goal>compile</goal></goals>
+					</execution>
+				</executions>
 			</plugin>
 			<!-- Disable Test on Build -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M3</version>
 				<configuration>
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 			<!-- Attach source in repository -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
 						<phase>verify</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
+						<goals><goal>jar</goal></goals>
 					</execution>
 				</executions>
 			</plugin>
 			<!-- Default resources -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
 						<!-- here the phase you need -->
 						<phase>validate</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
+						<goals><goal>copy-resources</goal></goals>
 						<configuration>
 							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
@@ -354,7 +978,9 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			
 		</plugins>
+		
 	</build>
 	
 </project>

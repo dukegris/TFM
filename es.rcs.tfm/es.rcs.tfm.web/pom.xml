@@ -15,24 +15,30 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 	
 		<!-- =====================================
-			 TFM
-			 ===================================== -->
-		<dependency>
-			<groupId>es.rcs.tfm</groupId>
-			<artifactId>RCS-Index</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-	
-		<!-- =====================================
 			 SPRING
 			 ===================================== -->
+		<!-- FRAMEWORK -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -45,28 +51,8 @@
 		</dependency>
 
 		<!-- =====================================
-			 XML
-			 ===================================== -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
-		<!-- GOOGLE -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
