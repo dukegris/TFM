@@ -34,5 +34,21 @@ public class AppNames {
 	// -------------------------------------------------------------------------------------
 	// APP: IDX CONFIG
 	public static final String SOLR_CONFIG = 					"taoSolrConfig";
+
+	// -------------------------------------------------------------------------------------
+	// APP: BASE DE DATOS
+	public static final String BBDD_CONFIG =					"taoBBDDConfig";
+
+	public static final String BBDD_PU =						"TFM_PU";
+	public static final String BBDD_DB =						"taoBBDDDB";
+	
+	public static final String BBDD_JPA_VENDOR =				"taoBBDD_JPA_VA";
+	public static final String BBDD_JPA_DIALECT =				"taoBBDD_JPA_DIALECT";
+	
+	public static final String BBDD_DATASOURCE =				"taoBBDDDS";
+	public static final String BBDD_CONSOLE =					"taoBBDDConsole";
+		
+	public static final String BBDD_NAME =						"jdbc:h2:file:J:/data/TFM;DB_CLOSE_ON_EXIT=true";
+	public static final String BBDD_URL =						"/h2/*";
 	
 }
