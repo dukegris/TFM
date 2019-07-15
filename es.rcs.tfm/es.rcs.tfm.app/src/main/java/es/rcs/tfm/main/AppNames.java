@@ -36,6 +36,10 @@ public class AppNames {
 	public static final String SOLR_CONFIG = 					"taoSolrConfig";
 
 	// -------------------------------------------------------------------------------------
+	// APP: SCHEDULER CONFIG
+	public static final String QUARTZ_CONFIG = 					"taoQuartzConfig";
+
+	// -------------------------------------------------------------------------------------
 	// APP: BASE DE DATOS
 	public static final String BBDD_CONFIG =					"taoBBDDConfig";
 

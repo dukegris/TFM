@@ -37,6 +37,12 @@
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Srv</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Api</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
@@ -63,6 +69,15 @@
 			<scope>compile</scope>
 		</dependency>
 		
+		<!-- =====================================
+			 APACHE COMMONS
+			 ===================================== -->
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- =====================================
 			 SPRING
 			 ===================================== -->
