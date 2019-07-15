@@ -1,0 +1,87 @@
+<project 
+		xmlns="http://maven.apache.org/POM/4.0.0" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://maven.apache.org/POM/4.0.0 
+			http://maven.apache.org/xsd/maven-4.0.0.xsd">
+			
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>RCS-Api</artifactId>
+	<name>TFM API Module</name>
+	<description>TFM Api Module</description>	
+	<packaging>jar</packaging>
+	
+	<parent>
+		<groupId>es.rcs.tfm</groupId>
+		<artifactId>RCS-TFM</artifactId>
+		<version>0.0.3-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+	
+		<!-- =====================================
+			 TFM
+			 ===================================== -->
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Idx</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+	
+		<!-- =====================================
+			 SPRING
+			 ===================================== -->
+		<!-- FRAMEWORK -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- DATA -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-solr</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
+			 UTILITIES
+			 ===================================== -->
+		<!-- GOOGLE -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- LOMBOK -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		
+	</dependencies>
+
+</project>
