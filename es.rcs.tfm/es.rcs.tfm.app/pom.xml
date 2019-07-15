@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -25,14 +25,26 @@
 			 ===================================== -->
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
-			<artifactId>RCS-Index</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<artifactId>RCS-Idx</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Api</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Spa</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Web</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		
@@ -42,10 +54,35 @@
 		<!-- FRAMEWORK -->
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<!-- DATA -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
@@ -56,6 +93,16 @@
 			<artifactId>spring-data-solr</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-core</artifactId>
+			<scope>compile</scope>
+		</dependency>			
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-webmvc</artifactId>
+			<scope>runtime</scope>
+		</dependency>			
 		<!-- BOOT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -72,6 +119,11 @@
 					<artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -100,8 +152,12 @@
 		<!-- JETTY -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>9.4.18.v20190429</version>
 			<scope>compile</scope>
 		</dependency>
 		
@@ -123,6 +179,19 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- =====================================
+			 LOGGER
+			 ===================================== -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 </project>

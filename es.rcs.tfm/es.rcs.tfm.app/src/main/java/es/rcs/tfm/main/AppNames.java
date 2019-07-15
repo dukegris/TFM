@@ -11,10 +11,6 @@ public class AppNames {
 	public static final String APP_MESSAGES_LOADER = 			"taoMessagesLoader";
 
 	// -------------------------------------------------------------------------------------
-	// APP: WEB CONFIG
-	public static final String WEB_CONFIG = 					"taoWebConfig";
-
-	// -------------------------------------------------------------------------------------
 	// J2EE: WEB SERVER
 	public static final String JETTY_CONFIG = 					"taoJettyConfig";
 

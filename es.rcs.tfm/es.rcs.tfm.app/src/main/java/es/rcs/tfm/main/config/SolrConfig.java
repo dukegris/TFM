@@ -8,15 +8,17 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.util.ResourceUtils;
 import org.xml.sax.SAXException;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.solr.IndexNames;
-import es.rcs.tfm.solr.model.Article;
+import es.rcs.tfm.solr.model.IdxArticleSolr;
 
 @Configuration( AppNames.SOLR_CONFIG )
+@PropertySource("classpath:solr/solr.properties")
 public class SolrConfig {
 
     /*
@@ -32,7 +34,7 @@ public class SolrConfig {
     	// return new HttpSolrClient.Builder(solrURL).build();
         //EmbeddedSolrServerFactory factory = new EmbeddedSolrServerFactory("classpath:solr");
     	//return factory.getSolrClient();
-    	EmbeddedSolrServer server = new EmbeddedSolrServer(ResourceUtils.getFile("classpath:solr").toPath(), Article.CORE);
+    	EmbeddedSolrServer server = new EmbeddedSolrServer(ResourceUtils.getFile("classpath:solr").toPath(), IdxArticleSolr.CORE);
     	return server;
     	
     }

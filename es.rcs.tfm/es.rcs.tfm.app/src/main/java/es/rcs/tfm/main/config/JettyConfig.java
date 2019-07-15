@@ -12,7 +12,6 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +42,12 @@ public class JettyConfig {
 	private @Value("${tao.web.alias.id}") String KEY_ID = "tomcat";
 	private @Value("${tao.web.alias.password}") String KEY_PASSWORD = "tomcat";
 	
-	private @Value("${server.port}") String HTTP_PORT_DEF = "80";
-	private @Value("${server.port}") String HTTPS_PORT_DEF = "443";
+	private String HTTP_PORT_DEF = "80";
+	private String HTTPS_PORT_DEF = "443";
 
 	private @Value("${tao.web.http}") String HTTP_PORT = "80";
 	private @Value("${tao.web.https}") String HTTPS_PORT = "443";
-	private @Value("${tao.web.webapp}") String WEBAPP_DIR = "webapp";
+	private @Value("${tao.web.webapp}") String WEBAPP_DIR = "public";
 	private @Value("${tao.web.session.cookie}") String SESSION_COOKIE_ID = "TAO-CLIENT-SESSION-COOKIE";
 
 	private static final Logger LOG = LoggerFactory.getLogger(JettyConfig.class);
@@ -76,7 +75,7 @@ public class JettyConfig {
 					File keystore = new ClassPathResource(KEYSTORE_LOCATION).getFile();
 					File truststore = new ClassPathResource(TRUSTSTORE_LOCATION).getFile();
 					
-					SslContextFactory sslContextFactory = new SslContextFactory();
+					SslContextFactory sslContextFactory = new SslContextFactory.Server();
 					sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
 					sslContextFactory.setKeyStorePath(keystore.getAbsolutePath());
 					sslContextFactory.setTrustStorePassword(TRUSTSTORE_PASSWORD);
@@ -120,10 +119,10 @@ public class JettyConfig {
 		}
 		bean.setPort(portInt);
 
-		File folder = new File(WEBAPP_DIR);
 		try {
-	        LOG.info("TAO Tomcat WEBAPP DIR: " + folder.getCanonicalPath());
-			System.out.println(folder.getCanonicalPath());
+			File folder = new ClassPathResource(WEBAPP_DIR).getFile();
+			bean.setDocumentRoot(folder);
+	        LOG.info("TFM AppServer WEBAPP DIR: " + folder.getCanonicalPath());
 		} catch (IOException ex) {
 	        LOG.warn(
 	        		"servletContainer " + 
@@ -133,9 +132,7 @@ public class JettyConfig {
 	        		ex.toString());
 		}
 
-		bean.setDocumentRoot(folder);
-		
-		bean.setDisplayName("TAO Tomcat");
+		bean.setDisplayName("TFM App Server");
 
 		return bean;
 		

@@ -8,12 +8,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
+import es.rcs.tfm.api.ApiNames;
 import es.rcs.tfm.solr.IndexNames;
 import es.rcs.tfm.web.WebNames;
 
 @ComponentScan(basePackages = {
 		AppNames.APP_CONFIG_PKG,
 		IndexNames.IDX_CONFIG_PKG,
+		ApiNames.API_CONFIG_PKG,
 		WebNames.WEB_CONFIG_PKG})
 public class AppBoot implements WrapperListener {
 	
