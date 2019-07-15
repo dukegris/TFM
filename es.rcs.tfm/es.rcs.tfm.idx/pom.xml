@@ -7,7 +7,7 @@
 			
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>RCS-Index</artifactId>
+	<artifactId>RCS-Idx</artifactId>
 	<name>TFM Index Module</name>
 	<description>TFM Solr Setup Module</description>	
 	<packaging>jar</packaging>
@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -23,7 +23,23 @@
 		<!-- =====================================
 			 SPRING
 			 ===================================== -->
+		<!-- FRAMEWORK -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<!-- DATA -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-solr</artifactId>
