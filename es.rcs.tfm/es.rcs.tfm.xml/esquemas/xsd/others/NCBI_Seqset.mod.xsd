@@ -1,0 +1,185 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "seqset.asn"
+     ::DATATOOL:: by application DATATOOL version 2.3.1
+     ::DATATOOL:: on 05/02/2011 23:05:02
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-Seqset"
+================================================= -->
+<!--
+$Revision: 279709 $
+**********************************************************************
+
+  NCBI Sequence Collections
+  by James Ostell, 1990
+
+  Version 3.0 - 1994
+
+**********************************************************************
+-->
+<!-- Elements used by other modules:
+          Bioseq-set,
+          Seq-entry -->
+
+<!-- Elements referenced from other modules:
+          Bioseq,
+          Seq-annot,
+          Seq-descr FROM NCBI-Sequence,
+          Object-id,
+          Dbtag,
+          Date FROM NCBI-General -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+*** Sequence Collections ********************************
+*
+ just a collection
+-->
+<xs:element name="Bioseq-set">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Bioseq-set_id" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Object-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- to identify a collection -->
+      <xs:element name="Bioseq-set_coll" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Dbtag"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- nesting level -->
+      <xs:element name="Bioseq-set_level" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Bioseq-set_class" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="optional" default="not-set">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    nuc-prot	-  nuc acid and coded proteins
+    segset	-  segmented sequence + parts
+    conset	-  constructed sequence + parts
+    parts	-  parts for 2 or 3
+    gibb	-  geninfo backbone
+    gi	-  geninfo
+    genbank	-  converted genbank
+    pir	-  converted pir
+    pub-set	-  all the seqs from a single publication
+    equiv	-  a set of equivalent maps or seqs
+    swissprot	-  converted SWISSPROT
+    pdb-entry	-  a complete PDB entry
+    mut-set	-  set of mutations
+    pop-set	-  population study
+    phy-set	-  phylogenetic study
+    eco-set	-  ecological sample study
+    gen-prod-set	-  genomic products, chrom+mRNA+protein
+    wgs-set	-  whole genome shotgun project
+    named-annot	-  named annotation set
+    named-annot-prod	-  with instantiated mRNA+protein
+    read-set	-  set from a single read
+    paired-end-reads	-  paired sequences within a read-set
+    small-genome-set	-  viral segments or mitochondrial minicircles
+-->
+                <xs:enumeration value="not-set"/>
+                <xs:enumeration value="nuc-prot"/>
+                <xs:enumeration value="segset"/>
+                <xs:enumeration value="conset"/>
+                <xs:enumeration value="parts"/>
+                <xs:enumeration value="gibb"/>
+                <xs:enumeration value="gi"/>
+                <xs:enumeration value="genbank"/>
+                <xs:enumeration value="pir"/>
+                <xs:enumeration value="pub-set"/>
+                <xs:enumeration value="equiv"/>
+                <xs:enumeration value="swissprot"/>
+                <xs:enumeration value="pdb-entry"/>
+                <xs:enumeration value="mut-set"/>
+                <xs:enumeration value="pop-set"/>
+                <xs:enumeration value="phy-set"/>
+                <xs:enumeration value="eco-set"/>
+                <xs:enumeration value="gen-prod-set"/>
+                <xs:enumeration value="wgs-set"/>
+                <xs:enumeration value="named-annot"/>
+                <xs:enumeration value="named-annot-prod"/>
+                <xs:enumeration value="read-set"/>
+                <xs:enumeration value="paired-end-reads"/>
+                <xs:enumeration value="small-genome-set"/>
+                <xs:enumeration value="other"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Bioseq-set_release" type="xs:string" minOccurs="0"/>
+      <xs:element name="Bioseq-set_date" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Date"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Bioseq-set_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Bioseq-set_seq-set">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Bioseq-set_annot" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Seq-entry">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Seq-entry_seq">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Bioseq"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Seq-entry_set">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Bioseq-set"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

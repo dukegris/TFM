@@ -1,0 +1,371 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "mla.asn"
+     ::DATATOOL:: by application DATATOOL version 2.0.0
+     ::DATATOOL:: on 11/02/2010 23:04:52
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-MedArchive"
+================================================= -->
+<!--
+$Revision: 209893 $
+********************************************************************
+
+  Network MEDLINE Archive message formats
+  Ostell 1993
+
+
+*********************************************************************
+
+  mla.asn
+
+     messages for medline archive data access
+
+*********************************************************************
+-->
+<!-- Elements referenced from other modules:
+          Medline-entry FROM NCBI-Medline,
+          Medlars-entry FROM NCBI-Medlars,
+          Pubmed-entry FROM NCBI-PubMed,
+          Medline-si FROM NCBI-Medline,
+          Pub FROM NCBI-Pub,
+          Title,
+          PubMedId FROM NCBI-Biblio -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+**********************************
+ requests
+
+-->
+<xs:element name="Mla-request">
+  <xs:complexType>
+    <xs:choice>
+<!-- DlInit -->
+      <xs:element name="Mla-request_init">
+        <xs:complexType/>
+      </xs:element>
+<!-- get MedlineEntry -->
+      <xs:element name="Mla-request_getmle" type="xs:integer"/>
+<!-- get citation by muid -->
+      <xs:element name="Mla-request_getpub" type="xs:integer"/>
+<!-- match titles -->
+      <xs:element name="Mla-request_gettitle">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Title-msg"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- -->
+      <xs:element name="Mla-request_citmatch">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- DlFini -->
+      <xs:element name="Mla-request_fini">
+        <xs:complexType/>
+      </xs:element>
+<!-- Get MUIDs for an MRI -->
+      <xs:element name="Mla-request_getmriuids" type="xs:integer"/>
+<!-- Get MUIDs for an Accessions -->
+      <xs:element name="Mla-request_getaccuids">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Medline-si"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get PMID for MUID -->
+      <xs:element name="Mla-request_uidtopmid" type="xs:integer"/>
+<!-- get MUID for PMID -->
+      <xs:element name="Mla-request_pmidtouid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get MedlineEntry by PubMed id -->
+      <xs:element name="Mla-request_getmlepmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get citation by PubMed id -->
+      <xs:element name="Mla-request_getpubpmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- citation match, PMID on out -->
+      <xs:element name="Mla-request_citmatchpmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get PMIDs for an MRI -->
+      <xs:element name="Mla-request_getmripmids" type="xs:integer"/>
+<!-- get PMIDs for an Accessions -->
+      <xs:element name="Mla-request_getaccpmids">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Medline-si"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- generate list of PMID for Pub -->
+      <xs:element name="Mla-request_citlstpmids">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get MedlineEntry by Medline id -->
+      <xs:element name="Mla-request_getmleuid" type="xs:integer"/>
+<!-- get MedlarsEntry by PubMed id -->
+      <xs:element name="Mla-request_getmlrpmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- get MedlarsEntry by Medline id -->
+      <xs:element name="Mla-request_getmlruid" type="xs:integer"/>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+**********************************************************************
+
+  if request = all
+	if one row returned
+	   reply=all, return every column
+	else 
+	   reply=ml-jta for each row
+
+  if request = not-set, reply=ml-jta
+
+  otherwise,
+	if request != ml-jta
+	   if column exist, reply=column, else reply=ml-jta
+
+**********************************************************************
+-->
+<xs:element name="Title-type">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+    not-set	-  request=ml-jta (default), reply=not-found
+-->
+          <xs:enumeration value="not-set"/>
+          <xs:enumeration value="name"/>
+          <xs:enumeration value="tsub"/>
+          <xs:enumeration value="trans"/>
+          <xs:enumeration value="jta"/>
+          <xs:enumeration value="iso-jta"/>
+          <xs:enumeration value="ml-jta"/>
+          <xs:enumeration value="coden"/>
+          <xs:enumeration value="issn"/>
+          <xs:enumeration value="abr"/>
+          <xs:enumeration value="isbn"/>
+          <xs:enumeration value="all"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!-- Title match request/response -->
+<xs:element name="Title-msg">
+  <xs:complexType>
+    <xs:sequence>
+<!-- type to get, or type returned -->
+      <xs:element name="Title-msg_type">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Title-type"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- title(s) to look up, or title(s) found -->
+      <xs:element name="Title-msg_title">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Title"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Title-msg-list">
+  <xs:complexType>
+    <xs:sequence>
+<!-- number of titles -->
+      <xs:element name="Title-msg-list_num" type="xs:integer"/>
+      <xs:element name="Title-msg-list_titles">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Title-msg"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Error-val">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+    not-found	-  Entry was not found
+    operational-error	-  A run-time operation error was occurred
+    cannot-connect-jrsrv	-  Cannot connect to Journal server
+    cannot-connect-pmdb	-  Cannot connect to PubMed
+    journal-not-found	-  Journal title not found
+    citation-not-found	-  Volume, Page and Author do not match any
+         article
+    citation-ambiguous	-  More than one article found
+    citation-too-many	-  Too many article was found
+    cannot-connect-searchbackend-jrsrv	-  Cannot connect to searchbackend Journals db
+    cannot-connect-searchbackend-pmdb	-  Cannot connect to searchbackend PubMed db
+    cannot-connect-docsumbackend	-  Cannot connect to docsumbackend
+-->
+          <xs:enumeration value="not-found"/>
+          <xs:enumeration value="operational-error"/>
+          <xs:enumeration value="cannot-connect-jrsrv"/>
+          <xs:enumeration value="cannot-connect-pmdb"/>
+          <xs:enumeration value="journal-not-found"/>
+          <xs:enumeration value="citation-not-found"/>
+          <xs:enumeration value="citation-ambiguous"/>
+          <xs:enumeration value="citation-too-many"/>
+          <xs:enumeration value="cannot-connect-searchbackend-jrsrv"/>
+          <xs:enumeration value="cannot-connect-searchbackend-pmdb"/>
+          <xs:enumeration value="cannot-connect-docsumbackend"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Mla-back">
+  <xs:complexType>
+    <xs:choice>
+<!-- DlInit -->
+      <xs:element name="Mla-back_init">
+        <xs:complexType/>
+      </xs:element>
+<!-- not found for getmle/getpub/citmatch -->
+      <xs:element name="Mla-back_error">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Error-val"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- got Medline Entry -->
+      <xs:element name="Mla-back_getmle">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Medline-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Mla-back_getpub">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- match titles -->
+      <xs:element name="Mla-back_gettitle">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Title-msg-list"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- citation lookup muid or 0 -->
+      <xs:element name="Mla-back_citmatch" type="xs:integer"/>
+<!-- DlFini -->
+      <xs:element name="Mla-back_fini">
+        <xs:complexType/>
+      </xs:element>
+<!-- got a set of MUIDs -->
+      <xs:element name="Mla-back_getuids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Mla-back_getuids_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- got a set of PMIDs -->
+      <xs:element name="Mla-back_getpmids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Mla-back_getpmids_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- result muid or 0 if not found -->
+      <xs:element name="Mla-back_outuid" type="xs:integer"/>
+<!-- result pmid or 0 if not found -->
+      <xs:element name="Mla-back_outpmid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PubMedId"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- got Pubmed Entry -->
+      <xs:element name="Mla-back_getpme">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pubmed-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- got Medlars Entry -->
+      <xs:element name="Mla-back_getmlr">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Medlars-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

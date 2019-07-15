@@ -1,0 +1,11 @@
+<!DOCTYPE catalog
+    PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+           "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+
+	<system
+		systemId="http://www.w3.org/1999/xlink"
+		uri="../xsd/jats-math3/standard-modules/xlink.xsd" />
+
+</catalog>

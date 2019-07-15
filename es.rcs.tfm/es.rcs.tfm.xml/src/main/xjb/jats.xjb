@@ -1,19 +1,63 @@
-<bindings 
-	xmlns="http://java.sun.com/xml/ns/jaxb"
-	xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	version="2.1">
+<?xml version="1.0" encoding="UTF-8"?>
+<jxb:bindings 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+		xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+		xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+		jxb:version="2.1"
+		jxb:extensionBindingPrefixes="xjc">
 
-	<bindings 
-			schemaLocation="../xsd/jats-math2/JATS-archivearticle1-elements.xsd" 
+	<!-- Rename title -->
+    <jxb:bindings
+    		schemaLocation="../xsd/jats-math3/JATS-archive-oasis-article1-mathml3-elements.xsd"
+			node="/xsd:schema">
+		<jxb:bindings 
+					node="//xsd:group[@name='sec-opt-title-model']">
+			<jxb:bindings 
+					node=".//xsd:element[@ref='title']">
+				<jxb:property 
+					name="sectitle" />
+			</jxb:bindings>
+		</jxb:bindings>
+	</jxb:bindings>
+
+	<!-- Rename title -->
+    <jxb:bindings
+    		schemaLocation="../xsd/jats-math3/standard-modules/mathml3/mathml3-presentation.xsd"
+			node="/xsd:schema">
+		<jxb:bindings 
+					node="//xsd:group[@name='sec-opt-title-model']">
+			<jxb:bindings 
+					node=".//xsd:element[@ref='title']">
+				<jxb:property 
+					name="sectitle" />
+			</jxb:bindings>
+		</jxb:bindings>
+	</jxb:bindings>
+	
+    <jxb:bindings
+    		schemaLocation="../xsd/jats-math3/JATS-archive-oasis-article1-mathml3.xsd"
 			node="/xsd:schema">
 
-		<bindings node="//xsd:group[@name='sec-opt-title-model']">
-			<bindings node=".//xsd:element[@ref='title']">
-				<property name="sectitle" />
+		<!--
+		location
+		<bindings schemaLocation="site-template.xsd" version="1.0">
+
+
+			Customise the package name
+			<schemaBindings>
+				<package name="com.example.schema" />
+			</schemaBindings>
+
+			rename the value element as valueAttribute
+			<bindings node="//xs:complexType[@name='MetaType']">
+				<bindings node=".//xs:attribute[@name='Value']">
+					<property name="ValueAttribute" />
+				</bindings>
 			</bindings>
 		</bindings>
+		 -->
 
-	</bindings>
+	</jxb:bindings>
 
-</bindings>              
+</jxb:bindings>

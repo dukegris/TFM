@@ -1,0 +1,1048 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "id2.asn"
+     ::DATATOOL:: by application DATATOOL version 2.4.4
+     ::DATATOOL:: on 05/04/2017 23:04:17
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-ID2Access"
+================================================= -->
+<!--
+$Revision: 534721 $
+********************************************************************
+
+  Network Id server network access
+  Vasilchenko 2003
+
+
+*********************************************************************
+
+  ID2.asn
+
+     messages for id server network access
+
+*********************************************************************
+-->
+<!-- Elements used by other modules:
+          ID2-Blob-State,
+          ID2-Blob-Id -->
+
+<!-- Elements referenced from other modules:
+          Seq-id,
+          Seq-loc FROM NCBI-Seqloc,
+          ID2S-Chunk-Id,
+          ID2S-Seq-annot-Info FROM NCBI-Seq-split -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+*********************************************************************
+ request types
+*********************************************************************
+ Requests are sent in packets to allow sending several requests at once
+ to avoid network latency, without possiblity of deadlock with server.
+ Server will not start sending replies until it will read the whole packet.
+-->
+<xs:element name="ID2-Request-Packet">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="ID2-Request"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Request">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ request's serial number, can be used in asynchronic clients
+ server should copy it to corresponding field in reply
+-->
+      <xs:element name="ID2-Request_serial-number" type="xs:integer" minOccurs="0"/>
+      <xs:element name="ID2-Request_params" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Params"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Request_request">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ID2-Request_request_init">
+              <xs:complexType/>
+            </xs:element>
+            <xs:element name="ID2-Request_request_get-packages">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Request-Get-Packages"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request_request_get-seq-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Request-Get-Seq-id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request_request_get-blob-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Request-Get-Blob-Id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request_request_get-blob-info">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Request-Get-Blob-Info"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request_request_reget-blob">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Request-ReGet-Blob"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request_request_get-chunks">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2S-Request-Get-Chunks"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Request for set of params packages know by server.
+ Packages can be used to abbreviate parameters of request.
+-->
+<xs:element name="ID2-Request-Get-Packages">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ return known packages from this list
+ if unset - return all known packages
+-->
+      <xs:element name="ID2-Request-Get-Packages_names" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2-Request-Get-Packages_names_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- return packages' names only -->
+      <xs:element name="ID2-Request-Get-Packages_no-contents" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Requested sequence ID, can be any string or Seq-id.
+ This request will be replied with one or more ID2-Reply-Get-Seq-id.
+-->
+<xs:element name="ID2-Request-Get-Seq-id">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Request-Get-Seq-id_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Request-Get-Seq-id_seq-id-type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="any">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    any	-  return any qualified Seq-id
+    gi	-  gi is preferred
+    text	-  text Seq-id (accession etc) is preferred
+    general	-  general Seq-id is preferred
+    all	-  return all qualified Seq-ids of the sequence
+    label	-  return a sequence string label as string
+         in general id with db "LABEL"
+    taxid	-  return a sequence taxonomy ID as integer
+         in general id with db "TAXID"
+    hash	-  return a sequence hash as integer
+         in general id with db "HASH"
+    seq-length	-  return a sequence Seq-inst.length as int
+         in general id with db "Seq-inst.length"
+    seq-mol	-  return a sequence Seq-inst.mol as int
+         in general id with db "Seq-inst.mol"
+-->
+                    <xs:enumeration value="any" ncbi:intvalue="0"/>
+                    <xs:enumeration value="gi" ncbi:intvalue="1"/>
+                    <xs:enumeration value="text" ncbi:intvalue="2"/>
+                    <xs:enumeration value="general" ncbi:intvalue="4"/>
+                    <xs:enumeration value="all" ncbi:intvalue="127"/>
+                    <xs:enumeration value="label" ncbi:intvalue="128"/>
+                    <xs:enumeration value="taxid" ncbi:intvalue="256"/>
+                    <xs:enumeration value="hash" ncbi:intvalue="512"/>
+                    <xs:enumeration value="seq-length" ncbi:intvalue="1024"/>
+                    <xs:enumeration value="seq-mol" ncbi:intvalue="2048"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Seq-id">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="ID2-Seq-id_string" type="xs:string"/>
+      <xs:element name="ID2-Seq-id_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Return blob-id with specified seq-id.
+ This request with be replied with one or more ID2-Reply-Get-Blob-Id.
+-->
+<xs:element name="ID2-Request-Get-Blob-Id">
+  <xs:complexType>
+    <xs:sequence>
+<!-- id can be supplied by inner request -->
+      <xs:element name="ID2-Request-Get-Blob-Id_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Request-Get-Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- return id of blob with sequence -->
+      <xs:element name="ID2-Request-Get-Blob-Id_sources" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2-Request-Get-Blob-Id_sources_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- return Blob-Ids with external features on this Seq-id -->
+      <xs:element name="ID2-Request-Get-Blob-Id_external" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Return some information related to the blob.
+ This request with be replied with one or more of:
+   ID2-Reply-Get-Blob-Seq-ids - if requested by get-seq-ids field
+   ID2-Reply-Get-Blob         - if requested by get-data field
+   ID2S-Reply-Get-Split-Info
+   ID2S-Reply-Get-Chunk
+ Last two can be sent in addition to ID2-Reply-Get-Blob
+ if the blob is split on the server.
+ The replies are made separate to allow server to create replies easier
+ from precalculated data. Each of these replies have ID2-Reply-Data field.
+-->
+<xs:element name="ID2-Request-Get-Blob-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Request-Get-Blob-Info_blob-id">
+        <xs:complexType>
+          <xs:choice>
+<!-- id can be supplied by inner request -->
+            <xs:element name="ID2-Request-Get-Blob-Info_blob-id_blob-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Blob-Id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Request-Get-Blob-Info_blob-id_resolve">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="ID2-Request-Get-Blob-Info_blob-id_resolve_request">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="ID2-Request-Get-Blob-Id"/>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+<!-- server will not send blobs listed here -->
+                  <xs:element name="ID2-Request-Get-Blob-Info_blob-id_resolve_exclude-blobs" minOccurs="0">
+                    <xs:complexType>
+                      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:element ref="ID2-Blob-Id"/>
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+<!-- return in addition list of Seq-ids also resolving to this blob -->
+      <xs:element name="ID2-Request-Get-Blob-Info_get-seq-ids" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+<!--
+ level of details requested immediately
+ server will send relevant chunks if blob is splitted
+-->
+      <xs:element name="ID2-Request-Get-Blob-Info_get-data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Get-Blob-Details"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ This is similar to FTP reget command.
+ It may be unsupported by server.
+ It's defined only for plain blobs (returned in ID2-Reply-Get-Blob)
+ as all split data comes in small chunks, so reget doesn't make sense.
+-->
+<xs:element name="ID2-Request-ReGet-Blob">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Request-ReGet-Blob_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- blob split version to resend -->
+      <xs:element name="ID2-Request-ReGet-Blob_split-version" type="xs:integer"/>
+<!-- start offset of data to get -->
+      <xs:element name="ID2-Request-ReGet-Blob_offset" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Request for specific chunks.
+ Server will reply with one or more ID2S-Reply-Get-Chunk.
+-->
+<xs:element name="ID2S-Request-Get-Chunks">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Request-Get-Chunks_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- requests for specific chunks of splitted blob -->
+      <xs:element name="ID2S-Request-Get-Chunks_chunks">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Chunk-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- blob split version -->
+      <xs:element name="ID2S-Request-Get-Chunks_split-version" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ The following structure describes what parts of blob are required
+ immediately after ID2-Request-Get-Blob-Info in case blob is split.
+ Seq-entry level will have probably the same values as Entry-complexities.
+-->
+<xs:element name="ID2-Get-Blob-Details">
+  <xs:complexType>
+    <xs:sequence>
+<!-- reference location for details - can be only part of sequence -->
+      <xs:element name="ID2-Get-Blob-Details_location" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-loc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Seq-entry level for all data except descriptors (sequnence, annots) -->
+      <xs:element name="ID2-Get-Blob-Details_seq-class-level" type="xs:integer" default="1"/>
+<!-- Seq-entry level for descriptors -->
+      <xs:element name="ID2-Get-Blob-Details_descr-level" type="xs:integer" default="1"/>
+<!-- mask of descriptor types - see Seqdesc for variants' values -->
+      <xs:element name="ID2-Get-Blob-Details_descr-type-mask" type="xs:integer" default="0"/>
+<!-- mask of annotation types - see Seq-annot.data for values -->
+      <xs:element name="ID2-Get-Blob-Details_annot-type-mask" type="xs:integer" default="0"/>
+<!-- mask of feature types - see SeqFeatData for values -->
+      <xs:element name="ID2-Get-Blob-Details_feat-type-mask" type="xs:integer" default="0"/>
+      <xs:element name="ID2-Get-Blob-Details_sequence-level" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="optional" default="none">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    none	-  not required
+    seq-map	-  at least seq-map
+    seq-data	-  include seq-data
+-->
+                <xs:enumeration value="none"/>
+                <xs:enumeration value="seq-map"/>
+                <xs:enumeration value="seq-data"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+*********************************************************************
+ reply types
+*********************************************************************
+-->
+<xs:element name="ID2-Reply">
+  <xs:complexType>
+    <xs:sequence>
+<!-- request's serial number, copy from request -->
+      <xs:element name="ID2-Reply_serial-number" type="xs:integer" minOccurs="0"/>
+      <xs:element name="ID2-Reply_params" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Params"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Reply_error" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2-Error"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ true if this reply is the last one for the request
+ false if more replies will follow
+-->
+      <xs:element name="ID2-Reply_end-of-reply" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+      <xs:element name="ID2-Reply_reply">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ID2-Reply_reply_init">
+              <xs:complexType/>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_empty">
+              <xs:complexType/>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-package">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-Get-Package"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-seq-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-Get-Seq-id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-blob-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-Get-Blob-Id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-blob-seq-ids">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-Get-Blob-Seq-ids"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-blob">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-Get-Blob"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_reget-blob">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2-Reply-ReGet-Blob"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-split-info">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2S-Reply-Get-Split-Info"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2-Reply_reply_get-chunk">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2S-Reply-Get-Chunk"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Reply_discard" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    reply	-  whole reply should be discarded
+    last-octet-string	-  all data in embedded ID2-Reply-Data
+         except last OCTET STRING is correct
+    nothing	-  all data in embedded ID2-Reply-Data
+         is correct, but is incomplete
+-->
+                <xs:enumeration value="reply"/>
+                <xs:enumeration value="last-octet-string"/>
+                <xs:enumeration value="nothing"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Error">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Error_severity">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    warning	-  nothing harmful happened
+    failed-command	-  command cannot be completed this time
+    failed-connection	-  connection cannot be reused, reconnect is required
+    failed-server	-  server cannot be used for a while
+    no-data	-  resolve request gives no data
+         probably temporarily (see retry-delay field)
+    restricted-data	-  data exists but client doesn't have permission to get it
+    unsupported-command	-  this request type is not supported by server
+    invalid-arguments	-  error in request packet, cannot retry
+-->
+                <xs:enumeration value="warning"/>
+                <xs:enumeration value="failed-command"/>
+                <xs:enumeration value="failed-connection"/>
+                <xs:enumeration value="failed-server"/>
+                <xs:enumeration value="no-data"/>
+                <xs:enumeration value="restricted-data"/>
+                <xs:enumeration value="unsupported-command"/>
+                <xs:enumeration value="invalid-arguments"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!-- client may retry the request after specified time in seconds  -->
+      <xs:element name="ID2-Error_retry-delay" type="xs:integer" minOccurs="0"/>
+      <xs:element name="ID2-Error_message" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Packages. -->
+<xs:element name="ID2-Reply-Get-Package">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Reply-Get-Package_name" type="xs:string"/>
+      <xs:element name="ID2-Reply-Get-Package_params" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Params"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Seq-id. -->
+<xs:element name="ID2-Reply-Get-Seq-id">
+  <xs:complexType>
+    <xs:sequence>
+<!-- copy of request -->
+      <xs:element name="ID2-Reply-Get-Seq-id_request">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Request-Get-Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ resolved Seq-id
+ not set if error occurred
+-->
+      <xs:element name="ID2-Reply-Get-Seq-id_seq-id" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- this Seq-id is the last one in the request -->
+      <xs:element name="ID2-Reply-Get-Seq-id_end-of-reply" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Bit numbers for different blob states,
+ used in blob-state fields of several replies.
+ For example, dead & protected blob has blob-state 24 - 3rd and 4th bits set.
+-->
+<xs:element name="ID2-Blob-State">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="live"/>
+          <xs:enumeration value="suppressed-temp"/>
+          <xs:enumeration value="suppressed"/>
+          <xs:enumeration value="dead"/>
+          <xs:enumeration value="protected"/>
+          <xs:enumeration value="withdrawn"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Blob-Id. -->
+<xs:element name="ID2-Reply-Get-Blob-Id">
+  <xs:complexType>
+    <xs:sequence>
+<!-- requested Seq-id -->
+      <xs:element name="ID2-Reply-Get-Blob-Id_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- result -->
+      <xs:element name="ID2-Reply-Get-Blob-Id_blob-id" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ version of split data
+ (0 for non split)
+-->
+      <xs:element name="ID2-Reply-Get-Blob-Id_split-version" type="xs:integer" default="0"/>
+<!--
+ annotation types in this blob
+ annotation are unknown if this field is omitted
+-->
+      <xs:element name="ID2-Reply-Get-Blob-Id_annot-info" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Seq-annot-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- this Blob-id is the last one in the request -->
+      <xs:element name="ID2-Reply-Get-Blob-Id_end-of-reply" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+<!-- state bits of the blob, 0 or missing means regular live data -->
+      <xs:element name="ID2-Reply-Get-Blob-Id_blob-state" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Blob-Info. -->
+<xs:element name="ID2-Reply-Get-Blob-Seq-ids">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Reply-Get-Blob-Seq-ids_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ list of Seq-id resolving to this Blob-Id
+ in compressed format
+-->
+      <xs:element name="ID2-Reply-Get-Blob-Seq-ids_ids" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Reply-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Blob-Info. -->
+<xs:element name="ID2-Reply-Get-Blob">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Reply-Get-Blob_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ version of split data
+ (0 for non split)
+-->
+      <xs:element name="ID2-Reply-Get-Blob_split-version" type="xs:integer" default="0"/>
+<!--
+ whole blob or blob skeleton
+ not set if error occurred
+-->
+      <xs:element name="ID2-Reply-Get-Blob_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Reply-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- state bits of the blob, 0 or missing means regular live data -->
+      <xs:element name="ID2-Reply-Get-Blob_blob-state" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-Get-Blob-Info. -->
+<xs:element name="ID2S-Reply-Get-Split-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Reply-Get-Split-Info_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- version of split data -->
+      <xs:element name="ID2S-Reply-Get-Split-Info_split-version" type="xs:integer"/>
+<!--
+ blob split info
+ not set if error occurred
+-->
+      <xs:element name="ID2S-Reply-Get-Split-Info_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Reply-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- state bits of the blob, 0 or missing means regular live data -->
+      <xs:element name="ID2S-Reply-Get-Split-Info_blob-state" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2-Request-ReGet-Blob. -->
+<xs:element name="ID2-Reply-ReGet-Blob">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Reply-ReGet-Blob_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- version of data split -->
+      <xs:element name="ID2-Reply-ReGet-Blob_split-version" type="xs:integer"/>
+<!-- offset of data -->
+      <xs:element name="ID2-Reply-ReGet-Blob_offset" type="xs:integer"/>
+<!--
+ blob split info
+ not set if error occurred
+-->
+      <xs:element name="ID2-Reply-ReGet-Blob_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Reply-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Reply to ID2S-Request-Get-Chunks. -->
+<xs:element name="ID2S-Reply-Get-Chunk">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Reply-Get-Chunk_blob-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Blob-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- id of chunk to send -->
+      <xs:element name="ID2S-Reply-Get-Chunk_chunk-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Chunk-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ chunk data
+ not set if error occurred
+-->
+      <xs:element name="ID2S-Reply-Get-Chunk_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2-Reply-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Data packing. -->
+<xs:element name="ID2-Reply-Data">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Reply-Data_data-type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="seq-entry">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="seq-entry" ncbi:intvalue="0"/>
+                    <xs:enumeration value="seq-annot" ncbi:intvalue="1"/>
+                    <xs:enumeration value="id2s-split-info" ncbi:intvalue="2"/>
+                    <xs:enumeration value="id2s-chunk" ncbi:intvalue="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Reply-Data_data-format" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="asn-binary">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="asn-binary" ncbi:intvalue="0"/>
+                    <xs:enumeration value="asn-text" ncbi:intvalue="1"/>
+                    <xs:enumeration value="xml" ncbi:intvalue="2"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Reply-Data_data-compression" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="none">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="none" ncbi:intvalue="0"/>
+                    <xs:enumeration value="gzip" ncbi:intvalue="1"/>
+                    <xs:enumeration value="nlmzip" ncbi:intvalue="2"/>
+                    <xs:enumeration value="bzip2" ncbi:intvalue="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!-- data blob -->
+      <xs:element name="ID2-Reply-Data_data">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2-Reply-Data_data_E" type="xs:hexBinary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Data packed within ID2-Reply-Get-Blob-Seq-ids reply. -->
+<xs:element name="ID2-Blob-Seq-ids">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="ID2-Blob-Seq-id"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Blob-Seq-id">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Blob-Seq-id_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- this Seq-id is replaced by sequence in another blob -->
+      <xs:element name="ID2-Blob-Seq-id_replaced" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+*********************************************************************
+ utility types
+*********************************************************************
+-->
+<xs:element name="ID2-Blob-Id">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Blob-Id_sat" type="xs:integer"/>
+      <xs:element name="ID2-Blob-Id_sub-sat" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="main">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="main" ncbi:intvalue="0"/>
+                    <xs:enumeration value="snp" ncbi:intvalue="1"/>
+                    <xs:enumeration value="snp-graph" ncbi:intvalue="4"/>
+                    <xs:enumeration value="cdd" ncbi:intvalue="8"/>
+                    <xs:enumeration value="mgc" ncbi:intvalue="16"/>
+                    <xs:enumeration value="hprd" ncbi:intvalue="32"/>
+                    <xs:enumeration value="sts" ncbi:intvalue="64"/>
+                    <xs:enumeration value="trna" ncbi:intvalue="128"/>
+                    <xs:enumeration value="exon" ncbi:intvalue="512"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Blob-Id_sat-key" type="xs:integer"/>
+<!-- version of blob, optional in some requests -->
+      <xs:element name="ID2-Blob-Id_version" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Params">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="ID2-Param"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2-Param">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2-Param_name" type="xs:string"/>
+      <xs:element name="ID2-Param_value" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2-Param_value_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2-Param_type" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="optional" default="set-value">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+<!--
+    set-value	-  no response expected
+    get-value	-  this option is for client only
+         server replies with its value of param if known
+         server omits this param in reply if unknown to server
+    force-value	-  no direct response expected,
+         but if the param or its value is not supported
+         an error is reported and the request is not be completed
+    use-package	-  use named package
+         value should be unset
+-->
+                <xs:enumeration value="set-value"/>
+                <xs:enumeration value="get-value"/>
+                <xs:enumeration value="force-value"/>
+                <xs:enumeration value="use-package"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

@@ -1,0 +1,1249 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "pcassay.asn"
+     ::DATATOOL:: by application DATATOOL version 2.3.1
+     ::DATATOOL:: on 01/17/2012 23:05:12
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-PCAssay"
+================================================= -->
+<!--
+ $Id: pcassay.asn 282508 2011-05-11 22:47:31Z ywang $
+ ===========================================================================
+
+                            PUBLIC DOMAIN NOTICE
+               National Center for Biotechnology Information
+
+  This software/database is a "United States Government Work" under the
+  terms of the United States Copyright Act.  It was written as part of
+  the author's official duties as a United States Government employee and
+  thus cannot be copyrighted.  This software/database is freely available
+  to the public for use. The National Library of Medicine and the U.S.
+  Government have not placed any restriction on its use or reproduction.
+
+  Although all reasonable efforts have been taken to ensure the accuracy
+  and reliability of the software and data, the NLM and the U.S.
+  Government do not and cannot warrant the performance or results that
+  may be obtained by using this software or data. The NLM and the U.S.
+  Government disclaim all warranties, express or implied, including
+  warranties of performance, merchantability or fitness for any particular
+  purpose.
+
+  Please cite the author in any work or product based on this material.
+
+ ===========================================================================
+
+ Authors:  NCBI Structure Group
+
+ File Description:
+      ASN.1 definitions for PubChem biological assay data database
+
+ ===========================================================================
+-->
+<!-- Elements referenced from other modules:
+          Pub FROM NCBI-Pub,
+          BioSource FROM NCBI-BioSource,
+          Date,
+          Object-id FROM NCBI-General,
+          PC-ID,
+          PC-Source,
+          PC-XRefData FROM NCBI-PCSubstance -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ EXPORTS ;
+ Container for multiple Assay Data Submissions
+-->
+<xs:element name="PC-AssayContainer">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="PC-AssaySubmit"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Container for Data Depositions and Assay Definitions -->
+<xs:element name="PC-AssaySubmit">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PC-AssaySubmit_assay">
+        <xs:complexType>
+          <xs:choice>
+<!--   Assay Identifier -->
+            <xs:element name="PC-AssaySubmit_assay_aid" type="xs:integer"/>
+<!--   External Assay Identifier -->
+            <xs:element name="PC-AssaySubmit_assay_aid-source">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="PC-Source"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--   Assay Description (new or updated) -->
+            <xs:element name="PC-AssaySubmit_assay_descr">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="PC-AssayDescription"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--   Assay Identifier/Version (for internal use) -->
+            <xs:element name="PC-AssaySubmit_assay_aidver">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="PC-ID"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+<!-- Assay Data Deposition (vector) -->
+      <xs:element name="PC-AssaySubmit_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayResults"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- List of SID's whose data is to be suppressed -->
+      <xs:element name="PC-AssaySubmit_revoke" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssaySubmit_revoke_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Container for multiple Assay Result Sets
+ PC-AssayResultsSet ::= SEQUENCE OF PC-AssayResults
+ Assay Results provided for a given Substance tested, with respect to the results types defined in the 
+   referenced Assay Description
+-->
+<xs:element name="PC-AssayResults">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ Internal/External Tracking Information
+ Tested Substance ID/Version  [Either valid ID or, 
+   if "sid-source" is used, this is a "0" value]
+   Note: A valid ID is greater than "0"
+-->
+      <xs:element name="PC-AssayResults_sid" type="xs:integer"/>
+<!--
+ External Identifier for this Substance
+   Note: May be used in-lieu of "sid"
+   Note: This is non-optional if "sid" is "0"
+-->
+      <xs:element name="PC-AssayResults_sid-source" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-Source"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Version identifier for this AID-SID Result
+   Note: Incoming data should set this to be "0"
+-->
+      <xs:element name="PC-AssayResults_version" type="xs:integer" minOccurs="0"/>
+<!--
+ Data Annotation/Qualifier and URL to further Depositor Information
+ Annotation or qualifier for this Result
+-->
+      <xs:element name="PC-AssayResults_comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="PC-AssayResults_outcome" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="unspecified">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    inactive	-    Substance is considered Inactive
+    active	-    Substance is considered Active
+    inconclusive	-    Substance is Inconclusive
+    unspecified	-    Substance Outcome is Unspecified
+    probe	-    Substance Outcome is Unspecified
+-->
+                    <xs:enumeration value="inactive" ncbi:intvalue="1"/>
+                    <xs:enumeration value="active" ncbi:intvalue="2"/>
+                    <xs:enumeration value="inconclusive" ncbi:intvalue="3"/>
+                    <xs:enumeration value="unspecified" ncbi:intvalue="4"/>
+                    <xs:enumeration value="probe" ncbi:intvalue="5"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Rank of Assay Outcome (for result ordering)
+   Note: Larger numbers are more active
+-->
+      <xs:element name="PC-AssayResults_rank" type="xs:integer" minOccurs="0"/>
+<!-- Assay Data Reported for this SID (vector) -->
+      <xs:element name="PC-AssayResults_data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayData"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Depositor provided URL for this Result -->
+      <xs:element name="PC-AssayResults_url" type="xs:string" minOccurs="0"/>
+<!--
+ annotated Cross-Reference Information
+ to be removed, 
+ instead regulard TID will be generated
+ which are then annotated by xref type
+-->
+      <xs:element name="PC-AssayResults_xref" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AnnotatedXRef"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Pubchem Release Date -->
+      <xs:element name="PC-AssayResults_date" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Date"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Assay Readouts/Results for a Tested Substance -->
+<xs:element name="PC-AssayData">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ Assay Result Field Type ID (TID)
+   Note: Result Field ID's must be greater than "0"
+-->
+      <xs:element name="PC-AssayData_tid" type="xs:integer"/>
+      <xs:element name="PC-AssayData_value">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="PC-AssayData_value_ival" type="xs:integer"/>
+            <xs:element name="PC-AssayData_value_fval" type="xs:double"/>
+            <xs:element name="PC-AssayData_value_bval">
+              <xs:complexType>
+                <xs:attribute name="value" use="required">
+                  <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                      <xs:enumeration value="true"/>
+                      <xs:enumeration value="false"/>
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="PC-AssayData_value_sval" type="xs:string"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Assay Description provided by an Organization that describes the assay/protocol performed and defines the 
+   measured end-points and parameters to be stored.  An Assay Description is not a database table.  You can 
+   define as many Result Definitions as needed and they need not be used by all Substances tested.
+ Assay Descriptions can be modified on both description text and Result Definitions after initial submission
+ as desired, and such udpates will be tracked in PubChem
+-->
+<xs:element name="PC-AssayDescription">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ Internal/External Tracking Information
+ Assay Description ID/Version  [Either valid ID
+   or, if "aid-source" is used, a "0" dummy value]
+   Note: Version is for internal use (only?)
+   Note: A valid ID is greater than "0"
+-->
+      <xs:element name="PC-AssayDescription_aid">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-ID"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ External Identifier for this Assay Description
+   Note: May be used in-lieu of "aid"
+   Note: This is non-optional if "aid" ID is "0"
+-->
+      <xs:element name="PC-AssayDescription_aid-source" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-Source"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Assay Description Information
+ Short Assay Name (for display purposes)
+-->
+      <xs:element name="PC-AssayDescription_name" type="xs:string"/>
+<!-- Description of Assay -->
+      <xs:element name="PC-AssayDescription_description" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayDescription_description_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Procedure used to generate results -->
+      <xs:element name="PC-AssayDescription_protocol" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayDescription_protocol_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Comments or additional information -->
+      <xs:element name="PC-AssayDescription_comment" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayDescription_comment_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Annotated Cross-Reference Information -->
+      <xs:element name="PC-AssayDescription_xref" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AnnotatedXRef"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Allowed Assay Result Types
+ Result Definitions (vector)
+-->
+      <xs:element name="PC-AssayDescription_results" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-ResultType"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Additional Information
+ Depositor provided publications for this assay
+-->
+      <xs:element name="PC-AssayDescription_pub" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Revision identifier for textual description -->
+      <xs:element name="PC-AssayDescription_revision" type="xs:integer" minOccurs="0"/>
+<!-- Target information -->
+      <xs:element name="PC-AssayDescription_target" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayTargetInfo"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PC-AssayDescription_activity-outcome-method" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    other	-    All Other Type
+    screening	-    Primary Screen Assay
+    confirmatory	-    Confirmatory Assay
+    summary	-    Probe Summary Assay
+-->
+                    <xs:enumeration value="other" ncbi:intvalue="0"/>
+                    <xs:enumeration value="screening" ncbi:intvalue="1"/>
+                    <xs:enumeration value="confirmatory" ncbi:intvalue="2"/>
+                    <xs:enumeration value="summary" ncbi:intvalue="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!-- Dose-Response Attribution -->
+      <xs:element name="PC-AssayDescription_dr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayDRAttr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- to distinguish the type of substance used in the screening -->
+      <xs:element name="PC-AssayDescription_substance-type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="small-molecule" ncbi:intvalue="1"/>
+                    <xs:enumeration value="nucleotide" ncbi:intvalue="2"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!--
+ Grant and project category information
+ grant proposal number
+ required for 'MLSCN' & 'MLPCN' projects
+-->
+      <xs:element name="PC-AssayDescription_grant-number" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayDescription_grant-number_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ to distinguish projects funded through MLSCN, MLPCN or other
+ mlscn: assay depositions from MLSCN screen center
+ mlpcn: assay depositions from MLPCN screen center
+ mlscn-ap: assay depositions from MLSCN assay provider
+ mlpcn-ap: assay depositions from MLPCN assay provider
+ required for 'MLSCN' & 'MLPCN' projects
+ journal-article: to be deprecated; replaced by option 7,8 & 9 to better characterize data from literature 
+ literature-extracted: data from literature, extracted by curators
+ literature-author: data from literature, submitted by author of articles
+ literature-publisher: data from literature, submitted by journals/publishers
+ rnaigi: RNAi screenings from RNAi Global Initiative 
+-->
+      <xs:element name="PC-AssayDescription_project-category" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    journal-article	-  to be deprecated
+-->
+                    <xs:enumeration value="mlscn" ncbi:intvalue="1"/>
+                    <xs:enumeration value="mlpcn" ncbi:intvalue="2"/>
+                    <xs:enumeration value="mlscn-ap" ncbi:intvalue="3"/>
+                    <xs:enumeration value="mlpcn-ap" ncbi:intvalue="4"/>
+                    <xs:enumeration value="journal-article" ncbi:intvalue="5"/>
+                    <xs:enumeration value="assay-vendor" ncbi:intvalue="6"/>
+                    <xs:enumeration value="literature-extracted" ncbi:intvalue="7"/>
+                    <xs:enumeration value="literature-author" ncbi:intvalue="8"/>
+                    <xs:enumeration value="literature-publisher" ncbi:intvalue="9"/>
+                    <xs:enumeration value="rnaigi" ncbi:intvalue="10"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!--
+ annotation to indicate whether an assay is a panel, e.g. containing multiple components, or belongs to a group    
+ annotation for panel assay, e.g. to indicate that this assay
+ contains multiple members/components. 
+ A panel assay can be one assay reporting readouts for
+ many targets, or reporting readouts for different
+ cell lines, or different organisms
+ examples such as bioassay containing kinase profiling data
+ or bioassay containing cytoxicity data for multiple cell lines
+ or bioassay containing screening data from different stages, 
+ such as primary screening, follow ups
+-->
+      <xs:element name="PC-AssayDescription_is-panel" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!--
+ annotation for assay gruop information, e.g. this 
+ assay belongs to a group of assay associated by 
+ a unique name, e.g. the value assigned to 'assay-group',  
+ assays belonging to this group can be 
+ retrieved using this unique name
+ it is depositor's responsibility to make the name 
+ distinct if necessary
+ this can be used as the mechanism to specify 'related bioassays'
+ before hand so it is not necessary to update the descriptions of
+ related assays when new group member submitted to PubChem 
+-->
+      <xs:element name="PC-AssayDescription_assay-group" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayDescription_assay-group_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ for 'panel' type of bioassay only
+ store assay panel member information
+-->
+      <xs:element name="PC-AssayDescription_panel-info" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-AssayPanel"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- verification for 'late-stage-data' deposition -->
+      <xs:element name="PC-AssayDescription_is-mlp-late-stage" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!-- to report categorized description/comment by associating with a category title  -->
+      <xs:element name="PC-AssayDescription_categorized-comment" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-CategorizedComment"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Description for Panel Assay
+ Describe general information about the panel, and link to information for each panel member 
+-->
+<xs:element name="PC-AssayPanel">
+  <xs:complexType>
+    <xs:sequence>
+<!-- short name for the panel, such as 'Kinase Profiling' -->
+      <xs:element name="PC-AssayPanel_name" type="xs:string"/>
+<!-- short description of this panel -->
+      <xs:element name="PC-AssayPanel_descr" type="xs:string" minOccurs="0"/>
+<!-- store panel member information -->
+      <xs:element name="PC-AssayPanel_member" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayPanelMember"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Specific information about each panel member(or component), such as target, cell line name, cross-reference ...  -->
+<xs:element name="PC-AssayPanelMember">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ ID for panel member 
+ if a kinase panel with 300 kinases, ID will range from 1 to 300  
+ TIDs of the same panel member to be grouped based on panel member ID
+-->
+      <xs:element name="PC-AssayPanelMember_mid" type="xs:integer"/>
+<!-- short name for this panel member  -->
+      <xs:element name="PC-AssayPanelMember_name" type="xs:string" minOccurs="0"/>
+<!--
+ description about specifics of this panel member
+ such as about cell line, or target information 
+-->
+      <xs:element name="PC-AssayPanelMember_description" type="xs:string" minOccurs="0"/>
+<!-- Specific procedure used to generate results for the panel member -->
+      <xs:element name="PC-AssayPanelMember_protocol" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayPanelMember_protocol_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Comments or additional information -->
+      <xs:element name="PC-AssayPanelMember_comment" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayPanelMember_comment_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- often provided for profiling assays across protein families -->
+      <xs:element name="PC-AssayPanelMember_target" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayTargetInfo"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- annotated Cross-Reference Information -->
+      <xs:element name="PC-AssayPanelMember_xref" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AnnotatedXRef"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PC-AssayPanelMember_activity-outcome-method" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    other	-    All Other Type
+    screening	-    Primary Screen Assay
+    confirmatory	-    Confirmatory Assay
+    summary	-    Probe Summary Assay
+-->
+                    <xs:enumeration value="other" ncbi:intvalue="0"/>
+                    <xs:enumeration value="screening" ncbi:intvalue="1"/>
+                    <xs:enumeration value="confirmatory" ncbi:intvalue="2"/>
+                    <xs:enumeration value="summary" ncbi:intvalue="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!-- Dose-Response Attribution within the panel member -->
+      <xs:element name="PC-AssayPanelMember_dr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-AssayDRAttr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- to report categorized description/comment by associating with a category title  -->
+      <xs:element name="PC-AssayPanelMember_categorized-comment" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="PC-CategorizedComment"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Definition for Categorized description/comment 
+ This field is added to provide flexibility for depositors to present textual description/comments in a desirable way 
+ and to facilitate information validation by the depositor and data exchange with PubChem 
+-->
+<xs:element name="PC-CategorizedComment">
+  <xs:complexType>
+    <xs:sequence>
+<!-- title for the description/comment -->
+      <xs:element name="PC-CategorizedComment_title" type="xs:string"/>
+<!-- description/comment content -->
+      <xs:element name="PC-CategorizedComment_comment">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-CategorizedComment_comment_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+  Assay Dose-response attribute information used to define a set of readouts
+    as being part of a dose-response curve (for curve plotting/analysis)
+-->
+<xs:element name="PC-AssayDRAttr">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ Unique dose-response test set identifier
+   Note: A valid ID is greater than "0"
+-->
+      <xs:element name="PC-AssayDRAttr_id" type="xs:integer"/>
+<!-- Dose-Response Curve Description (used as curve title) -->
+      <xs:element name="PC-AssayDRAttr_descr" type="xs:string" minOccurs="0"/>
+<!-- Dose Axis Description (used as axis name) -->
+      <xs:element name="PC-AssayDRAttr_dn" type="xs:string" minOccurs="0"/>
+<!-- Response Axis Description (used as axis name) -->
+      <xs:element name="PC-AssayDRAttr_rn" type="xs:string" minOccurs="0"/>
+      <xs:element name="PC-AssayDRAttr_type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    experimental	-  dose-response data points measured directly by experiment
+    calculated	-  dose-response data points derived from fitted curve
+-->
+                    <xs:enumeration value="experimental" ncbi:intvalue="0"/>
+                    <xs:enumeration value="calculated" ncbi:intvalue="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Molecular target information provides by organization describes the functionality of the target, 
+ facilitates the linking between PubChem bioassays, and the linking between target molecule to other NCBI resources
+-->
+<xs:element name="PC-AssayTargetInfo">
+  <xs:complexType>
+    <xs:sequence>
+<!-- Molecular name of target -->
+      <xs:element name="PC-AssayTargetInfo_name" type="xs:string"/>
+<!-- NCBI database identifier of the target molecule -->
+      <xs:element name="PC-AssayTargetInfo_mol-id" type="xs:integer"/>
+      <xs:element name="PC-AssayTargetInfo_molecule-type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="protein">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    protein	-  mol-id: NCBI Protein GI 
+    dna	-  mol-id: NCBI Nucleotide GI
+    rna	-  mol-id: NCBI Nucleotide GI
+    gene	-  mol-id: NCBI Gene ID
+    biosystem	-  mol-id: NCBI BioSystems ID
+-->
+                    <xs:enumeration value="protein" ncbi:intvalue="1"/>
+                    <xs:enumeration value="dna" ncbi:intvalue="2"/>
+                    <xs:enumeration value="rna" ncbi:intvalue="3"/>
+                    <xs:enumeration value="gene" ncbi:intvalue="4"/>
+                    <xs:enumeration value="biosystem" ncbi:intvalue="5"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!-- Target Organism -->
+      <xs:element name="PC-AssayTargetInfo_organism" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="BioSource"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Target Description  (e.g., cellular functionality and location) -->
+      <xs:element name="PC-AssayTargetInfo_descr" type="xs:string" minOccurs="0"/>
+<!-- Comments or Additional Information -->
+      <xs:element name="PC-AssayTargetInfo_comment" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-AssayTargetInfo_comment_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Annotated Cross-Reference (XRef) Information to allow the XRef to be qualified, as to its meaning or context -->
+<xs:element name="PC-AnnotatedXRef">
+  <xs:complexType>
+    <xs:sequence>
+<!-- Cross-Reference Information -->
+      <xs:element name="PC-AnnotatedXRef_xref">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-XRefData"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Annotation qualifier describing Cross-Reference meaning -->
+      <xs:element name="PC-AnnotatedXRef_comment" type="xs:string" minOccurs="0"/>
+      <xs:element name="PC-AnnotatedXRef_type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    pcit	-  primary PMID/citation directly associated with the current assay data 
+    pgene	-  gene encoding the protein assay target
+-->
+                    <xs:enumeration value="pcit" ncbi:intvalue="1"/>
+                    <xs:enumeration value="pgene" ncbi:intvalue="2"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Definition of Allowed Result Types for a given Assay -->
+<xs:element name="PC-ResultType">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ Tracking or Description Information
+ Assay Result Field Type ID (TID)
+-->
+      <xs:element name="PC-ResultType_tid" type="xs:integer"/>
+<!-- Result Field Name (short name for display) -->
+      <xs:element name="PC-ResultType_name" type="xs:string"/>
+<!-- Result Field Description -->
+      <xs:element name="PC-ResultType_description" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="PC-ResultType_description_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PC-ResultType_type">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="float" ncbi:intvalue="1"/>
+                    <xs:enumeration value="int" ncbi:intvalue="2"/>
+                    <xs:enumeration value="bool" ncbi:intvalue="3"/>
+                    <xs:enumeration value="string" ncbi:intvalue="4"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PC-ResultType_constraints" minOccurs="0">
+        <xs:complexType>
+          <xs:choice>
+<!--   Allowed values must be equal to one of these -->
+            <xs:element name="PC-ResultType_constraints_fset">
+              <xs:complexType>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                  <xs:element name="PC-ResultType_constraints_fset_E" type="xs:double"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--   Allowed values (x) must be [ fmin <= x ] -->
+            <xs:element name="PC-ResultType_constraints_fmin" type="xs:double"/>
+<!--   Allowed values (x) must be [ x <= fmax ] -->
+            <xs:element name="PC-ResultType_constraints_fmax" type="xs:double"/>
+<!--   Minimum/Maximum Range [ min <= x <= max ] -->
+            <xs:element name="PC-ResultType_constraints_frange">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="PC-RealMinMax"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--
+ If type is "int"
+   Allowed values must be equal to one of these
+-->
+            <xs:element name="PC-ResultType_constraints_iset">
+              <xs:complexType>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                  <xs:element name="PC-ResultType_constraints_iset_E" type="xs:integer"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--   Allowed values (x) must be [ imin <= x ] -->
+            <xs:element name="PC-ResultType_constraints_imin" type="xs:integer"/>
+<!--   Allowed values (x) must be [ x <= imax ] -->
+            <xs:element name="PC-ResultType_constraints_imax" type="xs:integer"/>
+<!--   Minimum/Maximum Range [ min <= x <= max ] -->
+            <xs:element name="PC-ResultType_constraints_irange">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="PC-IntegerMinMax"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+<!--
+ If type is "string"
+   Allowed values must be equal to one of these
+-->
+            <xs:element name="PC-ResultType_constraints_sset">
+              <xs:complexType>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                  <xs:element name="PC-ResultType_constraints_sset_E" type="xs:string"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PC-ResultType_unit" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    ppt	-  Parts per Thousand
+    ppm	-  Parts per Million
+    ppb	-  Parts per Billion
+    mm	-  milliM
+    um	-  microM
+    nm	-  nanoM
+    pm	-  picoM
+    fm	-  femtoM
+    mgml	-  milligrams per mL
+    ugml	-  micrograms per mL
+    ngml	-  nanograms per mL
+    pgml	-  picograms per mL
+    fgml	-  femtograms per mL
+    m	-  Molar
+    percent	-  Percent
+    ratio	-  Ratio
+    sec	-  Seconds
+    rsec	-  Reciprocal Seconds
+    min	-  Minutes
+    rmin	-  Reciprocal Minutes
+    day	-  Days
+    rday	-  Reciprocal Days
+    ml-min-kg	-  milliliter / minute / kilogram
+    l-kg	-  liter / kilogram
+    hr-ng-ml	-  hour * nanogram / milliliter
+    cm-sec	-  centimeter / second
+    mg-kg	-  milligram / kilogram
+-->
+                    <xs:enumeration value="ppt" ncbi:intvalue="1"/>
+                    <xs:enumeration value="ppm" ncbi:intvalue="2"/>
+                    <xs:enumeration value="ppb" ncbi:intvalue="3"/>
+                    <xs:enumeration value="mm" ncbi:intvalue="4"/>
+                    <xs:enumeration value="um" ncbi:intvalue="5"/>
+                    <xs:enumeration value="nm" ncbi:intvalue="6"/>
+                    <xs:enumeration value="pm" ncbi:intvalue="7"/>
+                    <xs:enumeration value="fm" ncbi:intvalue="8"/>
+                    <xs:enumeration value="mgml" ncbi:intvalue="9"/>
+                    <xs:enumeration value="ugml" ncbi:intvalue="10"/>
+                    <xs:enumeration value="ngml" ncbi:intvalue="11"/>
+                    <xs:enumeration value="pgml" ncbi:intvalue="12"/>
+                    <xs:enumeration value="fgml" ncbi:intvalue="13"/>
+                    <xs:enumeration value="m" ncbi:intvalue="14"/>
+                    <xs:enumeration value="percent" ncbi:intvalue="15"/>
+                    <xs:enumeration value="ratio" ncbi:intvalue="16"/>
+                    <xs:enumeration value="sec" ncbi:intvalue="17"/>
+                    <xs:enumeration value="rsec" ncbi:intvalue="18"/>
+                    <xs:enumeration value="min" ncbi:intvalue="19"/>
+                    <xs:enumeration value="rmin" ncbi:intvalue="20"/>
+                    <xs:enumeration value="day" ncbi:intvalue="21"/>
+                    <xs:enumeration value="rday" ncbi:intvalue="22"/>
+                    <xs:enumeration value="ml-min-kg" ncbi:intvalue="23"/>
+                    <xs:enumeration value="l-kg" ncbi:intvalue="24"/>
+                    <xs:enumeration value="hr-ng-ml" ncbi:intvalue="25"/>
+                    <xs:enumeration value="cm-sec" ncbi:intvalue="26"/>
+                    <xs:enumeration value="mg-kg" ncbi:intvalue="27"/>
+                    <xs:enumeration value="none" ncbi:intvalue="254"/>
+                    <xs:enumeration value="unspecified" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!--
+ ATTENTION: sunit field is DEPRECATED. It is no longer
+            supported and remains for legacy data only.
+ Unit Type (as a String)
+-->
+      <xs:element name="PC-ResultType_sunit" type="xs:string" minOccurs="0"/>
+      <xs:element name="PC-ResultType_transform" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    linear	-  Linear Scale (x)
+    ln	-  Natural Log Scale (ln x)
+    log	-  Log Base 10 Scale (log10 x)
+    reciprocal	-  Reciprocal Scale (1/x)
+    negative	-  Negative Linear Scale (-x)
+    nlog	-  Negative Log Base 10 Scale (-log10 x)
+    nln	-  Negative Natural Log Scane (-ln x)
+-->
+                    <xs:enumeration value="linear" ncbi:intvalue="1"/>
+                    <xs:enumeration value="ln" ncbi:intvalue="2"/>
+                    <xs:enumeration value="log" ncbi:intvalue="3"/>
+                    <xs:enumeration value="reciprocal" ncbi:intvalue="4"/>
+                    <xs:enumeration value="negative" ncbi:intvalue="5"/>
+                    <xs:enumeration value="nlog" ncbi:intvalue="6"/>
+                    <xs:enumeration value="nln" ncbi:intvalue="7"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!--
+ ATTENTION: stransform field is DEPRECATED. It is no longer
+            supported and remains for legacy data only.
+ Value Transform Type (as a String)
+-->
+      <xs:element name="PC-ResultType_stransform" type="xs:string" minOccurs="0"/>
+<!-- Tested concentration attribute -->
+      <xs:element name="PC-ResultType_tc" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-ConcentrationAttr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ if true, indicates that this TID field 
+ provides active concentration summary by 
+ reporting the concentration which produces 
+ 50% of the maximum possible biological response
+ such as IC50, EC50, AC50, GI50 etc. 
+ or by reporting constant parameters such as Ki, 
+ that based on which the activity outcome in this assay is called   
+-->
+      <xs:element name="PC-ResultType_ac" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!--
+ needed for panel assay only
+ each panel member may have a number of TID columns reported
+ such TIDs are grouped by panel member ID, see PC-AssayPanelMemberInfo
+-->
+      <xs:element name="PC-ResultType_panel-info" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="PC-AssayPanelTestResult"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!--
+ treat substance associated cross-reference as regular TID
+ web servers would make a link 
+ to the corresponding record in Entrez databases
+ treat substance associated target information as regular TID
+ for example, for RNAi screening data, each 'substance' may
+ correspond to a specific gene target
+-->
+      <xs:element name="PC-ResultType_annot" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    pmid	-  PubMed ID
+    mmdb	-  MMDB ID
+    url	-  indicate  TID data is a url that provides supplementary information
+    protein-gi	-  GenBank General ID (GI) for a Protein
+    nucleotide-gi	-  GenBank General ID (GI) for a Nucleotide 
+    taxonomy	-  Taxonomy ID for an Organism
+    mim	-  MIM, Mendelian Inheritance in Man, ID 
+    gene	-  Entrez Gene ID
+    probe	-  Entrez Probe ID
+    aid	-  PubChem BioAssay ID, may be used in 'Summary' assay
+    sid	-  PubChem Substance ID, may be used in 'Summary' assay 
+    cid	-  PubChem Compound ID 
+    protein-target-gi	-  GenBank General ID (GI) for a Protein target
+    biosystems-target-id	-  NCBI BioSystems ID 
+    target-name	-  target name
+    target-descr	-  brief target description 
+    target-tax-id	-  NCBI Taxonomy ID for target molecule 
+    gene-target-id	-  NCBI Gene ID for a gene target 
+    dna-nucleotide-target-gi	-  GenBank General ID (GI) for a DNA Nucleotide target 
+    rna-nucleotide-target-gi	-  GenBank General ID (GI) for a RNA Nucleotide target 
+-->
+                    <xs:enumeration value="pmid" ncbi:intvalue="1"/>
+                    <xs:enumeration value="mmdb" ncbi:intvalue="2"/>
+                    <xs:enumeration value="url" ncbi:intvalue="3"/>
+                    <xs:enumeration value="protein-gi" ncbi:intvalue="4"/>
+                    <xs:enumeration value="nucleotide-gi" ncbi:intvalue="5"/>
+                    <xs:enumeration value="taxonomy" ncbi:intvalue="6"/>
+                    <xs:enumeration value="mim" ncbi:intvalue="7"/>
+                    <xs:enumeration value="gene" ncbi:intvalue="8"/>
+                    <xs:enumeration value="probe" ncbi:intvalue="9"/>
+                    <xs:enumeration value="aid" ncbi:intvalue="10"/>
+                    <xs:enumeration value="sid" ncbi:intvalue="11"/>
+                    <xs:enumeration value="cid" ncbi:intvalue="12"/>
+                    <xs:enumeration value="protein-target-gi" ncbi:intvalue="13"/>
+                    <xs:enumeration value="biosystems-target-id" ncbi:intvalue="14"/>
+                    <xs:enumeration value="target-name" ncbi:intvalue="15"/>
+                    <xs:enumeration value="target-descr" ncbi:intvalue="16"/>
+                    <xs:enumeration value="target-tax-id" ncbi:intvalue="17"/>
+                    <xs:enumeration value="gene-target-id" ncbi:intvalue="18"/>
+                    <xs:enumeration value="dna-nucleotide-target-gi" ncbi:intvalue="19"/>
+                    <xs:enumeration value="rna-nucleotide-target-gi" ncbi:intvalue="20"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="PC-AssayPanelTestResult">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ panel member ID, see PC-AssayPanelMemberInfo
+ track association between a group of TIDs and panel member
+-->
+      <xs:element name="PC-AssayPanelTestResult_mid" type="xs:integer"/>
+      <xs:element name="PC-AssayPanelTestResult_readout-annot" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional" default="regular">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    regular	-  to indicate this TID column is a regular readout
+    outcome	-  to indicate this TID column is  "outcome" of the particular panel member
+    score	-  to indicate this TID column reports activity score of the particular panel member
+         to be used for neighboring assays
+    ac	-  to indicate this TID column is "active concentration"   
+         'outcome' and 'ac' type of TID are to be used for data analysis 
+         across members of panel
+         or across multiple assays including other panel assays
+-->
+                    <xs:enumeration value="regular" ncbi:intvalue="1"/>
+                    <xs:enumeration value="outcome" ncbi:intvalue="2"/>
+                    <xs:enumeration value="score" ncbi:intvalue="3"/>
+                    <xs:enumeration value="ac" ncbi:intvalue="4"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--The concentration attribute is to indicate that the readout under this test result field is biological concentration-response data, the attribute provides the value and unit of the tested concentration -->
+<xs:element name="PC-ConcentrationAttr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="PC-ConcentrationAttr_concentration" type="xs:double"/>
+      <xs:element name="PC-ConcentrationAttr_unit">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    um	-  microM
+-->
+                    <xs:enumeration value="um" ncbi:intvalue="5"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+<!-- Dose-Response Attribution ID (if applicable) -->
+      <xs:element name="PC-ConcentrationAttr_dr-id" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Mininum and Maximum Constraints on an Integer Value (used for validating incoming data) -->
+<xs:element name="PC-IntegerMinMax">
+  <xs:complexType>
+    <xs:sequence>
+<!-- Minimum Value Allowed -->
+      <xs:element name="PC-IntegerMinMax_min" type="xs:integer"/>
+<!-- Maximum Value Allowed -->
+      <xs:element name="PC-IntegerMinMax_max" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Mininum and Maximum Constraints on a Real Value (used for validating incoming data) -->
+<xs:element name="PC-RealMinMax">
+  <xs:complexType>
+    <xs:sequence>
+<!-- Minimum Value Allowed -->
+      <xs:element name="PC-RealMinMax_min" type="xs:double"/>
+<!-- Maximum Value Allowed -->
+      <xs:element name="PC-RealMinMax_max" type="xs:double"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

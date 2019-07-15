@@ -7,7 +7,7 @@
 			
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>RCS-XMLModel</artifactId>
+	<artifactId>RCS-Xml</artifactId>
 	<name>TFM Xml Model Module</name>
 	<description>TFM Xml Model Module</description>	
 	<packaging>jar</packaging>
@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -24,6 +24,11 @@
 			 SPRING
 			 ===================================== -->
 		<!-- FRAMEWORK -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
@@ -65,113 +70,55 @@
 
 	<build>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.jvnet.jaxb2.maven2</groupId>
+					<artifactId>maven-jaxb2-plugin</artifactId>
+					<version>0.14.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 		
 			<!--
-				BUILD FROM VARIOUS SOURCES 
-			 -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${project.build.directory}/generated-sources/jaxb_jats</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<!--
-				RESOURCES 
+				DTD 
 			 -->
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb23-plugin</artifactId>
-				<version>0.14.0</version>
+				<artifactId>maven-jaxb2-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>DTD-PubMed</id>
+						<id>JAXB-PubMed</id>
 						<phase>generate-sources</phase>
 						<goals><goal>generate</goal></goals>
 						<configuration>
-							<specVersion>2.2</specVersion>
-							<verbose>true</verbose>
-							<debug>true</debug>
-							<generatePackage>es.rcs.tfm.jats</generatePackage>
-        					<generateDirectory>${project.build.directory}/generated-sources/dtd_jats</generateDirectory>
-							<removeOldOutput>true</removeOldOutput>
-						
+
 							<schemaLanguage>DTD</schemaLanguage>
-							<schemaDirectory>${basedir}/src/main/dtd/jats-math2/</schemaDirectory>
-							<schemaIncludes><include>**/*.dtd</include></schemaIncludes>
-							<bindingDirectory>${basedir}/src/main/dtd</bindingDirectory>
-							<bindingIncludes><bindingInclude>**/JATS-archivearticle1.dtd</bindingInclude></bindingIncludes>
-							<catalog>${basedir}/src/main/dtd/jats-math2/catalog-jats-v1-2-no-base.xml</catalog>
-							
-							<accessExternalSchema>all</accessExternalSchema>
-							<accessExternalDTD>all</accessExternalDTD>
-							
-							<addCompileSourceRoot>true</addCompileSourceRoot>
-							<episode>false</episode>
-							<strict>false</strict>
-							<writeCode>true</writeCode>
-							<readOnly>false</readOnly>
+							<encoding>UTF-8</encoding>
+							<!-- 
+							<schemas><schema><url>http://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd</url></schema></schemas>
+							 -->
+							<schemaDirectory>${basedir}/src/main/dtd/pubmed/</schemaDirectory>
+							<schemaIncludes><schemaInclude>pubmed_190101.dtd</schemaInclude></schemaIncludes>
+							<accessExternalDTD>true</accessExternalDTD>
 
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			
-			<!-- 
-				GENERATE JATS XSD
-			 -->
-			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb23-plugin</artifactId>
-				<version>0.14.0</version>
-				<executions>
-					<execution>
-						<id>XSD-PubMed</id>
-						<phase>generate-sources</phase>
-						<goals><goal>generate</goal></goals>
-						<configuration>
-							<specVersion>2.2</specVersion>
-							<verbose>true</verbose>
+							<catalog>${basedir}/src/main/catalogs/pubmed.catalog</catalog>
+
+							<generateDirectory>${project.build.directory}/generated-sources/jaxb_pubmed</generateDirectory>
+							<generatePackage>org.pubmed.schema</generatePackage>
+
+							<episodeFile>${project.build.directory}/generated-sources/jaxb_pubmed/META-INF/jaxb_pubmed.episode</episodeFile>
+
+							<strict>false</strict>
 							<debug>true</debug>
-							<generatePackage>es.rcs.tfm.jats</generatePackage>
-        					<generateDirectory>${project.build.directory}/generated-sources/jaxb_jats</generateDirectory>
-							<removeOldOutput>true</removeOldOutput>
-						
-							<schemaLanguage>XMLSCHEMA</schemaLanguage>
-							<schemaDirectory>${basedir}/src/main/xsd/jats-math2/</schemaDirectory>
-							<schemaIncludes><include>**/*.xsd</include></schemaIncludes>
-							<bindingDirectory>${basedir}/src/main/xjb</bindingDirectory>
-							<bindingIncludes><bindingInclude>**/*.xjb</bindingInclude></bindingIncludes>
-							<catalog>${basedir}/src/main/catalogs/jats.cat</catalog>
-							
-							<accessExternalSchema>all</accessExternalSchema>
-							<accessExternalDTD>all</accessExternalDTD>
-							
-							<addCompileSourceRoot>true</addCompileSourceRoot>
-							<episode>false</episode>
-							<strict>false</strict>
-							<writeCode>true</writeCode>
-							<readOnly>false</readOnly>
+							<verbose>true</verbose>
 
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
+			
  		</plugins>
 
 	</build>

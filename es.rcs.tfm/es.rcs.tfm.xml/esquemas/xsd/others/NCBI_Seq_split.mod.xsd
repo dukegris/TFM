@@ -1,0 +1,788 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "seqsplit.asn"
+     ::DATATOOL:: by application DATATOOL version 2.4.4
+     ::DATATOOL:: on 04/13/2015 23:04:12
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-Seq-split"
+================================================= -->
+<!--
+$Revision: 464672 $
+********************************************************************
+
+  Network Id server network access
+  Vasilchenko 2003
+
+
+*********************************************************************
+
+  seqsplit.asn
+
+     representation of split sequences
+
+*********************************************************************
+-->
+<!-- Elements used by other modules:
+          ID2S-Chunk-Id,
+          ID2S-Seq-annot-Info -->
+
+<!-- Elements referenced from other modules:
+          Seq-id FROM NCBI-Seqloc,
+          Seq-entry FROM NCBI-Seqset,
+          Bioseq,
+          Seq-annot,
+          Seq-descr,
+          Seq-literal FROM NCBI-Sequence,
+          Seq-align FROM NCBI-Seqalign -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Blob split info types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Chunks split description
+-->
+<xs:element name="ID2S-Split-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Split-Info_bioseqs-info" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Bioseqs-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Split-Info_chunks">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Chunk-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Split-Info_skeleton" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-entry"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Bioseqs-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Bioseqs-Info_info">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Bioseqs-Info_bioseqs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Bioseq-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Bioseq-Info_gap-count" type="xs:integer" minOccurs="0"/>
+      <xs:element name="ID2S-Bioseq-Info_seq-map-has-ref" minOccurs="0">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Chunk-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Chunk-Info_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Chunk-Id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Chunk-Info_content">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Chunk-Content"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Description of information in this chunk
+ Place means id of Bioseq or Bioseq-set
+-->
+<xs:element name="ID2S-Chunk-Content">
+  <xs:complexType>
+    <xs:choice>
+<!-- place of Seq-descrs -->
+      <xs:element name="ID2S-Chunk-Content_seq-descr">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-descr-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- locations and types of annotations -->
+      <xs:element name="ID2S-Chunk-Content_seq-annot">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-annot-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- place of assembly history -->
+      <xs:element name="ID2S-Chunk-Content_seq-assembly">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-assembly-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- place of sequence map -->
+      <xs:element name="ID2S-Chunk-Content_seq-map">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-map-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- place of sequence data -->
+      <xs:element name="ID2S-Chunk-Content_seq-data">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-data-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- place of Seq-annots -->
+      <xs:element name="ID2S-Chunk-Content_seq-annot-place">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-annot-place-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- place of Bioseqs -->
+      <xs:element name="ID2S-Chunk-Content_bioseq-place">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Bioseq-place-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- ids of features -->
+      <xs:element name="ID2S-Chunk-Content_feat-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Seq-feat-Ids-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-descr-Info">
+  <xs:complexType>
+    <xs:sequence>
+<!-- mask of Seq-descr types, -->
+      <xs:element name="ID2S-Seq-descr-Info_type-mask" type="xs:integer"/>
+      <xs:element name="ID2S-Seq-descr-Info_bioseqs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-descr-Info_bioseq-sets" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-set-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-annot-Info">
+  <xs:complexType>
+    <xs:sequence>
+<!--
+ name is set if this is named annot
+ name may be empty which differ from unnamed annot
+-->
+      <xs:element name="ID2S-Seq-annot-Info_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="ID2S-Seq-annot-Info_align" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+      <xs:element name="ID2S-Seq-annot-Info_graph" minOccurs="0">
+        <xs:complexType/>
+      </xs:element>
+      <xs:element name="ID2S-Seq-annot-Info_feat" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Feat-type-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-annot-Info_seq-loc" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-loc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-annot-place-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Seq-annot-place-Info_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="ID2S-Seq-annot-place-Info_bioseqs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-annot-place-Info_bioseq-sets" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-set-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-feat-Ids-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Seq-feat-Ids-Info_feat-types" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Feat-type-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-feat-Ids-Info_xref-types" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Feat-type-Info"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-feat-Ids-Info_local-ids" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2S-Seq-feat-Ids-Info_local-ids_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-feat-Ids-Info_local-str-ids" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2S-Seq-feat-Ids-Info_local-str-ids_E" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Feat-type-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Feat-type-Info_type" type="xs:integer"/>
+      <xs:element name="ID2S-Feat-type-Info_subtypes" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="ID2S-Feat-type-Info_subtypes_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-assembly-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Seq-assembly-Info_bioseqs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-map-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="ID2S-Seq-loc"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-data-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="ID2S-Seq-loc"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Bioseq-place-Info">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Bioseq-place-Info_bioseq-set" type="xs:integer"/>
+      <xs:element name="ID2S-Bioseq-place-Info_seq-ids">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Bioseq-Ids"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Chunk">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Chunk_data">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Chunk-Data"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Chunk-Data">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Chunk-Data_id">
+        <xs:complexType>
+          <xs:choice>
+<!-- Bioseq-set id -->
+            <xs:element name="ID2S-Chunk-Data_id_bioseq-set" type="xs:integer"/>
+<!-- Bioseq id -->
+            <xs:element name="ID2S-Chunk-Data_id_gi" type="xs:integer"/>
+<!-- Bioseq id -->
+            <xs:element name="ID2S-Chunk-Data_id_seq-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Seq-id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+<!-- Seq-descr, for Bioseq and Bioseq-set -->
+      <xs:element name="ID2S-Chunk-Data_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Seq-annot, for Bioseq and Bioseq-set -->
+      <xs:element name="ID2S-Chunk-Data_annots" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-annot"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- assembly history Seq-align, for Bioseq -->
+      <xs:element name="ID2S-Chunk-Data_assembly" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-align"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequence map, for Bioseq -->
+      <xs:element name="ID2S-Chunk-Data_seq-map" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Sequence-Piece"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- sequence data, for Bioseq -->
+      <xs:element name="ID2S-Chunk-Data_seq-data" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Sequence-Piece"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- Bioseq, for Bioseq-set -->
+      <xs:element name="ID2S-Chunk-Data_bioseqs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Bioseq"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Sequence-Piece">
+  <xs:complexType>
+    <xs:sequence>
+<!-- start position on sequence -->
+      <xs:element name="ID2S-Sequence-Piece_start" type="xs:integer"/>
+      <xs:element name="ID2S-Sequence-Piece_data">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-literal"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ utility types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-->
+<xs:element name="ID2S-Chunk-Id" type="xs:integer"/>
+
+<xs:element name="ID2S-Bioseq-set-Ids">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="ID2S-Bioseq-set-Ids_E" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Bioseq-Ids">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="ID2S-Bioseq-Ids_E">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ID2S-Bioseq-Ids_E_gi" type="xs:integer"/>
+            <xs:element name="ID2S-Bioseq-Ids_E_seq-id">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Seq-id"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="ID2S-Bioseq-Ids_E_gi-range">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="ID2S-Gi-Range"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Gi-Range">
+  <xs:complexType>
+    <xs:sequence>
+<!-- start gi in this gi range -->
+      <xs:element name="ID2S-Gi-Range_start" type="xs:integer"/>
+<!-- number of sequential gis -->
+      <xs:element name="ID2S-Gi-Range_count" type="xs:integer" default="1"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ ID2S-Seq-loc is used to represent unordered and unstranded
+ set of intervals on set of sequences.
+ It's optimized for compact encoding of several common cases:
+    Seq-ids of type gi,
+    intervals covering whole sequences,
+    whole sequences with sequential gis,
+    set of intervals on the same sequence (Seq-id sharing).
+-->
+<xs:element name="ID2S-Seq-loc">
+  <xs:complexType>
+    <xs:choice>
+<!-- whole sequence by gi -->
+      <xs:element name="ID2S-Seq-loc_whole-gi" type="xs:integer"/>
+<!-- whole sequence by Seq-id -->
+      <xs:element name="ID2S-Seq-loc_whole-seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- set of whole sequences by gis -->
+      <xs:element name="ID2S-Seq-loc_whole-gi-range">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Gi-Range"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- interval on sequence by gi -->
+      <xs:element name="ID2S-Seq-loc_gi-interval">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Gi-Interval"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- interval on sequence by Seq-id -->
+      <xs:element name="ID2S-Seq-loc_seq-id-interval">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-id-Interval"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- set of intervals on the same gi -->
+      <xs:element name="ID2S-Seq-loc_gi-ints">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Gi-Ints"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- set of intervals on the same id -->
+      <xs:element name="ID2S-Seq-loc_seq-id-ints">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="ID2S-Seq-id-Ints"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- combination of locations -->
+      <xs:element name="ID2S-Seq-loc_loc-set">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Seq-loc"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Gi-Interval">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Gi-Interval_gi" type="xs:integer"/>
+      <xs:element name="ID2S-Gi-Interval_start" type="xs:integer"/>
+      <xs:element name="ID2S-Gi-Interval_length" type="xs:integer" default="1"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-id-Interval">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Seq-id-Interval_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-id-Interval_start" type="xs:integer"/>
+      <xs:element name="ID2S-Seq-id-Interval_length" type="xs:integer" default="1"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Interval">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Interval_start" type="xs:integer"/>
+      <xs:element name="ID2S-Interval_length" type="xs:integer" default="1"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Gi-Ints">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Gi-Ints_gi" type="xs:integer"/>
+      <xs:element name="ID2S-Gi-Ints_ints">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Interval"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ID2S-Seq-id-Ints">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID2S-Seq-id-Ints_seq-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ID2S-Seq-id-Ints_ints">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="ID2S-Interval"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

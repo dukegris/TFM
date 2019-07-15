@@ -1,0 +1,1243 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "mmdb3.asn"
+     ::DATATOOL:: by application DATATOOL version 2.3.1
+     ::DATATOOL:: on 02/28/2011 23:04:53
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "MMDB-Features"
+================================================= -->
+<!--
+$Revision: 240129 $
+**********************************************************************
+
+  Biological Macromolecule 3-D Structure Data Types for MMDB,
+                A Molecular Modeling Database
+
+  Definitions for structural features and biostruc addressing
+
+  By Hitomi Ohkawa, Jim Ostell, Chris Hogue and Steve Bryant 
+
+  National Center for Biotechnology Information
+  National Institutes of Health
+  Bethesda, MD 20894 USA
+
+  July, 1996
+
+**********************************************************************
+-->
+<!-- Elements used by other modules:
+          Biostruc-feature-set,
+          Chem-graph-pntrs,
+          Atom-pntrs,
+          Chem-graph-alignment,
+          Chem-graph-interaction,
+          Sphere,
+          Cone,
+          Cylinder,
+          Brick,
+          Transform,
+          Biostruc-feature-set-id,
+          Biostruc-feature-id -->
+
+<!-- Elements referenced from other modules:
+          Biostruc-id FROM MMDB,
+          Molecule-id,
+          Residue-id,
+          Atom-id FROM MMDB-Chemical-graph,
+          Model-id,
+          Model-coordinate-set-id FROM MMDB-Structural-model,
+          User-object FROM NCBI-General,
+          Pub FROM NCBI-Pub -->
+
+<!-- ============================================ -->
+
+
+
+<!--
+ Named model features refer to sets of residues or atoms, or a region in 
+ the model space.  A few specific feature types are allowed for compatibility
+ with PDB usage, but the purpose of a named model feature is simply to
+ associate various types of information with a set of atoms or 
+ residues, or a spatially-defined region of the model structure.  They also
+ support association of various properties with each residue or atom of a
+ set.
+ PDB-derived secondary structure defines a single feature, represented as a
+ sequence of residue motifs, as are the contents of PDB SITE and
+ FTNOTE records.  NCBI-assigned core and secondary structure descriptions
+ are also represented as a sequence of residue motifs.
+-->
+<xs:element name="Biostruc-feature-set">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-feature-set_id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-feature-set-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-feature-set_descr" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc-feature-set-descr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-feature-set_features">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc-feature"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-feature-set-id" type="xs:integer"/>
+
+<xs:element name="Biostruc-feature-set-descr">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Biostruc-feature-set-descr_name" type="xs:string"/>
+      <xs:element name="Biostruc-feature-set-descr_pdb-comment" type="xs:string"/>
+      <xs:element name="Biostruc-feature-set-descr_other-comment" type="xs:string"/>
+      <xs:element name="Biostruc-feature-set-descr_attribution">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Pub"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ An explicitly specified type in Biostruc-feature allows for
+ efficient extraction and indexing of feature sets of a specific type. 
+ Special types are provided for coloring and rendering, as
+ as needed by molecular graphics programs.
+ new
+-->
+<xs:element name="Biostruc-feature">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-feature_id" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-feature-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-feature_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="Biostruc-feature_type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+<!--
+    comment	-  new
+    interaction	-  interaction Data
+    subgraph	-  NCBI domain reserved
+    core	-  user core definition
+    supercore	-  NCBI reserved
+    color	-  new
+    render	-  new
+    label	-  new
+    transform	-  new
+    camera	-  new
+    script	-  for scripts
+    alignment	-  VAST reserved 
+    multalign	-  multiple alignment
+    indirect	-  new
+    cn3dstate	-  Cn3D reserved
+-->
+                    <xs:enumeration value="helix" ncbi:intvalue="1"/>
+                    <xs:enumeration value="strand" ncbi:intvalue="2"/>
+                    <xs:enumeration value="sheet" ncbi:intvalue="3"/>
+                    <xs:enumeration value="turn" ncbi:intvalue="4"/>
+                    <xs:enumeration value="site" ncbi:intvalue="5"/>
+                    <xs:enumeration value="footnote" ncbi:intvalue="6"/>
+                    <xs:enumeration value="comment" ncbi:intvalue="7"/>
+                    <xs:enumeration value="interaction" ncbi:intvalue="8"/>
+                    <xs:enumeration value="subgraph" ncbi:intvalue="100"/>
+                    <xs:enumeration value="region" ncbi:intvalue="101"/>
+                    <xs:enumeration value="core" ncbi:intvalue="102"/>
+                    <xs:enumeration value="supercore" ncbi:intvalue="103"/>
+                    <xs:enumeration value="color" ncbi:intvalue="150"/>
+                    <xs:enumeration value="render" ncbi:intvalue="151"/>
+                    <xs:enumeration value="label" ncbi:intvalue="152"/>
+                    <xs:enumeration value="transform" ncbi:intvalue="153"/>
+                    <xs:enumeration value="camera" ncbi:intvalue="154"/>
+                    <xs:enumeration value="script" ncbi:intvalue="155"/>
+                    <xs:enumeration value="alignment" ncbi:intvalue="200"/>
+                    <xs:enumeration value="similarity" ncbi:intvalue="201"/>
+                    <xs:enumeration value="multalign" ncbi:intvalue="202"/>
+                    <xs:enumeration value="indirect" ncbi:intvalue="203"/>
+                    <xs:enumeration value="cn3dstate" ncbi:intvalue="254"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-feature_property" minOccurs="0">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Biostruc-feature_property_color">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Color-prop"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_property_render">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Render-prop"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_property_transform">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Transform"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_property_camera">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Camera"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_property_script">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Biostruc-script"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_property_user">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="User-object"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-feature_location" minOccurs="0">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Biostruc-feature_location_subgraph">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Chem-graph-pntrs"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_location_region">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Region-pntrs"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_location_alignment">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Chem-graph-alignment"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_location_interaction">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Chem-graph-interaction"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_location_similarity">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Region-similarity"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Biostruc-feature_location_indirect">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element ref="Other-feature"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Other-feature allows for specifying location via reference to another
+ Biostruc-feature and its location.
+-->
+<xs:element name="Other-feature">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Other-feature_biostruc-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Other-feature_set">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-feature-set-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Other-feature_feature">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-feature-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-feature-id" type="xs:integer"/>
+
+<!--
+ Atom, residue or molecule motifs describe a substructure defined by a set
+ of nodes from the chemical graph. PDB secondary structure features are
+ described as a residue motif, since they are not associated with any one of
+ the multiple models that may be provided in a PDB file.  NCBI-assigned
+ secondary structure is represented in the same way, even though it is
+ model specific, since this allows for simple mapping of the structural 
+ feature onto a sequence-only representation. This addressing mode may also 
+ be used to describe features to be associated with particular atoms, 
+ as, for example, the chemical shift observed in an NMR experiment.
+-->
+<xs:element name="Biostruc-molecule-pntr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-molecule-pntr_biostruc-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-molecule-pntr_molecule-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Chem-graph-pntrs">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Chem-graph-pntrs_atoms">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Atom-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-pntrs_residues">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-pntrs_molecules">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Atom-pntrs">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Atom-pntrs_number-of-ptrs" type="xs:integer"/>
+      <xs:element name="Atom-pntrs_molecule-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom-pntrs_residue-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Atom-pntrs_atom-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Atom-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Residue-pntrs">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Residue-pntrs_explicit">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-explicit-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-pntrs_interval">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Residue-interval-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Residue-explicit-pntrs">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Residue-explicit-pntrs_number-of-ptrs" type="xs:integer"/>
+      <xs:element name="Residue-explicit-pntrs_molecule-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-explicit-pntrs_residue-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Residue-interval-pntr">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Residue-interval-pntr_molecule-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-interval-pntr_from">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Residue-interval-pntr_to">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Residue-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Molecule-pntrs">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Molecule-pntrs_number-of-ptrs" type="xs:integer"/>
+      <xs:element name="Molecule-pntrs_molecule-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Molecule-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Region motifs describe features defined by spatial location, such as the
+ site specified by a coordinate value, or a rgeion within a bounding volume.
+-->
+<xs:element name="Region-pntrs">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Region-pntrs_model-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-pntrs_region">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Region-pntrs_region_site">
+              <xs:complexType>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="Region-coordinates"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Region-pntrs_region_boundary">
+              <xs:complexType>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="Region-boundary"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Coordinate sites describe a region in space by reference to individual 
+ coordinates, in a particular model.  These coordinates may be either the
+ x, y and z values of atomic coordinates, the triangles of a surface mesh, 
+ or the grid points of a density model. All are addressed in the same manner,
+ as coordinate indices which give offsets from the beginning of the 
+ coordinate data arrays.  A coordinate-index of 5, for example, refers to 
+ the 5th x, y and z values of an atomic coordinate set, the 5th v1, v2, and v3
+ values of a triangle mesh, or the 5th value in a density grid.
+ PDB SITE and FTNOTE records refer to particular atomic coordinates, and they
+ are represented as a region motif with addresses of type Region-coordinates.
+ Any names or descriptions provided by PDB are thus associated with the
+ indicated sites, in the indicated model. 
+-->
+<xs:element name="Region-coordinates">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Region-coordinates_model-coord-set-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-coordinate-set-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-coordinates_number-of-coords" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Region-coordinates_coordinate-indices" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Region-coordinates_coordinate-indices_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- Region boundaries are defined by regular solids located in the model space.   -->
+<xs:element name="Region-boundary">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Region-boundary_sphere">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Sphere"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-boundary_cone">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cone"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-boundary_cylinder">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Cylinder"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-boundary_brick">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Brick"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A biostruc alignment establishes an equivalence of nodes in the chemical
+ graphs of two or more biostrucs. This may be mapped to a sequence
+ alignment in the case of biopolymers.
+ The 'dimension' component indicates the number of participants
+ in the alignment.  For pairwise alignments, such as VAST 
+ structure-structure alignments, the dimension will be always 2, with
+ biostruc-ids, alignment, and domain each containing two entries for an  
+ aligned pair.  The 'alignment' component contains a pair of Chem-graph-pntrs
+ specifying a like number of corresponding residues in each structure.
+ The 'domain' component specifies a region of each structure considered 
+ in the alignment.  Only one transform (for the second structure) and
+ one aligndata (for the pair) are provided for each VAST alignment.
+
+ For multiple alignments, a set of components are treated as
+ parallel arrays of length 'dimension'.
+ The 'transform' component moves each structure to align it with
+ the structure specified as the first element in the "parallel" array,
+ so necessarily the first transform is a NULL transform.
+ Align-stats are placeholders for scores.
+-->
+<xs:element name="Chem-graph-alignment">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Chem-graph-alignment_dimension" type="xs:integer" default="2"/>
+      <xs:element name="Chem-graph-alignment_biostruc-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-alignment_alignment">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Chem-graph-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-alignment_domain" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Chem-graph-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-alignment_transform" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Transform"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-alignment_aligndata" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Align-stats"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Chem-graph-interaction">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Chem-graph-interaction_type" minOccurs="0">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:integer">
+              <xs:attribute name="value" use="optional">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="protein-protein" ncbi:intvalue="1"/>
+                    <xs:enumeration value="protein-dna" ncbi:intvalue="2"/>
+                    <xs:enumeration value="protein-rna" ncbi:intvalue="3"/>
+                    <xs:enumeration value="protein-chemical" ncbi:intvalue="4"/>
+                    <xs:enumeration value="dna-dna" ncbi:intvalue="5"/>
+                    <xs:enumeration value="dna-rna" ncbi:intvalue="6"/>
+                    <xs:enumeration value="dna-chemical" ncbi:intvalue="7"/>
+                    <xs:enumeration value="rna-rna" ncbi:intvalue="8"/>
+                    <xs:enumeration value="rna-chemical" ncbi:intvalue="9"/>
+                    <xs:enumeration value="other" ncbi:intvalue="255"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-interaction_distance-threshold" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="RealValue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-interaction_interactors">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc-molecule-pntr"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-interaction_residue-contacts" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Chem-graph-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-interaction_atom-contacts" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Chem-graph-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Chem-graph-interaction_atom-distance" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="RealValue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Align-stats">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Align-stats_descr" type="xs:string" minOccurs="0"/>
+      <xs:element name="Align-stats_scale-factor" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_vast-score" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_vast-mlogp" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_align-res" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_rmsd" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_blast-score" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_blast-mlogp" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Align-stats_other-score" type="xs:integer" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A biostruc similarity describes spatial features which are similar between
+ two or more biostrucs.  Similarities are model dependent, and the model and
+ coordinate set ids of the biostrucs must be specified.  They do not 
+ necessarily map to a sequence alignment, as the regions referenced may
+ be pieces of a surface or grid, and thus not uniquely mapable to particular
+ chemical components.
+-->
+<xs:element name="Region-similarity">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Region-similarity_dimension" type="xs:integer" default="2"/>
+      <xs:element name="Region-similarity_biostruc-ids">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Biostruc-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-similarity_similarity">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Region-pntrs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Region-similarity_transform">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Transform"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Geometrical primitives are used in the definition of region motifs, and 
+ also non-atomic coordinates.  Spheres, cones, cylinders and bricks are 
+ defined by a few points in the model space.
+-->
+<xs:element name="Sphere">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Sphere_center">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Sphere_radius">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="RealValue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Cone">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cone_axis-top">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cone_axis-bottom">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cone_radius-bottom">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="RealValue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Cylinder">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Cylinder_axis-top">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cylinder_axis-bottom">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Cylinder_radius">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="RealValue"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A brick is defined by the coordinates of eight corners.  These are assumed
+ to appear in the order 000, 001, 010, 011, 100, 101, 110, 111, where the 
+ digits 0 and 1 refer to respectively to the x, y and z axes of a unit cube.
+ Opposite edges are assumed to be parallel. 
+-->
+<xs:element name="Brick">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Brick_corner-000">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-001">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-010">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-011">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-100">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-101">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-110">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Brick_corner-111">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Model-space-point"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Model-space-point">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Model-space-point_scale-factor" type="xs:integer"/>
+      <xs:element name="Model-space-point_x" type="xs:integer"/>
+      <xs:element name="Model-space-point_y" type="xs:integer"/>
+      <xs:element name="Model-space-point_z" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="RealValue">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="RealValue_scale-factor" type="xs:integer"/>
+      <xs:element name="RealValue_scaled-integer-value" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Transform">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Transform_id" type="xs:integer"/>
+      <xs:element name="Transform_moves">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Move"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Move">
+  <xs:complexType>
+    <xs:choice>
+      <xs:element name="Move_rotate">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Rot-matrix"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Move_translate">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Trans-matrix"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ A rotation matrix is defined by 9 numbers, given by row, i.e.,
+ with column indices varying fastest.
+ Coordinates, as a matrix with columns x, y, an z, are rotated 
+ via multiplication with the rotation matrix. 
+ A translation matrix is defined by 3 numbers, which is added to
+ the rotated coordinates for specified amount of translation. 
+-->
+<xs:element name="Rot-matrix">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Rot-matrix_scale-factor" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-11" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-12" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-13" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-21" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-22" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-23" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-31" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-32" type="xs:integer"/>
+      <xs:element name="Rot-matrix_rot-33" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Trans-matrix">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Trans-matrix_scale-factor" type="xs:integer"/>
+      <xs:element name="Trans-matrix_tran-1" type="xs:integer"/>
+      <xs:element name="Trans-matrix_tran-2" type="xs:integer"/>
+      <xs:element name="Trans-matrix_tran-3" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ The camera is a position relative to the world coordinates
+ of the structure referred to by a location.  
+ this is used to set the initial position of the
+ camera using OpenGL.  scale is the value used to scale the
+ other values from floating point to integer
+-->
+<xs:element name="Camera">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Camera_x" type="xs:integer"/>
+      <xs:element name="Camera_y" type="xs:integer"/>
+      <xs:element name="Camera_distance" type="xs:integer"/>
+      <xs:element name="Camera_angle" type="xs:integer"/>
+      <xs:element name="Camera_scale" type="xs:integer"/>
+      <xs:element name="Camera_modelview">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="GL-matrix"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="GL-matrix">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="GL-matrix_scale" type="xs:integer"/>
+      <xs:element name="GL-matrix_m11" type="xs:integer"/>
+      <xs:element name="GL-matrix_m12" type="xs:integer"/>
+      <xs:element name="GL-matrix_m13" type="xs:integer"/>
+      <xs:element name="GL-matrix_m14" type="xs:integer"/>
+      <xs:element name="GL-matrix_m21" type="xs:integer"/>
+      <xs:element name="GL-matrix_m22" type="xs:integer"/>
+      <xs:element name="GL-matrix_m23" type="xs:integer"/>
+      <xs:element name="GL-matrix_m24" type="xs:integer"/>
+      <xs:element name="GL-matrix_m31" type="xs:integer"/>
+      <xs:element name="GL-matrix_m32" type="xs:integer"/>
+      <xs:element name="GL-matrix_m33" type="xs:integer"/>
+      <xs:element name="GL-matrix_m34" type="xs:integer"/>
+      <xs:element name="GL-matrix_m41" type="xs:integer"/>
+      <xs:element name="GL-matrix_m42" type="xs:integer"/>
+      <xs:element name="GL-matrix_m43" type="xs:integer"/>
+      <xs:element name="GL-matrix_m44" type="xs:integer"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Color-prop">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Color-prop_r" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Color-prop_g" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Color-prop_b" type="xs:integer" minOccurs="0"/>
+      <xs:element name="Color-prop_name" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!--
+ Note that Render-prop is compatible with the Annmm specification,
+ i.e., its numbering schemes do not clash with those in Render-prop.
+-->
+<xs:element name="Render-prop">
+  <xs:complexType>
+    <xs:simpleContent>
+      <xs:extension base="xs:integer">
+        <xs:attribute name="value" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+<!--
+    default	-  Default view
+    wire	-  use wireframe 
+    space	-  use spacefill
+    stick	-  use stick model (thin cylinders)
+    ballNStick	-  use ball & stick model
+    thickWire	-  thicker wireframe
+    hide	-  don't show this
+    name	-  display its name next to it
+    number	-  display its number next to it 
+    pdbNumber	-  display its PDB number next to it
+    objWireFrame	-  display MMDB surface object as wireframe
+    objPolygons	-  display MMDB surface object as polygons   
+    colorsetCPK	-  color atoms like CPK models
+    colorsetbyChain	-  color each chain different
+    colorsetbyTemp	-  color using isotropic Temp factors 
+    colorsetbyRes	-  color using residue properties
+    colorsetbyLen	-  color changes along chain length
+    colorsetbySStru	-  color by secondary structure
+    colorsetbyHydro	-  color by hydrophobicity
+    colorsetbyObject	-  color each object differently
+    colorsetbyDomain	-  color each domain differently
+-->
+              <xs:enumeration value="default" ncbi:intvalue="0"/>
+              <xs:enumeration value="wire" ncbi:intvalue="1"/>
+              <xs:enumeration value="space" ncbi:intvalue="2"/>
+              <xs:enumeration value="stick" ncbi:intvalue="3"/>
+              <xs:enumeration value="ballNStick" ncbi:intvalue="4"/>
+              <xs:enumeration value="thickWire" ncbi:intvalue="5"/>
+              <xs:enumeration value="hide" ncbi:intvalue="9"/>
+              <xs:enumeration value="name" ncbi:intvalue="10"/>
+              <xs:enumeration value="number" ncbi:intvalue="11"/>
+              <xs:enumeration value="pdbNumber" ncbi:intvalue="12"/>
+              <xs:enumeration value="objWireFrame" ncbi:intvalue="150"/>
+              <xs:enumeration value="objPolygons" ncbi:intvalue="151"/>
+              <xs:enumeration value="colorsetCPK" ncbi:intvalue="225"/>
+              <xs:enumeration value="colorsetbyChain" ncbi:intvalue="226"/>
+              <xs:enumeration value="colorsetbyTemp" ncbi:intvalue="227"/>
+              <xs:enumeration value="colorsetbyRes" ncbi:intvalue="228"/>
+              <xs:enumeration value="colorsetbyLen" ncbi:intvalue="229"/>
+              <xs:enumeration value="colorsetbySStru" ncbi:intvalue="230"/>
+              <xs:enumeration value="colorsetbyHydro" ncbi:intvalue="231"/>
+              <xs:enumeration value="colorsetbyObject" ncbi:intvalue="246"/>
+              <xs:enumeration value="colorsetbyDomain" ncbi:intvalue="247"/>
+              <xs:enumeration value="other" ncbi:intvalue="255"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:element>
+
+<!--
+  When a Biostruc-Feature with a Biostruc-script is initiated,
+  it should play the specified steps one at a time, setting the feature-do
+  list as the active display.
+  The camera can be set using a feature-do, 
+  but it may be moved independently with
+  camera-move, which specifies how to move
+  the camera dynamically during the step along the path defined (e.g.,
+  a zoom, a rotate).
+  Any value of pause (in 1:10th's of a second) will force a pause
+  after an image is shown.
+  If waitevent is TRUE, it will await a mouse or keypress and ignore 
+  the pause value.
+-->
+<xs:element name="Biostruc-script">
+  <xs:complexType>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="Biostruc-script-step"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Biostruc-script-step">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Biostruc-script-step_step-id">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Step-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-script-step_step-name" type="xs:string" minOccurs="0"/>
+      <xs:element name="Biostruc-script-step_feature-do" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Other-feature"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-script-step_camera-move" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Transform"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-script-step_pause" type="xs:integer" default="10"/>
+      <xs:element name="Biostruc-script-step_waitevent">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Biostruc-script-step_extra" type="xs:integer"/>
+      <xs:element name="Biostruc-script-step_jump" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Step-id"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="Step-id" type="xs:integer"/>
+
+</xs:schema>

@@ -1,0 +1,204 @@
+<?xml version="1.0" ?>
+<!-- ============================================
+     ::DATATOOL:: Generated from "seqcode.asn"
+     ::DATATOOL:: by application DATATOOL version 1.8.7
+     ::DATATOOL:: on 10/04/2007 23:07:33
+     ============================================ -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:ncbi="http://www.ncbi.nlm.nih.gov"
+  xmlns="http://www.ncbi.nlm.nih.gov"
+  targetNamespace="http://www.ncbi.nlm.nih.gov"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+<!-- ============================================ -->
+<!-- This section is mapped from module "NCBI-SeqCode"
+================================================= -->
+<!--
+$Revision: 6.0 $
+  *********************************************************************
+
+  These are code and conversion tables for NCBI sequence codes
+  ASN.1 for the sequences themselves are define in seq.asn
+
+  Seq-map-table and Seq-code-table REQUIRE that codes start with 0
+    and increase continuously.  So IUPAC codes, which are upper case
+    letters will always have 65 0 cells before the codes begin.  This
+    allows all codes to do indexed lookups for things
+
+  Valid names for code tables are:
+    IUPACna
+    IUPACaa
+    IUPACeaa
+    IUPACaa3     3 letter amino acid codes : parallels IUPACeaa
+                   display only, not a data exchange type
+    NCBI2na
+    NCBI4na
+    NCBI8na
+    NCBI8aa
+    NCBIstdaa
+     probability types map to IUPAC types for display as characters
+-->
+<!-- Elements used by other modules:
+          Seq-code-table,
+          Seq-map-table,
+          Seq-code-set -->
+
+<!-- ============================================ -->
+
+
+
+<!-- sequence representations -->
+<xs:element name="Seq-code-type">
+  <xs:complexType>
+    <xs:attribute name="value" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+<!--
+    iupacna	-  IUPAC 1 letter nuc acid code
+    iupacaa	-  IUPAC 1 letter amino acid code
+    ncbi2na	-  2 bit nucleic acid code
+    ncbi4na	-  4 bit nucleic acid code
+    ncbi8na	-  8 bit extended nucleic acid code
+    ncbipna	-  nucleic acid probabilities
+    ncbi8aa	-  8 bit extended amino acid codes
+    ncbieaa	-  extended ASCII 1 letter aa codes
+    ncbipaa	-  amino acid probabilities
+    iupacaa3	-  3 letter code only for display
+    ncbistdaa	-  consecutive codes for std aas, 0-25
+-->
+          <xs:enumeration value="iupacna"/>
+          <xs:enumeration value="iupacaa"/>
+          <xs:enumeration value="ncbi2na"/>
+          <xs:enumeration value="ncbi4na"/>
+          <xs:enumeration value="ncbi8na"/>
+          <xs:enumeration value="ncbipna"/>
+          <xs:enumeration value="ncbi8aa"/>
+          <xs:enumeration value="ncbieaa"/>
+          <xs:enumeration value="ncbipaa"/>
+          <xs:enumeration value="iupacaa3"/>
+          <xs:enumeration value="ncbistdaa"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+</xs:element>
+
+<!-- for tables of sequence mappings  -->
+<xs:element name="Seq-map-table">
+  <xs:complexType>
+    <xs:sequence>
+<!-- code to map from -->
+      <xs:element name="Seq-map-table_from">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-code-type"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- code to map to -->
+      <xs:element name="Seq-map-table_to">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-code-type"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- number of rows in table -->
+      <xs:element name="Seq-map-table_num" type="xs:integer"/>
+<!-- index offset of first element -->
+      <xs:element name="Seq-map-table_start-at" type="xs:integer" default="0"/>
+<!-- table of values, in from-to order -->
+      <xs:element name="Seq-map-table_table">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Seq-map-table_table_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- for names of coded values -->
+<xs:element name="Seq-code-table">
+  <xs:complexType>
+    <xs:sequence>
+<!-- name of code -->
+      <xs:element name="Seq-code-table_code">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="Seq-code-type"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- number of rows in table -->
+      <xs:element name="Seq-code-table_num" type="xs:integer"/>
+<!-- symbol is ALWAYS 1 letter? -->
+      <xs:element name="Seq-code-table_one-letter">
+        <xs:complexType>
+          <xs:attribute name="value" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="true"/>
+                <xs:enumeration value="false"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+<!-- index offset of first element -->
+      <xs:element name="Seq-code-table_start-at" type="xs:integer" default="0"/>
+<!-- an explanatory name or string -->
+      <xs:element name="Seq-code-table_table">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Seq-code-table_table_E">
+              <xs:complexType>
+                <xs:sequence>
+<!-- the printed symbol or letter -->
+                  <xs:element name="Seq-code-table_table_E_symbol" type="xs:string"/>
+                  <xs:element name="Seq-code-table_table_E_name" type="xs:string"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+<!-- pointers to complement nuc acid -->
+      <xs:element name="Seq-code-table_comps" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Seq-code-table_comps_E" type="xs:integer"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<!-- for distribution -->
+<xs:element name="Seq-code-set">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Seq-code-set_codes" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-code-table"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Seq-code-set_maps" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="Seq-map-table"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

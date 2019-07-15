@@ -1,0 +1,11 @@
+<!DOCTYPE catalog
+    PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+           "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+
+	<system
+		systemId="https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd"
+		uri="../dtd/pubmed/pubmed_190101.dtd" />
+
+</catalog>
