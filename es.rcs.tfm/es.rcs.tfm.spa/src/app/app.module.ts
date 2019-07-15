@@ -4,18 +4,22 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { AppRoutingModule } from './app.routing.module';
-import { AppComponent } from './app.component';
-
 import { MaterialConfig } from './app.material.config';
 
+import * as $ from 'jquery';
+
+import { AppComponent } from './app.component';
+import { AppIndexComponent } from './components/app/index/app.index.component';
 import { AppNavComponent } from './components/app/nav/app.nav.component';
 import { AppSidenavComponent } from './components/app/sidenav/app.sidenav.component';
 
-import { SideBarService } from './services/sidebar.service';
+import { AppsService } from './services/apps/apps.service';
+import { SideBarService } from './services/sidebar/sidebar.service';
 
 @NgModule({
   declarations: [
     AppComponent,
+    AppIndexComponent,
     AppNavComponent,
     AppSidenavComponent
   ],
@@ -30,6 +34,7 @@ import { SideBarService } from './services/sidebar.service';
     })
   ],
   providers: [
+    AppsService,
     SideBarService
   ],
   bootstrap: [

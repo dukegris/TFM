@@ -1,4 +1,5 @@
 import { Injectable, Output, EventEmitter } from '@angular/core';
+import { BehaviorSubject  } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -10,11 +11,12 @@ export class SideBarService {
 
     isOpen = true;
 
-    @Output() change: EventEmitter<boolean> = new EventEmitter();
+    private sidebarToogleSource = new BehaviorSubject(true);
+    public sidebarCurrentToogle = this.sidebarToogleSource.asObservable();
 
     toggle() {
         this.isOpen = !this.isOpen;
-        this.change.emit(this.isOpen);
+        this.sidebarToogleSource.next(this.isOpen);
     }
 
 }

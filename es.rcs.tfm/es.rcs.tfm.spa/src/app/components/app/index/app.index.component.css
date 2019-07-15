@@ -1,0 +1,11 @@
+.background{
+    width: 100%;
+    height: calc(100vh - 64px);
+    background-image: url(../../../../assets/background.png);
+}
+
+@media only screen and (max-width: 599px) {
+    .background{
+        height: calc(100vh - 56px);
+    }
+}

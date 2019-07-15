@@ -1,5 +1,4 @@
 import { TestBed, inject } from '@angular/core/testing';
-
 import { SideBarService } from './sidebar.service';
 
 describe('SideBarService', () => {
