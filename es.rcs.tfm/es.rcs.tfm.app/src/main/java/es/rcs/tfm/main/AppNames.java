@@ -54,5 +54,12 @@ public class AppNames {
 		
 	public static final String BBDD_NAME =						"jdbc:h2:file:J:/data/TFM;DB_CLOSE_ON_EXIT=true";
 	public static final String BBDD_URL =						"/h2/*";
+
+	// -------------------------------------------------------------------------------------
+	// APP: SPARK CONFIG
+	public static final String SPARK_CONFIG =					"taoSparkConfig";
+	public static final String SPARK_SESSION =					"taoSparkSession";
+	public static final String SPARK_APPNAME =					"SPARK TFM APP";
+	
 	
 }

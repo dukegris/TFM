@@ -20,6 +20,7 @@
 		<module>es.rcs.tfm.xml</module>
 		<module>es.rcs.tfm.idx</module>
 		<module>es.rcs.tfm.db</module>
+		<module>es.rcs.tfm.nlp</module>
 		<module>es.rcs.tfm.srv</module>
 		<module>es.rcs.tfm.api</module>
 		<module>es.rcs.tfm.spa</module>
