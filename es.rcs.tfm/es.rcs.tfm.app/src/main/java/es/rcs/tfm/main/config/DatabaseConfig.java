@@ -2,10 +2,12 @@ package es.rcs.tfm.main.config;
 
 import java.util.Properties;
 
+import javax.servlet.http.HttpServlet;
 import javax.sql.DataSource;
 
+import org.h2.server.web.WebServlet;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -15,6 +17,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.main.AppNames;
@@ -53,7 +58,6 @@ public class DatabaseConfig {
 		
 	}
 
-	/*
 	@Bean( name = AppNames.BBDD_CONSOLE )
 	public ServletRegistrationBean<HttpServlet> h2servletRegistration() {
 
@@ -68,11 +72,11 @@ public class DatabaseConfig {
 		return bean;
 		
 	}
-	 */
 
 	@Bean( name = AppNames.BBDD_DATASOURCE )
 	public DataSource getDataSource() {
 		
+        
 		/*
 		EmbeddedDatabaseBuilder builder = 
 				new EmbeddedDatabaseBuilder();
@@ -82,12 +86,26 @@ public class DatabaseConfig {
 			.build();
 		 */
 		
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl( dbUrl );
+		config.setDriverClassName( dbDriver );
+        config.setUsername( dbUsernamer );
+        config.setPassword( dbPassword );
+        config.addDataSourceProperty( "cachePrepStmts" , "true" );
+        config.addDataSourceProperty( "prepStmtCacheSize" , "250" );
+        config.addDataSourceProperty( "prepStmtCacheSqlLimit" , "2048" );
+        HikariDataSource bean = new HikariDataSource( config );
+        
+        return bean; 
+
+        /*
 		DataSourceBuilder<?> bean = DataSourceBuilder.create();
         bean.driverClassName(dbDriver);
         bean.url(dbUrl);
         bean.username(dbUsernamer);
         bean.password(dbPassword);
         return bean.build();
+         */
 		
 	}
 	

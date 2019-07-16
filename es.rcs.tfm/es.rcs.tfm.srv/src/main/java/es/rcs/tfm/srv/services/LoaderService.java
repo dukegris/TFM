@@ -85,76 +85,76 @@ public class LoaderService {
 		// LOS DESCARGA Y ALMACENA LA INFORMACION EN LA BASE DE DATOS
 		// Stream<Fichero> ficherosStream = null;
 		// Stream<Articulo> articulosStream = 
-		List<Fichero> ficheros = Arrays.stream(ftpFiles)//.parallel()
+		List<Fichero> ficheros = Arrays.stream(ftpFiles).//.parallel()
 			// Solo ficheros validos
-			.filter(f ->
+			filter(f ->
 					f.isValid() &&
 					f.isFile() &&
 					!f.isDirectory() &&
 					!f.isUnknown() &&
-					pubmedFileNamePattern.matcher(f.getName()).find())
+					pubmedFileNamePattern.matcher(f.getName()).find()).
 			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
-			.map(f -> 
-					mapFtpFileToFichero(f, ftpFiles))
+			map(f -> 
+					mapFtpFileToFichero(f, ftpFiles)).
 			// Comprobar si hay cambios frente a la Base de datos
-			.map(f ->
-					searchFicheroInDb(f))
+			map(f ->
+					searchFicheroInDb(f)).
 			// Comprobar si hay cambios frente a la Base de datos
-			.map(f ->
-					checkFicheroInDb(f))
+			map(f ->
+					checkFicheroInDb(f)).
 			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
-			.map(f -> 
+			map(f -> 
 					checkDownloadNeeded(
 							CORPUS_PUBMED_GZIP_DIRECTORY,
-							f))
+							f)).
 			// Descargar ficheros
-			.map(f -> 
+			map(f -> 
 					f.isDescargaRequerida() ? download(
 							PUBMED_FPT_HOST, PUBMED_FTP_PORT, 
 							PUBMED_FTP_USERNAME, PUBMED_FTP_PASSWORD, 
 							PUBMED_FTP_UPDATE, 
 							CORPUS_PUBMED_GZIP_DIRECTORY,
-							f) : f)
+							f) : f).
 			// Actualizar la Base de datos
-			.map(f -> 
-					f.isHayCambiosEnBD() ? updateFileDB(f) : f)
+			map(f -> 
+					f.isHayCambiosEnBD() ? updateFileDB(f) : f).
 			// Descomprimir y obtener los articulos
-			.map(f -> 
+			map(f -> 
 					f.isProcesarRequerido() ? uncompress(
 							CORPUS_PUBMED_GZIP_DIRECTORY,
 							CORPUS_PUBMED_XML_DIRECTORY,
-							f) : f)
+							f) : f).
 			// Procesar XML con articulos
-			.flatMap(f -> 
+			flatMap(f -> 
 					f.isProcesarRequerido() ? Stream.generate(
 						new PubmedXmlProcessor(
 								CORPUS_PUBMED_XML_DIRECTORY, 
-								f)) : null)
+								f)) : null).
 			// Transformar ficheros del modelo en sus componentes de BD
-			.map(a -> 
-					searchArticuloInDb(a))
+			map(a -> 
+					searchArticuloInDb(a)).
 			// Comprobar si hay cambios fente a la Base de datos
-			.map(a -> 
-					checkArticuloInDb(a))
+			map(a -> 
+					checkArticuloInDb(a)).
 			// Transformar ficheros del modelo en sus componentes de SOLR
-			.map(a -> 
-					searchArticuloInSolr(a))
+			map(a -> 
+					searchArticuloInSolr(a)).
 			// Actualizar el indice
-			.map(a -> 
-					a.isHayCambiosEnIDX() ? updateArticleIDX(a) : a)
+			map(a -> 
+					a.isHayCambiosEnIDX() ? updateArticleIDX(a) : a).
 			// Actualizar la base de datos
-			.map(a -> 
-					a.isHayCambiosEnBD() ? updateArticleDB(a) : a)
+			map(a -> 
+					a.isHayCambiosEnBD() ? updateArticleDB(a) : a).
 			// Recoger ficheros procesados
-			.map(a -> a.getFichero())
-			.distinct()
-			.map(f ->
+			map(a -> a.getFichero()).
+			distinct().
+			map(f ->
 					f.isBorrarXml() ? borrarXml(
 							CORPUS_PUBMED_XML_DIRECTORY,
-							f) : f)
-			.map(f -> 
-					f.isHayCambiosEnBD() ? updateFileDB(f) : f)
-			.collect(Collectors.toList());
+							f) : f).
+			map(f -> 
+					f.isHayCambiosEnBD() ? updateFileDB(f) : f).
+			collect(Collectors.toList());
 
 		long count = ficheros.size();
 		LOG.info("PROCESED " + count + " FICHEROS");

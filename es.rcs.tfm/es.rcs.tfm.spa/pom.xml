@@ -7,10 +7,8 @@
 			
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>
-RCS-Spa</artifactId>
-	<name>
-TFM Spa Module</name>
+	<artifactId>RCS-Spa</artifactId>
+	<name>TFM Spa Module</name>
 	<description>TFM SPA Module</description>	
 	<packaging>jar</packaging>
 	
@@ -29,11 +27,20 @@ TFM Spa Module</name>
 
 	<build>
 	
-		
-<resources>
+		<resources>
 			<resource><directory>${project.basedir}/dist</directory></resource>
 		</resources>
 		
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.8</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<!--
 				BUILD ANGULAR APP 
@@ -42,35 +49,34 @@ TFM Spa Module</name>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
 				<executions>
 					<execution>
 						<id>NODE App INSTALL</id>
-						<phase>install</phase>
+						<phase>generate-sources</phase>
 						<goals><goal>run</goal></goals>
 						<configuration>
 							<target name="Install dependencies">
-			
-								<exec executable="cmd" dir="${project.basedir}"
-									failonerror="true" osfamily="windows">
-									<arg line="/c npm install" />
+								<exec	executable="cmd.exe" 
+										dir="${project.basedir}"
+										failonerror="true" 
+										osfamily="windows">
+									<arg line="/c &quot;npm install&quot;" />
 								</exec>
-			
 							</target>
 						</configuration>
 					</execution>
 					<execution>
 						<id>NODE App GS</id>
-						<phase>generate-sources</phase>
+						<phase>compile</phase>
 						<goals><goal>run</goal></goals>
 						<configuration>
 							<target name="Build Web">
-			
-								<exec executable="cmd" dir="${project.basedir}"
-									failonerror="true" osfamily="windows">
-									<arg line="/c ng build" />
+								<exec	executable="cmd.exe" 
+										dir="${project.basedir}"
+										failonerror="true" 
+										osfamily="windows">
+									<arg line="/c &quot;ng build&quot;" />
 								</exec>
-			
 							</target>
 						</configuration>
 					</execution>

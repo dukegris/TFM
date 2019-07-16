@@ -84,6 +84,11 @@
 		<!-- FRAMEWORK -->
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<scope>compile</scope>
 		</dependency>
@@ -182,8 +187,23 @@
 		</dependency>
 
 		<!-- =====================================
+			 HIBERNATE
+			 ===================================== -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
+		<!-- HIKARI -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<!-- WRAPPER -->
 		<dependency>
 			<groupId>tanukisoft</groupId>
@@ -229,7 +249,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- POSTGRESQL -->
