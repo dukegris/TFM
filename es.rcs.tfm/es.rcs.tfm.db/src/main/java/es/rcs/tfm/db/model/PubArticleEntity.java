@@ -17,7 +17,9 @@ import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -33,23 +35,41 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @Entity
 @Audited
-@Table(name="pubmed_articles")
+@Table(name="pubmed_articles",
+	uniqueConstraints = {
+			@UniqueConstraint(
+					name = "pubmed_articles_pmc_uk", 
+					columnNames = { "file_pmc_id" })})
 @EntityListeners(AuditingEntityListener.class)
 public class PubArticleEntity extends AuditedBaseEntity {
 	
 	@JoinColumn(
-			name = "file_id", 
+			name = "file_pubmed_id", 
 			unique = false,
 			nullable = false, 
 			referencedColumnName = "id",
 			foreignKey = @ForeignKey(
 					value = ConstraintMode.NO_CONSTRAINT,
-					name = "pubmed_files_art_fil_fk"))
+					name = "pubmed_article_pubmed_fk"))
 	@ManyToOne(
 			optional= false,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
-	public PubFileEntity file;
+	public PubFileEntity filePubmed;
+	
+	@JoinColumn(
+			name = "file_pmc_id", 
+			unique = false,
+			nullable = true, 
+			referencedColumnName = "id",
+			foreignKey = @ForeignKey(
+					value = ConstraintMode.NO_CONSTRAINT,
+					name = "pubmed_article_pmc_fk"))
+	@OneToOne(
+			optional= false,
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH })
+	public PubFileEntity filePmc;
 
 	@Column(
 			name = "pmid", 

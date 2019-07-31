@@ -11,7 +11,12 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=false)
 public class Fasciculo {
 
+	public static final String REVISTA = "REVISTA";
+	public static final String LIBRO = "LIBRO";
+	
 	Revista revista = new Revista();
+	
+	private String tipo;
 	private String medio;
 	private String volumen;
 	private String numero;

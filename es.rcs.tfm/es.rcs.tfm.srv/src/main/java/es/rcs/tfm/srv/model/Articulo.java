@@ -22,6 +22,7 @@ import lombok.ToString;
 public class Articulo {
 	
 	public static final String PUBMED_ID_NAME = "pubmed";
+	public static final String PMC_ID_NAME = "pmc";
 	
 	private ArrayList<Centro> centros = new ArrayList<Centro>();
 	private ArrayList<Autor> autores = new ArrayList<Autor>();
@@ -38,22 +39,19 @@ public class Articulo {
 	private String resumen = new String();
 	private String medio = new String();
 	private String idioma = new String();
-	private Fasciculo fasciculo = new Fasciculo();;
+	private Fasciculo fasciculo = new Fasciculo();
 
 	private boolean hayCambiosEnBD = false;
 	private boolean hayCambiosEnIDX = false;
-	private boolean procesarRequerido = false;
-	private boolean actualizarIdxRequerido = false;
-	private boolean actualizarDbRequerido = false;
 	
-	private Fichero fichero;
+	private Fichero ficheroPmc;
+	private Fichero ficheroPubmed;
 	
 	private PubArticleEntity entidad;
 	private IdxArticleSolr indice;
 
-	public Articulo(Fichero fichero) {
+	public Articulo() {
 		super();
-		this.fichero = fichero;
 	}
 
 	public void addIds(Map<String, String> items) {

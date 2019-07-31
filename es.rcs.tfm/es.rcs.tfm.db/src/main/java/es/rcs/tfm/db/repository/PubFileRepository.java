@@ -38,8 +38,8 @@ public interface PubFileRepository extends
 
 	}
 	
-	public PubFileEntity findBySourceAndFileName(
-			@Param("source") String source,
+	public PubFileEntity findByTypeAndFileName(
+			@Param("type") String source,
 			@Param("fileName") String fileName);
 
 }

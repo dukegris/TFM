@@ -50,4 +50,6 @@ public interface PubArticleRepository extends
 			@Param("type") String type, 
 			@Param("value") String value);
 	
+	PubArticleEntity findByPmid(String pmid);
+	
 }

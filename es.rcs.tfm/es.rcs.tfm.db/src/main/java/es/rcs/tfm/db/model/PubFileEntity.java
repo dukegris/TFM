@@ -28,18 +28,12 @@ import lombok.ToString;
 		uniqueConstraints = {
 				@UniqueConstraint(
 						name = "pubmed_files_source_uk", 
-						columnNames = { "source", "filename" })})
+						columnNames = { "type", "filename" })})
 @EntityListeners(AuditingEntityListener.class)
 public class PubFileEntity extends AuditedBaseEntity {
 
 	public static final String FTP_PUBMED = "FTP_PUBMED";
-	
-	@Column(
-			name = "source", 
-			unique = false,
-			nullable = false, 
-			length = 16)
-	public String source;
+	public static final String FTP_PMC = "FTP_PMC";
 	
 	@Column(
 			name = "filename", 
@@ -52,7 +46,14 @@ public class PubFileEntity extends AuditedBaseEntity {
 			name = "type", 
 			unique = false, 
 			nullable = true)
-	private Integer type;
+	private String type;
+
+	@Column(
+			name = "gzDirectory", 
+			unique = false,
+			nullable = true, 
+			length = 256)
+	public String gzDirectory;
 
 	@Column(
 			name = "gzfilename", 
@@ -82,23 +83,10 @@ public class PubFileEntity extends AuditedBaseEntity {
 	public String md5FileName;
 	
 	@Column(
-			name = "xmlfilename", 
+			name = "uncompressedfilename", 
 			unique = false,
 			nullable = true, 
 			length = 32)
-	public String xmlFilename;
-
-	@Column(
-			name = "xmlsize", 
-			unique = false, 
-			nullable = true)
-	private Long xmlSize;
-
-	@Column(
-			name = "xmltimestamp", 
-			unique = false, 
-			nullable = true)
-    @CreatedDate
-    private ZonedDateTime xmlTimeStamp;
+	public String uncompressedFilename;
 	
 }
