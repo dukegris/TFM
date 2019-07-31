@@ -89,7 +89,7 @@
 				<artifactId>maven-jaxb2-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>JAXB-PubMed</id>
+						<id>NCBI-PubMed</id>
 						<phase>generate-sources</phase>
 						<goals><goal>generate</goal></goals>
 						<configuration>
@@ -105,14 +105,67 @@
 
 							<catalog>${basedir}/src/main/catalogs/pubmed.catalog</catalog>
 
-							<generateDirectory>${project.build.directory}/generated-sources/jaxb_pubmed</generateDirectory>
-							<generatePackage>org.pubmed.schema</generatePackage>
+							<generateDirectory>${project.build.directory}/generated-sources/ncbi_pubmed</generateDirectory>
+							<generatePackage>org.ncbi.pubmed</generatePackage>
 
-							<episodeFile>${project.build.directory}/generated-sources/jaxb_pubmed/META-INF/jaxb_pubmed.episode</episodeFile>
+							<episodeFile>${project.build.directory}/generated-sources/ncbi_pubmed/META-INF/ncbi_pubmed.episode</episodeFile>
 
 							<strict>false</strict>
-							<debug>true</debug>
-							<verbose>true</verbose>
+							<debug>false</debug>
+							<verbose>false</verbose>
+
+						</configuration>
+					</execution>
+					<execution>
+						<id>NCBI-Mesh</id>
+						<phase>generate-sources</phase>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+
+							<schemaLanguage>DTD</schemaLanguage>
+							<encoding>UTF-8</encoding>
+							<!-- 
+							<schemas><schema><url>https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20190101.dtd</url></schema></schemas>
+							 -->
+							<schemaDirectory>${basedir}/src/main/dtd/mesh/</schemaDirectory>
+							<schemaIncludes><schemaInclude>nlmdescriptorrecordset_20190101.dtd</schemaInclude></schemaIncludes>
+							<accessExternalDTD>true</accessExternalDTD>
+
+							<catalog>${basedir}/src/main/catalogs/mesh.catalog</catalog>
+
+							<generateDirectory>${project.build.directory}/generated-sources/ncbi_mesh</generateDirectory>
+							<generatePackage>org.ncbi.mesh</generatePackage>
+
+							<episodeFile>${project.build.directory}/generated-sources/ncbi_mesh/META-INF/ncbi_mesh.episode</episodeFile>
+
+							<strict>false</strict>
+							<debug>false</debug>
+							<verbose>false</verbose>
+
+						</configuration>
+					</execution>
+					<execution>
+						<id>BioC</id>
+						<phase>generate-sources</phase>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+
+							<schemaLanguage>DTD</schemaLanguage>
+							<encoding>UTF-8</encoding>
+							<schemaDirectory>${basedir}/src/main/dtd/bioc/</schemaDirectory>
+							<schemaIncludes><schemaInclude>BioC.dtd</schemaInclude></schemaIncludes>
+							<accessExternalDTD>true</accessExternalDTD>
+
+							<catalog>${basedir}/src/main/catalogs/bioc.catalog</catalog>
+
+							<generateDirectory>${project.build.directory}/generated-sources/bioc</generateDirectory>
+							<generatePackage>org.bioc</generatePackage>
+
+							<episodeFile>${project.build.directory}/generated-sources/bioc/META-INF/bioc.episode</episodeFile>
+
+							<strict>false</strict>
+							<debug>false</debug>
+							<verbose>false</verbose>
 
 						</configuration>
 					</execution>
