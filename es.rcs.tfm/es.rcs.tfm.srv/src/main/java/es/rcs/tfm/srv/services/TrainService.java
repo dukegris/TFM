@@ -1,20 +1,8 @@
 package es.rcs.tfm.srv.services;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import es.rcs.tfm.srv.SrvNames;
-import es.rcs.tfm.srv.model.MarkedText;
 import es.rcs.tfm.srv.repository.TrainRepository;
 import es.rcs.tfm.srv.setup.BiocXmlProcessor;
 import es.rcs.tfm.srv.setup.Conll2003Writer;
@@ -56,75 +43,101 @@ public class TrainService {
 	private @Value("${tfm.training.ner.directory}")			String TRAINING_NER_DIRECTORY =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
 
 	private @Value("${tfm.model.bert_uncased.directory}")	String BERT_UNCASED_MODEL =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert_uncased_en_2.0.2_2.4_1556651478920";
+	private @Value("${tfm.model.bert_ner.directory}")		String BERT_NER_MODEL =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner_dl_bert_en_2.0.2_2.4_1558809068913";
+	private @Value("${tfm.model.tfm.directory}")			String TFM_NER_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tfm_1_.0.0";
 	
 	
 	private static final String TMVAR_TXT_TRAIN =	"tmvar.txt.train" + Conll2003Writer.CONLL_EXT;
 	private static final String TMVAR_TXT_TEST =	"tmvar.txt.test" + Conll2003Writer.CONLL_EXT;
 	private static final String TMVAR_BIOC_TRAIN =	"tmvar.bioc.train" + Conll2003Writer.CONLL_EXT;
 	private static final String TMVAR_BIOC_TEST =	"tmvar.bioc.test" + Conll2003Writer.CONLL_EXT;
+
+	public void trainModel(SparkSession spark) {
+		
+		try {
+			TrainRepository.trainFromConll(
+					spark, 
+					TMVAR_TXT_TRAIN, 
+					TMVAR_TXT_TEST, 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "tmvar_pubtator.csv"), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_pubtator"), 
+					BERT_UNCASED_MODEL, 
+					TFM_NER_MODEL);
+			LOG.info("TRAIN SERVICE: tmVar pubtator fail OK");
+		} catch (Exception ex) {
+			LOG.warn("TRAIN SERVICE: tmVar pubtator fail ex:" + ex.toString());
+		}
+		
+		try {
+			TrainRepository.trainFromConll(
+					spark, 
+					TMVAR_BIOC_TRAIN, 
+					TMVAR_BIOC_TEST, 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "tmvar_bioc.csv"), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_bioc"), 
+					BERT_UNCASED_MODEL, 
+					TFM_NER_MODEL);
+			LOG.info("TRAIN SERVICE: tmVar bioc fail OK");
+		} catch (Exception ex) {
+			LOG.warn("TRAIN SERVICE: tmVar bioc fail ex:" + ex.toString());
+		}
+		
+	}
 	
 	public void prepareDataForTraining(SparkSession spark) {
+
+		try {
+			TrainRepository.getConllFrom(
+					spark, 
+					new PubtatorTxtProcessor(Paths.get(TRAIN_TMVARS_TXT_TRAIN)), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_pubtator_train"), 
+					BERT_UNCASED_MODEL, 
+					BERT_NER_MODEL,
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TRAIN));
+			LOG.info("PREPARE DATA SERVICE: tmVar train pubtator OK");
+		} catch (Exception ex) {
+			LOG.warn("PREPARE DATA SERVICE: tmVar train pubtator fail ex:" + ex.toString());
+		}
 		
-		TrainRepository.getConllFrom(
-				spark, 
-				new PubtatorTxtProcessor(Paths.get(TRAIN_TMVARS_TXT_TRAIN)), 
-				BERT_UNCASED_MODEL, 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TRAIN));
+		try {
+			TrainRepository.getConllFrom(
+					spark, 
+					new PubtatorTxtProcessor(Paths.get(TRAIN_TMVARS_TXT_TEST)), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_pubtator_test"), 
+					BERT_UNCASED_MODEL, 
+					BERT_NER_MODEL,
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TEST));
+			LOG.info("PREPARE DATA SERVICE: tmVar test pubtator OK");
+		} catch (Exception ex) {
+			LOG.warn("PREPARE DATA SERVICE: tmVar test pubtator fail ex:" + ex.toString());
+		}
 
-		/*
-		Path path = null; 
-		Stream<MarkedText> stream = null;
-		List<MarkedText> a = null;
+		try {
+			TrainRepository.getConllFrom(
+					spark, 
+					new BiocXmlProcessor(Paths.get(TRAIN_TMVARS_XML_TRAIN)), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_bioc_train"), 
+					BERT_UNCASED_MODEL, 
+					BERT_NER_MODEL,
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TRAIN));
+			LOG.info("PREPARE DATA SERVICE: tmVar train bioc OK");
+		} catch (Exception ex) {
+			LOG.warn("PREPARE DATA SERVICE: tmVar train bioc fail ex:" + ex.toString());
+		}
+		
+		try {
+			TrainRepository.getConllFrom(
+					spark, 
+					new PubtatorTxtProcessor(Paths.get(TRAIN_TMVARS_XML_TEST)), 
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, "pipeline_bioc_test"), 
+					BERT_UNCASED_MODEL, 
+					BERT_NER_MODEL,
+					FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TEST));
+			LOG.info("PREPARE DATA SERVICE: tmVar test bioc OK");
+		} catch (Exception ex) {
+			LOG.warn("PREPARE DATA SERVICE: tmVar test bioc fail ex:" + ex.toString());
+		}
 
-		path = Paths.get(TRAIN_TMVARS_TXT_TEST);
-		stream = StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(
-						new PubtatorTxtProcessor(path), 
-						Spliterator.DISTINCT), 
-				false);
-		a = stream.collect(Collectors.toList());
-		System.out.println(a.size());
-
-		path = Paths.get(TRAIN_TMVARS_XML_TRAIN);
-		stream = StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(
-						new BiocXmlProcessor(path), 
-						Spliterator.DISTINCT), 
-				false);
-		a = stream.collect(Collectors.toList());
-		System.out.println("" + a.size());
-
-		path = Paths.get(TRAIN_TMVARS_XML_TEST);
-		stream = StreamSupport.stream(
-				Spliterators.spliteratorUnknownSize(
-						new BiocXmlProcessor(path), 
-						Spliterator.DISTINCT), 
-				false);
-		a = stream.collect(Collectors.toList());
-		System.out.println(a.size());
-		*/
 	}
 	
-	/*
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-	private void process(Dataset<Row> result) {
-		
-		// List<Row> rowslist = result.collectAsList();
-System.out.println("COLS: " + sdf.format(new Date()));	
-		
-		Arrays.asList(result.columns()).forEach(c -> {
-			System.out.print(c + ", ");
-		});
-		System.out.println();
-		
-System.out.println("BEFORE: " + sdf.format(new Date()));
-		try {
-			System.out.println("C: " + result.count());
-		} catch (Exception ex) {
-			System.out.println("EX: " + ex.toString());
-		}
-System.out.println("COUNT: " + sdf.format(new Date()));
-				
-	}
-	*/
 }

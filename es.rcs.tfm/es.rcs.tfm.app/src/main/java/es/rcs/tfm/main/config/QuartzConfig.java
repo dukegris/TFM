@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.components.PrepareConllTask;
+import es.rcs.tfm.srv.components.TrainConllTask;
 import es.rcs.tfm.srv.services.OspmcLoaderService;
 import es.rcs.tfm.srv.services.PubmedLoaderService;
 
@@ -51,7 +52,7 @@ public class QuartzConfig {
 	@Scheduled(
 			cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			//cron = "0 0 0 * * MON-SUN")
-	public void trainBronco() {
+	public void prepareBronco() {
 		synchronized(prepareDataTask) {
 			if (prepareDataTask != null) {
 				if (State.NEW.equals(prepareDataTask.getState())) {
@@ -62,6 +63,25 @@ public class QuartzConfig {
 					LOG.info("PREPARE DATA TASK IS RUNNING");
 				} else {
 					LOG.warn("PREPARE DATA TASK IS " + prepareDataTask.getState());
+				}
+			}
+		}
+	}
+	
+	@Scheduled(
+			cron = "0 */1 * * * SUN-SAT") // Cada minuto
+			//cron = "0 0 0 * * MON-SUN")
+	public void trainBronco() {
+		synchronized(trainModelTask) {
+			if (trainModelTask != null) {
+				if (State.NEW.equals(trainModelTask.getState())) {
+					trainModelTask.start();
+				} else if (State.TERMINATED.equals(trainModelTask.getState())) {
+					trainModelTask.run();
+				} else if (State.RUNNABLE.equals(trainModelTask.getState())) {
+					LOG.info("TRAIN DATA TASK IS RUNNING");
+				} else {
+					LOG.warn("TRAIN DATA TASK IS " + trainModelTask.getState());
 				}
 			}
 		}
@@ -78,5 +98,9 @@ public class QuartzConfig {
 	@Autowired
 	@Qualifier(value = SrvNames.PREPARE_DATA_TASK)
 	private PrepareConllTask prepareDataTask;
+	
+	@Autowired
+	@Qualifier(value = SrvNames.TRAIN_MODEL_TASK)
+	private TrainConllTask trainModelTask;
 	
 }

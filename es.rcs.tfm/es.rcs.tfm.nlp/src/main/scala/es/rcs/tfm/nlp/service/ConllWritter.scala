@@ -148,7 +148,7 @@ class ConllWritter(spark: SparkSession) {
 
   // https://fullstackml.com/2015/12/21/how-to-export-data-frame-from-apache-spark/
   def saveDsToCsv(
-      ds: Dataset[(String, String, String, String)], 
+      ds: Dataset[_], 
       targetFile: String,
       sep: String = ",", 
       header: Boolean = false): Unit = {

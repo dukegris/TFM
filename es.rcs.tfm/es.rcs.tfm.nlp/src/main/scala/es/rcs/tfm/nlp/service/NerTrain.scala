@@ -1,8 +1,9 @@
 package es.rcs.tfm.nlp.service
 
-import com.johnsnowlabs.nlp.{SparkNLP, DocumentAssembler, Finisher, AnnotatorType}
+import com.johnsnowlabs.nlp.{Annotation, SparkNLP, DocumentAssembler, Finisher, AnnotatorType}
 import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
 import com.johnsnowlabs.nlp.annotators.{Stemmer, Tokenizer, Normalizer}
+import com.johnsnowlabs.nlp.annotators.common.NerTagged
 import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach, PretrainedNerDL} 
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
@@ -10,12 +11,15 @@ import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
 import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.training.CoNLL
+import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs}
 
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
+import org.apache.spark.ml.PipelineModel
 
-class NerTrain(sc: SparkContext, spark: SparkSession, modelDirectory: String) {
+import es.rcs.tfm.nlp.util.NerHelper
+
+class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String) {
 
   val nerCorpus = """
                    |-DOCSTART- O
@@ -29,16 +33,130 @@ class NerTrain(sc: SparkContext, spark: SparkSession, modelDirectory: String) {
                    |. O
                    |
                   """.stripMargin
-                  
-  def testNerFromConll2003() = { // Dataset[Row] = {
-    
-    // Crea un texto con la primera columna y tiene en la segunda los IOB
-    val lines = nerCorpus.split("\n")
-    val data = CoNLL(conllLabelIndex = 1).readDatasetFromLines(lines, spark).toDF
-    
-    import spark.implicits._
-    val emptyData = spark.emptyDataset[String].toDF("text")
 
+  def getNerDlModelFor(trainFileName: String, modelDirectory: String): NerDLModel = {
+    
+    val nerReader = CoNLL()
+    val nerHelper = new NerHelper(spark)
+    
+    val trainFile = ExternalResource(
+         trainFileName, 
+         ReadAs.LINE_BY_LINE, 
+         Map.empty[String, String])
+    
+    val model = trainNerModel(nerReader, trainFile)
+    
+    val ner = model.
+      stages.
+      filter(s => s.isInstanceOf[NerDLModel]).
+      head.
+      asInstanceOf[NerDLModel]
+      
+    ner.
+      write.
+      overwrite.
+      save(modelDirectory)
+    
+     ner
+     
+  }
+
+  def saveNerModel(model: PipelineModel, modelDirectory: String): NerDLModel = {
+
+    val ner = model.
+      stages.
+      filter(s => s.isInstanceOf[NerDLModel]).
+      head.
+      asInstanceOf[NerDLModel]
+      
+    ner.
+      write.
+      overwrite.
+      save(modelDirectory)
+    
+     ner
+         
+  }
+                  
+  def measureNerTraining(trainFileName: String, testFileName: String, predictionsCsvFileName: String, pipelineModelDirectory: String): PipelineModel = {
+
+    val nerReader = CoNLL()
+    val nerHelper = new NerHelper(spark)
+  
+    val trainFile = ExternalResource(trainFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
+    val testFile = ExternalResource(testFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
+     
+    val model = trainNerModel(nerReader, trainFile)
+  
+    measureNerModel(nerReader, model, trainFile, false)
+    measureNerModel(nerReader, model, testFile, false)
+  
+    val df = model.transform(nerReader.readDataset(spark, testFile.path))
+    val annotation = Annotation.collect(df, "ner_span")
+    nerHelper.saveNerSpanTags(annotation, predictionsCsvFileName)
+    
+    model.write.overwrite().save(pipelineModelDirectory)
+    val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
+
+    System.out.println("Training dataset")
+    nerHelper.measureExact(nerReader, loadedModel, trainFile)
+  
+    System.out.println("Test dataset")
+    nerHelper.measureExact(nerReader, loadedModel, testFile)
+    
+    model
+    
+  }
+  
+  def measureNerModel(nerReader: CoNLL, model: PipelineModel, file: ExternalResource, extended: Boolean = true, errorsToPrint: Int = 0): Unit = {
+    
+    val ner = model.
+      stages.
+      filter(s => s.isInstanceOf[NerDLModel]).
+      head.
+      asInstanceOf[NerDLModel].
+      getModelIfNotSet
+
+    val df = nerReader.
+      readDataset(spark, file.path).
+      toDF()
+
+    val transformed = model.
+      transform(df)
+
+    val labeled = NerTagged.
+      collectTrainingInstances(
+          transformed, 
+          Seq("sentence", AnnotatorType.TOKEN, AnnotatorType.WORD_EMBEDDINGS), "label")
+
+    ner.measure(labeled, (s: String) => System.out.println(s), extended, errorsToPrint)
+
+  }
+  
+  def trainNerModel(nerReader: CoNLL, file: ExternalResource): PipelineModel = {
+
+    System.out.println("NER-TRAIN: Lectura del dataset")
+
+    val time = System.nanoTime()
+    
+    val dataset = nerReader.
+      readDataset(spark, file.path)
+    
+    System.out.println(s"NER-TRAIN: Lectura en ${(System.nanoTime() - time)/1e9}\n")
+
+    System.out.println("NER-TRAIN: Comienzo del entrenamiento")
+
+    val stages = createPipelineStagesDl()
+
+    val pipeline = new RecursivePipeline().
+      setStages(stages)
+
+    pipeline.fit(dataset)
+    
+  }
+  
+  def createPipelineStagesDl() = {
+    
     val document = new DocumentAssembler().
       setInputCol("text").
     	setOutputCol(AnnotatorType.DOCUMENT)
@@ -80,21 +198,19 @@ class NerTrain(sc: SparkContext, spark: SparkSession, modelDirectory: String) {
       // setEmbeddingsSource("/clinical.embeddings.100d.txt", 100, 2).
       // setIncludeEmbeddings(True).
       // setVerbose(2).
+      // setVerbose(Verbose.Epochs)
       setBatchSize(9)
 
     val converter = new NerConverter().
     	setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, AnnotatorType.NAMED_ENTITY).
     	//setInputCols(AnnotatorType.DOCUMENT, "normal_token", AnnotatorType.NAMED_ENTITY).
-    	setOutputCol("ner_chunk")
+    	setOutputCol("ner_span")
 
-    val finisher = new Finisher().
-      //setInputCols(AnnotatorType.TOKEN, "stem", "normal_token", AnnotatorType.POS, AnnotatorType.WORD_EMBEDDINGS, AnnotatorType.NAMED_ENTITY, "ner_chunk").
-      setInputCols(AnnotatorType.TOKEN, AnnotatorType.POS, AnnotatorType.WORD_EMBEDDINGS, AnnotatorType.NAMED_ENTITY, "ner_chunk").
-      setIncludeMetadata(true).
-      setCleanAnnotations(false)
+    val labelConverter = new NerConverter()
+      .setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, "label")
+      .setOutputCol("label_span")
 
-    val pipeline = new RecursivePipeline().
-    	setStages(Array(
+    Array(
     		document,
     		sentence,
     		token,
@@ -102,54 +218,9 @@ class NerTrain(sc: SparkContext, spark: SparkSession, modelDirectory: String) {
     		embeddings,
     		nerTagger,
     		converter,
-    		finisher
-    ))
-
-    val model = pipeline.fit(emptyData)
-
-    //model.getStages(3).write.overwrite.save("newmodel")
+    		labelConverter
+    )
     
   }
-  
-  /*
-   * 
-  converter = NerConverter()\
-  .setInputCols(["document", "token", "ner"])\
-  .setOutputCol("ner_span")
-    
-finisher = Finisher() \
-  .setInputCols(["ner_span"])\
-  .setIncludeKeys(True)
 
-pipeline = Pipeline(
-  stages = [
-    documentAssembler,
-    sentenceDetector,
-    tokenizer,
-    nerTagger,
-    converter,
-    finisher
-  ]
-searchForSuitableGraph(10, 100, 100)
-    assert(smallGraphFile.endsWith("blstm_10_100_128_100.pb") || smallGraphFile.endsWith("blstm-noncontrib_10_100_128_100.pb"))
-
-    val bigGraphFile = NerDLApproach.searchForSuitableGraph(25, 300, 100)
-    assert(bigGraphFile.endsWith("blstm_25_300_128_100.pb") || bigGraphFile.endsWith("blstm-noncontrib_25_300_128_100.pb"))
-       * 
-    val conll = CoNLL()
-    val training_data = conll.readDataset(ResourceHelper.spark, "python/tensorflow/ner/conll2003/eng.testa")
-    val embeddings = WordEmbeddingsModel.pretrained().setOutputCol("embeddings")
-    val readyData = embeddings.transform(training_data)
-val ner = new NerDLApproach()
-      .setInputCols("sentence", "token", "embeddings")
-      .setOutputCol("ner")
-      .setLabelColumn("label")
-      .setOutputCol("ner")
-      .setPo(5e-3f) //0.005
-      .setDropout(5e-1f) //0.5
-      .setMaxEpochs(1)
-      .setRandomSeed(0)
-      .setVerbose(0)
-      .setTrainValidationProp(0.1f)
-      .fit(readyData)  }   */
 }

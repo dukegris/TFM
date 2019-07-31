@@ -138,6 +138,12 @@
 			<artifactId>spark-sql_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- NLP -->
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 UTILIDADES

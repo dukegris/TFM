@@ -13,11 +13,10 @@ import com.johnsnowlabs.util.CoNLLGenerator
 
 import java.util.List;
 
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
 import org.apache.spark.sql.types.{StructType}
-import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 
 import scala.collection.{JavaConversions, JavaConverters}
 import scala.collection.mutable.WrappedArray
@@ -26,7 +25,7 @@ import scala.util.matching.Regex
 /**
  * 
  */
-class NerPrepare(sc: SparkContext, spark: SparkSession, modelDirectory: String) {
+class NerPrepare(sc: SparkContext, spark: SparkSession) {
 
   /**
    * Ejecuta un pipeline sobre un dataset con una columna denominada text
@@ -34,7 +33,7 @@ class NerPrepare(sc: SparkContext, spark: SparkSession, modelDirectory: String) 
    * @param structType La estructura de datos
    * @return Un dataset etiquetado con document, sentences, token, pos, word_embedding, named_entity, ner_chunk, sus finished y sus finished metadata
    */
-  def execute(rows: List[Row], structType: StructType): DataFrame = {
+  def execute(rows: List[Row], structType: StructType, pipelineModelDirectory: String): DataFrame = {
     
     import spark.implicits._
     val emptyData = spark.emptyDataset[String].toDF("text")
@@ -112,6 +111,9 @@ class NerPrepare(sc: SparkContext, spark: SparkSession, modelDirectory: String) 
     ))
 
     val model = pipeline.fit(emptyData)
+    
+    model.write.overwrite().save(pipelineModelDirectory)
+    val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
 
     val result = model.transform(data)
     
