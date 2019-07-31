@@ -1,4 +1,4 @@
-package es.rcs.tfm.jats.model;
+package es.rcs.tfm.pubmed;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,22 +20,22 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pubmed.schema.Abstract;
-import org.pubmed.schema.Article;
-import org.pubmed.schema.ArticleId;
-import org.pubmed.schema.ArticleTitle;
-import org.pubmed.schema.BookDocument;
-import org.pubmed.schema.DeleteCitation;
-import org.pubmed.schema.MedlineCitation;
-import org.pubmed.schema.ObjectList;
-import org.pubmed.schema.PMID;
-import org.pubmed.schema.PubMedPubDate;
-import org.pubmed.schema.PubmedArticle;
-import org.pubmed.schema.PubmedArticleSet;
-import org.pubmed.schema.PubmedBookArticle;
-import org.pubmed.schema.PubmedBookData;
-import org.pubmed.schema.PubmedData;
-import org.pubmed.schema.ReferenceList;
+import org.ncbi.pubmed.Abstract;
+import org.ncbi.pubmed.Article;
+import org.ncbi.pubmed.ArticleId;
+import org.ncbi.pubmed.ArticleTitle;
+import org.ncbi.pubmed.BookDocument;
+import org.ncbi.pubmed.DeleteCitation;
+import org.ncbi.pubmed.MedlineCitation;
+import org.ncbi.pubmed.ObjectList;
+import org.ncbi.pubmed.PMID;
+import org.ncbi.pubmed.PubMedPubDate;
+import org.ncbi.pubmed.PubmedArticle;
+import org.ncbi.pubmed.PubmedArticleSet;
+import org.ncbi.pubmed.PubmedBookArticle;
+import org.ncbi.pubmed.PubmedBookData;
+import org.ncbi.pubmed.PubmedData;
+import org.ncbi.pubmed.ReferenceList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -55,14 +55,12 @@ import es.rcs.tfm.xml.XmlNames;
 @ComponentScan(basePackages = {
 		XmlNames.XML_CONFIG_PKG})
 @ContextConfiguration(classes = {
-		ModelTest.class })
-public class ModelTest {
+		PubMedTest.class })
+public class PubMedTest {
 
 	public static void main(String[] args) {
 
-		//File file1 = new File("./data/PMC1790863/pone.0000217.nxml");
-		//File file2 = new File("./data/PMC6317384/PAMJ-30-287.nxml");
-		File file1 = new File("./data/pubmed19n1020/pubmed19n1020.xml");
+		File file = new File("../es.rcs.tfm.corpus/data/xmlpubmed/pubmed19n0973.xml");
 
 		JAXBContext jaxbContext;
 		try {
@@ -70,7 +68,7 @@ public class ModelTest {
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
 	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-	        InputSource inputSource = new InputSource(new FileReader(file1));
+	        InputSource inputSource = new InputSource(new FileReader(file));
 	        SAXSource source = new SAXSource(xmlReader, inputSource);
 	        
 			jaxbContext = JAXBContext.newInstance(PubmedArticleSet.class);
@@ -148,7 +146,7 @@ public class ModelTest {
 			    						if (	(pubmedData.getObjectList() != null) && 
 			    								(pubmedData.getObjectList().getObject() != null) &&
 			    								(!pubmedData.getObjectList().getObject().isEmpty())) {
-			    							List<org.pubmed.schema.Object> instances = pubmedData.getObjectList().getObject();
+			    							List<org.ncbi.pubmed.Object> instances = pubmedData.getObjectList().getObject();
 			    							if ((instances != null) && (!instances.isEmpty())) {
 			    								instances.forEach(instance -> {
 			    									
@@ -357,7 +355,7 @@ public class ModelTest {
 	}
 
 	@Autowired 
-	@Qualifier(	value = XmlNames.JAXB_MARSHALLER )
+	@Qualifier(	value = XmlNames.NCBI_PUBMED_MARSHALLER )
 	private Jaxb2Marshaller marshaller;
 		
 }
