@@ -37,6 +37,12 @@
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Nlp</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Srv</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
@@ -260,6 +266,49 @@
 		</dependency>
 
 		<!-- =====================================
+			 NLP
+			 ===================================== -->
+		<!-- SCALA -->
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- HADOOP -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- SPARK -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-mllib_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- NLP -->
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
 			 LOGGER
 			 ===================================== -->
 		<dependency>
@@ -272,6 +321,25 @@
 			<artifactId>log4j</artifactId>
 			<scope>compile</scope>
 		</dependency>
+	
+		
+		<!-- =====================================
+			 TEST
+			 ===================================== -->
+		<!-- SPRING -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- JUNIT -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		
 	</dependencies>
 
 </project>

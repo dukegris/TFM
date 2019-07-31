@@ -20,6 +20,7 @@
 		<module>es.rcs.tfm.xml</module>
 		<module>es.rcs.tfm.idx</module>
 		<module>es.rcs.tfm.db</module>
+		<module>es.rcs.tfm.nlp</module>
 		<module>es.rcs.tfm.srv</module>
 		<module>es.rcs.tfm.api</module>
 		<module>es.rcs.tfm.spa</module>
@@ -59,15 +60,18 @@
 	<profiles>
 	    <profile>
 	        <id>development</id>
-	        <activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+	        <activation><activeByDefault>true</activeByDefault></activation>
+			<properties><env>development</env></properties>
 	    </profile>
 	    <profile>
 	        <id>test</id>
+	        <activation><activeByDefault>false</activeByDefault></activation>
+			<properties><env>test</env></properties>
 	    </profile>
 	    <profile>
 	        <id>production</id>
+	        <activation><activeByDefault>false</activeByDefault></activation>
+			<properties><env>production</env></properties>
 	    </profile>
 	</profiles>
 
@@ -99,6 +103,7 @@
 		<!-- APACHE COMMONS -->
 		<commons-codec.version>1.12</commons-codec.version>
 		<commons-collections4.version>4.3</commons-collections4.version>
+		<commons-csv.version>1.7</commons-csv.version>
 		<commons-io.version>2.6</commons-io.version>
 		<commons-lang3.version>3.9</commons-lang3.version>
 		<commons-net.version>3.6</commons-net.version>
@@ -133,8 +138,7 @@
 		<wrapper.version>3.2.3</wrapper.version>
 		<querydsl.version>4.2.1</querydsl.version>
 		<javers.version>5.2.4</javers.version>
-		
-		<!-- https://stackoverflow.com/questions/36427291/illegalaccesserror-to-guavas-stopwatch-from-org-apache-hadoop-mapreduce-lib-inp -->
+		<sfm-csv.version>7.0.0</sfm-csv.version>
 		<google-guava.version>15.0</google-guava.version>
 		<google-collections.version>1.0</google-collections.version>
 		<hikari.version>3.3.1</hikari.version>
@@ -221,6 +225,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons-collections4.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>${commons-csv.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -680,6 +690,13 @@
 			<version>${wrapper.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- SFM CSV -->
+		<dependency>
+			<groupId>org.simpleflatmapper</groupId>
+			<artifactId>sfm-csv</artifactId>
+			<version>${sfm-csv.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		
 		<!-- =====================================
 			 SERVERS
@@ -887,6 +904,11 @@
 	
 	<build>
 			
+		<resources>
+			<resource><directory>src/main/resources</directory></resource>
+			<resource><directory>src/main/resources.${env}</directory></resource>
+		</resources>
+
 		<pluginManagement>
 				
 			<plugins>

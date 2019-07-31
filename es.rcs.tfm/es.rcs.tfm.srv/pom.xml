@@ -25,6 +25,12 @@
 			 ===================================== -->
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Nlp</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Db</artifactId>
 			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
@@ -48,6 +54,11 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -103,6 +114,32 @@
 		</dependency>
 
 		<!-- =====================================
+			 NLP
+			 ===================================== -->
+		<!-- SCALA -->
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- SPARK -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-mllib_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
 			 UTILIDADES
 			 ===================================== -->
 		<!-- LOMBOK -->
@@ -120,6 +157,12 @@
 		<dependency>
 			<groupId>com.querydsl</groupId>
 			<artifactId>querydsl-jpa</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- SFM CSV -->
+		<dependency>
+			<groupId>org.simpleflatmapper</groupId>
+			<artifactId>sfm-csv</artifactId>
 			<scope>compile</scope>
 		</dependency>
 

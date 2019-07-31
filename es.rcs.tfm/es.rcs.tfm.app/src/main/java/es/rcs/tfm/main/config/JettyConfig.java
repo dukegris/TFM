@@ -153,18 +153,12 @@ public class JettyConfig {
 	@Bean(	name = AppNames.JETTY_SERVLET )
     public DispatcherServlet dispatcherServlet() {
     	
-        System.out.println("TAO SERVLET CREATION");
-        LOG.info("TAO SERVLET CREATION");
+        LOG.info("TFM SERVLET CREATION");
         
         DispatcherServlet bean;
         bean = new DispatcherServlet();
 		
-        System.out.println("TAO SERVLET CREATED");
-        LOG.info("TAO SERVLET CREATED");
-		
-        System.out.println("TAO SERVLET REGISTRATION");
-        LOG.info("TAO SERVLET REGISTRATION");
-
+        LOG.info("TFM SERVLET CREATED");
         return bean;
 
     }
@@ -181,8 +175,7 @@ public class JettyConfig {
 		bean.setName(AppNames.JETTY_SERVLET);// Este nombre engancha con el de la configuracion web
 		bean.addUrlMappings("/");
 
-		System.out.println("TAO SERVLET REGISTERED NAME is: " + bean.getServletName().toString()); 
-		LOG.info("TAO SERVLET REGISTERED NAME is: " + bean.getServletName().toString());
+		LOG.info("TFM SERVLET REGISTERED NAME is: " + bean.getServletName().toString());
 	
 		return bean;
 
@@ -223,16 +216,14 @@ public class JettyConfig {
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 
-				System.out.println("TAO SERVLET CONTEXT initialized");
-				LOG.info("TAO SERVLET CONTEXT initialized");
+				LOG.info("TFM SERVLET CONTEXT initialized");
 
 			}
 
 			@Override
 			public void contextDestroyed(ServletContextEvent sce) {
 
-				System.out.println("TAO SERVLET CONTEXT destroyed");
-				LOG.info("TAO SERVLET CONTEXT destroyed");
+				LOG.info("TFM SERVLET CONTEXT destroyed");
 
 			}
 			

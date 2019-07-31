@@ -151,6 +151,7 @@ public class DatabaseConfig {
 		bean.setEntityManagerFactory(getEntityManager().getObject());
 		
 		return bean;
+		
 	}
 
 }
