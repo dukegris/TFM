@@ -52,7 +52,7 @@
 				<executions>
 					<execution>
 						<id>NODE App INSTALL</id>
-						<phase>generate-sources</phase>
+						<phase>compile</phase>
 						<goals><goal>run</goal></goals>
 						<configuration>
 							<target name="Install dependencies">
@@ -61,6 +61,12 @@
 										failonerror="true" 
 										osfamily="windows">
 									<arg line="/c &quot;npm install&quot;" />
+								</exec>
+								<exec	executable="npm" 
+										dir="${project.basedir}"
+										failonerror="true" 
+										osfamily="unix">
+									<arg line="install" />
 								</exec>
 							</target>
 						</configuration>
@@ -76,6 +82,12 @@
 										failonerror="true" 
 										osfamily="windows">
 									<arg line="/c &quot;ng build&quot;" />
+								</exec>
+								<exec	executable="ng" 
+										dir="${project.basedir}"
+										failonerror="true" 
+										osfamily="unix">
+									<arg line="build" />
 								</exec>
 							</target>
 						</configuration>
