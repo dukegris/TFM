@@ -3,6 +3,10 @@ package es.rcs.tfm.main;
 public class AppNames {
 
 	// -------------------------------------------------------------------------------------
+	// CMD: CONFIG
+	public static final String CMD_CONFIG = 					"taoCommandConfig";
+
+	// -------------------------------------------------------------------------------------
 	// APP: CONFIG
 	public static final String APP_NAME = 						"TCS TFM Web App";
 	public static final String APP_CONFIG = 					"taoConfig";

@@ -16,6 +16,6 @@ import es.rcs.tfm.db.DbNames;
 		transactionManagerRef = DbNames.DB_TX,
 		entityManagerFactoryRef = DbNames.DB_EMF,
 		repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-public class DatabaseConfig {
+public class DbConfig {
 
 }

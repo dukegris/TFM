@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -33,6 +34,7 @@ public class TrainRepository {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TrainRepository.class);
 	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
+	private static final String HADOOP_FILE_PREFIX = "file:///";
 	
 	/**
 	 * Construye un dataset a partir de los datos de entrenamiento en el modelo intermedio
@@ -161,7 +163,8 @@ public class TrainRepository {
 	 * Construye un fichero conll en un directorio parquet con el conjunto de documentos de entrenamiento
 	 * aplicandoles la localización de entidades del modelo 
 	 * @param spark Sesion de Spark donde se ejecutará la preparación de datos
-	 * @param filename Nombre del fichero con los datos de entrenamiento en formato Pubtator
+	 * @param processor Generador de anotaciones
+	 * @param resultsDirectory Directorio donde se deja el modelo con los resultados
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertNerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
 	 * @param targetFilename Directorio parquet de salida de la preparación de datos
@@ -196,7 +199,7 @@ public class TrainRepository {
 		if (target.toFile() == null) return false;
 		//if (!target.toFile().exists()) return false;
 		//if (!target.toFile().isFile()) return false;
-
+		
 		boolean resultado = true;
 		try {
 
@@ -212,7 +215,9 @@ public class TrainRepository {
 			//List<MarkedText> data = stream.limit(2).collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
+				
 				resultado = false;
+				
 			} else {
 
 				List<Row> rows = TrainRepository.generateDS(data);
@@ -229,7 +234,8 @@ public class TrainRepository {
 				ConllWritter writter = new ConllWritter(spark);
 				double tasa = writter.
 					exportConllFiles(
-						generator.execute(rows, structType, resultsDirectory),
+						generator.
+							execute(rows, structType, HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(resultsDirectory)),
 						targetFilename);
 
 				LOG.info(

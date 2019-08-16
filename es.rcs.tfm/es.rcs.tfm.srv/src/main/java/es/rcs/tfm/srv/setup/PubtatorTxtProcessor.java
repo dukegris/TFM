@@ -16,6 +16,10 @@ import es.rcs.tfm.srv.model.MarkedText.Note;
 
 public class PubtatorTxtProcessor extends MarkedTextProcessor {
 
+	private static final Pattern LINE_PUBTATOR_PTRN = Pattern.compile("(\\d+)[\\|\\s].*");
+	private static final Pattern TEXT_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\|([ta])\\|(.*)$");
+	private static final Pattern DATA_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\t(\\d+)\\t(\\d+)\\t(.+)[\\s\\t]+(.+)\\s+(.+)$");
+
 	private BufferedReader input = null;
 	private long totalSize = -1;
 	private long readedSize = -1;
@@ -45,33 +49,34 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 
 		boolean more = 
 				(this.allOk) && 
-				(this.input != null) &&
-				(readedSize < totalSize);
+				(this.input != null) && (
+				(this.readedSize < this.totalSize) ||
+				(this.nextItem.length()>0));
 		
+		/*
 		if (!more) {
 			System.out.println("MUTACIONES");
 			MarkedText.MUTATIONS.forEach((e,v) -> System.out.println ("TYPE: " + e + ": " + v));
 		}
-		
+		 */
 		return more;
 		
 	}
 
-	private Pattern LINE_PUBTATOR_PTRN = Pattern.compile("(\\d+)[\\|\\s].*");
 	@Override
 	public MarkedText next() {
 		
-		if (	(!this.allOk) ||
-				(!this.hasNext())) {
+		if (!this.hasNext()) {
 			this.allOk = false;
 			throw new NoSuchElementException();
 		}
 		
-		boolean exit = false;
 		String pmc = "";
+		boolean exit = false;
 		MarkedText result = null;
 		while (!exit) {
-	        String text = "";
+
+			String text = "";
 			try {
 				text = this.input.readLine();
 			} catch (IOException e) {
@@ -80,43 +85,44 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 				text = "";
 				this.allOk = false;
 			}
-			if (StringUtils.isNotBlank(text)) {
+			
+			if (!exit && this.allOk) {
+				if (StringUtils.isNotBlank(text)) {
 				
-				readedSize += text.length() + 2;
-				if (this.readedSize >= this.totalSize) {
-					exit = true;
-				}
-
-				Matcher m = LINE_PUBTATOR_PTRN.matcher(text);
-				if (m.find()) {
-					String str = m.group(1);
-					if (StringUtils.isNotBlank(str)) {
-						if (StringUtils.isBlank(pmc)) {
-							pmc = str;
-						} else if (!pmc.equals(str)) {
-							exit = true;							
+					readedSize += text.length() + 2;
+					Matcher m = LINE_PUBTATOR_PTRN.matcher(text);
+					if (m.find()) {
+						String str = m.group(1);
+						if (StringUtils.isNotBlank(str)) {
+							if (StringUtils.isBlank(pmc)) {
+								pmc = str;
+							}
+							if (str.equals(pmc)) {
+								this.nextItem.append(text);
+								this.nextItem.append("\r\n");
+							} else {
+								exit = true;						
+							} 
 						}
 					}
+					
+				} else { 
+					readedSize += 2;
+					exit = true;
 				}
-			} else if (text == null) {
-				exit = true;
-				allOk = false;
-			} else {
-				readedSize += text.length() + 2;
-				exit = true;
 			}
 			
 			if (exit) {
-				result = process(this.nextItem.toString());
-				this.nextItem = new StringBuffer();
-				this.nextItem.append(text);
-				
-			} else {
 				if (this.nextItem.length()>0) {
+					result = process(this.nextItem.toString());
+				}
+				this.nextItem = new StringBuffer();
+				if (StringUtils.isNotBlank(text)) {
+					this.nextItem.append(text);	
 					this.nextItem.append("\r\n");
 				}
-				this.nextItem.append(text);
 			}
+					
 		}
 
 		if(!this.hasNext()) {
@@ -128,16 +134,11 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 		}
 		
 		return result;
+		
 	}
-	
-	private Pattern TEXT_PUBTATOR_PTRN = Pattern.compile("(\\d+)\\|([ta])\\|(.*)");
-	private Pattern DATA_PUBTATOR_PTRN = Pattern.compile("(\\d+)\\t(\\d+)\\t(.+?)\\s+(.+?)\\s+(.+?)");
 	
 	private MarkedText process(String str) {
 
-		TEXT_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\|([ta])\\|(.*)$");
-		DATA_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\t(\\d+)\\t(\\d+)\\t(.+)[\\s\\t]+(.+)\\s+(.+)$");
-		
 		MarkedText result = new MarkedText();
 		
 		Block title = null;
@@ -231,6 +232,4 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 		
 	}
 
-	
-	
 }

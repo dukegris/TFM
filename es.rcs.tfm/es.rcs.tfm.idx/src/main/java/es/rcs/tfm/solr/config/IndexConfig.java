@@ -13,6 +13,6 @@ import es.rcs.tfm.solr.IndexNames;
 		basePackages = IndexNames.IDX_REPOSITORY_PKG,
 		solrClientRef = IndexNames.IDX_CLIENT,
 		solrTemplateRef = IndexNames.IDX_TEMPLATE)
-public class SolrConfig {
+public class IndexConfig {
     
 }

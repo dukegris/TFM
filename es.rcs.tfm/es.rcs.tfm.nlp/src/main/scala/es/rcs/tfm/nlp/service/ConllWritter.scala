@@ -28,8 +28,6 @@ class ConllWritter(spark: SparkSession) {
     
     import data.sparkSession.implicits._ // for row casting
 
-    var fallos:Integer = 0
-    var total:Integer = 0
     // ---------------------------------------------------------------------------------------
     // Preparacion de los datos para su procesamiento
     val conllData = data.select (
@@ -58,12 +56,14 @@ class ConllWritter(spark: SparkSession) {
 
     // ---------------------------------------------------------------------------------------
     // RECORRER CADA FILA GENERANDO UN DOCUMENTO
+    //val CoNLLDataset = conllData.limit(6).flatMap(row => {
+    var docId = 0
     val CoNLLDataset = conllData.flatMap(row => {
 
       // Inicio del documento
-      val conllDoc: ArrayBuffer[(String, String, String, String)] = ArrayBuffer()
-      conllDoc.append(("-DOCSTART-", "-X-", "-X-", "O"))
-      conllDoc.append((null, null, null, null))
+      val conllDoc: ArrayBuffer[(String, String, String, String, Int, Int, Int, Int)] = ArrayBuffer()
+      conllDoc.append(("-DOCSTART-", "-X-", "-X-", "O", docId, 0, 0, 0))
+      conllDoc.append((null, null, null, null, docId, 0, 0, 0))
       
       // Construye la tupla: ((1127,1135),Asp506Gly,NNP,O,9)
       val dataPrepared = (
@@ -74,18 +74,19 @@ class ConllWritter(spark: SparkSession) {
       		
       // Para cada tupla
       var sentenceId = 0
-      var encontrados = 0;
+      // var encontrados = 0;
       dataPrepared.foreach(a => {
         
         // Si hay cambio de frase se induce una linea en blanco
         if (a._5 != sentenceId){
-          conllDoc.append((null, null, null, null))
+          conllDoc.append((null, null, null, null, docId, 0, 0, 0))
           sentenceId = a._5
         }
         
         // Busca la localizacion por si hay un NER en los datos de train
         // row._3 tiene [655, 661, G13513A, MUT_DMA]
         val DIFF = 2
+        var enc = 0
         val iob = row._3.map(_ match {
         	case NOTES_PTR(start: String, end: String, word: String, iob: String) => (start.toInt, end.toInt, word, iob) 
         	case _ => (-2, -2, "", "")}).filter(i => (
@@ -98,50 +99,48 @@ class ConllWritter(spark: SparkSession) {
         var str = a._4 
         if ((iob != null) && (iob.size > 0)) {
           str = iob(0)._4
-          encontrados += 1;
+          enc = 1
         }
-        var aver = a._1._1 + "," + a._1._2 + "(" + str + ") -> " + a._2 + " --- " + str + " IN "
-        if (row._3.size> 0) aver = aver + row._3( 0)
-        if (row._3.size> 1) aver = aver + row._3( 1)
-        if (row._3.size> 2) aver = aver + row._3( 2)
-        if (row._3.size> 3) aver = aver + row._3( 3)
-        if (row._3.size> 4) aver = aver + row._3( 4)
-        if (row._3.size> 5) aver = aver + row._3( 5)
-        if (row._3.size> 6) aver = aver + row._3( 6)
-        if (row._3.size> 7) aver = aver + row._3( 7)
-        if (row._3.size> 8) aver = aver + row._3( 8)
-        if (row._3.size> 9) aver = aver + row._3( 9)
-        if (row._3.size>10) aver = aver + row._3(10)
-        if (row._3.size>11) aver = aver + row._3(11)
-        println (aver)
-
+ 
         // Linea del fichero CONLL
-        conllDoc.append((a._2, a._3, a._3, str))
-        
+        conllDoc.append((a._2, a._3, a._3, str, docId, sentenceId, enc, row._3.size))
+
       })
 
-      total = total + row._3.size
-      fallos = fallos + encontrados
-      if (encontrados != row._3.size) {
-        println("ENCONTRADOS " + encontrados + " de " + row._3.size);
-        row._3.foreach(n => println)
-      }
-      
       // Final del documento
-      conllDoc.append((null, null, null, null))
+
+      docId += 1
+
+      conllDoc.append((null, null, null, null, 0, 0, 0, 0))
       conllDoc
       
     })
 
     // ---------------------------------------------------------------------------------------
     // Exportar los datos a un fichero CONLL
+    //saveDsToCsv(ds = CoNLLDataset.select("_c0", "_c1", "_c2", "_c3"), sep = " ", targetFile = outputPath)
     saveDsToCsv(ds = CoNLLDataset, sep = " ", targetFile = outputPath)
     
+    val precission = CoNLLDataset.select("_5", "_6", "_7", "_8").groupBy("_5").agg(
+        "_5" -> "count",
+        "_6" -> "count",
+        "_7" -> "sum",
+        "_8" -> "max").agg(
+        "count(_5)" -> "sum", // docs
+        "count(_6)" -> "sum", // sentences
+        "sum(_7)" -> "sum", // encontrados
+        "max(_8)" -> "max") // total  
+        
+    var docs:Integer = precission.select("_1").first().getInt(0)
+    var sentences:Integer = precission.select("_2").first().getInt(0)
+    var items:Integer = precission.select("_3").first().getInt(1)
+    var total:Integer = precission.select("_4").first().getInt(2)
+
     var result = 1.0
     if (total != 0) {
-      result = fallos / total
+      result = items / total
     }
-    println(result + " " + fallos + " " + total)
+    println(result + ": encontrados " + items + " de " + total + " en " + docs + " documents!")
     result
 
   }
@@ -201,6 +200,5 @@ class ConllWritter(spark: SparkSession) {
 		*/
     //token: array<struct<annotatorType:string,begin:int,end:int,result:string,metadata:map<string,string>,embeddings:array<float>,sentence_embeddings:array<float>>>
     //pos:   array<struct<annotatorType:string,begin:int,end:int,result:string,metadata:map<string,string>,embeddings:array<float>,sentence_embeddings:array<float>>>
-  
-  
+
 }

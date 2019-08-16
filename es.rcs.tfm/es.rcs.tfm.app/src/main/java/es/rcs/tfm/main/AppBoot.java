@@ -38,9 +38,9 @@ public class AppBoot implements WrapperListener {
 	private static Class<AppBoot> applicationClass = AppBoot.class;
 	private static ConfigurableApplicationContext context;
 
-	/*---------------------------------------------------------------
-    * Main Method
-    *-------------------------------------------------------------*/
+	/**------------------------------------------------------------
+     * Main Method
+     *-------------------------------------------------------------*/
 	public static void main(String[] args) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("main ... begin");
@@ -54,7 +54,7 @@ public class AppBoot implements WrapperListener {
 	}
 	
 
-   /*---------------------------------------------------------------
+   /**------------------------------------------------------------
     * WrapperListener Methods
     *-------------------------------------------------------------*/
    /**

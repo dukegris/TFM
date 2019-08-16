@@ -18,15 +18,15 @@ public class XmlNames {
 	
 	// -------------------------------------------------------------------------------------
 	// TFM-XMLMODEL: BEAN
-	public static final String NCBI_PUBMED_CONTEXT = 			"taoNcbiPubmedCotext";
+	public static final String NCBI_PUBMED_CONTEXT = 			"taoNcbiPubmedContext";
 	public static final String NCBI_PUBMED_MARSHALLER = 		"taoNcbiPubmedMarshaller";
 	public static final String NCBI_PUBMED_UNMARSHALLER = 		"taoNcbiPubmedUnmarshaller";
 
-	public static final String NCBI_MESH_CONTEXT = 				"taoNcbiMeshCotext";
+	public static final String NCBI_MESH_CONTEXT = 				"taoNcbiMeshContext";
 	public static final String NCBI_MESH_MARSHALLER = 			"taoNcbiMeshMarshaller";
 	public static final String NCBI_MESH_UNMARSHALLER = 		"taoNcbiMeshUnmarshaller";
 
-	public static final String BIOC_CONTEXT = 					"taoBiocCotext";
+	public static final String BIOC_CONTEXT = 					"taoBiocContext";
 	public static final String BIOC_MARSHALLER = 				"taoBiocMarshaller";
 	public static final String BIOC_UNMARSHALLER = 				"taoBiocUnmarshaller";
 
