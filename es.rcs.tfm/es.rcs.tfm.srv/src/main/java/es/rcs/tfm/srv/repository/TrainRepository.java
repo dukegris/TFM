@@ -104,8 +104,7 @@ public class TrainRepository {
 
 		Path results = Paths.get(resultsDirectory);
 		if (results.toFile() == null) return false;
-		if (!results.toFile().exists()) return false;
-		if (!results.toFile().isDirectory()) return false;
+		if (results.toFile().exists() && !results.toFile().isDirectory()) return false;
 
 		//Path target = Paths.get(targetModelDirectory);
 
@@ -123,8 +122,7 @@ public class TrainRepository {
 		if (test.toFile() == null) return false;
 		if (!test.toFile().exists()) return false;
 		if (!test.toFile().isFile()) return false;
-		
-		
+				
 		boolean resultado = true;
 		try {
 			
@@ -211,8 +209,8 @@ public class TrainRepository {
 							Spliterator.DISTINCT), 
 					false);
 			//TODO 
-			List<MarkedText> data = stream.collect(Collectors.toList());
-			//List<MarkedText> data = stream.limit(2).collect(Collectors.toList());
+			//List<MarkedText> data = stream.collect(Collectors.toList());
+			List<MarkedText> data = stream.limit(1).collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
 				

@@ -75,6 +75,7 @@ class ConllWritter(spark: SparkSession) {
       // Para cada tupla
       var sentenceId = 0
       // var encontrados = 0;
+      
       dataPrepared.foreach(a => {
         
         // Si hay cambio de frase se induce una linea en blanco
@@ -118,23 +119,28 @@ class ConllWritter(spark: SparkSession) {
 
     // ---------------------------------------------------------------------------------------
     // Exportar los datos a un fichero CONLL
-    //saveDsToCsv(ds = CoNLLDataset.select("_c0", "_c1", "_c2", "_c3"), sep = " ", targetFile = outputPath)
+    //saveDsToCsv(ds = CoNLLDataset.select($"_1", $"_2", $"_3", $"_4"), sep = " ", targetFile = outputPath)
     saveDsToCsv(ds = CoNLLDataset, sep = " ", targetFile = outputPath)
     
-    val precission = CoNLLDataset.select("_5", "_6", "_7", "_8").groupBy("_5").agg(
-        "_5" -> "count",
-        "_6" -> "count",
-        "_7" -> "sum",
-        "_8" -> "max").agg(
-        "count(_5)" -> "sum", // docs
-        "count(_6)" -> "sum", // sentences
-        "sum(_7)" -> "sum", // encontrados
-        "max(_8)" -> "max") // total  
+    import org.apache.spark.sql.functions._
+    val precission = CoNLLDataset.
+      select($"_5", $"_6", $"_7", $"_8").
+      groupBy($"_5").
+        agg(
+          expr("count(_5) as docs"),
+          expr("count(_6) as seqs"),
+          expr("sum(_7) as encs"),
+          expr("max(_8) as tot")).
+        agg(
+          expr("sum(docs) as docs"),
+          expr("sum(seqs) as seqs"),
+          expr("sum(encs) as encs"),
+          expr("max(tot) as tot"))
         
-    var docs:Integer = precission.select("_1").first().getInt(0)
-    var sentences:Integer = precission.select("_2").first().getInt(0)
-    var items:Integer = precission.select("_3").first().getInt(1)
-    var total:Integer = precission.select("_4").first().getInt(2)
+    var docs:Long = precission.select("docs").first().getLong(0)
+    var sentences:Long = precission.select("seqs").first().getLong(1)
+    var items:Long = precission.select("encs").first().getLong(2)
+    var total:Long = precission.select("tot").first().getLong(3)
 
     var result = 1.0
     if (total != 0) {
@@ -166,7 +172,9 @@ class ConllWritter(spark: SparkSession) {
     val dir = new File(tmpParquetDir)
     dir.listFiles.foreach(f => {
       if (f.getName().startsWith("part-00000")) {
-        f.renameTo(new File(targetFile))
+        val file = new File(targetFile)
+        if (file.exists) file.delete
+        f.renameTo(file)
       } else {
         f.delete
       }

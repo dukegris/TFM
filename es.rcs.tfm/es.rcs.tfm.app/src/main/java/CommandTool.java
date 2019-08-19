@@ -132,11 +132,11 @@ public class CommandTool {
 		int result = OK;
 
 		File f = Paths.get(trainfile).toFile();
-		if (!f.isFile() || !f.exists()) result = TRAIN_INVALID_TRAIN_FILE;
+		if (!f.exists() || !f.isFile()) result = TRAIN_INVALID_TRAIN_FILE;
 		f = Paths.get(testfile).toFile();
-		if (!f.isFile() || !f.exists()) result = TRAIN_INVALID_TEST_FILE;
+		if (!f.exists() || !f.isFile()) result = TRAIN_INVALID_TEST_FILE;
 		f = Paths.get(outdir).toFile();
-		if (!f.isDirectory() || !f.exists()) result = TRAIN_INVALID_DIRECTORY;
+		if (f.exists() && !f.isDirectory()) result = TRAIN_INVALID_DIRECTORY;
 		
 		if (result == OK) {
 			
@@ -170,7 +170,7 @@ public class CommandTool {
 		int result = OK;
 		
 		File f = Paths.get(infile).toFile();
-		if (!f.isFile() || !f.exists()) result = GENERATE_INVALID_FILE;
+		if (!f.exists() || !f.isFile()) result = GENERATE_INVALID_FILE;
 		if (!(BIOC.equals(type.toUpperCase()) || PUBTATOR.equals(type.toUpperCase()))) result = GENERATE_INVALID_TYPE;
 		
 		if (result == OK) {

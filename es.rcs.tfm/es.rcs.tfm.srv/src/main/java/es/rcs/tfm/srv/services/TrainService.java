@@ -103,7 +103,7 @@ public class TrainService {
 					trainfile, 
 					testfile, 
 					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "csv"), 
-					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "pipeline9"), 
+					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "pipeline"), 
 					BERT_UNCASED_MODEL, 
 					TFM_NER_MODEL);
 			LOG.info("TRAIN SERVICE: tmVar pubtator fail OK");
