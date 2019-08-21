@@ -60,7 +60,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg line="/c &quot;npm install&quot;" />
+									<arg line="/c &quot;c:\Java\node-v10.16.3-win-x64\npm.cmd install&quot;" />
 								</exec>
 								<exec	executable="npm" 
 										dir="${project.basedir}"
@@ -71,6 +71,9 @@
 							</target>
 						</configuration>
 					</execution>
+					<!--
+					npm install -g @angular/cli  
+					 -->
 					<execution>
 						<id>NODE App GS</id>
 						<phase>compile</phase>
@@ -81,7 +84,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg line="/c &quot;ng build&quot;" />
+									<arg line="/c &quot;c:\Java\node-v10.16.3-win-x64\ng.cmd build&quot;" />
 								</exec>
 								<exec	executable="ng" 
 										dir="${project.basedir}"

@@ -14,6 +14,7 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
@@ -49,16 +50,18 @@ public class TrainRepository {
 		try {
 		
 			list.forEach(doc -> {
-				doc.blocks.forEach((e, b) -> {
-					List<String> notes = null;
-					if ((b.notes != null) && (!b.notes.isEmpty())) {
-						notes = b.notes.values().stream().flatMap(n -> n.pos.stream().map(p -> 
-							String.format("[%d, %d, %s, %s]", p.offset, p.offset + p.length - 1, n.text, n.type)
-						)).collect(Collectors.toList());
-					}
-					if (notes == null) notes = new ArrayList<String>();
-					result.add(RowFactory.create(doc.pmid, b.type, b.text, notes));
-				});
+				if ((doc != null) && (doc.blocks != null)) {
+					doc.blocks.forEach((e, b) -> {
+						List<String> notes = null;
+						if ((b != null) && (b.notes != null) && (!b.notes.isEmpty())) {
+							notes = b.notes.values().stream().flatMap(n -> n.pos.stream().map(p -> 
+								String.format("[%d, %d, %s, %s]", p.offset, p.offset + p.length - 1, n.text, n.type)
+							)).collect(Collectors.toList());
+						}
+						if (notes == null) notes = new ArrayList<String>();
+						result.add(RowFactory.create(doc.pmid, b.type, b.text, notes));
+					});
+				}
 			});
 			
 		} catch (Exception ex) {
@@ -91,28 +94,34 @@ public class TrainRepository {
 			String testFilename,
 			String resultsFilename,
 			String resultsDirectory,
-			String modelDirectory,
+			String posModelDirectory,
+			String bertModelDirectory,
 			String targetModelDirectory) {
 
 		if (spark == null) return false;
 		if (StringUtils.isBlank(resultsDirectory)) return false;
 		if (StringUtils.isBlank(resultsFilename)) return false;
 		if (StringUtils.isBlank(targetModelDirectory)) return false;
-		if (StringUtils.isBlank(modelDirectory)) return false;
 		if (StringUtils.isBlank(trainFilename)) return false;
 		if (StringUtils.isBlank(testFilename)) return false;
+		if (StringUtils.isBlank(posModelDirectory)) return false;
+		if (StringUtils.isBlank(bertModelDirectory)) return false;
 
 		Path results = Paths.get(resultsDirectory);
 		if (results.toFile() == null) return false;
-		if (!results.toFile().exists()) return false;
-		if (!results.toFile().isDirectory()) return false;
+		if (results.toFile().exists() && (!results.toFile().isDirectory())) return false;
 
 		//Path target = Paths.get(targetModelDirectory);
 
-		Path model = Paths.get(modelDirectory);
-		if (model.toFile() == null) return false;
-		if (!model.toFile().exists()) return false;
-		if (!model.toFile().isDirectory()) return false;
+		Path posModel = Paths.get(posModelDirectory);
+		if (posModel.toFile() == null) return false;
+		if (!posModel.toFile().exists()) return false;
+		if (!posModel.toFile().isDirectory()) return false;
+
+		Path bertModel = Paths.get(bertModelDirectory);
+		if (bertModel.toFile() == null) return false;
+		if (!bertModel.toFile().exists()) return false;
+		if (!bertModel.toFile().isDirectory()) return false;
 
 		Path train = Paths.get(trainFilename);
 		if (train.toFile() == null) return false;
@@ -133,7 +142,8 @@ public class TrainRepository {
 			NerTrain nerTrainer = new NerTrain(
 					spark.sparkContext(),
 					spark,
-					modelDirectory);
+					HADOOP_FILE_PREFIX + posModelDirectory,
+					HADOOP_FILE_PREFIX + bertModelDirectory);
 			
 			nerTrainer.
 				saveNerModel (
@@ -143,7 +153,7 @@ public class TrainRepository {
 							testFilename,
 							resultsFilename,
 							resultsDirectory),
-					modelDirectory);
+						HADOOP_FILE_PREFIX + targetModelDirectory);
 			
 			LOG.info(
 					"\r\nTRAIN TIME for [" + trainFilename + "] "  +
@@ -165,6 +175,7 @@ public class TrainRepository {
 	 * @param spark Sesion de Spark donde se ejecutará la preparación de datos
 	 * @param processor Generador de anotaciones
 	 * @param resultsDirectory Directorio donde se deja el modelo con los resultados
+	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertNerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
 	 * @param targetFilename Directorio parquet de salida de la preparación de datos
@@ -174,6 +185,7 @@ public class TrainRepository {
 			SparkSession spark,
 			MarkedTextProcessor processor,
 			String resultsDirectory,
+			String posModelDirectory,
 			String bertModelDirectory,
 			String bertNerModelDirectory,
 			String targetFilename) {
@@ -181,9 +193,15 @@ public class TrainRepository {
 		if (spark == null) return false;
 		if (processor == null) return false;
 		if (StringUtils.isBlank(resultsDirectory)) return false;
+		if (StringUtils.isBlank(targetFilename)) return false;
+		if (StringUtils.isBlank(posModelDirectory)) return false;
 		if (StringUtils.isBlank(bertModelDirectory)) return false;
 		if (StringUtils.isBlank(bertNerModelDirectory)) return false;
-		if (StringUtils.isBlank(targetFilename)) return false;
+
+		Path posModel = Paths.get(posModelDirectory);
+		if (posModel.toFile() == null) return false;
+		if (!posModel.toFile().exists()) return false;
+		if (!posModel.toFile().isDirectory()) return false;
 
 		Path bertModel = Paths.get(bertModelDirectory);
 		if (bertModel.toFile() == null) return false;
@@ -212,7 +230,7 @@ public class TrainRepository {
 					false);
 			//TODO 
 			List<MarkedText> data = stream.collect(Collectors.toList());
-			//List<MarkedText> data = stream.limit(2).collect(Collectors.toList());
+			//List<MarkedText> data = stream.limit(32).collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
 				
@@ -227,16 +245,30 @@ public class TrainRepository {
 
 				NerPrepare generator = new NerPrepare(
 						spark.sparkContext(),
-						spark);
+						spark,
+						HADOOP_FILE_PREFIX + posModelDirectory,
+						HADOOP_FILE_PREFIX + bertModelDirectory,
+						HADOOP_FILE_PREFIX + bertNerModelDirectory);
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 
 				ConllWritter writter = new ConllWritter(spark);
+				
+				Dataset<Row> ds = generator.
+						execute(
+								rows, 
+								structType, 
+								HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(resultsDirectory));
+				
+				@SuppressWarnings("unchecked")
+				Dataset<Row> conllDs = writter.
+						generateConll(
+								ds);
+				
 				double tasa = writter.
-					exportConllFiles(
-						generator.
-							execute(rows, structType, HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(resultsDirectory)),
-						targetFilename);
+						saveConll(
+								conllDs, 
+								targetFilename);
 
 				LOG.info(
 						"\r\nCONLL2003 TIME for [" + rows.size() + "] documents. PRECISSION = " + tasa * 100 +

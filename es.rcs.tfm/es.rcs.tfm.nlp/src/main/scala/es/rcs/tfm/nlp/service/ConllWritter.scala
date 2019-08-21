@@ -19,26 +19,27 @@ import scala.util.matching.Regex
 class ConllWritter(spark: SparkSession) {
 
   /**
-   * Exporta un dataset procesador por NerDL a formato CONLL2003 
-   * @param spark Sesion en la que se realiza la transformacion
+   * Genera un dataset procesado por NerDL a formato CONLL2003 
    * @param data Datos a exportar
    * @param outputPath Directorio destino de la exportacion
    */
-  def exportConllFiles(data: DataFrame, outputPath: String): Double = {
+  def generateConll(data: DataFrame): DataFrame = {
     
     import data.sparkSession.implicits._ // for row casting
 
+println(java.time.LocalTime.now + ": generate init")
     // ---------------------------------------------------------------------------------------
     // Preparacion de los datos para su procesamiento
-    val conllData = data.select (
-    		"id",
-    		"text",
-    		"notes",
-    		"token", 
-    		"finished_token", 
-    		"finished_pos",
-    		"finished_named_entity",
-    		"finished_token_metadata"
+    val dataSelect = data.select (
+    		TfmType.ID,
+    		TfmType.TEXT,
+    		TfmType.NOTES,
+    		TfmType.TOKEN, 
+    		TfmType.FINISHED_TOKEN, 
+    		TfmType.FINISHED_POS,
+    		TfmType.FINISHED_NAMED_ENTITY,
+    		//TfmType.FINISHED_NAMED_ENTITY_CHUNK,
+    		TfmType.FINISHED_TOKEN_METADATA
     	).as[(
     		String,
     		String, 
@@ -47,100 +48,137 @@ class ConllWritter(spark: SparkSession) {
     		Array[String], 
     		Array[String], 
     		Array[String], 
+    		//Array[String], 
     		Array[(String, String)])]
     
     // ---------------------------------------------------------------------------------------
     // Expresiones regulares para tratar las tuplas
-    val NOTES_PTR:Regex = raw"\[(\d+)\s*,\s*(\d+)\s*,\s*(.+)\s*,\s*(\w+)\s*\]".r
+    val NOTES_PTR:Regex = raw"\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(.+)\s*,\s*(\w+)\s*\]".r
     val IOB_PTR:Regex = raw"\[(\w+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(.+)\s*,\s*.*\]".r
 
     // ---------------------------------------------------------------------------------------
     // RECORRER CADA FILA GENERANDO UN DOCUMENTO
-    //val CoNLLDataset = conllData.limit(6).flatMap(row => {
     var docId = 0
-    val CoNLLDataset = conllData.flatMap(row => {
+    val conllData = dataSelect.flatMap(row => {
 
-      // Inicio del documento
-      val conllDoc: ArrayBuffer[(String, String, String, String, Int, Int, Int, Int)] = ArrayBuffer()
+println(java.time.LocalTime.now + ": doc_start " + docId)
+
+// Inicio del documento
+      val conllDoc: ArrayBuffer[(String, String, String, String, Integer, Integer, Integer, Integer)] = ArrayBuffer()
       conllDoc.append(("-DOCSTART-", "-X-", "-X-", "O", docId, 0, 0, 0))
-      conllDoc.append((null, null, null, null, docId, 0, 0, 0))
-      
+      conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+
       // Construye la tupla: ((1127,1135),Asp506Gly,NNP,O,9)
       val dataPrepared = (
-      	row._4.map {
+      	row._4.map { // Partimos de los tokens
       		case IOB_PTR(iob, start, end, word) => (start.toInt, end.toInt) 
+      		//case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8 zip row._9.map(_._2.toInt) map {
+      		  //case ((((((begin, end), text), pos), chunk), ner), sentence) => ((begin, end), text, pos, chunk, ner, sentence)})
       		case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8.map(_._2.toInt) map {
-      		case (((((begin, end), text), iob), ner), sentence) => ((begin, end), text, iob, ner, sentence)})
+      		  case (((((begin, end), text), pos), ner), sentence) => ((begin, end), text, pos, ner, sentence)})
       		
+println(row._4.size)
+println(row._5.size)
+println(row._6.size)
+println(row._7.size)
       // Para cada tupla
       var sentenceId = 0
-      // var encontrados = 0;
-      dataPrepared.foreach(a => {
+      dataPrepared.foreach(token => { // FILA: ((begin, end), text, pos, ner, sentence)
+//println(java.time.LocalTime.now + ": token " + token.toString())
         
         // Si hay cambio de frase se induce una linea en blanco
-        if (a._5 != sentenceId){
-          conllDoc.append((null, null, null, null, docId, 0, 0, 0))
-          sentenceId = a._5
+        if (token._5 != sentenceId){
+          conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+          sentenceId = token._5
         }
         
-        // Busca la localizacion por si hay un NER en los datos de train
-        // row._3 tiene [655, 661, G13513A, MUT_DMA]
+        // Busca la localizacion por si hay un NER en los tokens
+        // fila._2 tiene el token
+        // row._3 tiene las notas [655, 661, G13513A, MUT_DMA]
         val DIFF = 2
+        var str = token._4 // El token detectado por los procesos ner
         var enc = 0
-        val iob = row._3.map(_ match {
-        	case NOTES_PTR(start: String, end: String, word: String, iob: String) => (start.toInt, end.toInt, word, iob) 
-        	case _ => (-2, -2, "", "")}).filter(i => (
-        	    (a._1._1>=i._1-DIFF) && 
-        	    (a._1._1<=i._1+DIFF) && 
-        	    (a._1._2>=i._2-DIFF) &&
-        	    (a._1._2<=i._2+DIFF) &&
-        	    (a._2.indexOf(i._3)>=0)))
+        if ((row._3 != null) && (row._3.length>0)) {
 
-        var str = a._4 
-        if ((iob != null) && (iob.size > 0)) {
-          str = iob(0)._4
-          enc = 1
-        }
+          var iob = row._3.map(note => {
+//println(java.time.LocalTime.now + ": note " + note)
+            note match { // Obtenemos las notas
+          	case NOTES_PTR(start: String, end: String, word: String, iob: String) => (start.toInt, end.toInt, word, iob) 
+          	case _ => (-2, -2, "", "")}}).filter(nota => (
+          	    (token._1._1-DIFF<=nota._1) && 
+          	    (token._1._2+DIFF>=nota._2) &&
+          	    (token._2 != null) &&
+          	    (token._2.indexOf(nota._3)>=0))) // Busca word de nota en token
+          if ((iob != null) && (iob.size > 0) && (iob(0)._4 != null) && (iob(0)._4.size > 0)) {
+//println("encontrado")            
+            str = iob(0)._4 
+            enc = 1
+          }
+        }        	    
  
         // Linea del fichero CONLL
-        conllDoc.append((a._2, a._3, a._3, str, docId, sentenceId, enc, row._3.size))
+        var size = 0;
+        if ((row._3 != null) && row._3.size != null) size = row._3.size
+        conllDoc.append((token._2, token._3, token._3, str, docId, sentenceId, enc, size))
 
       })
 
       // Final del documento
-
+      conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+println(java.time.LocalTime.now + ": doc_end " + docId)
       docId += 1
 
-      conllDoc.append((null, null, null, null, 0, 0, 0, 0))
       conllDoc
       
     })
+    
+println(java.time.LocalTime.now + ": generate")
+    val result = conllData.coalesce(1).toDF()
+println(java.time.LocalTime.now + ": coalesce")
+    result
+    
+  }
+  
+  /**
+   * Guarda un dataset procesado por NerDL a formato CONLL2003 
+   * @param data Datos a exportar
+   * @param outputPath Directorio destino de la exportacion
+   */
+  def saveConll(data: DataFrame, outputPath: String): Double = {
+
+    import data.sparkSession.implicits._ // for row casting
 
     // ---------------------------------------------------------------------------------------
     // Exportar los datos a un fichero CONLL
-    //saveDsToCsv(ds = CoNLLDataset.select("_c0", "_c1", "_c2", "_c3"), sep = " ", targetFile = outputPath)
-    saveDsToCsv(ds = CoNLLDataset, sep = " ", targetFile = outputPath)
-    
-    val precission = CoNLLDataset.select("_5", "_6", "_7", "_8").groupBy("_5").agg(
+    //val conll = data.coalesce(1)
+    val conll = data
+println(java.time.LocalTime.now + ": saveConll")    
+    saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_4"), sep = " ", targetFile = outputPath)
+println(java.time.LocalTime.now + ": saveConll-ALL")    
+    saveDsToCsv(ds = conll, sep = " ", targetFile = outputPath+".all")
+println(java.time.LocalTime.now + ": saveConll-STATS")    
+    val precission = conll.select("_5", "_6", "_7", "_8").groupBy("_5").agg( // _5 DOCID
         "_5" -> "count",
         "_6" -> "count",
         "_7" -> "sum",
-        "_8" -> "max").agg(
-        "count(_5)" -> "sum", // docs
+        "_8" -> "max").agg( // (_5, count(_5), count(_6), sum(_7), max(_8))
+        "_5" -> "count", // docs
         "count(_6)" -> "sum", // sentences
         "sum(_7)" -> "sum", // encontrados
-        "max(_8)" -> "max") // total  
-        
-    var docs:Integer = precission.select("_1").first().getInt(0)
-    var sentences:Integer = precission.select("_2").first().getInt(0)
-    var items:Integer = precission.select("_3").first().getInt(1)
-    var total:Integer = precission.select("_4").first().getInt(2)
+        "max(_8)" -> "sum") // total  
+
+    val precRow = precission.first()
+    var docs:Long = precRow.getLong(0)
+    var sentences:Long = precRow.getLong(1)
+    var items:Long = precRow.getLong(2)
+    var total:Long = precRow.getLong(3)
 
     var result = 1.0
     if (total != 0) {
       result = items / total
     }
     println(result + ": encontrados " + items + " de " + total + " en " + docs + " documents!")
+println(java.time.LocalTime.now + ": saveConll-END")    
     result
 
   }
@@ -153,16 +191,16 @@ class ConllWritter(spark: SparkSession) {
       header: Boolean = false): Unit = {
 
     val tmpParquetDir = "CONLL.tmp.parquet"
-
+println(java.time.LocalTime.now + ": saveDsToCsv - save")
     ds.
-      repartition(1).
+      // repartition(1).
       write.
       mode("overwrite").
       format("com.databricks.spark.csv").
       option("header", header.toString).
       option("delimiter", sep).
       save(tmpParquetDir)
-
+println(java.time.LocalTime.now + ": saveDsToCsv - rename")
     val dir = new File(tmpParquetDir)
     dir.listFiles.foreach(f => {
       if (f.getName().startsWith("part-00000")) {

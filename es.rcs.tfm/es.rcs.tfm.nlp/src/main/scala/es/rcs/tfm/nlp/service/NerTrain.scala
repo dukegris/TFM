@@ -19,7 +19,7 @@ import org.apache.spark.ml.PipelineModel
 
 import es.rcs.tfm.nlp.util.NerHelper
 
-class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String) {
+class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String, bertModelDirectory: String) {
 
   val nerCorpus = """
                    |-DOCSTART- O
@@ -92,7 +92,7 @@ class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String
     measureNerModel(nerReader, model, testFile, false)
   
     val df = model.transform(nerReader.readDataset(spark, testFile.path))
-    val annotation = Annotation.collect(df, "ner_span")
+    val annotation = Annotation.collect(df, TfmType.NAMED_ENTITY_SPAN)
     nerHelper.saveNerSpanTags(annotation, predictionsCsvFileName)
     
     model.write.overwrite().save(pipelineModelDirectory)
@@ -127,7 +127,7 @@ class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String
     val labeled = NerTagged.
       collectTrainingInstances(
           transformed, 
-          Seq("sentence", AnnotatorType.TOKEN, AnnotatorType.WORD_EMBEDDINGS), "label")
+          Seq(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS), TfmType.LABEL)
 
     ner.measure(labeled, (s: String) => System.out.println(s), extended, errorsToPrint)
 
@@ -158,31 +158,33 @@ class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String
   def createPipelineStagesDl() = {
     
     val document = new DocumentAssembler().
-      setInputCol("text").
-    	setOutputCol(AnnotatorType.DOCUMENT)
+      setInputCol(TfmType.TEXT).
+    	setOutputCol(TfmType.DOCUMENT)
     
     val sentence = new SentenceDetector().
-    	setInputCols(AnnotatorType.DOCUMENT).
-    	setOutputCol("sentences")
+    	setInputCols(Array(TfmType.DOCUMENT)).
+    	setOutputCol(TfmType.SENTENCES)
     
     val token = new Tokenizer().
-    	setInputCols("sentences").
-    	setOutputCol(AnnotatorType.TOKEN)
+    	setInputCols(Array(TfmType.SENTENCES)).
+    	setOutputCol(TfmType.TOKEN)
     
-    val pos = PerceptronModel.pretrained().
-    	setInputCols("sentences", AnnotatorType.TOKEN).
-    	setOutputCol(AnnotatorType.POS)
+    val pos = PerceptronModel.
+      //pretrained().
+      load(this.posModelDirectory).
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
+    	setOutputCol(TfmType.POS)
     	
     val embeddings = BertEmbeddings.
-    	pretrained("bert_uncased", "en").
-    	//load(this.modelDirectory).
-    	setInputCols(AnnotatorType.DOCUMENT).
-    	setOutputCol(AnnotatorType.WORD_EMBEDDINGS)
+      //pretrained(TfmType.PRETRAINED_BERT, "en").
+    	load(this.bertModelDirectory).
+    	setInputCols(Array(TfmType.SENTENCES)).
+    	setOutputCol(TfmType.WORD_EMBEDDINGS)
 
     val nerTagger =  new NerDLApproach().
-      setInputCols("sentence", AnnotatorType.TOKEN, AnnotatorType.WORD_EMBEDDINGS).
-      setOutputCol(AnnotatorType.NAMED_ENTITY).
-      setLabelColumn("label").
+      setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
+      setOutputCol(TfmType.NAMED_ENTITY).
+      setLabelColumn(TfmType.LABEL).
       setRandomSeed(0).
       setPo(0.01f).
       // setPo(5e-3f). //0.005
@@ -202,13 +204,13 @@ class NerTrain(sc: SparkContext, spark: SparkSession, bertModelDirectory: String
       setBatchSize(9)
 
     val converter = new NerConverter().
-    	setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, AnnotatorType.NAMED_ENTITY).
-    	//setInputCols(AnnotatorType.DOCUMENT, "normal_token", AnnotatorType.NAMED_ENTITY).
-    	setOutputCol("ner_span")
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).
+    	//setInputCols(TfmType.DOCUMENT, TfmType.NORMAL, TfmType.NAMED_ENTITY).
+    	setOutputCol(TfmType.NAMED_ENTITY_SPAN)
 
     val labelConverter = new NerConverter()
-      .setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, "label")
-      .setOutputCol("label_span")
+      .setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.LABEL))
+      .setOutputCol(TfmType.LABEL_SPAN)
 
     Array(
     		document,

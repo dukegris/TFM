@@ -25,7 +25,7 @@ import scala.util.matching.Regex
 /**
  * 
  */
-class NerPrepare(sc: SparkContext, spark: SparkSession) {
+class NerPrepare(sc: SparkContext, spark: SparkSession, posModelDirectory: String, bertModelDirectory: String, bertNerModelDirectory: String) {
 
   /**
    * Ejecuta un pipeline sobre un dataset con una columna denominada text
@@ -35,91 +35,107 @@ class NerPrepare(sc: SparkContext, spark: SparkSession) {
    */
   def execute(rows: List[Row], structType: StructType, pipelineModelDirectory: String): DataFrame = {
     
+println(java.time.LocalTime.now + ": execute init")
     import spark.implicits._
-    val emptyData = spark.emptyDataset[String].toDF("text")
+    val emptyData = spark.emptyDataset[String].toDF(TfmType.TEXT)
     
     val data = spark.createDataFrame(
         rows, 
         structType)
     
+    val pipeline = new RecursivePipeline().
+    	setStages(createPipelineStagesDl)
+
+println(java.time.LocalTime.now + ": execute fit")
+    val model = pipeline.fit(emptyData)
+println(java.time.LocalTime.now + ": execute save")
+    //model.write.overwrite().save(pipelineModelDirectory)
+    //val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
+println(java.time.LocalTime.now + ": execute transform")
+    // java.lang.IllegalArgumentException: Input to reshape is a tensor with 15728640 values, but the requested shape has 983040
+	  //   [[{{node bert/embeddings/Reshape}} = Reshape[T=DT_FLOAT, Tshape=DT_INT32, _device="/job:localhost/replica:0/task:0/device:CPU:0"](bert/embeddings/embedding_lookup, bert/embeddings/Reshape/shape)]]
+    //val result = loadedModel.transform(data)
+    val result = model.transform(data)
+println(java.time.LocalTime.now + ": execute end")
+
+    result
+    
+  }
+  
+  def createPipelineStagesDl() = {
+    
     val document = new DocumentAssembler().
-    	setInputCol("text").
-    	setOutputCol(AnnotatorType.DOCUMENT) //.
+    	setInputCol(TfmType.TEXT).
+    	setOutputCol(TfmType.DOCUMENT) //.
     	//setCleanupMode("shrink") // disabled, inplace, inplace_full, shrink, shrink_full
     
     val sentence = new SentenceDetector().
-    	setInputCols(AnnotatorType.DOCUMENT).
-    	setOutputCol("sentences")
+    	setInputCols(Array(TfmType.DOCUMENT)).
+    	setOutputCol(TfmType.SENTENCES)
     
     val token = new Tokenizer().
-    	setInputCols("sentences").
-    	setOutputCol(AnnotatorType.TOKEN)
+    	setInputCols(Array(TfmType.SENTENCES)).
+    	setOutputCol(TfmType.TOKEN)
     /*
     val stemmer = new Stemmer().
-    	setInputCols(AnnotatorType.TOKEN).
-    	setOutputCol("stem")
+    	setInputCols(TfmType.TOKEN).
+    	setOutputCol(TfmType.STEM)
 
     val normalizer = new Normalizer().
-    	setInputCols("stem").
-    	setOutputCol("normal_token")
+    	setInputCols(TfmType.STEM).
+    	setOutputCol(TfmType.NORMAL)
 
     val pos = PerceptronModel.pretrained().
-    	setInputCols("sentences", "normal_token").
-    	setOutputCol(AnnotatorType.POS)
+    	setInputCols(TfmType.SENTENCES, TfmType.NORMAL).
+    	setOutputCol(TfmType.POS)
 		 */
 
-    val pos = PerceptronModel.pretrained().
-    	setInputCols("sentences", AnnotatorType.TOKEN).
-    	setOutputCol(AnnotatorType.POS)
+    val pos = PerceptronModel.
+      //pretrained().
+      load(this.posModelDirectory).
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
+    	setOutputCol(TfmType.POS)
     	
     val embeddings = BertEmbeddings.
-    	pretrained("bert_uncased", "en").
-    	//load(this.modelDirectory).
-    	setInputCols(AnnotatorType.DOCUMENT).
-    	setOutputCol(AnnotatorType.WORD_EMBEDDINGS)
+      //pretrained(TfmType.PRETRAINED_BERT, "en").
+      //pretrained("bert_uncased", "en").
+    	load(this.bertModelDirectory).
+    	setMaxSentenceLength(4096).
+    	setDimension(1024).
+    	setInputCols(Array(TfmType.SENTENCES)).
+    	setOutputCol(TfmType.WORD_EMBEDDINGS)
     
     val ner = NerDLModel.
-    	pretrained("ner_dl_bert").
-    	//load(modelDirectory).
-    	setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, AnnotatorType.WORD_EMBEDDINGS).
-    	//setInputCols(AnnotatorType.DOCUMENT, "normal_token", AnnotatorType.WORD_EMBEDDINGS).
-    	setOutputCol(AnnotatorType.NAMED_ENTITY)
+    	//pretrained(TfmType.PRETRAINED_NER_BERT).
+    	load(this.bertNerModelDirectory).
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
+    	setOutputCol(TfmType.NAMED_ENTITY)
 
     val converter = new NerConverter().
-    	setInputCols(AnnotatorType.DOCUMENT, AnnotatorType.TOKEN, AnnotatorType.NAMED_ENTITY).
-    	//setInputCols(AnnotatorType.DOCUMENT, "normal_token", AnnotatorType.NAMED_ENTITY).
-    	setOutputCol("ner_chunk")
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).
+    	setOutputCol(TfmType.NAMED_ENTITY_CHUNK)
 
     val finisher = new Finisher().
-      //setInputCols(AnnotatorType.TOKEN, "stem", "normal_token", AnnotatorType.POS, AnnotatorType.WORD_EMBEDDINGS, AnnotatorType.NAMED_ENTITY, "ner_chunk").
-      setInputCols(AnnotatorType.TOKEN, AnnotatorType.POS, AnnotatorType.WORD_EMBEDDINGS, AnnotatorType.NAMED_ENTITY, "ner_chunk").
+      //setInputCols(Array(TfmType.DOCUMENT, TfmType.SENTENCES, TfmType.TOKEN, TfmType.POS, TfmType.WORD_EMBEDDINGS, TfmType.NAMED_ENTITY, TfmType.NAMED_ENTITY_CHUNK)).
+      setInputCols(Array(
+          TfmType.DOCUMENT, TfmType.SENTENCES, 
+          TfmType.TOKEN, TfmType.POS, 
+          TfmType.WORD_EMBEDDINGS, TfmType.NAMED_ENTITY)).
       setIncludeMetadata(true).
       setCleanAnnotations(false)
 
-    val pipeline = new RecursivePipeline().
-    	setStages(Array(
-    		document,
-    		sentence,
-    		token,
-    		// stemmer,
-    		// normalizer,
-    		pos,
-    		embeddings,
-    		ner,
-    		converter,
-    		finisher
-    ))
-
-    val model = pipeline.fit(emptyData)
-    
-    model.write.overwrite().save(pipelineModelDirectory)
-    val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
-
-    val result = model.transform(data)
-    
-    // result.show
-
-    result
+    Array(
+  		document,
+  		sentence,
+  		token,
+  		// stemmer,
+  		// normalizer,
+  		pos,
+  		embeddings,
+  		ner,
+  		//converter,
+  		finisher
+  	)
     
   }
 

@@ -34,6 +34,7 @@ public class PubFileEntity extends AuditedBaseEntity {
 
 	public static final String FTP_PUBMED = "FTP_PUBMED";
 	public static final String FTP_PMC = "FTP_PMC";
+	public static final String FTP_PMC_TEXT = "FTP_PMC_TEXT";
 	
 	@Column(
 			name = "filename", 
@@ -49,7 +50,7 @@ public class PubFileEntity extends AuditedBaseEntity {
 	private String type;
 
 	@Column(
-			name = "gzDirectory", 
+			name = "gzdirectory", 
 			unique = false,
 			nullable = true, 
 			length = 256)
@@ -87,6 +88,6 @@ public class PubFileEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = true, 
 			length = 32)
-	public String uncompressedFilename;
+	public String uncompressedFileName;
 	
 }

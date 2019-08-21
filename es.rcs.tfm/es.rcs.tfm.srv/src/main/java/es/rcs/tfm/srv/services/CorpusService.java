@@ -168,7 +168,7 @@ public class CorpusService {
 			
 			db.setMd5FileName(obj.getMd5Fichero());
 			
-			db.setUncompressedFilename(obj.getUncompressFichero());
+			db.setUncompressedFileName(obj.getUncompressFichero());
 			
 			db = fileDB.saveAndFlush(db);
 			

@@ -43,6 +43,7 @@ public class TrainService {
 			
 	private @Value("${tfm.training.ner.directory}")			String TRAINING_NER_DIRECTORY =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
 
+	private @Value("${tfm.model.pos_asc.directory}")		String POS_MODEL =				"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos_anc_en_2.0.2_2.4_1556659930154";
 	private @Value("${tfm.model.bert_uncased.directory}")	String BERT_UNCASED_MODEL =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert_uncased_en_2.0.2_2.4_1556651478920";
 	private @Value("${tfm.model.bert_ner.directory}")		String BERT_NER_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner_dl_bert_en_2.0.2_2.4_1558809068913";
 	private @Value("${tfm.model.tfm.directory}")			String TFM_NER_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tfm_1_.0.0";
@@ -59,13 +60,13 @@ public class TrainService {
 				spark,
 				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TRAIN), 
 				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TEST), 
-				TRAINING_NER_DIRECTORY);
+				TFM_NER_MODEL);
 		
 		trainModel(
 				spark,
 				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TRAIN), 
 				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TEST), 
-				TRAINING_NER_DIRECTORY);
+				TFM_NER_MODEL);
 		
 	}
 	
@@ -104,6 +105,7 @@ public class TrainService {
 					testfile, 
 					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "csv"), 
 					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "pipeline9"), 
+					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					TFM_NER_MODEL);
 			LOG.info("TRAIN SERVICE: tmVar pubtator fail OK");
@@ -120,6 +122,7 @@ public class TrainService {
 					spark, 
 					new BiocXmlProcessor(filename), 
 					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
+					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);
@@ -137,6 +140,7 @@ public class TrainService {
 					spark, 
 					new PubtatorTxtProcessor(filename), 
 					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
+					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);

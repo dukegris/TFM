@@ -47,10 +47,12 @@ public class SparkConfig {
         		set("spark.rpc.askTimeout", "240").
         		set("spark.driver.cores", sparkCores).
         		set("spark.driver.memory", sparkDriverMemory).
+        		set("spark.driver.maxResultSize", "4G").
         		set("spark.executor.memory", sparkExcutorMemory).
-        		set("spark.local.dir", sparkHome + "/tmp").
         		set("spark.ui.enabled", sparkUiEnabled).
         		set("spark.ui.port", sparkUiPort).
+        		set("spark.local.dir", sparkHome + "/tmp").
+        		set("spark.kryoserializer.buffer.max", "500m").
         		set("spark.jars.packages", "JohnSnowLabs:spark-nlp:2.0.9");
 
         return bean;

@@ -15,6 +15,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToOne;
@@ -70,6 +71,20 @@ public class PubArticleEntity extends AuditedBaseEntity {
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
 	public PubFileEntity filePmc;
+	
+	@JoinColumn(
+			name = "file_pmctxt_id", 
+			unique = false,
+			nullable = true, 
+			referencedColumnName = "id",
+			foreignKey = @ForeignKey(
+					value = ConstraintMode.NO_CONSTRAINT,
+					name = "pubmed_article_pmctxt_fk"))
+	@OneToOne(
+			optional= false,
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH })
+	public PubFileEntity filePmcTxt;
 
 	@Column(
 			name = "pmid", 
@@ -91,6 +106,14 @@ public class PubArticleEntity extends AuditedBaseEntity {
 			nullable = true, 
 			length = 10240)
 	public String summary;
+
+	@Lob
+	@Column(
+			name = "text", 
+			unique = false,
+			nullable = true, 
+			length = 65536)
+	public String text;
 
 	@Column(
 			name = "language", 
