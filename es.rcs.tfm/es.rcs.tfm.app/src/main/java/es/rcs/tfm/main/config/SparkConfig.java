@@ -3,7 +3,6 @@ package es.rcs.tfm.main.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.PropertySource;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.nlp.NlpNames;
-import es.rcs.tfm.nlp.setup.DistributedFileSystem;
 import es.rcs.tfm.nlp.setup.SparkSessionFactory;
 import es.rcs.tfm.srv.SrvNames;
 
