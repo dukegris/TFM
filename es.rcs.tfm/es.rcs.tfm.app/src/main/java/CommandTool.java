@@ -170,7 +170,7 @@ public class CommandTool {
 		int result = OK;
 		
 		File f = Paths.get(infile).toFile();
-		if (!f.isFile() || !f.exists()) result = GENERATE_INVALID_FILE;
+		if (!f.exists() || !f.isFile()) result = GENERATE_INVALID_FILE;
 		if (!(BIOC.equals(type.toUpperCase()) || PUBTATOR.equals(type.toUpperCase()))) result = GENERATE_INVALID_TYPE;
 		
 		if (result == OK) {

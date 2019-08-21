@@ -44,7 +44,7 @@ public class SparkConfig {
         SparkConf bean = new SparkConf().
         		setAppName(AppNames.SPARK_APPNAME).
         		setMaster(sparkMaster). // Locahost with 2 threads
-        		set("spark.rpc.askTimeout", "240").
+        		set("spark.rpc.askTimeout", "480").
         		set("spark.driver.cores", sparkCores).
         		set("spark.driver.memory", sparkDriverMemory).
         		set("spark.driver.maxResultSize", "4G").

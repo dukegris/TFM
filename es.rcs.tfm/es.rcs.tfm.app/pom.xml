@@ -209,6 +209,12 @@
 		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
+		<!-- ANTLR para compatibilidad con spark -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 		<!-- HIKARI -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>

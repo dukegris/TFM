@@ -136,6 +136,7 @@
 		<jackson.version>2.9.9</jackson.version>
 	
 		<!-- UTILITIES -->
+		<antlr.version>4.7.1</antlr.version>
 		<lombok.version>1.18.8</lombok.version>
 		<wrapper.version>3.2.3</wrapper.version>
 		<querydsl.version>4.2.1</querydsl.version>
@@ -625,6 +626,13 @@
 		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
+		<!-- ANTLR para compatibilidad con spark -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>${antlr.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
