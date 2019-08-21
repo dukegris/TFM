@@ -60,7 +60,7 @@
 	<profiles>
 	    <profile>
 	        <id>development</id>
-	        <activation><activeByDefault>true</activeByDefault></activation>
+	        <activation><activeByDefault>false</activeByDefault></activation>
 			<properties><env>development</env></properties>
 	    </profile>
 	    <profile>
@@ -70,7 +70,7 @@
 	    </profile>
 	    <profile>
 	        <id>production</id>
-	        <activation><activeByDefault>false</activeByDefault></activation>
+	        <activation><activeByDefault>true</activeByDefault></activation>
 			<properties><env>production</env></properties>
 	    </profile>
 	</profiles>

@@ -27,6 +27,7 @@ public class SparkConfig {
 	@Value("${spark.master}") private String sparkMaster;
 	@Value("${spark.driver.cores}") private String sparkCores;
 	@Value("${spark.driver.memory}") private String sparkDriverMemory;
+	@Value("${spark.executor.cores}") private String sparkExcutorCores;
 	@Value("${spark.executor.memory}") private String sparkExcutorMemory;
 	@Value("${spark.ui.enabled}") private String sparkUiEnabled;
 	@Value("${spark.ui.port}") private String sparkUiPort;
@@ -48,6 +49,7 @@ public class SparkConfig {
         		set("spark.driver.cores", sparkCores).
         		set("spark.driver.memory", sparkDriverMemory).
         		set("spark.driver.maxResultSize", "4G").
+        		set("spark.executor.cores", sparkExcutorCores).
         		set("spark.executor.memory", sparkExcutorMemory).
         		set("spark.ui.enabled", sparkUiEnabled).
         		set("spark.ui.port", sparkUiPort).
