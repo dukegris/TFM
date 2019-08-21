@@ -104,8 +104,7 @@
   <dataDir>${solr.data.dir:}</dataDir>
   <dataDir>/solr/data/${solr.core.name}</dataDir>
     -->
-  <dataDir>
-${solr.data.dir:}/${solr.core.name}</dataDir>
+  <dataDir>${solr.data.dir:}/${solr.core.name}</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.

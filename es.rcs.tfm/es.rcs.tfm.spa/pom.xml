@@ -60,7 +60,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg line="/c &quot;c:\Java\node-v10.16.3-win-x64\npm.cmd install&quot;" />
+									<arg line="/c &quot;c:\Java\node-10.16.0\npm.cmd install&quot;" />
 								</exec>
 								<exec	executable="npm" 
 										dir="${project.basedir}"
@@ -84,7 +84,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg line="/c &quot;c:\Java\node-v10.16.3-win-x64\ng.cmd build&quot;" />
+									<arg line="/c &quot;c:\Java\node-10.16.0\ng.cmd build&quot;" />
 								</exec>
 								<exec	executable="ng" 
 										dir="${project.basedir}"

@@ -1,8 +1,16 @@
 dist
 node_modules
 target
+.cache*
 .classpath
 .project
 .settings
 .vscode
 /.metadata/
+/es.rcs.tfm/es.rcs.tfm.corpus/data
+/es.rcs.tfm/es.rcs.tfm.corpus/datasets
+/es.rcs.tfm/es.rcs.tfm.corpus/models
+/es.rcs.tfm/es.rcs.tfm.corpus/training
+/es.rcs.tfm/es.rcs.tfm.app/hadoop
+/es.rcs.tfm/es.rcs.tfm.app/solr
+/es.rcs.tfm/es.rcs.tfm.app/spark
