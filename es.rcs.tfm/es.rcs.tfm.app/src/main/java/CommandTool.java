@@ -157,6 +157,7 @@ public class CommandTool {
 
 			} catch (Exception ex) {
 				result = TRAIN_START_FAILED;
+				System.out.println("FAILED " + ex);
 			}
 
 		}
@@ -196,6 +197,7 @@ public class CommandTool {
 
 			} catch (Exception ex) {
 				result = GENERATE_START_FAILED;
+				System.out.println("FAILED " + ex);
 			}
 
 		}

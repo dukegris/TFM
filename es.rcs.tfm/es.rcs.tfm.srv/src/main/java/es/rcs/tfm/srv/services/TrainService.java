@@ -99,7 +99,7 @@ public class TrainService {
 		Path outdirname = Paths.get(outdir);
 		Path filename = Paths.get(trainfile);
 		try {
-			TrainRepository.trainFromConll(
+			boolean result = TrainRepository.trainFromConll(
 					spark, 
 					trainfile, 
 					testfile, 
@@ -108,9 +108,13 @@ public class TrainService {
 					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					TFM_NER_MODEL);
-			LOG.info("TRAIN SERVICE: tmVar pubtator fail OK");
+			if (result) {
+				LOG.info("TRAIN SERVICE: OK");
+			} else {
+				LOG.info("TRAIN SERVICE: FAIL");
+			}
 		} catch (Exception ex) {
-			LOG.warn("TRAIN SERVICE: tmVar pubtator fail ex:" + ex.toString());
+			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
 		}
 		
 	}
@@ -118,7 +122,7 @@ public class TrainService {
 	public void prepareDataForTrainingFromBioc(SparkSession spark, String infile, String outfile) {
 		try {
 			Path filename = Paths.get(infile);
-			TrainRepository.getConllFrom(
+			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new BiocXmlProcessor(filename), 
 					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
@@ -126,9 +130,13 @@ public class TrainService {
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);
-			LOG.info("PREPARE DATA SERVICE: tmVar train bioc OK");
+			if (result) {
+				LOG.info("PREPARE DATA SERVICE: tmVar test bioc OK");
+			} else {
+				LOG.info("PREPARE DATA SERVICE: tmVar test bioc FAIL");
+			}
 		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: tmVar train bioc fail ex:" + ex.toString());
+			LOG.warn("PREPARE DATA SERVICE: tmVar train bioc FAIL - ex:" + ex.toString());
 		}
 	}
 
@@ -136,7 +144,7 @@ public class TrainService {
 		
 		try {
 			Path filename = Paths.get(infile);
-			TrainRepository.getConllFrom(
+			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new PubtatorTxtProcessor(filename), 
 					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
@@ -144,9 +152,13 @@ public class TrainService {
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);
-			LOG.info("PREPARE DATA SERVICE: tmVar test pubtator OK");
+			if (result) {
+				LOG.info("PREPARE DATA SERVICE: tmVar test pubtator OK");
+			} else {
+				LOG.info("PREPARE DATA SERVICE: tmVar test pubtator FAIL");
+			}
 		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: tmVar test pubtator fail ex:" + ex.toString());
+			LOG.warn("PREPARE DATA SERVICE: tmVar test pubtator FAIL - ex:" + ex.toString());
 		}
 		
 	}
