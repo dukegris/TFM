@@ -3,6 +3,7 @@ package es.rcs.tfm.main.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.PropertySource;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.nlp.NlpNames;
+import es.rcs.tfm.nlp.setup.DistributedFileSystem;
 import es.rcs.tfm.nlp.setup.SparkSessionFactory;
 import es.rcs.tfm.srv.SrvNames;
 
@@ -45,6 +47,7 @@ public class SparkConfig {
         SparkConf bean = new SparkConf().
         		setAppName(AppNames.SPARK_APPNAME).
         		setMaster(sparkMaster). // Locahost with 2 threads
+        		//set("fs.file.impl", LocalFileSystem.class.getName()).
         		set("spark.rpc.askTimeout", "480").
         		set("spark.driver.cores", sparkCores).
         		set("spark.driver.memory", sparkDriverMemory).
@@ -56,7 +59,6 @@ public class SparkConfig {
         		set("spark.local.dir", sparkHome + "/tmp").
         		set("spark.kryoserializer.buffer.max", "500m").
         		set("spark.jars.packages", "JohnSnowLabs:spark-nlp:2.0.9");
-
         return bean;
     }
 

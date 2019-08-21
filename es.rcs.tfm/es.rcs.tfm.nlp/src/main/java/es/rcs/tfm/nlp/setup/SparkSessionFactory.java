@@ -1,5 +1,7 @@
 package es.rcs.tfm.nlp.setup;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.FactoryBean;
@@ -15,10 +17,17 @@ public class SparkSessionFactory implements FactoryBean<SparkSession> {
 
 	@Override
     public SparkSession getObject() throws Exception {
-        return SparkSession.
+        
+		SparkSession session = SparkSession.
 				builder().
 				config(sparkConf).
 				getOrCreate();
+
+        Configuration hadoopConf = session.sparkContext().hadoopConfiguration();
+        hadoopConf.set("fs.file.impl", LocalFileSystem.class.getName());
+        
+        return session;
+        
     }
  
     @Override
