@@ -25,6 +25,7 @@
 		<module>es.rcs.tfm.api</module>
 		<module>es.rcs.tfm.spa</module>
 		<module>es.rcs.tfm.web</module>
+		<module>es.rcs.tfm.corpus</module>
 		<module>es.rcs.tfm.app</module>
 	</modules>
 

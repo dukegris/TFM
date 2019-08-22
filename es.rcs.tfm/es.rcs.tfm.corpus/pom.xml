@@ -1,0 +1,24 @@
+<project 
+		xmlns="http://maven.apache.org/POM/4.0.0" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://maven.apache.org/POM/4.0.0 
+			http://maven.apache.org/xsd/maven-4.0.0.xsd">
+			
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>RCS-Corpus</artifactId>
+	<name>TFM Corpus-Datalake</name>
+	<description>TFM Corpus-Datalake Module</description>	
+	<packaging>jar</packaging>
+	
+	<parent>
+		<groupId>es.rcs.tfm</groupId>
+		<artifactId>RCS-TFM</artifactId>
+		<version>0.0.3-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+	</dependencies>
+
+</project>
