@@ -18,6 +18,7 @@ import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
 import org.apache.spark.ml.PipelineModel
 
 import es.rcs.tfm.nlp.util.NerHelper
+import es.rcs.tfm.nlp.util.TfmType
 
 class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String, bertModelDirectory: String) {
 

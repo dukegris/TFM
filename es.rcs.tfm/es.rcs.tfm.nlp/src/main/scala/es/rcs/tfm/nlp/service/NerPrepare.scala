@@ -21,6 +21,7 @@ import org.apache.spark.ml.{Pipeline, PipelineModel}
 import scala.collection.{JavaConversions, JavaConverters}
 import scala.collection.mutable.WrappedArray
 import scala.util.matching.Regex
+import es.rcs.tfm.nlp.util.TfmType
 
 /**
  * 

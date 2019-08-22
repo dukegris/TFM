@@ -7,6 +7,7 @@ import org.apache.spark.ml.param.{BooleanParam, Param, ParamMap, StringArrayPara
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
+import es.rcs.tfm.nlp.util.TfmType
 
 /**
  * Clase encargada de mezclar en un fichero CONLL2003 el resultado de un 
