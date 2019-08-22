@@ -54,7 +54,7 @@ class NerHelper(spark: SparkSession) {
   def measureExact(nerReader: CoNLL, model: PipelineModel, file: ExternalResource, printErrors: Int = 0): Unit = {
     val df = nerReader.readDataset(spark, file.path).toDF()
     val transformed = model.transform(df)
-    val rows = transformed.select("ner_span", "label_span").collect()
+    val rows = transformed.select(TfmType.NAMED_ENTITY_SPAN, TfmType.LABEL_SPAN).collect()
 
     val correctPredicted = mutable.Map[String, Int]()
     val predicted = mutable.Map[String, Int]()

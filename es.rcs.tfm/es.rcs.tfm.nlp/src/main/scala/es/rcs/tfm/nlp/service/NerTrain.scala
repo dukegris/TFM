@@ -110,7 +110,7 @@ println(java.time.LocalTime.now + ": reload model")
 println(java.time.LocalTime.now + ": Measure Training dataset " + trainFile.path)
     nerHelper.measureExact(nerReader, loadedModel, trainFile)
     
-println(java.time.LocalTime.now + ": Test dataset " + testFile.path)
+println(java.time.LocalTime.now + ": Measure Test dataset " + testFile.path)
     nerHelper.measureExact(nerReader, loadedModel, testFile)
     
 println(java.time.LocalTime.now + ": measureNerTraining end")
