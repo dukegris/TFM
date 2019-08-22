@@ -80,36 +80,47 @@ class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String,
                   
   def measureNerTraining(trainFileName: String, testFileName: String, predictionsCsvFileName: String, pipelineModelDirectory: String): PipelineModel = {
 
+println(java.time.LocalTime.now + ": measureNerTraining begin")
     val nerReader = CoNLL()
     val nerHelper = new NerHelper(spark)
   
     val trainFile = ExternalResource(trainFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
     val testFile = ExternalResource(testFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
      
+println(java.time.LocalTime.now + ": trainNerModel " + trainFile)
     val model = trainNerModel(nerReader, trainFile)
   
+println(java.time.LocalTime.now + ": measureNerModel " + trainFile.path)
     measureNerModel(nerReader, model, trainFile, false)
+    
+println(java.time.LocalTime.now + ": measureNerModel " + testFile.path)
     measureNerModel(nerReader, model, testFile, false)
-  
+    
+println(java.time.LocalTime.now + ": model.transform " + testFile.path)
     val df = model.transform(nerReader.readDataset(spark, testFile.path))
+    
+println(java.time.LocalTime.now + ": collect anotations")
     val annotation = Annotation.collect(df, TfmType.NAMED_ENTITY_SPAN)
     nerHelper.saveNerSpanTags(annotation, predictionsCsvFileName)
     
+println(java.time.LocalTime.now + ": reload model")
     model.write.overwrite().save(pipelineModelDirectory)
     val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
-
-    System.out.println("Training dataset")
+    
+println(java.time.LocalTime.now + ": Measure Training dataset " + trainFile.path)
     nerHelper.measureExact(nerReader, loadedModel, trainFile)
-  
-    System.out.println("Test dataset")
+    
+println(java.time.LocalTime.now + ": Test dataset " + testFile.path)
     nerHelper.measureExact(nerReader, loadedModel, testFile)
     
+println(java.time.LocalTime.now + ": measureNerTraining end")
     model
     
   }
   
   def measureNerModel(nerReader: CoNLL, model: PipelineModel, file: ExternalResource, extended: Boolean = true, errorsToPrint: Int = 0): Unit = {
     
+println(java.time.LocalTime.now + ": measureNerModel begin")
     val ner = model.
       stages.
       filter(s => s.isInstanceOf[NerDLModel]).
@@ -121,21 +132,25 @@ class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String,
       readDataset(spark, file.path).
       toDF()
 
+println(java.time.LocalTime.now + ": measureNerModel transform")
     val transformed = model.
       transform(df)
 
+println(java.time.LocalTime.now + ": measureNerModel annotation")
     val labeled = NerTagged.
       collectTrainingInstances(
           transformed, 
           Seq(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS), TfmType.LABEL)
 
+println(java.time.LocalTime.now + ": results")
     ner.measure(labeled, (s: String) => System.out.println(s), extended, errorsToPrint)
+println(java.time.LocalTime.now + ": measureNerModel end")
 
   }
   
   def trainNerModel(nerReader: CoNLL, file: ExternalResource): PipelineModel = {
 
-    System.out.println("NER-TRAIN: Lectura del dataset")
+println(java.time.LocalTime.now + ": NER-TRAIN: Lectura del dataset")
 
     val time = System.nanoTime()
     
@@ -144,14 +159,17 @@ class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String,
     
     System.out.println(s"NER-TRAIN: Lectura en ${(System.nanoTime() - time)/1e9}\n")
 
-    System.out.println("NER-TRAIN: Comienzo del entrenamiento")
+println(java.time.LocalTime.now + ": NER-TRAIN: Comienzo del entrenamiento")
 
     val stages = createPipelineStagesDl()
 
     val pipeline = new RecursivePipeline().
       setStages(stages)
 
-    pipeline.fit(dataset)
+    val model = pipeline.fit(dataset)
+    
+println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
+    model
     
   }
   

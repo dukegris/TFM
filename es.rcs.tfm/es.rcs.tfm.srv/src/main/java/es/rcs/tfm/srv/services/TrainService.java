@@ -103,8 +103,8 @@ public class TrainService {
 					spark, 
 					trainfile, 
 					testfile, 
-					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "csv"), 
-					FilenameUtils.concat(FilenameUtils.concat(outdirname.toFile().getName(), filename.toFile().getName()), "pipeline9"), 
+					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".csv", 
+					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
 					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					TFM_NER_MODEL);

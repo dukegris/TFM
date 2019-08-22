@@ -66,7 +66,7 @@ println(java.time.LocalTime.now + ": doc_start " + docId)
 // Inicio del documento
       val conllDoc: ArrayBuffer[(String, String, String, String, Integer, Integer, Integer, Integer)] = ArrayBuffer()
       conllDoc.append(("-DOCSTART-", "-X-", "-X-", "O", docId, 0, 0, 0))
-      conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+      conllDoc.append((null, null, null, null, docId, 0, 0, 0))
 
       // Construye la tupla: ((1127,1135),Asp506Gly,NNP,O,9)
       val dataPrepared = (
@@ -88,7 +88,7 @@ println(row._7.size)
         
         // Si hay cambio de frase se induce una linea en blanco
         if (token._5 != sentenceId){
-          conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+          conllDoc.append((null, null, null, null, docId, 0, 0, 0))
           sentenceId = token._5
         }
         
@@ -124,7 +124,7 @@ println(row._7.size)
       })
 
       // Final del documento
-      conllDoc.append((" ", " ", " ", " ", docId, 0, 0, 0))
+      conllDoc.append((null, null, null, null, docId, 0, 0, 0))
 println(java.time.LocalTime.now + ": doc_end " + docId)
       docId += 1
 
