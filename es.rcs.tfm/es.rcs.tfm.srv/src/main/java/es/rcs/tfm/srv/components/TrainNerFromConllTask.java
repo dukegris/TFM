@@ -17,15 +17,15 @@ import es.rcs.tfm.srv.services.TrainService;
  * @author raul
  *
  */
-@Component(value = SrvNames.TRAIN_MODEL_TASK)
+@Component(value = SrvNames.TRAIN_NER_MODEL_TASK)
 @Scope("prototype")
-public class TrainConllTask extends Thread{
+public class TrainNerFromConllTask extends Thread{
 
-	private static final Logger LOG = LoggerFactory.getLogger(TrainConllTask.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TrainNerFromConllTask.class);
 
-	public TrainConllTask() {
+	public TrainNerFromConllTask() {
 		super();
-		this.setName(SrvNames.TRAIN_MODEL_TASK);
+		this.setName(SrvNames.TRAIN_NER_MODEL_TASK);
 	}
 
 	@Override

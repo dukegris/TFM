@@ -23,8 +23,8 @@ public class SrvNames {
 
 	// -------------------------------------------------------------------------------------
 	// SRV: THREADS
-	public static final String PREPARE_DATA_TASK =	"taoPrepareDataTask";
-	public static final String TRAIN_MODEL_TASK =	"taoTrainModelTask";
+	public static final String PREPARE_CONLL_FROM_TXT_TASK =	"taoPrepareDataTask";
+	public static final String TRAIN_NER_MODEL_TASK =	"taoTrainModelTask";
 	
 		
 	

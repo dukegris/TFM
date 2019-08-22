@@ -228,9 +228,7 @@ public class TrainRepository {
 							processor, 
 							Spliterator.DISTINCT), 
 					false);
-			//TODO 
 			List<MarkedText> data = stream.collect(Collectors.toList());
-			//List<MarkedText> data = stream.limit(32).collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
 				

@@ -29,43 +29,36 @@ public class TrainService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrainService.class);
 
-	private @Value("${tfm.training.tmvar.bronco.texts}")	String TRAIN_BRONCO_TEXT =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/bronco/BRONCO-A_Abstractss.txt";
-	private @Value("${tfm.training.tmvar.bronco.answers}")	String TRAIN_BRONCO_ANSWERS =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/bronco/BRONCO-A_Answers.txt";
+	private @Value("${tfm.model.pos_asc.directory}")		String POS_MODEL =					"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos_anc_en_2.0.2_2.4_1556659930154";
+	private @Value("${tfm.model.bert_uncased.directory}")	String BERT_UNCASED_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert_uncased_en_2.0.2_2.4_1556651478920";
+	private @Value("${tfm.model.bert_ner.directory}")		String BERT_NER_MODEL =				"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner_dl_bert_en_2.0.2_2.4_1558809068913";
+	private @Value("${tfm.model.tfm.directory}")			String TFM_NER_MODEL =				"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tfm_1.0.0";
 
-	private @Value("${tfm.training.tmvar.train.texts}")		String TRAIN_TMVARS_TEXT =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/bronco/corpus[tmVar]_abstracts.txt";
-	private @Value("${tfm.training.tmvar.train.answers}")	String TRAIN_TMVARS_ANSWERS =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/bronco/corpus[tmVar]_answers.txt";
+	private @Value("${tfm.training.ner.train.pubtator}")	String TRAIN_NER_PUBTATOR_TRAIN =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/train.PubTator";
+	private @Value("${tfm.training.ner.test.pubtator}")		String TRAIN_NER_PUBTATOR_TEST =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/test.PubTator";
 
-	private @Value("${tfm.training.tmvar.train.pubtator}")	String TRAIN_TMVARS_TXT_TRAIN =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/train.PubTator";
-	private @Value("${tfm.training.tmvar.test.pubtator}")	String TRAIN_TMVARS_TXT_TEST =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/test.PubTator";
-
-	private @Value("${tfm.training.tmvar.train.bioc}")		String TRAIN_TMVARS_XML_TRAIN =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/train.BioC.xml";
-	private @Value("${tfm.training.tmvar.test.bioc}")		String TRAIN_TMVARS_XML_TEST =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/test.Bioc.xml";
+	private @Value("${tfm.training.ner.train.bioc}")		String TRAIN_NER_BIOC_TRAIN =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/train.BioC.xml";
+	private @Value("${tfm.training.ner.test.bioc}")			String TRAIN_NER_BIOC_XML_TEST =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmVar/test.Bioc.xml";
 			
-	private @Value("${tfm.training.ner.directory}")			String TRAINING_NER_DIRECTORY =	"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
-
-	private @Value("${tfm.model.pos_asc.directory}")		String POS_MODEL =				"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos_anc_en_2.0.2_2.4_1556659930154";
-	private @Value("${tfm.model.bert_uncased.directory}")	String BERT_UNCASED_MODEL =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert_uncased_en_2.0.2_2.4_1556651478920";
-	private @Value("${tfm.model.bert_ner.directory}")		String BERT_NER_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner_dl_bert_en_2.0.2_2.4_1558809068913";
-	private @Value("${tfm.model.tfm.directory}")			String TFM_NER_MODEL =			"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tfm_1_.0.0";
+	private @Value("${tfm.training.ner.directory}")			String TRAIN_NER_DIRECTORY =		"D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
 	
-	
-	private static final String TMVAR_TXT_TRAIN =	"tmvar.txt.train" + Conll2003Writer.CONLL_EXT;
-	private static final String TMVAR_TXT_TEST =	"tmvar.txt.test" + Conll2003Writer.CONLL_EXT;
-	private static final String TMVAR_BIOC_TRAIN =	"tmvar.bioc.train" + Conll2003Writer.CONLL_EXT;
-	private static final String TMVAR_BIOC_TEST =	"tmvar.bioc.test" + Conll2003Writer.CONLL_EXT;
+	private static final String NER_TXT_TRAIN =		"ner_txt_train" + Conll2003Writer.CONLL_EXT;
+	private static final String NER_TXT_TEST =		"ner_txt_test" + Conll2003Writer.CONLL_EXT;
+	private static final String NER_BIOC_TRAIN =	"ner_bioc_train" + Conll2003Writer.CONLL_EXT;
+	private static final String NER_BIOC_TEST =		"ner_bioc_test" + Conll2003Writer.CONLL_EXT;
 
 	public void trainModel(SparkSession spark) {
 		
 		trainModel(
 				spark,
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TRAIN), 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TEST), 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_TXT_TRAIN), 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_TXT_TEST), 
 				TFM_NER_MODEL);
 		
 		trainModel(
 				spark,
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TRAIN), 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TEST), 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_BIOC_TRAIN), 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_BIOC_TEST), 
 				TFM_NER_MODEL);
 		
 	}
@@ -74,23 +67,23 @@ public class TrainService {
 
 		prepareDataForTrainingFromPubtator(
 				spark,
-				TRAIN_TMVARS_TXT_TRAIN, 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TRAIN));
+				TRAIN_NER_PUBTATOR_TRAIN, 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_TXT_TRAIN));
 		
 		prepareDataForTrainingFromPubtator(
 				spark,
-				TRAIN_TMVARS_TXT_TEST, 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_TXT_TEST));
+				TRAIN_NER_PUBTATOR_TEST, 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_TXT_TEST));
 		
 		prepareDataForTrainingFromBioc(
 				spark,
-				TRAIN_TMVARS_XML_TRAIN, 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TRAIN));
+				TRAIN_NER_BIOC_TRAIN, 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_BIOC_TRAIN));
 		
 		prepareDataForTrainingFromBioc(
 				spark,
-				TRAIN_TMVARS_XML_TEST, 
-				FilenameUtils.concat(TRAINING_NER_DIRECTORY, TMVAR_BIOC_TEST));
+				TRAIN_NER_BIOC_XML_TEST, 
+				FilenameUtils.concat(TRAIN_NER_DIRECTORY, NER_BIOC_TEST));
 
 	}
 
@@ -125,18 +118,18 @@ public class TrainService {
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new BiocXmlProcessor(filename), 
-					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
+					FilenameUtils.concat(TRAIN_NER_DIRECTORY, filename.toFile().getName()), 
 					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);
 			if (result) {
-				LOG.info("PREPARE DATA SERVICE: tmVar test bioc OK");
+				LOG.info("PREPARE DATA SERVICE: bioc OK");
 			} else {
-				LOG.info("PREPARE DATA SERVICE: tmVar test bioc FAIL");
+				LOG.info("PREPARE DATA SERVICE: bioc FAIL");
 			}
 		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: tmVar train bioc FAIL - ex:" + ex.toString());
+			LOG.warn("PREPARE DATA SERVICE: bioc FAIL - ex:" + ex.toString());
 		}
 	}
 
@@ -147,18 +140,18 @@ public class TrainService {
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new PubtatorTxtProcessor(filename), 
-					FilenameUtils.concat(TRAINING_NER_DIRECTORY, filename.toFile().getName()), 
+					FilenameUtils.concat(TRAIN_NER_DIRECTORY, filename.toFile().getName()), 
 					POS_MODEL,
 					BERT_UNCASED_MODEL, 
 					BERT_NER_MODEL,
 					outfile);
 			if (result) {
-				LOG.info("PREPARE DATA SERVICE: tmVar test pubtator OK");
+				LOG.info("PREPARE DATA SERVICE: txt OK");
 			} else {
-				LOG.info("PREPARE DATA SERVICE: tmVar test pubtator FAIL");
+				LOG.info("PREPARE DATA SERVICE: txt FAIL");
 			}
 		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: tmVar test pubtator FAIL - ex:" + ex.toString());
+			LOG.warn("PREPARE DATA SERVICE: txt FAIL - ex:" + ex.toString());
 		}
 		
 	}

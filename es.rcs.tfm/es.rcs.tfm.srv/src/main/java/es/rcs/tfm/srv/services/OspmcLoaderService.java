@@ -39,9 +39,9 @@ public class OspmcLoaderService {
 	private @Value("${tfm.ospmc.ftp.baseline}") String FTP_BASELINE = "/pub/pmc";
 	private @Value("${tfm.ospmc.ftp.files}") String FTP_LIST_FILE = "oa_file_list.csv";
 
-	private @Value("${tfm.corpus.ospmc.gzip.directory}") String CORPUS_PMC_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/gzpmc";
-	private @Value("${tfm.corpus.ospmc.tar.directory}") String CORPUS_PMC_TAR_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/tarpmc";
-	private @Value("${tfm.corpus.ospmc.pmc.directory}") String CORPUS_PMC_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pmc";
+	private @Value("${tfm.corpus.ospmc.gzip.directory}") String CORPUS_PMC_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pmc_gzip";
+	private @Value("${tfm.corpus.ospmc.tar.directory}") String CORPUS_PMC_TAR_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pmc_tar";
+	private @Value("${tfm.corpus.ospmc.pmc.directory}") String CORPUS_PMC_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pmc_dir";
 
 	private static final Pattern SOLO_GZIP_PTRN = Pattern.compile(".*PMC(\\d+).tar.gz$");
 	

@@ -41,8 +41,8 @@ public class PubmedLoaderService {
 	private @Value("${tfm.pubmed.ftp.baseline}") String FTP_BASELINE = "/pubmed/baseline";
 	private @Value("${tfm.pubmed.ftp.update}") String FTP_UPDATE = "/pubmed/updatefiles";
 
-	private @Value("${tfm.corpus.pubmed.gzip.directory}") String CORPUS_PUBMED_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/gzpubmed";
-	private @Value("${tfm.corpus.pubmed.xml.directory}") String CORPUS_PUBMED_XML_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/xmlpubmed";
+	private @Value("${tfm.corpus.pubmed.gzip.directory}") String CORPUS_PUBMED_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pubmed_gzip";
+	private @Value("${tfm.corpus.pubmed.xml.directory}") String CORPUS_PUBMED_XML_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pubmed_xml";
 	
 	private static final Pattern SOLO_GZIP_PTRN = Pattern.compile("^pubmed(\\d+)n(\\d+).xml.gz$");
 

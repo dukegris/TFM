@@ -9,7 +9,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -36,12 +35,6 @@ import es.rcs.tfm.srv.repository.FtpRepository;
 @PropertySource(
 		{"classpath:/META-INF/service.properties"} )
 public class CorpusService {
-
-	private @Value("${tfm.corpus.pubmed.gzip.directory}") String CORPUS_PUBMED_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pubmed";
-	private @Value("${tfm.corpus.pubmed.xml.directory}") String CORPUS_PUBMED_XML_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/xmlpubmed";
-
-	private @Value("${tfm.corpus.ospmc.gzip.directory}") String CORPUS_PMC_GZIP_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/pmc";
-	private @Value("${tfm.corpus.ospmc.tar.directory}") String CORPUS_PMC_XML_DIRECTORY = "D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/tarpmc";
 	
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// FICHEROS

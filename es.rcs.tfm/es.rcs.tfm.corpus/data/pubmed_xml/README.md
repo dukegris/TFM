@@ -1,0 +1,2 @@
+# DATALAKE: Datos de PubMed descomprimidos
+Las citas de los articulos de PubMed Central son descomprimidos en este directorio, obteniendo un xml con 30000 artículos si se trata de ficheros de la linea base y de tamaño indeterminado para las actualizaciones diarias
