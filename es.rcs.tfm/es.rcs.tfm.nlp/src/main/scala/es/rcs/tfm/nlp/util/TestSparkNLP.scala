@@ -1,4 +1,4 @@
-package es.rcs.tfm.nlp.service
+package es.rcs.tfm.nlp.util
 
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
