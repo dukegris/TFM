@@ -197,7 +197,7 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
     val embeddings = BertEmbeddings.
       //pretrained(TfmType.PRETRAINED_BERT, "en").
     	load(this.bertModelDirectory).
-    	setInputCols(Array(TfmType.SENTENCES)).
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.WORD_EMBEDDINGS)
 
     val nerTagger =  new NerDLApproach().

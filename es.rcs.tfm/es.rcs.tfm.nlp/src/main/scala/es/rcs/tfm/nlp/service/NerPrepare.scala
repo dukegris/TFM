@@ -103,7 +103,7 @@ println(java.time.LocalTime.now + ": execute end")
     	load(this.bertModelDirectory).
     	setMaxSentenceLength(4096).
     	setDimension(1024).
-    	setInputCols(Array(TfmType.SENTENCES)).
+    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.WORD_EMBEDDINGS)
     
     val ner = NerDLModel.
