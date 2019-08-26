@@ -77,9 +77,9 @@ public class JettyConfig {
 					
 					SslContextFactory sslContextFactory = new SslContextFactory.Server();
 					sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
-					sslContextFactory.setKeyStorePath(keystore.getAbsolutePath());
+					sslContextFactory.setKeyStorePath(KEYSTORE_LOCATION);
 					sslContextFactory.setTrustStorePassword(TRUSTSTORE_PASSWORD);
-					sslContextFactory.setTrustStorePath(truststore.getAbsolutePath());
+					sslContextFactory.setTrustStorePath(TRUSTSTORE_LOCATION);
 
 					ServerConnector connector = new ServerConnector(server);
 					

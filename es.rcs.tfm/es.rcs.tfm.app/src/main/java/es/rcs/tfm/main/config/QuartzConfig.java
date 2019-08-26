@@ -30,7 +30,7 @@ public class QuartzConfig {
 
 	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "4 0 0 * * MON-SUN")
+			cron = "0 0 4 * * MON-SUN")
 	public void loadPubmedNewData() {
 		pubmedLoader.doLoadNewData();
 	}
@@ -44,7 +44,7 @@ public class QuartzConfig {
 
 	@Scheduled(
 			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "10 0 0 * * MON-SUN")
+			cron = "0 0 10 * * MON-SUN")
 	public void loadPMC() {
 		pmcLoader.doLoadNewData();
 	}
