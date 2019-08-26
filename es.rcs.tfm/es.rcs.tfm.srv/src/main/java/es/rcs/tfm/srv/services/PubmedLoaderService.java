@@ -113,12 +113,13 @@ public class PubmedLoaderService {
 						a.isHayCambiosEnBD() ? corpusSrvc.updateDb(a) : a).
 				// Actualizar datos de los ficheros en el indice
 				map(a -> 
-						a.isHayCambiosEnBD() ? corpusSrvc.updateIdx(a) : a)
+						a.isHayCambiosEnIDX() ? corpusSrvc.updateIdx(a) : a)
 				;
 		
-		List<Fichero> f = ficherosStream.collect(Collectors.toList());
+		//List<Fichero> f = ficherosStream.collect(Collectors.toList());
 		List<Articulo> a = articulosStream.collect(Collectors.toList());
-		System.out.println(f.size() + "\t" + a.size());
+		System.out.println("\t" + a.size());
+		//System.out.println(f.size() + "\t" + a.size());
 
 	}
 

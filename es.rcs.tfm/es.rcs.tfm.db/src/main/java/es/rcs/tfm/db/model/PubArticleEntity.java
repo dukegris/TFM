@@ -39,6 +39,9 @@ import lombok.ToString;
 @Table(name="pubmed_articles",
 	uniqueConstraints = {
 			@UniqueConstraint(
+					name = "pubmed_articles_pmctxt_uk", 
+					columnNames = { "file_pmctxt_id" }),
+			@UniqueConstraint(
 					name = "pubmed_articles_pmc_uk", 
 					columnNames = { "file_pmc_id" })})
 @EntityListeners(AuditingEntityListener.class)

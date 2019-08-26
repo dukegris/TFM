@@ -205,10 +205,10 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
       setOutputCol(TfmType.NAMED_ENTITY).
       setLabelColumn(TfmType.LABEL).
       setRandomSeed(0).
-      setPo(0.01f).
-      // setPo(5e-3f). //0.005
-      setLr(0.1f).
-      // setLr(1e-1f). //0.001
+      setPo(0.01f). //0.005
+      // setPo(5e-3f). 
+      setLr(0.1f). //0.001
+      // setLr(1e-1f). 
       setMaxEpochs(100).
       // setMaxEpochs(1).
       // setDropout(5e-1f). //0.5
@@ -220,7 +220,7 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
       // setIncludeEmbeddings(True).
       // setVerbose(2).
       // setVerbose(Verbose.Epochs)
-      setBatchSize(9)
+      setBatchSize(9) // 32
 
     val converter = new NerConverter().
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).

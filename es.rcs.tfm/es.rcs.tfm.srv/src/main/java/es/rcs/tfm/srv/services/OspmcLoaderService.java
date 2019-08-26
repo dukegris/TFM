@@ -63,7 +63,6 @@ public class OspmcLoaderService {
 					!f.isDirectory() &&
 					!f.isUnknown() &&
 					FTP_LIST_FILE.equals(f.getName()) && (
-					true ||
 					CorpusRepository.checkDownloadNeeded(
 							CORPUS_PMC_GZIP_DIRECTORY,
 							f.getName(),
@@ -76,13 +75,13 @@ public class OspmcLoaderService {
 							f.getName(),
 							CORPUS_PMC_GZIP_DIRECTORY,
 							f.getName()))).
-			// Obtener todos los articulos del índice
+			// Obtener todos los ficheros de los articulos del índice
 			flatMap(f -> 
 					new PmcProcessor(
 							CORPUS_PMC_GZIP_DIRECTORY, 
 							f.getName()).
 						stream()).
-			//Comprobar si se requiere descargar
+			// Comprobar si se requiere descargar
 			map (f->
 					corpusSrvc.isProcessNeeded(f)).
 			// Descargar ficheros

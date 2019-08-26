@@ -28,29 +28,29 @@ public class QuartzConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QuartzConfig.class);
 
-	//@Scheduled(
+	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			//cron = "0 0 0 * * MON-SUN")
+			cron = "4 0 0 * * MON-SUN")
 	public void loadPubmedNewData() {
 		pubmedLoader.doLoadNewData();
 	}
 
-	//@Scheduled(
+	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			//cron = "0 0 0 * * MON-SUN")
+			cron = "0 0 0 * * MON-SUN")
 	public void loadPubmedBaseline() {
 		pubmedLoader.doLoadBaselineData();
 	}
 
-	//@Scheduled(
-	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			//cron = "0 0 0 * * MON-SUN")
+	@Scheduled(
+			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
+			cron = "10 0 0 * * MON-SUN")
 	public void loadPMC() {
 		pmcLoader.doLoadNewData();
 	}
 	
-	@Scheduled(
-			cron = "0 */1 * * * SUN-SAT") // Cada minuto
+	//@Scheduled(
+			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			//cron = "0 0 0 * * MON-SUN")
 	public void prepareNerConllFromTxt() {
 		synchronized(prepareNerConllFromTxtTask) {

@@ -159,7 +159,7 @@ public class Fichero {
 		fichero.setTipo(PubFileEntity.FTP_PUBMED);
 		fichero.setNombre(nombre);
 		fichero.setGzDirectorio(gzDirectorio);
-		fichero.setGzFichero(nombre);
+		fichero.setGzFichero(gzFilename);
 		fichero.setGzInstante(gztimestamp);
 		fichero.setGzTamanio(size);
 		fichero.setUncompressFichero(uncompressFilename);

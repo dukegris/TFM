@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
@@ -35,6 +37,8 @@ import es.rcs.tfm.srv.repository.FtpRepository;
 @PropertySource(
 		{"classpath:/META-INF/service.properties"} )
 public class CorpusService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CorpusService.class);
 	
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// FICHEROS
@@ -58,45 +62,51 @@ public class CorpusService {
 			String uncompressDirectory,
 			Fichero obj) {
 		
-		String sourceDir = FilenameUtils.normalize(FilenameUtils.concat(sourceDirectory, obj.getGzDirectorio()), true);
-		
-		Path pathGZ = Paths.get(FilenameUtils.concat(dataDirectory, obj.getGzDirectorio()));
-		CorpusRepository.makeDirectoryIfNeeded (pathGZ);
+		try {
+			
+			String sourceDir = FilenameUtils.normalize(FilenameUtils.concat(sourceDirectory, obj.getGzDirectorio()), true);
+			
+			Path pathGZ = Paths.get(FilenameUtils.concat(dataDirectory, obj.getGzDirectorio()));
+			CorpusRepository.makeDirectoryIfNeeded (pathGZ);
 
-		Path pathUNCOMPRESS = Paths.get(FilenameUtils.concat(uncompressDirectory, obj.getGzDirectorio()));
-		CorpusRepository.makeDirectoryIfNeeded (pathUNCOMPRESS);
-		
-		boolean result = FtpRepository.download(
-				server, port,
-				username, password,
-				sourceDir,
-				obj.getGzFichero(),
-				pathGZ.toFile().getAbsolutePath(),
-				obj.getGzFichero());
-		if (result && obj.isMd5()) {
-			result = FtpRepository.download(
+			Path pathUNCOMPRESS = Paths.get(FilenameUtils.concat(uncompressDirectory, obj.getGzDirectorio()));
+			CorpusRepository.makeDirectoryIfNeeded (pathUNCOMPRESS);
+			
+			boolean result = FtpRepository.download(
 					server, port,
 					username, password,
 					sourceDir,
-					obj.getMd5Fichero(),
+					obj.getGzFichero(),
 					pathGZ.toFile().getAbsolutePath(),
-					obj.getMd5Fichero());
+					obj.getGzFichero());
+			if (result && obj.isMd5()) {
+				result = FtpRepository.download(
+						server, port,
+						username, password,
+						sourceDir,
+						obj.getMd5Fichero(),
+						pathGZ.toFile().getAbsolutePath(),
+						obj.getMd5Fichero());
+			}
+			if (result && obj.isMd5()) {
+				result = CorpusRepository.checkDownload(
+						pathGZ.toFile().getAbsolutePath(), 
+						obj.getGzFichero(), 
+						obj.getMd5Fichero());
+			}
+			if (result) {
+				result = CorpusRepository.uncompress(
+						pathGZ.toFile().getAbsolutePath(), 
+						obj.getGzFichero(), 
+						pathUNCOMPRESS.toFile().getAbsolutePath(), 
+						obj.getUncompressFichero());
+			}
+			
+			obj.setHayCambiosEnDisco(result);
+
+		} catch (Exception ex) {
+			LOG.warn("updateDb-FILE " + obj + " EX:" + ex.getMessage());
 		}
-		if (result && obj.isMd5()) {
-			result = CorpusRepository.checkDownload(
-					pathGZ.toFile().getAbsolutePath(), 
-					obj.getGzFichero(), 
-					obj.getMd5Fichero());
-		}
-		if (result) {
-			result = CorpusRepository.uncompress(
-					pathGZ.toFile().getAbsolutePath(), 
-					obj.getGzFichero(), 
-					pathUNCOMPRESS.toFile().getAbsolutePath(), 
-					obj.getUncompressFichero());
-		}
-		
-		obj.setHayCambiosEnDisco(result);
 		
 		return obj;
 		
@@ -168,8 +178,8 @@ public class CorpusService {
 			obj.setEntidad(db);
 			obj.setHayCambiosEnBD(false);
 
-		} catch (Exception e) {
-			
+		} catch (Exception ex) {
+			LOG.warn("updateDb-FILE " + obj + " EX:" + ex.getMessage());
 		}
 		
 		return obj;
@@ -199,8 +209,9 @@ public class CorpusService {
 					obj.getNombre());
 
 			}
-		} catch (Exception ex) {
 			
+		} catch (Exception ex) {
+			LOG.warn("searchFicheroInDb-FILE " + obj + " EX:" + ex.getMessage());
 		}
 
 		if (db == null) {
@@ -227,101 +238,106 @@ public class CorpusService {
 		boolean dbFound = false;
 		PubArticleEntity db = obj.getEntidad();
 
-		if (!dbFound && (db != null)) {
-			dbFound = true;
-		}
-		
-		if (!dbFound && (StringUtils.isNotBlank(obj.getPmid()))) {
-			db = articleDB.findByPmid(obj.getPmid());
-			if (db != null) dbFound = true;
-		}
-		
-		if (!dbFound && (obj.getIds() != null) && (!obj.getIds().isEmpty())) {
-			for (Entry<String, String> id: obj.getIds().entrySet()) {
-				List<PubArticleEntity> find = articleDB.findByIdentificador(id.getKey(), id.getValue());
-				if ((find != null) && (!find.isEmpty())) {
-					dbFound = true;
-					db = find.get(0);
-					break;
+		try {
+			
+			if (!dbFound && (db != null)) {
+				dbFound = true;
+			}
+			
+			if (!dbFound && (StringUtils.isNotBlank(obj.getPmid()))) {
+				db = articleDB.findByPmid(obj.getPmid());
+				if (db != null) dbFound = true;
+			}
+			
+			if (!dbFound && (obj.getIds() != null) && (!obj.getIds().isEmpty())) {
+				for (Entry<String, String> id: obj.getIds().entrySet()) {
+					List<PubArticleEntity> find = articleDB.findByIdentificador(id.getKey(), id.getValue());
+					if ((find != null) && (!find.isEmpty())) {
+						dbFound = true;
+						db = find.get(0);
+						break;
+					}
 				}
 			}
-		}
-		
-		boolean dbUpdateNeeded = false;
-		if (!dbFound) {
-			if (db == null) {
-				dbUpdateNeeded = true;
-				db = new PubArticleEntity();
+			
+			boolean dbUpdateNeeded = false;
+			if (!dbFound) {
+				if (db == null) {
+					dbUpdateNeeded = true;
+					db = new PubArticleEntity();
+				}
+				obj.setEntidad(db);
 			}
-			obj.setEntidad(db);
-		}
 
-		// Check Articulo changes vs Database. 
-		// TODO Solo revisamos Titulo y resumen
-		if (!dbUpdateNeeded) {
-			if (	(StringUtils.isNotBlank(obj.getTitulo()))) {
-				if 	(StringUtils.isBlank(db.getTitle())) {
-					dbUpdateNeeded = true;
-				} else if 	
-					(obj.getTitulo().compareTo(db.getTitle()) != 0) {
-					dbUpdateNeeded = true;
-				} 
-			} else if 
-					(StringUtils.isNotBlank(obj.getResumen())) {
-				if 	(StringUtils.isBlank(db.getSummary())) {
-					dbUpdateNeeded = true;
-				} else if 	
-					(obj.getResumen().compareTo(db.getSummary()) != 0) {
-					dbUpdateNeeded = true;
+			// Check Articulo changes vs Database. 
+			// TODO Solo revisamos Titulo y resumen
+			if (!dbUpdateNeeded) {
+				if (	(StringUtils.isNotBlank(obj.getTitulo()))) {
+					if 	(StringUtils.isBlank(db.getTitle())) {
+						dbUpdateNeeded = true;
+					} else if 	
+						(obj.getTitulo().compareTo(db.getTitle()) != 0) {
+						dbUpdateNeeded = true;
+					} 
+				} else if 
+						(StringUtils.isNotBlank(obj.getResumen())) {
+					if 	(StringUtils.isBlank(db.getSummary())) {
+						dbUpdateNeeded = true;
+					} else if 	
+						(obj.getResumen().compareTo(db.getSummary()) != 0) {
+						dbUpdateNeeded = true;
+					}
 				}
 			}
-		}
-		obj.setHayCambiosEnBD(dbUpdateNeeded);
-		
-		// ---------------------------------------------------------------------
-		// Search Article in index
-		IdxArticleSolr idx = null;
-		boolean idxFound = false;
-		
-		if (!idxFound && (StringUtils.isNotBlank(obj.getPmid()))) {
-			List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
-			if ((idxs != null) && (!idxs.isEmpty())) {
-				idxFound = true;
-				idx = idxs.get(0);
-			}
-		}
-		
-		boolean idxUpdateNeeded = false;
-		if (!idxFound) {
-			if (idx == null) {
-				idxUpdateNeeded = true;
-				idx = new IdxArticleSolr();
-			}
-			obj.setIndice(idx);
-		}
-
-		// Check Articulo changes vs index
-		if (!idxUpdateNeeded) {
-			if		(StringUtils.isNotBlank(obj.getTitulo())) {
-				if 	(StringUtils.isBlank(idx.getTitle())) {
-					idxUpdateNeeded = true;
-				} else if 	
-					(obj.getTitulo().compareTo(idx.getTitle()) != 0) {
-					idxUpdateNeeded = true;
-				} 
-			} else if 
-					(StringUtils.isNotBlank(obj.getResumen())) {
-				if 	(StringUtils.isBlank(idx.getSummary())) {
-					idxUpdateNeeded = true;
-				} else if 	
-					(obj.getResumen().compareTo(idx.getSummary()) != 0) {
-					idxUpdateNeeded = true;
+			obj.setHayCambiosEnBD(dbUpdateNeeded);
+			
+			// ---------------------------------------------------------------------
+			// Search Article in index
+			IdxArticleSolr idx = null;
+			boolean idxFound = false;
+			
+			if (!idxFound && (StringUtils.isNotBlank(obj.getPmid()))) {
+				List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
+				if ((idxs != null) && (!idxs.isEmpty())) {
+					idxFound = true;
+					idx = idxs.get(0);
 				}
 			}
-		}
-		obj.setHayCambiosEnIDX(idxUpdateNeeded);
-		
+			
+			boolean idxUpdateNeeded = false;
+			if (!idxFound) {
+				if (idx == null) {
+					idxUpdateNeeded = true;
+					idx = new IdxArticleSolr();
+				}
+				obj.setIndice(idx);
+			}
 
+			// Check Articulo changes vs index
+			if (!idxUpdateNeeded) {
+				if		(StringUtils.isNotBlank(obj.getTitulo())) {
+					if 	(StringUtils.isBlank(idx.getTitle())) {
+						idxUpdateNeeded = true;
+					} else if 	
+						(obj.getTitulo().compareTo(idx.getTitle()) != 0) {
+						idxUpdateNeeded = true;
+					} 
+				} else if 
+						(StringUtils.isNotBlank(obj.getResumen())) {
+					if 	(StringUtils.isBlank(idx.getSummary())) {
+						idxUpdateNeeded = true;
+					} else if 	
+						(obj.getResumen().compareTo(idx.getSummary()) != 0) {
+						idxUpdateNeeded = true;
+					}
+				}
+			}
+			obj.setHayCambiosEnIDX(idxUpdateNeeded);
+			
+		} catch (Exception ex) {
+			LOG.warn("isProcessNeeded " + obj + " EX:" + ex.getMessage());
+		}
+		
 		return obj;
 	}
 
@@ -371,9 +387,9 @@ public class CorpusService {
 			
 			obj.setEntidad(db);
 			obj.setHayCambiosEnBD(false);
-
-		} catch (Exception e) {
 			
+		} catch (Exception ex) {
+			LOG.warn("updateDb-ARTICLE " + obj + " EX:" + ex.getMessage());
 		}
 		
 		return obj;
@@ -398,9 +414,9 @@ public class CorpusService {
 
 			obj.setIndice(idx);
 			obj.setHayCambiosEnIDX(false);
-
-		} catch (Exception e) {
 			
+		} catch (Exception ex) {
+			LOG.warn("updateIdx-ARTICLE " + obj + " EX:" + ex.getMessage());
 		}
 		
 		return obj;
@@ -416,18 +432,24 @@ public class CorpusService {
 			Articulo obj) {
 		
 		PubArticleEntity db = obj.getEntidad();
-		
-		if ((db == null) && (StringUtils.isNotBlank(obj.getPmid()))) {
-			db = articleDB.findByPmid(obj.getPmid());
-		}
 
-		if ((db == null) && (obj.getIds() != null) && (!obj.getIds().isEmpty())) {
-			for (Entry<String, String> id: obj.getIds().entrySet()) {
-				List<PubArticleEntity> find = articleDB.findByIdentificador(id.getKey(), id.getValue());
-				if ((find != null) && (!find.isEmpty())) {
-					db = find.get(0);
+		try {
+			
+			if ((db == null) && (StringUtils.isNotBlank(obj.getPmid()))) {
+				db = articleDB.findByPmid(obj.getPmid());
+			}
+	
+			if ((db == null) && (obj.getIds() != null) && (!obj.getIds().isEmpty())) {
+				for (Entry<String, String> id: obj.getIds().entrySet()) {
+					List<PubArticleEntity> find = articleDB.findByIdentificador(id.getKey(), id.getValue());
+					if ((find != null) && (!find.isEmpty())) {
+						db = find.get(0);
+					}
 				}
 			}
+			
+		} catch (Exception ex) {
+			LOG.warn("searchArticuloInDb " + obj + " EX:" + ex.getMessage());
 		}
 
 		if (db == null) {
@@ -447,14 +469,21 @@ public class CorpusService {
 			Articulo obj) {
 		
 		IdxArticleSolr idx = obj.getIndice();
-		if (	(idx == null) &&
-				(StringUtils.isNotBlank(obj.getPmid()))) {
-
-			List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
-			if ((idxs != null) && (!idxs.isEmpty())) {
-				idx = idxs.get(0);
+		
+		try {
+			
+			if (	(idx == null) &&
+					(StringUtils.isNotBlank(obj.getPmid()))) {
+	
+				List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
+				if ((idxs != null) && (!idxs.isEmpty())) {
+					idx = idxs.get(0);
+				}
+	
 			}
-
+			
+		} catch (Exception ex) {
+			LOG.warn("searchArticuloInIdx " + obj + " EX:" + ex.getMessage());
 		}
 
 		if (	(idx == null)) {

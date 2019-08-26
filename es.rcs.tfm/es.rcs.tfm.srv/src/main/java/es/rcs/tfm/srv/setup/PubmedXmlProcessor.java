@@ -568,6 +568,9 @@ public class PubmedXmlProcessor implements Iterator<Articulo> {
 							}
 							
 							journal.getAuthorList(); // TODO
+							if ((journal.getAuthorList() != null) && !journal.getAuthorList().isEmpty()) {
+								System.out.println("Comprobar autores: ");
+							}
 							journal.getCollectionTitle(); // TODO
 							journal.getEdition(); // TODO
 							journal.getEndingDate(); // TODO
@@ -624,10 +627,10 @@ public class PubmedXmlProcessor implements Iterator<Articulo> {
 		}
 		
 		if (StringUtils.isBlank(articulo.getTitulo())) {
-			System.out.println("OJO");
+			System.out.println("OJO: No hay titulo: " + articulo.getPmid());
 		}
 		if (StringUtils.isBlank(articulo.getResumen())) {
-			System.out.println("OJO");
+			System.out.println("OJO: No hay resumen: " + articulo.getPmid());
 		}
 		
 		this.index++;
