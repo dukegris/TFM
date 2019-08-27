@@ -127,12 +127,12 @@ public class BiocXmlProcessor extends MarkedTextProcessor {
 
 		Document doc = items.get(index);
 
-		MarkedText documento = new MarkedText();
+		MarkedText result = new MarkedText();
 		
 		doc.getInfon(); //TODO
 		doc.getRelation(); //TODO
 
-		documento.pmid = doc.getId();
+		result.pmid = doc.getId();
 
 		if (	(doc.getPassage() != null) &&
 				(!doc.getPassage().isEmpty())) {
@@ -141,7 +141,7 @@ public class BiocXmlProcessor extends MarkedTextProcessor {
 				
 				passage.getRelation(); //TODO
 
-				Block block = documento.new Block();
+				Block block = result.new Block();
 				block.offset = passage.getOffset();
 				
 				if (	(passage.getInfon() != null) &&
@@ -173,46 +173,46 @@ public class BiocXmlProcessor extends MarkedTextProcessor {
 						}
 						if ((item != null) && item instanceof Annotation) {
 							Annotation annotation = (Annotation)item;
-							Note nota = documento.new Note();
-							nota.id = annotation.getId();
+							Note note = result.new Note();
+							note.id = annotation.getId();
 							if (	(annotation.getInfon() != null) &&
 									(!annotation.getInfon().isEmpty())) {
 								List<Infon> infons = annotation.getInfon();
 								infons.forEach(infon -> {
 									if (INFON_TYPE.equals(infon.getKey())) {
-										nota.type = infon.getvalue();
-										if (MarkedText.MUTATIONS.containsKey(nota.type)) {
-											nota.type = MarkedText.MUTATIONS.get(nota.type);
+										note.type = infon.getvalue();
+										if (MarkedText.MUTATIONS.containsKey(note.type)) {
+											note.type = MarkedText.MUTATIONS.get(note.type);
 										} else {
-											MarkedText.MUTATIONS.put(nota.type, nota.type);
+											MarkedText.MUTATIONS.put(note.type, note.type);
 										}
 									} else {
-										nota.value = infon.getvalue();
+										note.value = infon.getvalue();
 									}
 								});
 							}
-							if (annotation.getText() != null) nota.text = annotation.getText().getvalue();
+							if (annotation.getText() != null) note.text = annotation.getText().getvalue();
 							
 							if (	(annotation.getLocation() != null) &&
 									(!annotation.getLocation().isEmpty())) {
 								List<Location> locations = annotation.getLocation();
 								for (Location loc : locations) {
 									try {
-										Position pos = documento.new Position(
-												Integer.parseInt(loc.getOffset()),
+										Position pos = result.new Position(
+												Integer.parseInt(loc.getOffset()) - Integer.parseInt(block.offset) - 1,
 												Integer.parseInt(loc.getLength()));
-										nota.pos.add(pos);
+										note.pos.add(pos);
 									} catch (NumberFormatException ex) {
 										
 									}
 								}
 							}
-							block.notes.put(nota.type, nota);
+							block.notes.put(String.valueOf(annotation.getId()), note);
 						}
 					}
 				}
 				
-				documento.blocks.put(block.type, block);
+				result.blocks.put(block.type, block);
 
 			});
 			
@@ -220,7 +220,7 @@ public class BiocXmlProcessor extends MarkedTextProcessor {
 		
 		this.index++;
 
-		return documento;
+		return result;
 		
 	}
 	

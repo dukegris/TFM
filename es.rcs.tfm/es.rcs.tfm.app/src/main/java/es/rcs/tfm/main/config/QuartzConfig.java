@@ -30,28 +30,28 @@ public class QuartzConfig {
 
 	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "0 0 4 * * MON-SUN")
+			cron = "0 0 4 * * SUN-SAT")
 	public void loadPubmedNewData() {
 		pubmedLoader.doLoadNewData();
 	}
 
 	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "0 0 0 * * MON-SUN")
+			cron = "0 0 0 * * SUN-SAT")
 	public void loadPubmedBaseline() {
 		pubmedLoader.doLoadBaselineData();
 	}
 
 	@Scheduled(
 			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "0 0 10 * * MON-SUN")
+			cron = "0 0 10 * * SUN-SAT")
 	public void loadPMC() {
 		pmcLoader.doLoadNewData();
 	}
 	
 	//@Scheduled(
 			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			//cron = "0 0 0 * * MON-SUN")
+			//cron = "0 0 0 * * SUN-SAT")
 	public void prepareNerConllFromTxt() {
 		synchronized(prepareNerConllFromTxtTask) {
 			if (prepareNerConllFromTxtTask != null) {
@@ -70,7 +70,7 @@ public class QuartzConfig {
 	
 	//@Scheduled(
 			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			//cron = "0 0 0 * * MON-SUN")
+			//cron = "0 0 0 * * SUN-SAT")
 	public void trainNerFromConll() {
 		synchronized(trainNerFromConllTask) {
 			if (trainNerFromConllTask != null) {

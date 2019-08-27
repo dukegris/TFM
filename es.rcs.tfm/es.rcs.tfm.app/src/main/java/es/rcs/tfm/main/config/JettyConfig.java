@@ -1,7 +1,6 @@
 package es.rcs.tfm.main.config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -72,14 +71,12 @@ public class JettyConfig {
 			public void customize(Server server) {
 
 				try {
-					File keystore = new ClassPathResource(KEYSTORE_LOCATION).getFile();
-					File truststore = new ClassPathResource(TRUSTSTORE_LOCATION).getFile();
-					
+
 					SslContextFactory sslContextFactory = new SslContextFactory.Server();
 					sslContextFactory.setKeyStorePassword(KEYSTORE_PASSWORD);
-					sslContextFactory.setKeyStorePath(KEYSTORE_LOCATION);
+					sslContextFactory.setKeyStorePath("jar:file:"+KEYSTORE_LOCATION);
 					sslContextFactory.setTrustStorePassword(TRUSTSTORE_PASSWORD);
-					sslContextFactory.setTrustStorePath(TRUSTSTORE_LOCATION);
+					sslContextFactory.setTrustStorePath("jar:file:"+TRUSTSTORE_LOCATION);
 
 					ServerConnector connector = new ServerConnector(server);
 					
@@ -96,10 +93,7 @@ public class JettyConfig {
 
 					server.addConnector(connector);
 					
-				} catch (FileNotFoundException ex) {
-					LOG.warn("Could not load keystore" + ex.toString());
-					throw new IllegalStateException("Could not load keystore", ex);
-				} catch (IOException ex) {
+				} catch (Exception ex) {
 					LOG.warn("Could not load keystore" + ex.toString());
 					throw new IllegalStateException("Could not load keystore", ex);
 				}
