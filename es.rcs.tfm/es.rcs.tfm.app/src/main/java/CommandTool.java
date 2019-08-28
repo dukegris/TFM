@@ -70,10 +70,11 @@ public class CommandTool {
 				longOpt("generate").
 				desc(	"Genera un fichero <outfile> CONLL2003 " + 
 						"a partir del fichero <infile> de tipo " + 
-						"<type> PUBTATOR o BIOC").
+						"<type> PUBTATOR o BIOC." +
+						"betmodel y nermodel son opcionales").
 				hasArg(true).
 				numberOfArgs(3).
-				argName("infile> <outfile> <type").
+				argName("infile> <outfile> <type> <bertmodel> <nermodel").
 				build();
 
 		Option train = Option.
@@ -81,10 +82,11 @@ public class CommandTool {
 				longOpt("train").
 				desc(	"Genera un modelo NER en <outdir> " +
 						"a partir del fichero de entrenamiento <trainfile> " +
-						"evaluandolo contra <TESTFILE>").
+						"evaluandolo contra <TESTFILE>." +
+						"betmodel y nermodel son opcionales").
 				hasArg(true).
 				numberOfArgs(3).
-				argName("trainfile> <testfile> <outdir").
+				argName("trainfile> <testfile> <outdir> <bertmodel> <nermodel").
 				build();
 
 		options.addOption(help);
@@ -104,7 +106,13 @@ public class CommandTool {
 					String infile = data[0];
 					String outfile = data[1];
 					String type = data[2];
-					result = tool.generate(infile, outfile, type);
+					String bertmodel = "";
+					String nermodel = "";
+					if (data.length>4) {
+						bertmodel = data[3];
+						nermodel = data[4];
+					}
+					result = tool.generate(infile, outfile, type, bertmodel, nermodel);
 				}
 			} else if (cmd.hasOption("t")) {
 				String[] data = cmd.getOptionValues("t");
@@ -112,7 +120,11 @@ public class CommandTool {
 					String trainfile = data[0];
 					String testfile = data[1];
 					String outdir = data[2];
-					result = tool.train(trainfile, testfile, outdir);
+					String bertmodel = "";
+					if (data.length>3) {
+						bertmodel = data[3];
+					}
+					result = tool.train(trainfile, testfile, outdir, bertmodel);
 				}
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
@@ -127,7 +139,7 @@ public class CommandTool {
 		
 	}
 
-	private int train(String trainfile, String testfile, String outdir) {
+	private int train(String trainfile, String testfile, String outdir, String bertmodel) {
 
 		int result = OK;
 
@@ -153,7 +165,7 @@ public class CommandTool {
 				SparkSession spark = context.getBean(SrvNames.SPARK_SESSION_TRAIN, SparkSession.class);
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
 				
-				train.trainModel(spark, trainfile, testfile, outdir);
+				train.trainModel(spark, trainfile, testfile, outdir, bertmodel);
 
 			} catch (Exception ex) {
 				result = TRAIN_START_FAILED;
@@ -166,7 +178,7 @@ public class CommandTool {
 		
 	}
 
-	private int generate(String infile, String outfile, String type) {
+	private int generate(String infile, String outfile, String type, String bertmodel, String nermodel) {
 
 		int result = OK;
 		
@@ -179,6 +191,8 @@ public class CommandTool {
 			System.out.println(infile);
 			System.out.println(outfile);
 			System.out.println(type);
+			System.out.println(bertmodel);
+			System.out.println(nermodel);
 			
 			try {
 				
@@ -190,9 +204,9 @@ public class CommandTool {
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
 
 				if (BIOC.equals(type.toUpperCase())) {
-					train.prepareDataForTrainingFromBioc(spark, infile, outfile);
+					train.prepareDataForTrainingFromBioc(spark, infile, outfile, bertmodel, nermodel);
 				} else if (PUBTATOR.equals(type.toUpperCase())) {
-					train.prepareDataForTrainingFromPubtator(spark, infile, outfile);
+					train.prepareDataForTrainingFromPubtator(spark, infile, outfile, bertmodel, nermodel);
 				}
 
 			} catch (Exception ex) {

@@ -85,10 +85,6 @@ println(java.time.LocalTime.now + ": execute end")
     val normalizer = new Normalizer().
     	setInputCols(TfmType.STEM).
     	setOutputCol(TfmType.NORMAL)
-
-    val pos = PerceptronModel.pretrained().
-    	setInputCols(TfmType.SENTENCES, TfmType.NORMAL).
-    	setOutputCol(TfmType.POS)
 		 */
 
     val pos = PerceptronModel.
@@ -101,7 +97,7 @@ println(java.time.LocalTime.now + ": execute end")
       //pretrained(TfmType.PRETRAINED_BERT, "en").
       //pretrained("bert_uncased", "en").
     	load(this.bertModelDirectory).
-    	setMaxSentenceLength(4096).
+    	setMaxSentenceLength(512).
     	setDimension(1024).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.WORD_EMBEDDINGS)
@@ -119,9 +115,13 @@ println(java.time.LocalTime.now + ": execute end")
     val finisher = new Finisher().
       //setInputCols(Array(TfmType.DOCUMENT, TfmType.SENTENCES, TfmType.TOKEN, TfmType.POS, TfmType.WORD_EMBEDDINGS, TfmType.NAMED_ENTITY, TfmType.NAMED_ENTITY_CHUNK)).
       setInputCols(Array(
-          TfmType.DOCUMENT, TfmType.SENTENCES, 
-          TfmType.TOKEN, TfmType.POS, 
-          TfmType.WORD_EMBEDDINGS, TfmType.NAMED_ENTITY)).
+          TfmType.DOCUMENT, 
+          TfmType.SENTENCES, 
+          TfmType.TOKEN, 
+          TfmType.POS, 
+          TfmType.WORD_EMBEDDINGS, 
+          TfmType.NAMED_ENTITY, 
+          TfmType.NAMED_ENTITY_CHUNK)).
       setIncludeMetadata(true).
       setCleanAnnotations(false)
 
@@ -134,7 +134,7 @@ println(java.time.LocalTime.now + ": execute end")
   		pos,
   		embeddings,
   		ner,
-  		//converter,
+  		converter,
   		finisher
   	)
     

@@ -38,8 +38,8 @@ println(java.time.LocalTime.now + ": generate init")
     		TfmType.TOKEN, 
     		TfmType.FINISHED_TOKEN, 
     		TfmType.FINISHED_POS,
+    		TfmType.FINISHED_NAMED_ENTITY_CHUNK,
     		TfmType.FINISHED_NAMED_ENTITY,
-    		//TfmType.FINISHED_NAMED_ENTITY_CHUNK,
     		TfmType.FINISHED_TOKEN_METADATA
     	).as[(
     		String,
@@ -49,7 +49,7 @@ println(java.time.LocalTime.now + ": generate init")
     		Array[String], 
     		Array[String], 
     		Array[String], 
-    		//Array[String], 
+    		Array[String], 
     		Array[(String, String)])]
     
     // ---------------------------------------------------------------------------------------
@@ -73,10 +73,10 @@ println(java.time.LocalTime.now + ": doc_start " + docId)
       val dataPrepared = (
       	row._4.map { // Partimos de los tokens
       		case IOB_PTR(iob, start, end, word) => (start.toInt, end.toInt) 
-      		//case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8 zip row._9.map(_._2.toInt) map {
-      		  //case ((((((begin, end), text), pos), chunk), ner), sentence) => ((begin, end), text, pos, chunk, ner, sentence)})
-      		case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8.map(_._2.toInt) map {
-      		  case (((((begin, end), text), pos), ner), sentence) => ((begin, end), text, pos, ner, sentence)})
+      		case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8 zip row._9.map(_._2.toInt) map {
+      		  case ((((((begin, end), text), pos), chunk), ner), sentence) => ((begin, end), text, pos, chunk, ner, sentence)})
+      		//case _ => (-1, -1)} zip row._5 zip row._6 zip row._7 zip row._8.map(_._2.toInt) map {
+      		  //case (((((begin, end), text), pos), ner), sentence) => ((begin, end), text, pos, ner, sentence)})
       		
 println(row._4.size)
 println(row._5.size)
@@ -88,16 +88,16 @@ println(row._7.size)
 //println(java.time.LocalTime.now + ": token " + token.toString())
         
         // Si hay cambio de frase se induce una linea en blanco
-        if (token._5 != sentenceId){
+        if (token._6 != sentenceId){
           conllDoc.append((null, null, null, null, docId, 0, 0, 0))
-          sentenceId = token._5
+          sentenceId = token._6
         }
         
         // Busca la localizacion por si hay un NER en los tokens
         // fila._2 tiene el token
         // row._3 tiene las notas [655, 661, G13513A, MUT_DMA]
         val DIFF = 2
-        var str = token._4 // El token detectado por los procesos ner
+        var str = token._5 // El token detectado por los procesos ner
         var enc = 0
         if ((row._3 != null) && (row._3.length>0)) {
 
@@ -120,7 +120,7 @@ println(row._7.size)
         // Linea del fichero CONLL
         var size = 0;
         if ((row._3 != null) && row._3.size != null) size = row._3.size
-        conllDoc.append((token._2, token._3, token._3, str, docId, sentenceId, enc, size))
+        conllDoc.append((token._2, token._3, token._4, str, docId, sentenceId, enc, size))
 
       })
 
