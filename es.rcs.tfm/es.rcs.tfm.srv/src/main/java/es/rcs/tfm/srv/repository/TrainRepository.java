@@ -177,7 +177,7 @@ public class TrainRepository {
 	 * @param resultsDirectory Directorio donde se deja el modelo con los resultados
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
-	 * @param bertNerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
+	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
 	 * @param targetFilename Directorio parquet de salida de la preparación de datos
 	 * @return
 	 */
@@ -187,7 +187,7 @@ public class TrainRepository {
 			String resultsDirectory,
 			String posModelDirectory,
 			String bertModelDirectory,
-			String bertNerModelDirectory,
+			String nerModelDirectory,
 			String targetFilename) {
 
 		if (spark == null) return false;
@@ -196,7 +196,7 @@ public class TrainRepository {
 		if (StringUtils.isBlank(targetFilename)) return false;
 		if (StringUtils.isBlank(posModelDirectory)) return false;
 		if (StringUtils.isBlank(bertModelDirectory)) return false;
-		if (StringUtils.isBlank(bertNerModelDirectory)) return false;
+		if (StringUtils.isBlank(nerModelDirectory)) return false;
 
 		Path posModel = Paths.get(posModelDirectory);
 		if (posModel.toFile() == null) return false;
@@ -246,7 +246,7 @@ public class TrainRepository {
 						spark,
 						HADOOP_FILE_PREFIX + posModelDirectory,
 						HADOOP_FILE_PREFIX + bertModelDirectory,
-						HADOOP_FILE_PREFIX + bertNerModelDirectory);
+						HADOOP_FILE_PREFIX + nerModelDirectory);
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 

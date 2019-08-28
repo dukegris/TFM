@@ -74,26 +74,30 @@ public class TrainService {
 		prepareDataForTrainingFromPubtator(
 				spark,
 				TRAIN_NER_IN_TXT_TRAIN, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TRAIN));
+				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TRAIN),
+				TRAIN_NER_IN_BERT_MODEL,
+				TRAIN_NER_IN_NER_MODEL);
 		
 		prepareDataForTrainingFromPubtator(
 				spark,
 				TRAIN_NER_IN_PUBTATOR_TEST, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TEST));
+				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TEST),
+				TRAIN_NER_IN_BERT_MODEL,
+				TRAIN_NER_IN_NER_MODEL);
 		
 		prepareDataForTrainingFromBioc(
 				spark,
 				TRAIN_NER_IN_BIOC_TRAIN, 
 				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TRAIN),
-				null,
-				null);
+				TRAIN_NER_IN_BERT_MODEL,
+				TRAIN_NER_IN_NER_MODEL);
 		
 		prepareDataForTrainingFromBioc(
 				spark,
 				TRAIN_NER_IN_BIOC_TEST, 
 				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TEST),
-				null,
-				null);
+				TRAIN_NER_IN_BERT_MODEL,
+				TRAIN_NER_IN_NER_MODEL);
 
 	}
 
@@ -135,11 +139,13 @@ public class TrainService {
 	 * @param spark La instancia de Spark
 	 * @param infile Fichero BioC
 	 * @param outfile Fichero Conll
-	 * @param nermodel 
-	 * @param bertmodel 
+	 * @param bertmodel El modelo BERT 
+	 * @param nermodel  El modelo NER
 	 */
 	public void prepareDataForTrainingFromBioc(SparkSession spark, String infile, String outfile, String bertmodel, String nermodel) {
+
 		try {
+
 			Path filename = Paths.get(infile);
 			
 			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
@@ -161,45 +167,18 @@ public class TrainService {
 					new BiocXmlProcessor(filename), 
 					infile, 
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
-					FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL), 
-					FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL),
+					bertmodelDirectory.getAbsolutePath(), 
+					nermodelDirectory.getAbsolutePath(),
 					outfile);
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: bioc OK");
 			} else {
 				LOG.info("PREPARE DATA SERVICE: bioc FAIL");
 			}
+			
 		} catch (Exception ex) {
 			LOG.warn("PREPARE DATA SERVICE: bioc FAIL - ex:" + ex.toString());
 		}
-	}
-
-	/**
-	 * Genera un fichero CONLL2003 a partir de un fichero de texto en formato PUBTATOR para procesos de extracción de entidades
-	 * @param spark La instancia de Spark
-	 * @param infile Fichero Pubtator
-	 * @param outfile Fichero Conll
-	 */
-	public void prepareDataForTrainingFromPubtator(SparkSession spark, String infile, String outfile) {
-		
-		try {
-			Path filename = Paths.get(infile);
-			boolean result = TrainRepository.getConllFrom(
-					spark, 
-					new PubtatorTxtProcessor(filename), 
-					infile, 
-					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
-					FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL), 
-					FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL),
-					outfile);
-			if (result) {
-				LOG.info("PREPARE DATA SERVICE: txt OK");
-			} else {
-				LOG.info("PREPARE DATA SERVICE: txt FAIL");
-			}
-		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: txt FAIL - ex:" + ex.toString());
-		}
 		
 	}
 
@@ -208,20 +187,36 @@ public class TrainService {
 	 * @param spark La instancia de Spark
 	 * @param infile Fichero Pubtator
 	 * @param outfile Fichero Conll
-	 * @param bertModel Modelo utilizado para embeddings
-	 * @param nerModel Modelo utilizado para ner
+	 * @param bertmodel El modelo BERT 
+	 * @param nermodel  El modelo NER
 	 */
-	public void prepareDataForTrainingFromPubtator(SparkSession spark, String infile, String outfile, String bertModel, String nerModel) {
+	public void prepareDataForTrainingFromPubtator(SparkSession spark, String infile, String outfile, String bertmodel, String nermodel) {
 		
 		try {
+			
 			Path filename = Paths.get(infile);
+			
+			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
+			if (	StringUtils.isBlank(bertmodel) ||
+					(bertmodelDirectory == null) || 
+					!bertmodelDirectory.exists() || 
+					!bertmodelDirectory.isDirectory()) 
+				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
+
+			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
+			if (	StringUtils.isBlank(nermodel) ||
+					(nermodelDirectory == null) || 
+					!nermodelDirectory.exists() || 
+					!nermodelDirectory.isDirectory()) 
+				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL)).toFile();
+			
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new PubtatorTxtProcessor(filename), 
 					infile, 
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
-					FilenameUtils.concat(BERT_DIRECTORY, bertModel), 
-					FilenameUtils.concat(NER_DIRECTORY, nerModel),
+					bertmodelDirectory.getAbsolutePath(), 
+					nermodelDirectory.getAbsolutePath(),
 					outfile);
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: txt OK");
