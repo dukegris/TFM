@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,8 +101,12 @@ public class TrainService {
 		
 		Path outdirname = Paths.get(outdir);
 		Path filename = Paths.get(trainfile);
+		
 		File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
-		if ((bertmodelDirectory == null) || !bertmodelDirectory.exists() || !bertmodelDirectory.isDirectory()) 
+		if (	StringUtils.isBlank(bertmodel) ||
+				(bertmodelDirectory == null) || 
+				!bertmodelDirectory.exists() || 
+				!bertmodelDirectory.isDirectory()) 
 			bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
 		
 		try {
@@ -138,11 +143,17 @@ public class TrainService {
 			Path filename = Paths.get(infile);
 			
 			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
-			if ((bertmodelDirectory == null) || !bertmodelDirectory.exists() || !bertmodelDirectory.isDirectory()) 
+			if (	StringUtils.isBlank(bertmodel) ||
+					(bertmodelDirectory == null) || 
+					!bertmodelDirectory.exists() || 
+					!bertmodelDirectory.isDirectory()) 
 				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
 
 			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
-			if ((nermodelDirectory == null) || !nermodelDirectory.exists() || !nermodelDirectory.isDirectory()) 
+			if (	StringUtils.isBlank(nermodel) ||
+					(nermodelDirectory == null) || 
+					!nermodelDirectory.exists() || 
+					!nermodelDirectory.isDirectory()) 
 				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL)).toFile();
 			
 			boolean result = TrainRepository.getConllFrom(
