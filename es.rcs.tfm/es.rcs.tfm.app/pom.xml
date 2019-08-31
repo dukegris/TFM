@@ -164,6 +164,12 @@
 			<artifactId>spring-data-rest-webmvc</artifactId>
 			<scope>runtime</scope>
 		</dependency>			
+		<!-- SHELL -->
+		<dependency>
+			<groupId>org.springframework.shell</groupId>
+			<artifactId>spring-shell-starter</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<!-- BOOT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

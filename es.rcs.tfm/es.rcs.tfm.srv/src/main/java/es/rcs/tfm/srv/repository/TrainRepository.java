@@ -88,6 +88,19 @@ public class TrainRepository {
 
 	}
 	
+	/**
+	 * @param spark Sesion de Spark donde se ejecutará la preparación de datos
+	 * @param trainFilename
+	 * @param testFilename
+	 * @param resultsFilename
+	 * @param resultsDirectory
+	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
+	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
+	 * @param targetModelDirectory Directorio de salida de los fichero CONLL
+	 * @param maxSentence Maximo tamaño de una frase (defecto 512, suele ser 128)
+	 * @param dimension Maximo número de dimensiones (defecto 1024, suele ser 768)
+	 * @return
+	 */
 	public static final boolean trainFromConll(
 			SparkSession spark,
 			String trainFilename,
@@ -96,7 +109,11 @@ public class TrainRepository {
 			String resultsDirectory,
 			String posModelDirectory,
 			String bertModelDirectory,
-			String targetModelDirectory) {
+			String targetModelDirectory,
+			Integer maxSentence,
+			Integer dimension,
+			Integer batchSize,
+			Boolean caseSensistive) {
 
 		if (spark == null) return false;
 		if (StringUtils.isBlank(resultsDirectory)) return false;
@@ -132,7 +149,11 @@ public class TrainRepository {
 		if (test.toFile() == null) return false;
 		if (!test.toFile().exists()) return false;
 		if (!test.toFile().isFile()) return false;
-		
+
+		if (maxSentence == null) maxSentence = 512;
+		if (dimension == null) dimension = 1024;
+		if (batchSize == null) batchSize = 32;
+		if (caseSensistive == null) caseSensistive = false;
 		
 		boolean resultado = true;
 		try {
@@ -143,7 +164,11 @@ public class TrainRepository {
 					spark.sparkContext(),
 					spark,
 					HADOOP_FILE_PREFIX + posModelDirectory,
-					HADOOP_FILE_PREFIX + bertModelDirectory);
+					HADOOP_FILE_PREFIX + bertModelDirectory,
+					maxSentence,
+					dimension,
+					batchSize,
+					caseSensistive);
 			
 			nerTrainer.
 				saveNerModel (
@@ -179,6 +204,8 @@ public class TrainRepository {
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
 	 * @param targetFilename Directorio parquet de salida de la preparación de datos
+	 * @param maxSentence Maximo tamaño de una frase (defecto 512, suele ser 128)
+	 * @param dimension Maximo número de dimensiones (defecto 1024, suele ser 768)
 	 * @return
 	 */
 	public static final boolean getConllFrom(
@@ -188,7 +215,11 @@ public class TrainRepository {
 			String posModelDirectory,
 			String bertModelDirectory,
 			String nerModelDirectory,
-			String targetFilename) {
+			String targetFilename,
+			Integer maxSentence,
+			Integer dimension,
+			Integer batchSize,
+			Boolean caseSensistive) {
 
 		if (spark == null) return false;
 		if (processor == null) return false;
@@ -217,6 +248,11 @@ public class TrainRepository {
 		if (target.toFile() == null) return false;
 		//if (!target.toFile().exists()) return false;
 		//if (!target.toFile().isFile()) return false;
+
+		if (maxSentence == null) maxSentence = 512;
+		if (dimension == null) dimension = 1024;
+		if (batchSize == null) batchSize = 32;
+		if (caseSensistive == null) caseSensistive = false;
 		
 		boolean resultado = true;
 		try {
@@ -246,7 +282,11 @@ public class TrainRepository {
 						spark,
 						HADOOP_FILE_PREFIX + posModelDirectory,
 						HADOOP_FILE_PREFIX + bertModelDirectory,
-						HADOOP_FILE_PREFIX + nerModelDirectory);
+						HADOOP_FILE_PREFIX + nerModelDirectory,
+						maxSentence,
+						dimension,
+						batchSize,
+						caseSensistive);
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 

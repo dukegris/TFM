@@ -3,6 +3,8 @@ package es.rcs.tfm.srv.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.repository.TrainRepository;
 import es.rcs.tfm.srv.setup.BiocXmlProcessor;
-import es.rcs.tfm.srv.setup.Conll2003Writer;
 import es.rcs.tfm.srv.setup.PubtatorTxtProcessor;
 import es.rcs.tfm.xml.XmlNames;
 
@@ -101,6 +102,45 @@ public class TrainService {
 
 	}
 
+	private static final Pattern MODEL_NAME=Pattern.compile("((?:(?:un)|(?:multi-))cased)_L-(\\d+)_H-(\\d+)_A-(\\d+)_M-(\\d+)_B-(\\d+)");
+	private static Integer getData(String name, Integer pos) {
+		Integer result = -1;
+		try {
+			Matcher m = MODEL_NAME.matcher(name);
+			if (m.find()) {
+				result = Integer.parseInt(m.group(pos));
+			}
+		} catch (NumberFormatException | IndexOutOfBoundsException ex) {
+		}
+		return result;
+	}
+
+	private static Integer getMaxSentence(String name) {
+		Integer result = getData(name, 5);
+		if (result == -1) result = 512;
+		return result;
+	}
+	private static Integer getDimension(String name) {
+		Integer result = getData(name, 3);
+		if (result == -1) result = 1024;
+		return result;
+	}
+	private static Integer getBatchSize(String name) {
+		Integer result = getData(name, 6);
+		if (result == -1) result = 32;
+		return result;
+	}
+	private static Boolean getCaseSensitive(String name) {
+		Boolean result = false;
+		try {
+			Matcher m = MODEL_NAME.matcher(name);
+			if (m.find()) {
+				result = "uncased".equals(m.group(1)) ? false : true;
+			}
+		} catch (NumberFormatException | IndexOutOfBoundsException ex) {
+		}
+		return result;
+	}
 	public void trainModel(SparkSession spark, String trainfile, String testfile, String outdir, String bertmodel) {
 		
 		Path outdirname = Paths.get(outdir);
@@ -122,7 +162,11 @@ public class TrainService {
 					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
-					outdir);
+					outdir,
+					getMaxSentence(bertmodel),
+					getDimension(bertmodel),
+					getBatchSize(bertmodel),
+					getCaseSensitive(bertmodel));
 			if (result) {
 				LOG.info("TRAIN SERVICE: OK");
 			} else {
@@ -169,7 +213,11 @@ public class TrainService {
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
 					nermodelDirectory.getAbsolutePath(),
-					outfile);
+					outfile,
+					getMaxSentence(bertmodel),
+					getDimension(bertmodel),
+					getBatchSize(bertmodel),
+					getCaseSensitive(bertmodel));
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: bioc OK");
 			} else {
@@ -217,7 +265,11 @@ public class TrainService {
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
 					nermodelDirectory.getAbsolutePath(),
-					outfile);
+					outfile,
+					getMaxSentence(bertmodel),
+					getDimension(bertmodel),
+					getBatchSize(bertmodel),
+					getCaseSensitive(bertmodel));
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: txt OK");
 			} else {

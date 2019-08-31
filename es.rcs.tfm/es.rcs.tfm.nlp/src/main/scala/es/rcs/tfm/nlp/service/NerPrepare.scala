@@ -26,7 +26,16 @@ import es.rcs.tfm.nlp.util.TfmType
 /**
  * 
  */
-class NerPrepare(sc: SparkContext, spark: SparkSession, posModelDirectory: String, bertModelDirectory: String, bertNerModelDirectory: String) {
+class NerPrepare(
+    sc: SparkContext, 
+    spark: SparkSession, 
+    posModelDirectory: String, 
+    bertModelDirectory: String, 
+    bertNerModelDirectory: String, 
+    maxSentenceLength: Integer = 512, 
+    dimension: Integer = 1024,
+    batchSize: Integer = 32,
+    caseSensitive: Boolean = false) {
 
   /**
    * Ejecuta un pipeline sobre un dataset con una columna denominada text
@@ -72,7 +81,8 @@ println(java.time.LocalTime.now + ": execute end")
     
     val sentence = new SentenceDetector().
     	setInputCols(Array(TfmType.DOCUMENT)).
-    	setOutputCol(TfmType.SENTENCES)
+    	setOutputCol(TfmType.SENTENCES).
+    	setMaxLength(maxSentenceLength)
     
     val token = new Tokenizer().
     	setInputCols(Array(TfmType.SENTENCES)).
@@ -100,7 +110,9 @@ println(java.time.LocalTime.now + ": execute end")
     	setMaxSentenceLength(512).
     	setDimension(1024).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
-    	setOutputCol(TfmType.WORD_EMBEDDINGS)
+    	setOutputCol(TfmType.WORD_EMBEDDINGS).
+    	setCaseSensitive(caseSensitive).
+    	setBatchSize(batchSize)
     
     val ner = NerDLModel.
     	//pretrained(TfmType.PRETRAINED_NER_BERT).

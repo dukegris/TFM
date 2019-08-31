@@ -73,7 +73,8 @@ public class CommandTool {
 						"<type> PUBTATOR o BIOC." +
 						"betmodel y nermodel son opcionales").
 				hasArg(true).
-				numberOfArgs(3).
+				numberOfArgs(5).
+				optionalArg(true).
 				argName("infile> <outfile> <type> <bertmodel> <nermodel").
 				build();
 
@@ -85,7 +86,8 @@ public class CommandTool {
 						"evaluandolo contra <TESTFILE>." +
 						"betmodel y nermodel son opcionales").
 				hasArg(true).
-				numberOfArgs(3).
+				numberOfArgs(5).
+				optionalArg(true).
 				argName("trainfile> <testfile> <outdir> <bertmodel> <nermodel").
 				build();
 

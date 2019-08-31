@@ -20,7 +20,15 @@ import org.apache.spark.ml.PipelineModel
 import es.rcs.tfm.nlp.util.NerHelper
 import es.rcs.tfm.nlp.util.TfmType
 
-class NerTrain(sc: SparkContext, spark: SparkSession, posModelDirectory: String, bertModelDirectory: String) {
+class NerTrain(
+    sc: SparkContext, 
+    spark: SparkSession, 
+    posModelDirectory: String, 
+    bertModelDirectory: String, 
+    maxSentenceLength: Integer = 512, 
+    dimension: Integer = 1024,
+    batchSize: Integer = 32,
+    caseSensitive: Boolean = false) {
 
   val nerCorpus = """
                    |-DOCSTART- O
@@ -182,12 +190,13 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
     
     val sentence = new SentenceDetector().
     	setInputCols(Array(TfmType.DOCUMENT)).
-    	setOutputCol(TfmType.SENTENCES)
+    	setOutputCol(TfmType.SENTENCES).
+    	setMaxLength(maxSentenceLength)
     
     val token = new Tokenizer().
     	setInputCols(Array(TfmType.SENTENCES)).
     	setOutputCol(TfmType.TOKEN)
-    
+    	
     val pos = PerceptronModel.
       //pretrained().
       load(this.posModelDirectory).
@@ -198,7 +207,11 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
       //pretrained(TfmType.PRETRAINED_BERT, "en").
     	load(this.bertModelDirectory).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
-    	setOutputCol(TfmType.WORD_EMBEDDINGS)
+    	setOutputCol(TfmType.WORD_EMBEDDINGS).
+    	setMaxSentenceLength(maxSentenceLength).
+    	setDimension(dimension).
+    	setCaseSensitive(caseSensitive).
+    	setBatchSize(batchSize)
 
     val nerTagger =  new NerDLApproach().
       setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
@@ -220,8 +233,8 @@ println(java.time.LocalTime.now + ": NER-TRAIN: Salida")
       // setIncludeEmbeddings(True).
       // setVerbose(2).
       // setVerbose(Verbose.Epochs)
-      setBatchSize(9) // 32
-
+      setBatchSize(32) 
+      
     val converter = new NerConverter().
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).
     	//setInputCols(TfmType.DOCUMENT, TfmType.NORMAL, TfmType.NAMED_ENTITY).

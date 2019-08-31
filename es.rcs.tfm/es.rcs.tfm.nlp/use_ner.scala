@@ -1,3 +1,7 @@
+// spark-shell --packages JohnSnowLabs:spark-nlp:2.2.0 --executor-memory=8g --executor-cores=24 --driver-memory=8g
+// spark-shell --packages JohnSnowLabs:spark-nlp:2.2.0 --executor-memory=8g --executor-cores=6 --driver-memory=8g
+// scp -r . rcuesta@10.160.1.215:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models
+
 import com.johnsnowlabs.nlp.{SparkNLP, DocumentAssembler, Finisher, AnnotatorType}
 import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
@@ -28,38 +32,43 @@ val document = new DocumentAssembler().
 	setCleanupMode("shrink")
 
 val sentence = new SentenceDetector().
-	setInputCols("document").
+	setInputCols(Array("document")).
 	setOutputCol("sentences")
 
 val token = new Tokenizer().
-	setInputCols("sentences").
+	setInputCols(Array("sentences")).
 	setOutputCol("token")
 
-val pos = PerceptronModel.pretrained().
+val pos = PerceptronModel.
+	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos/pos_anc_en_2.0.2_2.4_1556659930154").
 	setInputCols(Array("sentences", "token")).
 	setOutputCol("pos")
-
+ 
 val embeddings = BertEmbeddings.
-	load("models/uncased_L-12_H-768_A-12_M-128_B-32").
-	setMaxSentenceLength(512).
+	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/uncased_L-12_H-768_A-12_M-128_B-32").
 	setDimension(768).
+	setMaxSentenceLength(512).
 	setInputCols(Array("sentences", "token")).
 	setOutputCol("embeddings")
 
 val ner = NerDLModel.
-	load("ner_general").
+	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/ner_dl_bert_en_2.2.0_2.4_20190828").
 	setInputCols(Array("sentences", "token", "embeddings")).
 	setOutputCol("ner")
 
 val converter = new NerConverter().
 	setInputCols(Array("sentences", "token", "ner")).
-	setOutputCol("ner_chunk")
+	setOutputCol("chunk")
 
 val finisher = new Finisher().
 	setInputCols(Array(
-		"document", "sentences", 
-		"token", "pos", "embeddings", 
-		"ner", "chunk")).
+		"document", 
+		"sentences", 
+		"token", 
+		"pos", 
+		"embeddings", 
+		"ner",
+		"chunk")).
 	setIncludeMetadata(true).
 	setCleanAnnotations(false)
 
@@ -80,3 +89,4 @@ val model = pipeline.fit(emptyData)
 val result = model.transform(testData)
 
 result.show
+
