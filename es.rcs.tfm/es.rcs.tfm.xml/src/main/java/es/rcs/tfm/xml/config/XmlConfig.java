@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.bioc.Collection;
 import org.bioc.Document;
@@ -97,6 +98,15 @@ public class XmlConfig {
 		return bean;
 		
 	}
+	
+	@Bean( name = XmlNames.BIOC_UNMARSHALLER )
+	public Unmarshaller getBiocJaxbUnmarshaller () throws JAXBException {
+				
+		Unmarshaller bean = getJaxbBiocContext().createUnmarshaller();
+		
+		return bean;
+		
+	}
 
 	@Bean( name = XmlNames.NCBI_MESH_CONTEXT )
 	public JAXBContext getJaxbMeshContext() {
@@ -157,6 +167,15 @@ public class XmlConfig {
 		Jaxb2Marshaller bean = new Jaxb2Marshaller();
 		bean.setPackagesToScan( XmlNames.XML_MESH_PKG );
 		bean.setMarshallerProperties(map);
+		
+		return bean;
+		
+	}
+	
+	@Bean( name = XmlNames.NCBI_MESH_UNMARSHALLER )
+	public Unmarshaller getMeshJaxbUnmarshaller () throws JAXBException {
+	
+		Unmarshaller bean = getJaxbMeshContext().createUnmarshaller();
 		
 		return bean;
 		
@@ -487,6 +506,15 @@ public class XmlConfig {
 		Jaxb2Marshaller bean = new Jaxb2Marshaller();
 		bean.setPackagesToScan( XmlNames.XML_PUBMED_PKG );
 		bean.setMarshallerProperties(map);
+		
+		return bean;
+		
+	}
+	
+	@Bean( name = XmlNames.NCBI_PUBMED_UNMARSHALLER )
+	public Unmarshaller getPubMedJaxbUnmarshaller () throws JAXBException {
+	
+		Unmarshaller bean = getJaxbPubmedContext().createUnmarshaller();
 		
 		return bean;
 		

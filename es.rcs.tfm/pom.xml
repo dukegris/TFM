@@ -9,7 +9,7 @@
 	
 	<groupId>es.rcs.tfm</groupId>
 	<artifactId>RCS-TFM</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>TFM Maven Project</name>
 	<description>TFM Maven Project</description>	
 	<url>https://github.com/dukegris/TFM</url>
@@ -61,18 +61,27 @@
 	<profiles>
 	    <profile>
 	        <id>development</id>
-	        <activation><activeByDefault>true</activeByDefault></activation>
-			<properties><env>development</env></properties>
+	        <activation><activeByDefault>false</activeByDefault></activation>
+			<properties>
+				<env>development</env>
+				<spring.profiles.active>development</spring.profiles.active>
+			</properties>
 	    </profile>
 	    <profile>
 	        <id>test</id>
 	        <activation><activeByDefault>false</activeByDefault></activation>
-			<properties><env>test</env></properties>
+			<properties>
+				<env>test</env>
+				<spring.profiles.active>test</spring.profiles.active>
+			</properties>
 	    </profile>
 	    <profile>
 	        <id>production</id>
-	        <activation><activeByDefault>false</activeByDefault></activation>
-			<properties><env>production</env></properties>
+	        <activation><activeByDefault>true</activeByDefault></activation>
+			<properties>
+				<env>production</env>
+				<spring.profiles.active>production</spring.profiles.active>
+			</properties>
 	    </profile>
 	</profiles>
 
@@ -96,8 +105,11 @@
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>ISO-8859-1</project.reporting.outputEncoding>
 		
+		<tfm.version>0.0.4-SNAPSHOT</tfm.version>
+		
 		<!-- J2EE -->
 		<javax-annotation.version>1.3.2</javax-annotation.version>
+		<javax-validation.version>2.0.1.Final</javax-validation.version>
 		<javax-persistence.version>2.2</javax-persistence.version>
 		<javax-transaction.version>1.3</javax-transaction.version>
 		<javax-cache.version>1.1.0</javax-cache.version>
@@ -149,6 +161,7 @@
 		<hikari.version>3.3.1</hikari.version>
 		<netty.version>3.10.6.Final</netty.version>
 		<netty-all.version>4.1.37.Final</netty-all.version>
+		<crnk.version>3.1.20191001134804</crnk.version>
 
 		<!-- SERVERS -->
 		<jetty.version>9.4.19.v20190610</jetty.version>
@@ -161,7 +174,7 @@
 		<scala.version>2.11.12</scala.version>
 		<hadoop.version>2.9.2</hadoop.version>
 		<spark.version>2.4.3</spark.version>
-		<spark-nlp.version>2.2.0</spark-nlp.version>
+		<spark-nlp.version>2.2.1</spark-nlp.version>
 
 		<!-- LOGS -->
 		<slf4j.version>1.7.25</slf4j.version>
@@ -190,6 +203,11 @@
 			<name>Maven Central</name>
 			<url>http://central.maven.org/maven2</url>
 		</repository>
+		<repository>
+			<id>bintray</id>
+			<name>Maven Bintray</name>
+			<url>https://dl.bintray.com/crnk-project/mavenLatest</url>
+		</repository>
 	</repositories>
 
 	<dependencyManagement>
@@ -202,6 +220,12 @@
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 			<version>${javax-annotation.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>${javax-validation.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -564,6 +588,7 @@
 		<!-- =====================================
 			 XML
 			 ===================================== -->
+		<!-- JACKSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
@@ -728,6 +753,110 @@
 			<version>${sfm-csv.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- CRNK -->
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-core</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-format</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-home</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-meta</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-security</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-monitor</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-operations</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-validation</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data-jpa</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-jpa</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-servlet</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-servlet</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-spring</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring-boot2</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		
 		<!-- =====================================
 			 SERVERS
@@ -859,6 +988,12 @@
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
 			<artifactId>spark-nlp-ocr_${scala.main}</artifactId>
+			<version>${spark-nlp.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
 			<version>${spark-nlp.version}</version>
 			<scope>runtime</scope>
 		</dependency>

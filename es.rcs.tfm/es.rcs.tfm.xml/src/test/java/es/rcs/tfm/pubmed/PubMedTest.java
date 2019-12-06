@@ -1,5 +1,7 @@
 package es.rcs.tfm.pubmed;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -58,11 +60,31 @@ import es.rcs.tfm.xml.XmlNames;
 		PubMedTest.class })
 public class PubMedTest {
 
+	public static final String PUBMED_FILE = "../es.rcs.tfm.corpus/data/corpus/pubmed_xml/pubmed19n0973.xml";
+	
+	@Test
+	public void unmarshallFile() {
+		
+		File file = new File(PUBMED_FILE);
+		assertTrue(unmarshall(unmarshaller, file));
+		
+	}
+	
 	public static void main(String[] args) {
 
-		File file = new File("../es.rcs.tfm.corpus/data/xmlpubmed/pubmed19n0973.xml");
+		try {
+			File file = new File(PUBMED_FILE);
+	        JAXBContext jaxbContext = JAXBContext.newInstance(PubmedArticleSet.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+		    unmarshall(jaxbUnmarshaller, file);
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
 
-		JAXBContext jaxbContext;
+	}
+	
+	private static boolean unmarshall(Unmarshaller jaxbUnmarshaller, File file) {
+		boolean resultOk = true;
 		try {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -70,10 +92,6 @@ public class PubMedTest {
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 	        InputSource inputSource = new InputSource(new FileReader(file));
 	        SAXSource source = new SAXSource(xmlReader, inputSource);
-	        
-			jaxbContext = JAXBContext.newInstance(PubmedArticleSet.class);
-		    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-		    //jaxbUnmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, Boolean.FALSE);
 		    
 		    PubmedArticleSet pubmedArticleSet = (PubmedArticleSet)jaxbUnmarshaller.unmarshal(source);
 		    if (pubmedArticleSet != null) {
@@ -309,30 +327,17 @@ public class PubMedTest {
 		    	}
 		    }
 		    
-		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
+		} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException e) {
 			e.printStackTrace();
-		} catch (SAXNotRecognizedException e) {
-			// TODO Auto-generated catch block
+			resultOk = false;
+		} catch (JAXBException | SAXException e) {
 			e.printStackTrace();
-		} catch (SAXNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			resultOk = false;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			resultOk = false;
 		}
-
-	}
-	
-	@Test
-	public void testMarshall() {
+		return resultOk;
 		
 	}
 
@@ -342,12 +347,10 @@ public class PubMedTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		
 	}
 		
     @After
     public void tearDown() {
-    	
     }
 	
 	@AfterClass
@@ -358,4 +361,8 @@ public class PubMedTest {
 	@Qualifier(	value = XmlNames.NCBI_PUBMED_MARSHALLER )
 	private Jaxb2Marshaller marshaller;
 		
+	@Autowired
+	@Qualifier( value = XmlNames.NCBI_PUBMED_UNMARSHALLER )
+	public Unmarshaller unmarshaller;
+
 }

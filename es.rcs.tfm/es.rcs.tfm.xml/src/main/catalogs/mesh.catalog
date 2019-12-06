@@ -5,7 +5,7 @@
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
 
 	<system
-		systemId="https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20190101.dtd"
-		uri="../dtd/mesh/nlmdescriptorrecordset_20190101.dtd" />
+		systemId="nlmdescriptorrecordset_20200101.dtd"
+		uri="../dtd/mesh/nlmdescriptorrecordset_20200101.dtd" />
 
 </catalog>

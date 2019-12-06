@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -137,8 +137,15 @@
 							<schemas><schema><url>https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20190101.dtd</url></schema></schemas>
 							 -->
 							<schemaDirectory>${basedir}/src/main/dtd/mesh/</schemaDirectory>
-							<schemaIncludes><schemaInclude>nlmdescriptorrecordset_20190101.dtd</schemaInclude></schemaIncludes>
-							<accessExternalDTD>true</accessExternalDTD>
+							<schemaIncludes>
+								<schemaInclude>nlmqualifierrecordset_20200101.dtd</schemaInclude>
+								<!-- 
+								<schemaInclude>nlmsupplementalrecordset_20200101.dtd</schemaInclude>
+								<schemaInclude>nlmdescriptorrecordset_20200101.dtd</schemaInclude>
+								 -->
+							</schemaIncludes>
+							
+							<accessExternalDTD>false</accessExternalDTD>
 
 							<catalog>${basedir}/src/main/catalogs/mesh.catalog</catalog>
 
