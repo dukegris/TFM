@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.services;
+package es.rcs.tfm.srv.corpus.services;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -64,7 +64,12 @@ public class PubmedLoaderService {
 				FTP_USERNAME, FTP_PASSWORD, 
 				FTP_DIRECTORY);
 		
-		if (ftpFiles != null) LOG.info("PROCESSING " + ftpFiles.length + " FILES");
+		if ((ftpFiles != null) && (ftpFiles.length>0)) {
+			LOG.info("PROCESSING " + ftpFiles.length + " FILES");
+		} else {
+			LOG.warn("PROCESSING NO FILES");
+			return;
+		}
 		
 		// MODELO DE FICHEROS 
 		Stream<Fichero> ficherosStream = Arrays.stream(ftpFiles).//.parallel()

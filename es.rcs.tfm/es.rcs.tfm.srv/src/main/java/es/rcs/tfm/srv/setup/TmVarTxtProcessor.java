@@ -10,11 +10,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import es.rcs.tfm.srv.model.MarkedText;
-import es.rcs.tfm.srv.model.MarkedText.Block;
-import es.rcs.tfm.srv.model.MarkedText.Note;
+import es.rcs.tfm.srv.model.Anotacion;
+import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.Posicion;
 
-public class PubtatorTxtProcessor extends MarkedTextProcessor {
+public class TmVarTxtProcessor extends ArticleProcessor {
 
 	private static final Pattern LINE_PUBTATOR_PTRN = Pattern.compile("(\\d+)[\\|\\s].*");
 	private static final Pattern TEXT_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\|([ta])\\|(.*)$");
@@ -26,7 +27,7 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 	private boolean allOk = false;
 	private StringBuffer nextItem = new StringBuffer();
 	
-	public PubtatorTxtProcessor(
+	public TmVarTxtProcessor(
 			Path path) {
 
 		if (	(path == null) ||
@@ -64,7 +65,7 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 	}
 
 	@Override
-	public MarkedText next() {
+	public Articulo next() {
 		
 		if (!this.hasNext()) {
 			this.allOk = false;
@@ -73,7 +74,7 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 		
 		String pmc = "";
 		boolean exit = false;
-		MarkedText result = null;
+		Articulo result = null;
 		while (!exit) {
 
 			String text = "";
@@ -137,92 +138,124 @@ public class PubtatorTxtProcessor extends MarkedTextProcessor {
 		
 	}
 	
-	private MarkedText process(String str) {
+	private Articulo process(String str) {
 
-		MarkedText result = new MarkedText();
+		Articulo result = new Articulo();
 		
-		Block title = null;
-		Block summary = null;
+		BloqueAnotado title = null;
+		BloqueAnotado summary = null;
 		int noteId = 0;
 		for (String line: str.split("\r\n")) {
 
 			Matcher m = TEXT_PUBTATOR_PTRN.matcher(line);
 			if (m.find()) {
-				String pmc = m.group(1);
-				if (	(StringUtils.isBlank(result.pmid)) &&
-						(StringUtils.isNotBlank(pmc))) {
-					result.pmid = pmc;
+				
+				// ID ARTICLE
+				String pmid = m.group(1);
+				if (	(StringUtils.isBlank(result.getPmid())) &&
+						(StringUtils.isNotBlank(pmid))) {
+					result.setPmid(pmid);
 				}
 
-				Block block = null;
+				BloqueAnotado block = null;
 
+				// TITLE/ABSTRACT
 				String type = m.group(2);
 				if (	(StringUtils.isNotBlank(type))) {
 					boolean found = false;
-					if (MarkedText.BLOCKS.containsKey(type)) {
-						if (result.blocks.containsKey(MarkedText.BLOCKS.get(type))) {
-							block = result.blocks.get(MarkedText.BLOCKS.get(type));
+					if (ArticleProcessor.BLOCKS_NORMALIZE.containsKey(type)) {
+						if (result.containsBlockOfType(ArticleProcessor.BLOCKS_NORMALIZE.get(type))) {
+							block = result.getBlocksOfType(ArticleProcessor.BLOCKS_NORMALIZE.get(type));
 							found = true;
 						} else {
-							block = result.new Block();
-							block.type = MarkedText.BLOCKS.get(type);
+							block = new BloqueAnotado();
+							block.setType(ArticleProcessor.BLOCKS_NORMALIZE.get(type));
 						};
 					} else {
 						// TIPO DE BLOQUE DESCONOCIDO. NO SABRIAMOS COMO CONTAR
-						block = result.new Block();
-						block.type = type;
+						block = new BloqueAnotado();
+						block.setType(type);
 					}
 					
 					String text = m.group(3);
-					block.text = text;
-					if (!found) result.blocks.put(block.type, block);
+					block.setText(text);
+					if (!found) result.addBlock(block);
 				}
 				
-				if ((block != null) && "title".equals(block.type)) title = block;
-				if ((block != null) && "abstract".equals(block.type)) summary = block;
+				if ((block != null) && BloqueAnotado.PASSAGE_TYPE_TITLE.equals(block.getType())) title = block;
+				if ((block != null) && BloqueAnotado.PASSAGE_TYPE_ABSTRACT.equals(block.getType())) summary = block;
 				
 			}
 
 			m = DATA_PUBTATOR_PTRN.matcher(line);
 			if (m.find()) {
 				
-				noteId ++;
-				
-				String pmc = m.group(1);
-				if (	(StringUtils.isBlank(result.pmid)) &&
-						(StringUtils.isNotBlank(pmc))) {
-					result.pmid = pmc;
+				// ID ARTICLE
+				String pmid = m.group(1);
+				if (	(StringUtils.isBlank(result.getPmid())) &&
+						(StringUtils.isNotBlank(pmid))) {
+					result.setPmid(pmid);
 				}
 
-				Note note = result.new Note();
+				Anotacion note = new Anotacion();
+				note.setId(Integer.toString(noteId));
+
+				// TOKEN
 				String text = m.group(4);
-				if (StringUtils.isNotBlank(text)) note.text = text;
-				String value = m.group(6);
-				if (StringUtils.isNotBlank(text)) note.value = value;
+				if (StringUtils.isNotBlank(text)) note.setText(text);
+				
+				// TYPE
 				String type = m.group(5);
-				if (MarkedText.MUTATIONS.containsKey(type)) {
-					note.type = MarkedText.MUTATIONS.get(type);
+				if (ArticleProcessor.MUTATIONS_NORMALIZE.containsKey(type)) {
+					note.setType(ArticleProcessor.MUTATIONS_NORMALIZE.get(type));
 				} else {
-					MarkedText.MUTATIONS.put(type, type);
+					ArticleProcessor.MUTATIONS_NORMALIZE.put(type, type);
 				}
-
+				
+				// STD IDENTIFIER
+				String value = m.group(6);
+				if (StringUtils.isNotBlank(text)) note.setValue(value);
+				
 				if (	(title != null) &&
-						(StringUtils.isNotBlank(title.text)) &&
+						(StringUtils.isNotBlank(title.getText())) &&
 						(summary != null)) {
 					
-					int titleSize = title.text.length();
+					// POSITION
 					Long start = Long.parseLong(m.group(2));
 					Long end = Long.parseLong(m.group(3));
+					
+					int titleSize = (title.getText() != null) ? title.getText().length() : 0;
 					Long size = end - start; //OJO Marca el caracter siguiente aunque sea en blanco
 					if (start < titleSize) {
-						note.pos.add(result.new Position(start.intValue(), size.intValue()));
-						title.notes.put(String.valueOf(noteId), note);
+						note.addPosition(new Posicion(start.intValue(), size.intValue()));
+						title.setOffset(0);
+						title.addNote(String.valueOf(noteId), note);
 					} else {
-						note.pos.add(result.new Position(start.intValue()-titleSize-1, size.intValue()));
-						summary.notes.put(String.valueOf(noteId), note);
+						// offset: Title has an offset of zero, while the other passages 
+						// (e.g., abstract) are assumed to begin after the previous passages and one space
+						
+						// En tmVar solo hay un pasaje titulo y un pasaje abstract
+						summary.setOffset((title.getText() != null) ? title.getText().length() : 0);
+						
+						// El offset del abstract incluye los parrafos anteriores + 1 caracter por parrafo
+						// en tmVar solo hay un titulo, por lo que hay que restar al offset el tamaño del título y uno
+						/*
+						String fortest = title.text + " " + summary.text;
+						System.out.println(
+								"Compare: " + 
+								fortest.substring(start.intValue(), start.intValue() + size.intValue()) +
+								" con " +
+								note.getText() +
+								" y con " +
+								summary.text.substring(start.intValue()-title.text.length()-1, start.intValue()-title.text.length()-1 + size.intValue()));
+						 */
+						note.addPosition(new Posicion(start.intValue()-titleSize-1, size.intValue()));
+						summary.addNote(String.valueOf(noteId), note);
 					}
 
 				}
+				
+				noteId ++;
 				
 			}
 			

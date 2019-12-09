@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.services;
+package es.rcs.tfm.srv.corpus.services;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -272,11 +272,11 @@ public class CorpusService {
 			// Check Articulo changes vs Database. 
 			// TODO Solo revisamos Titulo y resumen
 			if (!dbUpdateNeeded) {
-				if (	(StringUtils.isNotBlank(obj.getTitulo()))) {
+				if (	(StringUtils.isNotBlank(obj.getTitulo().getTitulo()))) {
 					if 	(StringUtils.isBlank(db.getTitle())) {
 						dbUpdateNeeded = true;
 					} else if 	
-						(obj.getTitulo().compareTo(db.getTitle()) != 0) {
+						(obj.getTitulo().getTitulo().compareTo(db.getTitle()) != 0) {
 						dbUpdateNeeded = true;
 					} 
 				} else if 
@@ -315,11 +315,11 @@ public class CorpusService {
 
 			// Check Articulo changes vs index
 			if (!idxUpdateNeeded) {
-				if		(StringUtils.isNotBlank(obj.getTitulo())) {
+				if		(StringUtils.isNotBlank(obj.getTitulo().getTitulo())) {
 					if 	(StringUtils.isBlank(idx.getTitle())) {
 						idxUpdateNeeded = true;
 					} else if 	
-						(obj.getTitulo().compareTo(idx.getTitle()) != 0) {
+						(obj.getTitulo().getTitulo().compareTo(idx.getTitle()) != 0) {
 						idxUpdateNeeded = true;
 					} 
 				} else if 
@@ -361,7 +361,7 @@ public class CorpusService {
 */
 			db.setPmid(obj.getPmid());
 			db.setSummary(obj.getResumen());
-			db.setTitle(obj.getTitulo());
+			db.setTitle(obj.getTitulo().getTitulo());
 			
 			db = articleDB.saveAndFlush(db);
 
@@ -383,7 +383,7 @@ public class CorpusService {
  */
 			obj.setPmid(db.getPmid());
 			obj.setResumen(db.getSummary());
-			obj.setTitulo(db.getTitle());
+			obj.getTitulo().setTitulo(db.getTitle());
 			
 			obj.setEntidad(db);
 			obj.setHayCambiosEnBD(false);
@@ -408,7 +408,7 @@ public class CorpusService {
 			IdxArticleSolr idx = searchArticuloInIdx(obj);
 			
 			idx.setPmid(obj.getPmid());
-			idx.setTitle(obj.getTitulo());
+			idx.setTitle(obj.getTitulo().getTitulo());
 			idx.setSummary(obj.getResumen());
 			idx = articleSOLR.save(idx);
 

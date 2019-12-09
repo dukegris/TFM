@@ -12,11 +12,10 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper=false)
-public class Centro {
-	
-	private HashMap<String, String> ids = new HashMap<String, String>();
-	private String tipo;
-	private String nombre;
+public class Referencia {
+
+	private Map<String, String> ids = new HashMap<String, String>();
+	private String cita = new String();
 
 	public void addIds(Map<String, String> items) {
 		if ((items!= null) && (!items.isEmpty())) this.ids.putAll(items);

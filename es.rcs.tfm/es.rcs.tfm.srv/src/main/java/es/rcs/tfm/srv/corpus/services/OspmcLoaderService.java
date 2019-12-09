@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.services;
+package es.rcs.tfm.srv.corpus.services;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +53,12 @@ public class OspmcLoaderService {
 				FTP_USERNAME, FTP_PASSWORD, 
 				FTP_BASELINE);
 		
-		if (ftpFiles != null) LOG.info("PROCESSING " + ftpFiles.length + " FILES");
+		if ((ftpFiles != null) && (ftpFiles.length>0)) {
+			LOG.info("PROCESSING " + ftpFiles.length + " FILES");
+		} else {
+			LOG.warn("PROCESSING NO FILES");
+			return;
+		}
 		
 		// LISTA DE FICHEROS A DESCARGAR
 		Stream<Fichero> ficherosStream = Arrays.stream(ftpFiles).//.parallel()

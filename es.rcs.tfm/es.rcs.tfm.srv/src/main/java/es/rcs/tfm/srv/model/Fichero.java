@@ -122,7 +122,7 @@ public class Fichero {
 		
 		Articulo articulo = new Articulo();
 		articulo.setFicheroPmc(fichero);
-		articulo.setTitulo(title);
+		articulo.setTitulo(new Titulo(title));
 		articulo.setFicheroPmc(fichero);
 		articulo.setPmid(pmid);
 		articulo.setIds(ids);

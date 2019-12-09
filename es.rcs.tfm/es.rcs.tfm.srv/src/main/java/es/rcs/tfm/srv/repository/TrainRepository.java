@@ -28,8 +28,9 @@ import org.slf4j.LoggerFactory;
 import es.rcs.tfm.nlp.service.ConllWritter;
 import es.rcs.tfm.nlp.service.NerPrepare;
 import es.rcs.tfm.nlp.service.NerTrain;
-import es.rcs.tfm.srv.model.MarkedText;
-import es.rcs.tfm.srv.setup.MarkedTextProcessor;
+import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.ArticuloTextoAnotado;
+import es.rcs.tfm.srv.setup.ArticleProcessor;
 
 public class TrainRepository {
 	
@@ -42,7 +43,7 @@ public class TrainRepository {
 	 * @param list lista de beans del modelo con los documentos de entrenamiento
 	 * @return lista de filas con los documentos de entrenamiento
 	 */
-	public static final List<Row> generateDS(List<MarkedText> list) {
+	public static final List<Row> generateDS(List<Articulo> list) {
 		
 		if ((list == null) || (list.isEmpty())) return null;
 
@@ -50,16 +51,35 @@ public class TrainRepository {
 		try {
 		
 			list.forEach(doc -> {
-				if ((doc != null) && (doc.blocks != null)) {
-					doc.blocks.forEach((e, b) -> {
+				if ((doc != null) && (doc.getBlocks() != null)) {
+					doc.getBlocks().forEach((b) -> {
 						List<String> notes = null;
-						if ((b != null) && (b.notes != null) && (!b.notes.isEmpty())) {
-							notes = b.notes.values().stream().flatMap(n -> n.pos.stream().map(p -> 
-								String.format("[%d, %d, %s, %s]", p.offset, p.offset + p.length - 1, n.text, n.type)
-							)).collect(Collectors.toList());
+						if ((b != null) && (b.getNotes() != null) && (!b.getNotes().isEmpty())) {
+							notes = b.getNotes().
+									values().
+									stream().
+									filter(n -> (n != null)).
+									flatMap(n -> n.getPos().
+											stream().
+											map(p -> {
+												System.out.println ("NOTE :" + 
+														n.getText().equals(b.getText().substring(p.getOffset(), p.getOffset() + p.getLength())) + 
+														" -> \"" + 
+														b.getText().substring(p.getOffset(), p.getOffset()+ p.getLength()) + 
+														"\" is \"" + 
+														n.getText() + 
+														"\"");
+												return String.format(
+														"[%d, %d, %s, %s]", 
+														p.getOffset(), 
+														p.getEnd(), 
+														n.getText(), 
+														n.getType());
+											}))
+									.collect(Collectors.toList());
 						}
 						if (notes == null) notes = new ArrayList<String>();
-						result.add(RowFactory.create(doc.pmid, b.type, b.text, notes));
+						result.add(RowFactory.create(doc.getPmid(), b.getType(), b.getText(), notes));
 					});
 				}
 			});
@@ -89,7 +109,7 @@ public class TrainRepository {
 	}
 	
 	/**
-	 * @param spark Sesion de Spark donde se ejecutará la preparación de datos
+	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
 	 * @param trainFilename
 	 * @param testFilename
 	 * @param resultsFilename
@@ -97,8 +117,8 @@ public class TrainRepository {
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param targetModelDirectory Directorio de salida de los fichero CONLL
-	 * @param maxSentence Maximo tamaño de una frase (defecto 512, suele ser 128)
-	 * @param dimension Maximo número de dimensiones (defecto 1024, suele ser 768)
+	 * @param maxSentence Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
+	 * @param dimension Maximo nï¿½mero de dimensiones (defecto 1024, suele ser 768)
 	 * @return
 	 */
 	public static final boolean trainFromConll(
@@ -113,7 +133,7 @@ public class TrainRepository {
 			Integer maxSentence,
 			Integer dimension,
 			Integer batchSize,
-			Boolean caseSensistive) {
+			Boolean caseSensitive) {
 
 		if (spark == null) return false;
 		if (StringUtils.isBlank(resultsDirectory)) return false;
@@ -153,7 +173,7 @@ public class TrainRepository {
 		if (maxSentence == null) maxSentence = 512;
 		if (dimension == null) dimension = 1024;
 		if (batchSize == null) batchSize = 32;
-		if (caseSensistive == null) caseSensistive = false;
+		if (caseSensitive == null) caseSensitive = false;
 		
 		boolean resultado = true;
 		try {
@@ -168,7 +188,7 @@ public class TrainRepository {
 					maxSentence,
 					dimension,
 					batchSize,
-					caseSensistive);
+					caseSensitive);
 			
 			nerTrainer.
 				saveNerModel (
@@ -196,21 +216,21 @@ public class TrainRepository {
 
 	/**
 	 * Construye un fichero conll en un directorio parquet con el conjunto de documentos de entrenamiento
-	 * aplicandoles la localización de entidades del modelo 
-	 * @param spark Sesion de Spark donde se ejecutará la preparación de datos
+	 * aplicandoles la localizaciï¿½n de entidades del modelo 
+	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
 	 * @param processor Generador de anotaciones
 	 * @param resultsDirectory Directorio donde se deja el modelo con los resultados
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
-	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localización de entidades genéricas
-	 * @param targetFilename Directorio parquet de salida de la preparación de datos
-	 * @param maxSentence Maximo tamaño de una frase (defecto 512, suele ser 128)
-	 * @param dimension Maximo número de dimensiones (defecto 1024, suele ser 768)
+	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localizaciï¿½n de entidades genï¿½ricas
+	 * @param targetFilename Directorio parquet de salida de la preparaciï¿½n de datos
+	 * @param maxSentence Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
+	 * @param dimension Maximo nï¿½mero de dimensiones (defecto 1024, suele ser 768)
 	 * @return
 	 */
 	public static final boolean getConllFrom(
 			SparkSession spark,
-			MarkedTextProcessor processor,
+			ArticleProcessor processor,
 			String resultsDirectory,
 			String posModelDirectory,
 			String bertModelDirectory,
@@ -219,7 +239,7 @@ public class TrainRepository {
 			Integer maxSentence,
 			Integer dimension,
 			Integer batchSize,
-			Boolean caseSensistive) {
+			Boolean caseSensitive) {
 
 		if (spark == null) return false;
 		if (processor == null) return false;
@@ -252,19 +272,19 @@ public class TrainRepository {
 		if (maxSentence == null) maxSentence = 512;
 		if (dimension == null) dimension = 1024;
 		if (batchSize == null) batchSize = 32;
-		if (caseSensistive == null) caseSensistive = false;
+		if (caseSensitive == null) caseSensitive = false;
 		
 		boolean resultado = true;
 		try {
 
 			String ini = SIMPLE_DATE_FORMAT.format(new Date());
 			
-			Stream<MarkedText> stream = StreamSupport.stream(
+			Stream<Articulo> stream = StreamSupport.stream(
 					Spliterators.spliteratorUnknownSize(
 							processor, 
 							Spliterator.DISTINCT), 
 					false);
-			List<MarkedText> data = stream.collect(Collectors.toList());
+			List<Articulo> data = stream.collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
 				
@@ -286,7 +306,7 @@ public class TrainRepository {
 						maxSentence,
 						dimension,
 						batchSize,
-						caseSensistive);
+						caseSensitive);
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 

@@ -89,6 +89,7 @@ public class PubMedTest {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
 	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+	        spf.setNamespaceAware(true);
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 	        InputSource inputSource = new InputSource(new FileReader(file));
 	        SAXSource source = new SAXSource(xmlReader, inputSource);

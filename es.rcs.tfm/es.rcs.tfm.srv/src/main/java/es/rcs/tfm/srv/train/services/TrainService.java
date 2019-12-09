@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.services;
+package es.rcs.tfm.srv.train.services;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.repository.TrainRepository;
-import es.rcs.tfm.srv.setup.BiocXmlProcessor;
-import es.rcs.tfm.srv.setup.PubtatorTxtProcessor;
+import es.rcs.tfm.srv.setup.TmBiocXmlProcessor;
+import es.rcs.tfm.srv.setup.TmVarTxtProcessor;
 import es.rcs.tfm.xml.XmlNames;
 
 @Service(value = SrvNames.TRAINING_SRVC)
@@ -208,7 +208,7 @@ public class TrainService {
 			
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new BiocXmlProcessor(filename), 
+					new TmBiocXmlProcessor(filename), 
 					infile, 
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
@@ -260,7 +260,7 @@ public class TrainService {
 			
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new PubtatorTxtProcessor(filename), 
+					new TmVarTxtProcessor(filename), 
 					infile, 
 					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 

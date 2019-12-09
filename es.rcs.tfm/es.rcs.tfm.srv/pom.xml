@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -26,25 +26,25 @@
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Nlp</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Db</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Idx</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Xml</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -188,6 +188,22 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
+			 TEST
+			 ===================================== -->
+		<!-- SPRING -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- JUNIT -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

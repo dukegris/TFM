@@ -10,8 +10,8 @@ import es.rcs.tfm.srv.SrvNames;
 		SrvNames.SRV_CONFIG )
 @ComponentScan(
 		basePackages = {
-				SrvNames.SRV_SERVICES_PKG,
-				SrvNames.SRV_COMPONENTS_PKG
+				SrvNames.SRV_CORPUS_SERVICES_PKG,
+				SrvNames.SRV_TRAIN_SERVICES_PKG
 		})
 @PropertySource(
 		{"classpath:/META-INF/service.properties"} )

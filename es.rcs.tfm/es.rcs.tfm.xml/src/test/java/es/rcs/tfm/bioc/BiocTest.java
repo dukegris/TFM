@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -16,14 +15,12 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
 
 import org.bioc.Collection;
-import org.bioc.Document;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ncbi.mesh.DescriptorRecordSet;
 import org.ncbi.pubmed.PubmedArticleSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -76,6 +73,7 @@ public class BiocTest {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
 	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+	        spf.setNamespaceAware(true);
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 	        InputSource inputSource = new InputSource(new FileReader(file));
 	        SAXSource source = new SAXSource(xmlReader, inputSource);

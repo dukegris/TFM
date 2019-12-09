@@ -1,15 +1,15 @@
-package es.rcs.tfm.srv.components;
+package es.rcs.tfm.srv.train.services;
 
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import es.rcs.tfm.srv.SrvNames;
-import es.rcs.tfm.srv.services.TrainService;
 
 /**
  * Lanza una tarea de preparación de datos
@@ -17,22 +17,25 @@ import es.rcs.tfm.srv.services.TrainService;
  * @author raul
  *
  */
-@Component(value = SrvNames.TRAIN_NER_MODEL_TASK)
+@Component(value = SrvNames.PREPARE_CONLL_FROM_TXT_TASK)
+@DependsOn(value = {
+		SrvNames.SPARK_SESSION_TRAIN,
+		SrvNames.TRAINING_SRVC})
 @Scope("prototype")
-public class TrainNerFromConllTask extends Thread{
+public class PrepareNerConllFromTxtTask extends Thread{
 
-	private static final Logger LOG = LoggerFactory.getLogger(TrainNerFromConllTask.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PrepareNerConllFromTxtTask.class);
 
-	public TrainNerFromConllTask() {
+	public PrepareNerConllFromTxtTask() {
 		super();
-		this.setName(SrvNames.TRAIN_NER_MODEL_TASK);
+		this.setName(SrvNames.PREPARE_CONLL_FROM_TXT_TASK);
 	}
 
 	@Override
 	public void run() {
-		LOG.info("TRAIN MODEL START");
-		train.trainModel(spark);
-		LOG.info("TRAIN MODEL END");
+		LOG.info("PREPARE DATA START");
+		train.prepareDataForTraining(spark);
+		LOG.info("PREPARE DATA END");
 	}
 
 	@Autowired

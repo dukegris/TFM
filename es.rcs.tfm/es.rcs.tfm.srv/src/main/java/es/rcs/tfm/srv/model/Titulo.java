@@ -9,12 +9,16 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper=false)
-public class Fasciculo {
+public class Titulo {
 	
-	private String tipo;
-	private String medio;
-	private String volumen;
-	private String numero;
-	private Fecha fecha;
-
+	private String titulo;
+	private String libroId;
+	private String parteId;
+	private String seccionId;
+	
+	public Titulo(String titulo) {
+		super();
+		this.titulo = titulo;
+	}
+	
 }

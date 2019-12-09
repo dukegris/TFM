@@ -9,12 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper=false)
-public class Fasciculo {
-	
-	private String tipo;
-	private String medio;
-	private String volumen;
-	private String numero;
-	private Fecha fecha;
-
+public class Seccion {
+	String titulo;
+	String etiqueta;
 }
