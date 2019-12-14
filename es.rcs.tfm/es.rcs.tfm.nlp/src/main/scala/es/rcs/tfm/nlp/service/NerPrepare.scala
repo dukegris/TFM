@@ -4,7 +4,7 @@ import com.johnsnowlabs.nlp.{SparkNLP, DocumentAssembler, Finisher, AnnotatorTyp
 import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
 import com.johnsnowlabs.nlp.annotators.{Stemmer, Tokenizer, Normalizer}
 import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
-import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach, PretrainedNerDL} 
+import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach} 
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
 import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
@@ -33,11 +33,23 @@ class NerPrepare(
     bertModelDirectory: String, 
     bertNerModelDirectory: String, 
     maxSentenceLength: Integer = 512, 
-    dimension: Integer = 1024,
+    dimension: Integer = 768,
     batchSize: Integer = 32,
     caseSensitive: Boolean = false) {
+    
+  println(java.time.LocalTime.now + ": ner prepare constructor")
 
-  /**
+  import spark.implicits._
+  val emptyData = spark.emptyDataset[String].toDF(TfmType.TEXT)
+
+  val pipeline = new RecursivePipeline().
+  	setStages(createPipelineStagesDl)
+
+  val model = pipeline.fit(emptyData)
+
+  println(java.time.LocalTime.now + ": ner prepare constructor created")
+
+ 	/**
    * Ejecuta un pipeline sobre un dataset con una columna denominada text
    * @param rows El dataset
    * @param structType La estructura de datos
@@ -45,29 +57,24 @@ class NerPrepare(
    */
   def execute(rows: List[Row], structType: StructType, pipelineModelDirectory: String): DataFrame = {
     
-println(java.time.LocalTime.now + ": execute init")
-    import spark.implicits._
-    val emptyData = spark.emptyDataset[String].toDF(TfmType.TEXT)
+    println(java.time.LocalTime.now + ": ner prepare execute init")
     
     val data = spark.createDataFrame(
         rows, 
         structType)
-    
-    val pipeline = new RecursivePipeline().
-    	setStages(createPipelineStagesDl)
 
-println(java.time.LocalTime.now + ": execute fit")
-    val model = pipeline.fit(emptyData)
-println(java.time.LocalTime.now + ": execute save")
     //model.write.overwrite().save(pipelineModelDirectory)
     //val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
-println(java.time.LocalTime.now + ": execute transform")
-    // java.lang.IllegalArgumentException: Input to reshape is a tensor with 15728640 values, but the requested shape has 983040
+    //println(java.time.LocalTime.now + ": execute transform")
+    //java.lang.IllegalArgumentException: Input to reshape is a tensor with 15728640 values, but the requested shape has 983040
 	  //   [[{{node bert/embeddings/Reshape}} = Reshape[T=DT_FLOAT, Tshape=DT_INT32, _device="/job:localhost/replica:0/task:0/device:CPU:0"](bert/embeddings/embedding_lookup, bert/embeddings/Reshape/shape)]]
     //val result = loadedModel.transform(data)
-    val result = model.transform(data)
-println(java.time.LocalTime.now + ": execute end")
 
+    println(java.time.LocalTime.now + ": ner prepare execute df created")
+    
+    val result = model.transform(data)
+
+    println(java.time.LocalTime.now + ": ner prepare execute transformed")
     result
     
   }
@@ -107,10 +114,10 @@ println(java.time.LocalTime.now + ": execute end")
       //pretrained(TfmType.PRETRAINED_BERT, "en").
       //pretrained("bert_uncased", "en").
     	load(this.bertModelDirectory).
-    	setMaxSentenceLength(512).
-    	setDimension(1024).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.WORD_EMBEDDINGS).
+    	setMaxSentenceLength(maxSentenceLength).
+    	setDimension(dimension).
     	setCaseSensitive(caseSensitive).
     	setBatchSize(batchSize)
     
@@ -125,11 +132,12 @@ println(java.time.LocalTime.now + ": execute end")
     	setOutputCol(TfmType.NAMED_ENTITY_CHUNK)
 
     val finisher = new Finisher().
-      //setInputCols(Array(TfmType.DOCUMENT, TfmType.SENTENCES, TfmType.TOKEN, TfmType.POS, TfmType.WORD_EMBEDDINGS, TfmType.NAMED_ENTITY, TfmType.NAMED_ENTITY_CHUNK)).
       setInputCols(Array(
           TfmType.DOCUMENT, 
           TfmType.SENTENCES, 
           TfmType.TOKEN, 
+          //TfmType.STEM,
+          //TfmType.NORMAL,
           TfmType.POS, 
           TfmType.WORD_EMBEDDINGS, 
           TfmType.NAMED_ENTITY, 

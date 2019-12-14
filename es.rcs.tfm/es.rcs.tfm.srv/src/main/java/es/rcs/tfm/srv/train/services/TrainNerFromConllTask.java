@@ -9,8 +9,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import es.rcs.tfm.db.DbNames;
-import es.rcs.tfm.solr.IndexNames;
 import es.rcs.tfm.srv.SrvNames;
 
 /**
@@ -19,10 +17,12 @@ import es.rcs.tfm.srv.SrvNames;
  * @author raul
  *
  */
-@Component(value = SrvNames.TRAIN_NER_MODEL_TASK)
-@DependsOn(value = {
-		SrvNames.SPARK_SESSION_TRAIN,
-		SrvNames.TRAINING_SRVC})
+@Component(
+		value = SrvNames.TRAIN_NER_MODEL_TASK)
+@DependsOn(
+		value = {
+				SrvNames.SPARK_SESSION_TRAIN,
+				SrvNames.TRAINING_SRVC})
 @Scope("prototype")
 public class TrainNerFromConllTask extends Thread{
 

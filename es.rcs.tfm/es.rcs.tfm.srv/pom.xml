@@ -153,6 +153,12 @@
 			<artifactId>spark-nlp_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
+			<version>2.2.2</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 UTILIDADES

@@ -30,7 +30,7 @@ import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 		PubmedXmlProcessorTest.class })
 public class PubmedXmlProcessorTest {
 
-	public static final String PUBMED_FILE = "../es.rcs.tfm.corpus/data/corpus/pubmed_xml/pubmed19n0973.xml";
+	public static final String PUBMED_FILE = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/corpus/pubmed_xml/pubmed19n0973.xml";
 	
 	@Test
 	public void unmarshallFile() {
@@ -38,6 +38,8 @@ public class PubmedXmlProcessorTest {
 		String[] ficheros = {
 				PUBMED_FILE
 		};
+		
+		System.out.println ("-" + "A novel missense mutation Asp506Gly in Exon 13 of the F11 gene in an asymptomatic Korean woman with mild factor XI deficiency.".substring(26,35) + "-");
 
 		Stream<String> ficherosStream = Arrays.asList(ficheros).stream();
 		

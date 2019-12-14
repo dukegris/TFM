@@ -75,18 +75,18 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 	public boolean hasNext() {
 
 		boolean more = index < items.size()-1;
-		
+/*		
 		if (!more) {
 			System.out.println("TEXTOS");
 			ArticleProcessor.BLOCKS_NORMALIZE.forEach((e,v) -> System.out.println ("BLOCK: " + e + ": " + v));
 			System.out.println("MUTACIONES");
 			ArticleProcessor.MUTATIONS_NORMALIZE.forEach((e,v) -> System.out.println ("TYPE: " + e + ": " + v));
 		}
-		
+*/		
 		return more;
 
 	}
-	
+
 	@Override
 	public Articulo next() {
 		
@@ -149,8 +149,10 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 				block.setText(		makeText(instance.getTextOrAnnotationOrSentence()));
 
 				try {
-					int delta = makeOffset(instance.getOffset());
-					if (!block.isTitle()) blockOffset.addAndGet(delta);
+					if (!block.isTitle()) {
+						int delta = makeOffset(instance.getOffset());
+						blockOffset.addAndGet(delta);
+					}
 				} catch (NumberFormatException ex) {}
 				block.addNotes(		makeNotes(instance.getTextOrAnnotationOrSentence(), blockOffset.get()));
 				
@@ -160,6 +162,34 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 			collect(Collectors.toList());
 		
 		if (resultado.isEmpty()) resultado = null;
+		if (resultado.size() == 2) {
+			int offset = resultado.get(1).getOffset();
+			int textlength = resultado.get(0).getText().length();
+			if (offset - 1 != textlength) {
+				System.out.println (
+						"Error en el offset del fichero: Recalcular notas.Hay " + 
+						textlength +
+						" en el titulo y " +
+						offset +
+						" en el fichero");
+				resultado.get(1).recalculateOffset(offset - textlength - 1);
+				resultado.get(1).setOffset(textlength + 1);
+
+				
+				offset = resultado.get(1).getOffset();
+				textlength = resultado.get(0).getText().length();
+				if (offset - 1 != textlength) {
+					System.out.println (
+							"Tras el recalculo sigue el error en el offset del fichero: " + 
+							"recalcular notas.Hay " + 
+							textlength +
+							" en el titulo y " +
+							offset +
+							" en el fichero");
+				}
+			}
+		}
+			
 		return resultado;
 
 	}

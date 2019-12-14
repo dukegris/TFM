@@ -43,4 +43,11 @@ public class BloqueAnotado {
 		if (StringUtils.isBlank(key) || (value == null)) return;
 		notes.put(key, value);
 	}
+	public void recalculateOffset(int addvalue) {
+		notes.forEach((k, n) -> {
+			n.getPos().forEach(p -> {
+				p.setOffset(p.getOffset() + addvalue);
+			});
+		});
+	}
 }

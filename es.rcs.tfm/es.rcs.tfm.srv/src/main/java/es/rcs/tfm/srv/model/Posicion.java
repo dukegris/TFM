@@ -16,8 +16,7 @@ public class Posicion {
 	public Posicion(int offset, int length) {
 		super();
 		this.offset = offset;
-		this.length = length;
-		this.end = this.offset + this.length;
+		this.setLength(length);
 	}
 	public void setOffset(int offset) {
 		this.offset = offset;

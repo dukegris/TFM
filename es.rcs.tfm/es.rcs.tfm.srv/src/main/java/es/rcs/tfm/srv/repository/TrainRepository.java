@@ -5,7 +5,9 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
@@ -28,8 +30,8 @@ import org.slf4j.LoggerFactory;
 import es.rcs.tfm.nlp.service.ConllWritter;
 import es.rcs.tfm.nlp.service.NerPrepare;
 import es.rcs.tfm.nlp.service.NerTrain;
+import es.rcs.tfm.srv.model.Anotacion;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.ArticuloTextoAnotado;
 import es.rcs.tfm.srv.setup.ArticleProcessor;
 
 public class TrainRepository {
@@ -38,6 +40,26 @@ public class TrainRepository {
 	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
 	private static final String HADOOP_FILE_PREFIX = "file:///";
 	
+	private static Map<Integer, NerPrepare> PREPARERS = new HashMap<Integer, NerPrepare>();
+	private static Map<Integer, NerTrain> TRAINERS = new HashMap<Integer, NerTrain>();
+	
+	private static Integer getHash(
+			String posModelDirectory,
+			String bertModelDirectory,
+			Integer maxSentence,
+			Integer dimension,
+			Integer batchSize,
+			Boolean caseSensitive) {
+		int hash = 17;
+        hash = hash * 23 + ((posModelDirectory == null) ? 0 : posModelDirectory.hashCode());
+        hash = hash * 23 + ((bertModelDirectory == null) ? 0 : bertModelDirectory.hashCode());
+        hash = hash * 23 + ((maxSentence == null) ? 0 : maxSentence.hashCode());
+        hash = hash * 23 + ((dimension == null) ? 0 : dimension.hashCode());
+        hash = hash * 23 + ((batchSize == null) ? 0 : batchSize.hashCode());
+        hash = hash * 23 + ((caseSensitive == null) ? 0 : caseSensitive.hashCode());
+        return hash;
+	}
+
 	/**
 	 * Construye un dataset a partir de los datos de entrenamiento en el modelo intermedio
 	 * @param list lista de beans del modelo con los documentos de entrenamiento
@@ -62,6 +84,7 @@ public class TrainRepository {
 									flatMap(n -> n.getPos().
 											stream().
 											map(p -> {
+												/*
 												System.out.println ("NOTE :" + 
 														n.getText().equals(b.getText().substring(p.getOffset(), p.getOffset() + p.getLength())) + 
 														" -> \"" + 
@@ -69,6 +92,7 @@ public class TrainRepository {
 														"\" is \"" + 
 														n.getText() + 
 														"\"");
+												 */
 												return String.format(
 														"[%d, %d, %s, %s]", 
 														p.getOffset(), 
@@ -180,6 +204,7 @@ public class TrainRepository {
 			
 			String ini = SIMPLE_DATE_FORMAT.format(new Date());
 			
+			String[] entities = {};
 			NerTrain nerTrainer = new NerTrain(
 					spark.sparkContext(),
 					spark,
@@ -188,8 +213,15 @@ public class TrainRepository {
 					maxSentence,
 					dimension,
 					batchSize,
-					caseSensitive);
-			
+					caseSensitive,
+					ArticleProcessor.MUTATIONS_NORMALIZE.values().toArray(entities));
+
+			nerTrainer.train(
+					trainFilename,
+					testFilename,
+					resultsFilename,
+					resultsDirectory);
+/*			
 			nerTrainer.
 				saveNerModel (
 					nerTrainer.
@@ -199,7 +231,7 @@ public class TrainRepository {
 							resultsFilename,
 							resultsDirectory),
 						HADOOP_FILE_PREFIX + targetModelDirectory);
-			
+*/			
 			LOG.info(
 					"\r\nTRAIN TIME for [" + trainFilename + "] "  +
 					"\r\n\tINI:" + ini +
@@ -224,6 +256,7 @@ public class TrainRepository {
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localizaciï¿½n de entidades genï¿½ricas
 	 * @param targetFilename Directorio parquet de salida de la preparaciï¿½n de datos
+	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
 	 * @param maxSentence Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
 	 * @param dimension Maximo nï¿½mero de dimensiones (defecto 1024, suele ser 768)
 	 * @return
@@ -236,6 +269,7 @@ public class TrainRepository {
 			String bertModelDirectory,
 			String nerModelDirectory,
 			String targetFilename,
+			Boolean mantainNerFromGenericModel,
 			Integer maxSentence,
 			Integer dimension,
 			Integer batchSize,
@@ -284,6 +318,8 @@ public class TrainRepository {
 							processor, 
 							Spliterator.DISTINCT), 
 					false);
+			//TODO List<Articulo> data = stream.collect(Collectors.toList());
+			//TODO List<Articulo> data = stream.limit(2).collect(Collectors.toList());
 			List<Articulo> data = stream.collect(Collectors.toList());
 			
 			if ((data == null) || (data.size() == 0)) {
@@ -297,16 +333,29 @@ public class TrainRepository {
 				
 				String build = SIMPLE_DATE_FORMAT.format(new Date());
 
-				NerPrepare generator = new NerPrepare(
-						spark.sparkContext(),
-						spark,
-						HADOOP_FILE_PREFIX + posModelDirectory,
-						HADOOP_FILE_PREFIX + bertModelDirectory,
-						HADOOP_FILE_PREFIX + nerModelDirectory,
-						maxSentence,
-						dimension,
-						batchSize,
+				NerPrepare generator = null;
+				Integer key = getHash(
+						posModelDirectory, 
+						bertModelDirectory, 
+						maxSentence, 
+						dimension, 
+						batchSize, 
 						caseSensitive);
+				if (!PREPARERS.containsKey(key)) {
+					generator = new NerPrepare(
+							spark.sparkContext(),
+							spark,
+							HADOOP_FILE_PREFIX + posModelDirectory,
+							HADOOP_FILE_PREFIX + bertModelDirectory,
+							HADOOP_FILE_PREFIX + nerModelDirectory,
+							maxSentence,
+							dimension,
+							batchSize,
+							caseSensitive);
+					PREPARERS.put(key, generator);
+				} else {
+					generator = PREPARERS.get(key);
+				}
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 
@@ -321,7 +370,8 @@ public class TrainRepository {
 				@SuppressWarnings("unchecked")
 				Dataset<Row> conllDs = writter.
 						generateConll(
-								ds);
+								ds,
+								mantainNerFromGenericModel);
 				
 				double tasa = writter.
 						saveConll(

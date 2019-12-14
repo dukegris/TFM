@@ -17,7 +17,7 @@ object TfmType {
   val LABEL = "label"
   val LABEL_SPAN = "label_span"
   
-  val SENTENCES = "sentences"
+  val SENTENCES = "sentence"
   
   val NAMED_ENTITY_SPAN = "named_entity_span"
   val NAMED_ENTITY_CHUNK = "named_entity_chunk"

@@ -1,2 +1,6 @@
 # DATALAKE: Datos de entrenamiento
-Directorio base con la información generada para entrenamiento como los datos de resultados y estadísticas de los proces de entrenamiento
+Directorio base con la informaciï¿½n generada para entrenamiento como los datos de resultados y estadï¿½sticas de los proces de entrenamiento
+Deben de existir los directorios 
+- temp
+- bert
+- ner
