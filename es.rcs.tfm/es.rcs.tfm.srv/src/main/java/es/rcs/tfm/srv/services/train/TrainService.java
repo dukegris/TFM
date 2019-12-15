@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.train.services;
+package es.rcs.tfm.srv.services.train;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -32,78 +32,83 @@ public class TrainService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrainService.class);
 
-	private @Value("${tfm.model.pos.directory}")				String POS_DIRECTORY =				"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
-	private @Value("${tfm.model.bert.directory}")				String BERT_DIRECTORY =				"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
-	private @Value("${tfm.model.ner.directory}")				String NER_DIRECTORY =				"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
+	private @Value("${tfm.model.pos.directory}")				String POS_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
+	private @Value("${tfm.model.bert.directory}")				String BERT_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
+	private @Value("${tfm.model.ner.directory}")				String NER_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
 
-	private @Value("${tfm.training.ner.in.train.pubtator}")		String TRAIN_NER_IN_TXT_TRAIN =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.PubTator.txt";
-	private @Value("${tfm.training.ner.in.train.bioc}")			String TRAIN_NER_IN_BIOC_TRAIN =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.BioC.xml";
-	private @Value("${tfm.training.ner.in.test.pubtator}")		String TRAIN_NER_IN_PUBTATOR_TEST =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.PubTator.txt";
-	private @Value("${tfm.training.ner.in.test.bioc}")			String TRAIN_NER_IN_BIOC_TEST =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.BioC.xml";
-	private @Value("${tfm.training.ner.in.model.pos}")			String TRAIN_NER_IN_POS_MODEL =		"pos_anc_en_2.0.2_2.4_1556659930154";
-	private @Value("${tfm.training.ner.in.model.bert}")			String TRAIN_NER_IN_BERT_MODEL =	"bert_base_cased_en_2.2.0_2.4_1566671427398";
-	private @Value("${tfm.training.ner.in.model.ner}")			String TRAIN_NER_IN_NER_MODEL =		"ner_dl_bert_base_cased_en_2.2.0_2.4_1567854461249";
+	private @Value("${tfm.conll2003.in.model.pos}")				String CONLL2003_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
+	private @Value("${tfm.conll2003.in.model.bert}")			String CONLL2003_IN_BERT_MODEL =			"bert_base_cased_en_2.2.0_2.4_1566671427398";
+	private @Value("${tfm.conll2003.in.model.ner}")				String CONLL2003_IN_NER_MODEL =				"ner_dl_bert_base_cased_en_2.2.0_2.4_1567854461249";
+	private @Value("${tfm.mutations.in.train.pubtator}")		String MUTATIONS_PUBTATOR_TRAIN_DATASET =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.PubTator.txt";
+	private @Value("${tfm.mutations.in.test.pubtator}")			String MUTATIONS_PUBTATOR_TEST_DATASET =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.PubTator.txt";
+	private @Value("${tfm.mutations.in.train.bioc}")			String MUTATIONS_BIOC_TRAIN_DATASET =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.BioC.xml";
+	private @Value("${tfm.mutations.in.test.bioc}")				String MUTATIONS_BIOC_TEST_DATASET =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.BioC.xml";
 	
-	private @Value("${tfm.training.ner.out.mantain-iob}")		Boolean TRAIN_NER_OUT_GEN_IOB =		false;
-	private @Value("${tfm.training.ner.out.directory}")			String TRAIN_NER_OUT_DIRECTORY =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
-	private @Value("${tfm.training.ner.out.train_txt.conll}")	String TRAIN_NER_OUT_TXT_TRAIN =	"ner_txt_train.conll";
-	private @Value("${tfm.training.ner.out.test_txt.conll}")	String TRAIN_NER_OUT_TXT_TEST =		"ner_txt_test.conll";
-	private @Value("${tfm.training.ner.out.train_bioc.conll}")	String TRAIN_NER_OUT_BIOC_TRAIN =	"ner_bioc_train.conll";
-	private @Value("${tfm.training.ner.out.test_bioc.conll}")	String TRAIN_NER_OUT_BIOC_TEST =	"ner_bioc_test.conll";
-	private @Value("${tfm.training.ner.out.txt.model}")			String TRAIN_NER_OUT_TXT_MODEL =	"tfm_ner_txt_1.0.0";
-	private @Value("${tfm.training.ner.out.bioc.model}")		String TRAIN_NER_OUT_BIOC_MODEL =	"tfm_ner_bioc_1.0.0";
+	private @Value("${tfm.conll2003.out.directory}")			String CONLL2003_OUT_DIRECTORY =			"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
+	private @Value("${tfm.conll2003.out.mantain-iob}")			Boolean CONLL2003_OUT_MANTAIN_IOB =			false;
+	private @Value("${tfm.mutations.out.train.pubtator.conll}")	String MUTATIONS_PUBTATOR_TRAIN_CONLL =		"mutations_pubtator_train.conll";
+	private @Value("${tfm.mutations.out.test.pubtator.conll}")	String MUTATIONS_PUBTATOR_TEST_CONLL =		"mutations_pubtator_test.conll";
+	private @Value("${tfm.mutations.out.train.bioc.conll}")		String MUTATIONS_BIOC_TRAIN_CONLL =			"mutations_bioc_train.conll";
+	private @Value("${tfm.mutations.out.test.bioc.conll}")		String MUTATIONS_BIOC_TEST_CONLL =			"mutations_bioc_train.conll";
+	
+	private @Value("${tfm.mutations.in.model.pos}")				String MUTATIONS_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
+	private @Value("${tfm.mutations.in.model.bert}")			String MUTATIONS_IN_BERT_MODEL =			"uncased_L-24_H-1024_A-16_M-128_B-32";
+	private @Value("${tfm.mutations.out.pubtator.model.ner}")	String MUTATIONS_FROM_PUBTATOR_NER_MODEL =	"tfm_ner_pubtator_1.0.0-uncased_L-24_H-1024_A-16_M-128_B-32";
+	private @Value("${tfm.mutations.out.bioc.model.ner}")		String MUTATIONS_FROM_BIOC_NER_MODEL =		"tfm_ner_bioc_1.0.0_uncased_L-24_H-1024_A-16_M-128_B-32";
 
 	public void trainModel(SparkSession spark) {
 		
 		trainModel(
 				spark,
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TRAIN), 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TEST), 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_MODEL),
-				TRAIN_NER_IN_BERT_MODEL);
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TRAIN_CONLL), 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TEST_CONLL), 
+				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_PUBTATOR_NER_MODEL),
+				MUTATIONS_IN_POS_MODEL,
+				MUTATIONS_IN_BERT_MODEL);
 		
 		trainModel(
 				spark,
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TRAIN), 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TEST), 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_MODEL),
-				TRAIN_NER_IN_BERT_MODEL);
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TRAIN_CONLL), 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TEST_CONLL), 
+				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_BIOC_NER_MODEL),
+				MUTATIONS_IN_POS_MODEL,
+				MUTATIONS_IN_BERT_MODEL);
 		
 	}
 	
-	public void prepareDataForTraining(SparkSession spark) {
+	public void prepareCoNLL2003DataForTraining(SparkSession spark) {
 
-		prepareDataForTrainingFromPubtator(
+		prepareCoNLL2003DataForTrainingFromPubtator(
 				spark,
-				TRAIN_NER_IN_TXT_TRAIN, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TRAIN),
-				TRAIN_NER_IN_BERT_MODEL,
-				TRAIN_NER_IN_NER_MODEL,
-				TRAIN_NER_OUT_GEN_IOB);
+				MUTATIONS_PUBTATOR_TRAIN_DATASET, 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TRAIN_CONLL),
+				CONLL2003_IN_BERT_MODEL,
+				CONLL2003_IN_NER_MODEL,
+				CONLL2003_OUT_MANTAIN_IOB);
 		
-		prepareDataForTrainingFromPubtator(
+		prepareCoNLL2003DataForTrainingFromPubtator(
 				spark,
-				TRAIN_NER_IN_PUBTATOR_TEST, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_TXT_TEST),
-				TRAIN_NER_IN_BERT_MODEL,
-				TRAIN_NER_IN_NER_MODEL,
-				TRAIN_NER_OUT_GEN_IOB);
+				MUTATIONS_PUBTATOR_TEST_DATASET, 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TEST_CONLL),
+				CONLL2003_IN_BERT_MODEL,
+				CONLL2003_IN_NER_MODEL,
+				CONLL2003_OUT_MANTAIN_IOB);
 		
-		prepareDataForTrainingFromBioc(
+		prepareCoNLL2003DataForTrainingFromBioc(
 				spark,
-				TRAIN_NER_IN_BIOC_TRAIN, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TRAIN),
-				TRAIN_NER_IN_BERT_MODEL,
-				TRAIN_NER_IN_NER_MODEL,
-				TRAIN_NER_OUT_GEN_IOB);
+				MUTATIONS_BIOC_TRAIN_DATASET, 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TRAIN_CONLL),
+				CONLL2003_IN_BERT_MODEL,
+				CONLL2003_IN_NER_MODEL,
+				CONLL2003_OUT_MANTAIN_IOB);
 		
-		prepareDataForTrainingFromBioc(
+		prepareCoNLL2003DataForTrainingFromBioc(
 				spark,
-				TRAIN_NER_IN_BIOC_TEST, 
-				FilenameUtils.concat(TRAIN_NER_OUT_DIRECTORY, TRAIN_NER_OUT_BIOC_TEST),
-				TRAIN_NER_IN_BERT_MODEL,
-				TRAIN_NER_IN_NER_MODEL,
-				TRAIN_NER_OUT_GEN_IOB);
+				MUTATIONS_BIOC_TEST_DATASET, 
+				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TEST_CONLL),
+				CONLL2003_IN_BERT_MODEL,
+				CONLL2003_IN_NER_MODEL,
+				CONLL2003_OUT_MANTAIN_IOB);
 
 	}
 
@@ -156,17 +161,24 @@ public class TrainService {
 		}
 		return result;
 	}
-	public void trainModel(SparkSession spark, String trainfile, String testfile, String outdir, String bertmodel) {
+	public void trainModel(SparkSession spark, String trainfile, String testfile, String outdir, String posmodel, String bertmodel) {
 		
 		Path outdirname = Paths.get(outdir);
 		Path filename = Paths.get(trainfile);
 		
+		File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
+		if (	StringUtils.isBlank(bertmodel) ||
+				(posmodelDirectory == null) || 
+				!posmodelDirectory.exists() || 
+				!posmodelDirectory.isDirectory()) 
+			posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
+
 		File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
 		if (	StringUtils.isBlank(bertmodel) ||
 				(bertmodelDirectory == null) || 
 				!bertmodelDirectory.exists() || 
 				!bertmodelDirectory.isDirectory()) 
-			bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
+			bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
 		
 		try {
 			boolean result = TrainRepository.trainFromConll(
@@ -175,7 +187,7 @@ public class TrainService {
 					testfile, 
 					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".csv", 
 					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
-					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
+					posmodelDirectory.getAbsolutePath(),
 					bertmodelDirectory.getAbsolutePath(), 
 					outdir,
 					getMaxSentence(bertmodel),
@@ -202,7 +214,7 @@ public class TrainService {
 	 * @param nermodel  El modelo NER
 	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
 	 */
-	public void prepareDataForTrainingFromBioc(
+	public void prepareCoNLL2003DataForTrainingFromBioc(
 			SparkSession spark, 
 			String infile, 
 			String outfile, 
@@ -219,20 +231,20 @@ public class TrainService {
 					(bertmodelDirectory == null) || 
 					!bertmodelDirectory.exists() || 
 					!bertmodelDirectory.isDirectory()) 
-				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
+				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
 
 			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
 			if (	StringUtils.isBlank(nermodel) ||
 					(nermodelDirectory == null) || 
 					!nermodelDirectory.exists() || 
 					!nermodelDirectory.isDirectory()) 
-				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL)).toFile();
+				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
 			
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new TmBiocXmlProcessor(filename), 
 					infile, 
-					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
+					FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
 					nermodelDirectory.getAbsolutePath(),
 					outfile,
@@ -262,7 +274,7 @@ public class TrainService {
 	 * @param nermodel  El modelo NER
 	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
 	 */
-	public void prepareDataForTrainingFromPubtator(
+	public void prepareCoNLL2003DataForTrainingFromPubtator(
 			SparkSession spark, 
 			String infile, 
 			String outfile, 
@@ -279,20 +291,20 @@ public class TrainService {
 					(bertmodelDirectory == null) || 
 					!bertmodelDirectory.exists() || 
 					!bertmodelDirectory.isDirectory()) 
-				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, TRAIN_NER_IN_BERT_MODEL)).toFile();
+				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
 
 			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
 			if (	StringUtils.isBlank(nermodel) ||
 					(nermodelDirectory == null) || 
 					!nermodelDirectory.exists() || 
 					!nermodelDirectory.isDirectory()) 
-				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_IN_NER_MODEL)).toFile();
+				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
 			
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
 					new TmVarTxtProcessor(filename), 
 					infile, 
-					FilenameUtils.concat(POS_DIRECTORY, TRAIN_NER_IN_POS_MODEL),
+					FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL),
 					bertmodelDirectory.getAbsolutePath(), 
 					nermodelDirectory.getAbsolutePath(),
 					outfile,

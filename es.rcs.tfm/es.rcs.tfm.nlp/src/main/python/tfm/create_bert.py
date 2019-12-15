@@ -4,7 +4,7 @@
 # ms-python.python added
 import os
 try:
-	os.chdir(os.path.join(os.getcwd(), 'es.rcs.tfm.nlp/src/main/python/tfm'))
+	os.chdir(os.path.join(os.getcwd(), '/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.nlp/src/main/python/tfm'))
 	print(os.getcwd())
 except:
 	pass
@@ -30,7 +30,12 @@ import sparknlp
 import time
 import zipfile
 
-CORPUS_PATH="../../../../es.rcs.tfm.corpus/"
+CORPUS_PATH="/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/"
+DATASET_PATH=CORPUS_PATH + "datasets/"
+BERT_PATH=DATASET_PATH + 'bert/'
+BIOBERT_PATH=DATASET_PATH + 'biobert/'
+
+SPARKNLP_BERT_MODEL_PATH=CORPUS_PATH+ "models/bert"
 
 
 # %%
@@ -43,19 +48,20 @@ spark.version
 
 
 # %%
-def download_model(url, name):
+def download_model(url, destination_bert_folder, name):
     import os
     from pathlib import Path
     import urllib.request
     import zipfile
-    zip_file = CORPUS_PATH + 'models/bert/' + name + ".zip"
+    model_name = destination_bert_folder + name
+    zip_file = model_name + ".zip"
     if not Path(zip_file).is_file():
-        print("Downloading " + url)
+        print("Downloading " + url + " to " + str(Path(zip_file).resolve()))
         urllib.request.urlretrieve(url, zip_file)
-    if not os.path.exists(CORPUS_PATH + 'models/bert/' + name):
-        print("Unziping ")
+    if not Path(model_name).exists():
+        print("Unziping " + str(Path(zip_file).resolve()) + " to " + str(Path(model_name).resolve()))
         zip_ref = zipfile.ZipFile(zip_file, 'r')
-        zip_ref.extractall(CORPUS_PATH + 'models/bert/')
+        zip_ref.extractall(destination_bert_folder)
         zip_ref.close()
 
 '''
@@ -73,11 +79,22 @@ def get_service_token_ids(source_bert_folder):
 '''
 
 def create_model(source_bert_folder, export_dir, max_sentence_length = 128, batch_size = 32):
+
+    from pathlib import Path
+
+    # if not os.path.exists(dst_folder):
+    #     os.makedirs(dst_folder)
+    if not Path(source_bert_folder).exists():
+        print("Vamos mal")
+    print("Esto no va mal")
+ 
     tf.reset_default_graph()
     is_cased = 'uncased' not in source_bert_folder.lower()
-    print("source_bert_folder: {}".format(source_bert_folder))
+    string = str(Path(source_bert_folder).resolve())
+    print("source_bert_folder: {}".format(string))
     print("is_cased: {}".format(is_cased))
     print("lowercase: {}".format(not is_cased))
+
     resolver = BertEmbeddingsResolver(source_bert_folder, max_sentence_length, lowercase = not is_cased)
     saver = NerModelSaver(resolver, None)
     saver.save_models(export_dir)
@@ -95,17 +112,26 @@ def create_model(source_bert_folder, export_dir, max_sentence_length = 128, batc
     return model
 
 
-def download_and_convert(url, name, max_sentence_length = 128, batch_size = 32, dst_folder = CORPUS_PATH + 'models/bert'):
-    if not os.path.exists(dst_folder):
-        os.makedirs(dst_folder)
-    download_model(url, name)
-    model = create_model(CORPUS_PATH + 'models/bert/' + name, CORPUS_PATH + 'models/bert/' + name + '_export_dir', max_sentence_length, batch_size)
+def download_and_convert(url, name, max_sentence_length = 128, batch_size = 32, destination_model_folder = SPARKNLP_BERT_MODEL_PATH):
+
+    from pathlib import Path
+
+    # if not os.path.exists(dst_folder):
+    #     os.makedirs(dst_folder)
+    if not Path(destination_model_folder).exists():
+        os.makedirs(destination_model_folder)
+
+    download_model(url, BERT_PATH, name)
+
+    bert_name = BERT_PATH + name
+    model = create_model(bert_name, bert_name + '_export_dir_tmp', max_sentence_length, batch_size)
     # Remove but it's possible to use this model
-    shutil.rmtree(CORPUS_PATH + 'models/bert/' + name + '_export_dir')
+    shutil.rmtree(bert_name + '_export_dir_tmp')
     # shutil.rmtree(name)
+
     final_model_name = name + '_M-{}'.format(max_sentence_length) + '_B-{}'.format(batch_size)
-    model.write().overwrite().save(os.path.join(dst_folder, final_model_name))
-    print("BERT model has been saved: {}".format(dst_folder+'/'+final_model_name))
+    model.write().overwrite().save(os.path.join(destination_model_folder, final_model_name))
+    print("SPARKNLP BERT model has been saved: {}".format(destination_model_folder+'/'+final_model_name))
     return model
 
 # %% [markdown]
@@ -114,49 +140,49 @@ def download_and_convert(url, name, max_sentence_length = 128, batch_size = 32, 
 # %%
 # 1. Base uncased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip'
-name = 'bert_base_uncased_L-12_H-768_A-12'
+name = 'uncased_L-12_H-768_A-12'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 2. Large uncased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zip'
-name = 'bert_base_uncased_L-24_H-1024_A-16'
+name = 'uncased_L-24_H-1024_A-16'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 3. Base cased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/cased_L-12_H-768_A-12.zip'
-name = 'bert_base_cased_L-12_H-768_A-12'
+name = 'cased_L-12_H-768_A-12'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 4. Large cased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/cased_L-24_H-1024_A-16.zip'
-name = 'bert_base_cased_L-24_H-1024_A-16'
+name = 'cased_L-24_H-1024_A-16'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 5. Multilingual Cased (New, recommended)
 url = 'https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip'
-name = 'bert_base_multi_cased_L-12_H-768_A-12'
+name = 'multi_cased_L-12_H-768_A-12'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 6. Large uncased
 url = 'https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip'
-name = 'bert_large_uncased_L-24_H-1024_A-16'
+name = 'wwm_uncased_L-24_H-1024_A-16'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
 # 7. Large cased
 url = 'https://storage.googleapis.com/bert_models/2019_05_30/wwm_cased_L-24_H-1024_A-16.zip'
-name = 'bert_large_cased_L-24_H-1024_A-16'
+name = 'wwm_cased_L-24_H-1024_A-16'
 download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
 
 
@@ -165,15 +191,16 @@ print('All generated models are inside "models/" directory')
 
 
 # %%
-def convert(name, max_sentence_length = 128, batch_size = 32, dst_folder = CORPUS_PATH + 'models/bert'):
-    if not os.path.exists(dst_folder):
-        os.makedirs(dst_folder)
-    model = create_model(CORPUS_PATH + 'datasets/biobert/' + name, CORPUS_PATH + 'model/bert/' + name + '_export_dir', max_sentence_length, batch_size)
+def convert(name, max_sentence_length = 128, batch_size = 32, destination_model_folder = SPARKNLP_BERT_MODEL_PATH):
+
+    model = create_model(BIOBERT_PATH + name, BERT_PATH + name + '_export_dir', max_sentence_length, batch_size)
     # Remove but it's possible to use this model
-    shutil.rmtree(CORPUS_PATH + 'model/bert/' + name + '_export_dir')
+    shutil.rmtree(BERT_PATH + name + '_export_dir')
+
     final_model_name = name + '_M-{}'.format(max_sentence_length) + '_B-{}'.format(batch_size)
-    model.write().overwrite().save(os.path.join(dst_folder, final_model_name))
-    print("BERT model has been saved: {}".format(dst_folder+'/'+final_model_name))
+    model.write().overwrite().save(os.path.join(destination_model_folder, final_model_name))
+    print("SPARKNLP BERT model has been saved: {}".format(destination_model_folder+'/'+final_model_name))
+
     return model
 
 # %% [markdown]
@@ -188,11 +215,17 @@ def convert(name, max_sentence_length = 128, batch_size = 32, dst_folder = CORPU
 # - embeddings_resolver.py requiere que el modelo se denomine internamente bert_model.ckpt
 
 # %%
-name = 'biobert_v1.1_pubmed_bert'
+name = 'biobert_v1.1_pubmed'
 convert(name, max_sentence_length = 128, batch_size = 32)
 
 
 # %%
+# Create Graph
+from create_models import create_graph
+
+create_graph(BERT_PATH, True, 14, 1024, 62)
 
 
 
+
+# %%

@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.train.services;
+package es.rcs.tfm.srv.services.train;
 
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
@@ -24,11 +24,11 @@ import es.rcs.tfm.srv.SrvNames;
 				SrvNames.SPARK_SESSION_TRAIN,
 				SrvNames.TRAINING_SRVC})
 @Scope("prototype")
-public class TrainNerFromConllTask extends Thread{
+public class TrainNerFromCoNLL2003Task extends Thread{
 
-	private static final Logger LOG = LoggerFactory.getLogger(TrainNerFromConllTask.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TrainNerFromCoNLL2003Task.class);
 
-	public TrainNerFromConllTask() {
+	public TrainNerFromCoNLL2003Task() {
 		super();
 		this.setName(SrvNames.TRAIN_NER_MODEL_TASK);
 	}

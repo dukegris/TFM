@@ -3,9 +3,11 @@ import numpy as np
 import plyvel
 import os.path
 import sys
+import tensorflow as tf
 
-from bert.modeling import *
-from bert.tokenization import *
+from bert.modeling import BertConfig
+from bert.modeling import BertModel
+from bert.tokenization import FullTokenizer
 
 import json
 import os.path

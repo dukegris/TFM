@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.train.services;
+package es.rcs.tfm.srv.services.train;
 
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
@@ -22,11 +22,11 @@ import es.rcs.tfm.srv.SrvNames;
 		SrvNames.SPARK_SESSION_TRAIN,
 		SrvNames.TRAINING_SRVC})
 @Scope("prototype")
-public class PrepareNerConllFromTxtTask extends Thread{
+public class PrepareCoNLL2003Task extends Thread{
 
-	private static final Logger LOG = LoggerFactory.getLogger(PrepareNerConllFromTxtTask.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PrepareCoNLL2003Task.class);
 
-	public PrepareNerConllFromTxtTask() {
+	public PrepareCoNLL2003Task() {
 		super();
 		this.setName(SrvNames.PREPARE_CONLL_FROM_TXT_TASK);
 	}
@@ -34,7 +34,7 @@ public class PrepareNerConllFromTxtTask extends Thread{
 	@Override
 	public void run() {
 		LOG.info("PREPARE DATA START");
-		train.prepareDataForTraining(spark);
+		train.prepareCoNLL2003DataForTraining(spark);
 		LOG.info("PREPARE DATA END");
 	}
 
