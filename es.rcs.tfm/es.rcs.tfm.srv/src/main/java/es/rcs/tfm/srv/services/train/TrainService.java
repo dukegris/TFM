@@ -35,6 +35,7 @@ public class TrainService {
 	private @Value("${tfm.model.pos.directory}")				String POS_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
 	private @Value("${tfm.model.bert.directory}")				String BERT_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
 	private @Value("${tfm.model.ner.directory}")				String NER_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
+	private @Value("${tfm.model.tensorflow.directory}")			String TENSORFLOW_DIRECTORY =				"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow";
 
 	private @Value("${tfm.conll2003.in.model.pos}")				String CONLL2003_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
 	private @Value("${tfm.conll2003.in.model.bert}")			String CONLL2003_IN_BERT_MODEL =			"bert_base_cased_en_2.2.0_2.4_1566671427398";
@@ -64,7 +65,8 @@ public class TrainService {
 				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TEST_CONLL), 
 				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_PUBTATOR_NER_MODEL),
 				MUTATIONS_IN_POS_MODEL,
-				MUTATIONS_IN_BERT_MODEL);
+				MUTATIONS_IN_BERT_MODEL,
+				TENSORFLOW_DIRECTORY);
 		
 		trainModel(
 				spark,
@@ -72,7 +74,8 @@ public class TrainService {
 				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TEST_CONLL), 
 				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_BIOC_NER_MODEL),
 				MUTATIONS_IN_POS_MODEL,
-				MUTATIONS_IN_BERT_MODEL);
+				MUTATIONS_IN_BERT_MODEL,
+				TENSORFLOW_DIRECTORY);
 		
 	}
 	
@@ -161,13 +164,20 @@ public class TrainService {
 		}
 		return result;
 	}
-	public void trainModel(SparkSession spark, String trainfile, String testfile, String outdir, String posmodel, String bertmodel) {
+	public void trainModel(
+			SparkSession spark, 
+			String trainfile, 
+			String testfile, 
+			String outdir, 
+			String posmodel, 
+			String bertmodel,
+			String tensorflowmodel) {
 		
 		Path outdirname = Paths.get(outdir);
 		Path filename = Paths.get(trainfile);
 		
 		File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
-		if (	StringUtils.isBlank(bertmodel) ||
+		if (	StringUtils.isBlank(posmodel) ||
 				(posmodelDirectory == null) || 
 				!posmodelDirectory.exists() || 
 				!posmodelDirectory.isDirectory()) 
@@ -179,6 +189,13 @@ public class TrainService {
 				!bertmodelDirectory.exists() || 
 				!bertmodelDirectory.isDirectory()) 
 			bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+
+		File tensorflowmodelDirectory = Paths.get(tensorflowmodel).toFile();
+		if (	StringUtils.isBlank(bertmodel) ||
+				(bertmodelDirectory == null) || 
+				!bertmodelDirectory.exists() || 
+				!bertmodelDirectory.isDirectory()) 
+			tensorflowmodelDirectory = Paths.get(TENSORFLOW_DIRECTORY).toFile();
 		
 		try {
 			boolean result = TrainRepository.trainFromConll(
@@ -189,6 +206,7 @@ public class TrainService {
 					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
 					posmodelDirectory.getAbsolutePath(),
 					bertmodelDirectory.getAbsolutePath(), 
+					tensorflowmodelDirectory.getAbsolutePath(), 
 					outdir,
 					getMaxSentence(bertmodel),
 					getDimension(bertmodel),

@@ -21,12 +21,12 @@ import org.apache.spark.ml.{Pipeline, PipelineModel}
 import scala.collection.{JavaConversions, JavaConverters}
 import scala.collection.mutable.WrappedArray
 import scala.util.matching.Regex
-import es.rcs.tfm.nlp.util.TfmType
+import es.rcs.tfm.nlp.model.TfmType
 
 /**
  * 
  */
-class NerPrepare(
+class NerPipeline(
     sc: SparkContext, 
     spark: SparkSession, 
     posModelDirectory: String, 
@@ -37,7 +37,7 @@ class NerPrepare(
     batchSize: Integer = 32,
     caseSensitive: Boolean = false) {
     
-  println(java.time.LocalTime.now + ": ner prepare constructor")
+  println(java.time.LocalTime.now + ": NER-PIPELINE constructor")
 
   import spark.implicits._
   val emptyData = spark.emptyDataset[String].toDF(TfmType.TEXT)
@@ -47,37 +47,36 @@ class NerPrepare(
 
   val model = pipeline.fit(emptyData)
 
-  println(java.time.LocalTime.now + ": ner prepare constructor created")
+  println(java.time.LocalTime.now + ": NER-PIPELINE constructor created")
 
+  
  	/**
    * Ejecuta un pipeline sobre un dataset con una columna denominada text
    * @param rows El dataset
    * @param structType La estructura de datos
    * @return Un dataset etiquetado con document, sentences, token, pos, word_embedding, named_entity, ner_chunk, sus finished y sus finished metadata
    */
-  def execute(rows: List[Row], structType: StructType, pipelineModelDirectory: String): DataFrame = {
+  def execute(
+      rows: List[Row], 
+      structType: StructType, 
+      pipelineModelDirectory: String): DataFrame = {
     
-    println(java.time.LocalTime.now + ": ner prepare execute init")
+    println(java.time.LocalTime.now + ": NER-PIPELINE execute init")
     
     val data = spark.createDataFrame(
         rows, 
         structType)
 
-    //model.write.overwrite().save(pipelineModelDirectory)
-    //val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
-    //println(java.time.LocalTime.now + ": execute transform")
-    //java.lang.IllegalArgumentException: Input to reshape is a tensor with 15728640 values, but the requested shape has 983040
-	  //   [[{{node bert/embeddings/Reshape}} = Reshape[T=DT_FLOAT, Tshape=DT_INT32, _device="/job:localhost/replica:0/task:0/device:CPU:0"](bert/embeddings/embedding_lookup, bert/embeddings/Reshape/shape)]]
-    //val result = loadedModel.transform(data)
-
-    println(java.time.LocalTime.now + ": ner prepare execute df created")
+    println(java.time.LocalTime.now + ": NER-PIPELINE execute df created")
     
     val result = model.transform(data)
 
-    println(java.time.LocalTime.now + ": ner prepare execute transformed")
+    println(java.time.LocalTime.now + ": NER-PIPELINE execute transformed")
+    
     result
     
   }
+  
   
   def createPipelineStagesDl() = {
     
@@ -94,6 +93,7 @@ class NerPrepare(
     val token = new Tokenizer().
     	setInputCols(Array(TfmType.SENTENCES)).
     	setOutputCol(TfmType.TOKEN)
+    	
     /*
     val stemmer = new Stemmer().
     	setInputCols(TfmType.TOKEN).

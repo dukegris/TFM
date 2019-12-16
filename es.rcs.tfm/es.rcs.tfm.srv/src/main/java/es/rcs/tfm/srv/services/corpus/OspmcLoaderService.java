@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.corpus.services;
+package es.rcs.tfm.srv.services.corpus;
 
 import java.util.Arrays;
 import java.util.List;
@@ -87,43 +87,43 @@ public class OspmcLoaderService {
 							f.getName()).
 						stream()).
 			// Comprobar si se requiere descargar
-			map (f->
-					corpusSrvc.isProcessNeeded(f)).
+			peek (f->
+					corpusSrvc.calculateIfTheProcessIsNeeded(f)).
 			// Descargar ficheros
-			map(f -> 
-					SOLO_GZIP_PTRN.matcher(f.getGzFichero()).find() &&
-					f.isHayCambiosEnDisco() 
-						? CorpusService.download(
-							FPT_HOST, FTP_PORT, 
-							FTP_USERNAME, FTP_PASSWORD, 
-							FTP_BASELINE, 
-							CORPUS_PMC_GZIP_DIRECTORY,
-							CORPUS_PMC_TAR_DIRECTORY,
-							f) 
-						: f).
+			peek(f -> {
+					if (	SOLO_GZIP_PTRN.matcher(f.getGzFichero()).find() &&
+							f.isHayCambiosEnDisco()) CorpusService.download(
+						FPT_HOST, FTP_PORT, 
+						FTP_USERNAME, FTP_PASSWORD, 
+						FTP_BASELINE, 
+						CORPUS_PMC_GZIP_DIRECTORY,
+						CORPUS_PMC_TAR_DIRECTORY,
+						f); 
+					}).
 			// Actualizar datos de los ficheros en DB
-			map(f -> 
-					f.isHayCambiosEnBD() ? corpusSrvc.updateDb(f) : f)
+			peek(f -> {
+					if (	f.isHayCambiosEnBD()) corpusSrvc.updateDb(f); })
 			;
 
 		Stream<Articulo> articulosStream = ficherosStream.
-				// Procesar XML con articulos
-				flatMap(f -> 
-						f.isHayCambiosEnDisco() && 
-						(f.getArticulos() != null) &&
-						(!f.getArticulos().isEmpty())
-							? f.getArticulos().stream() 
-							: null).
-				//Comprobar si se requiere descargar
-				map (a->
-						corpusSrvc.isProcessNeeded(a)).
-				// Actualizar datos de los ficheros en DB
-				map(a -> 
-						a.isHayCambiosEnBD() ? corpusSrvc.updateDb(a) : a).
-				// Actualizar datos de los ficheros en el indice
-				map(a -> 
-						a.isHayCambiosEnBD() ? corpusSrvc.updateIdx(a) : a)
-				;
+			filter(f -> 
+					f.isHayCambiosEnDisco() && 
+					(f.getArticulos() != null) &&
+					(!f.getArticulos().isEmpty())
+			).
+			// Procesar XML con articulos
+			flatMap(f -> 
+					f.getArticulos().stream()).
+			//Comprobar si se requiere descargar
+			map (a->
+					corpusSrvc.calculateIfTheProcessIsNeeded(a)).
+			// Actualizar datos de los ficheros en DB
+			peek(a -> {
+					if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);}).
+			// Actualizar datos de los ficheros en el indice
+			peek(a -> {
+					if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);})
+			;
 
 //		List<Fichero> f = ficherosStream.collect(Collectors.toList());
 		List<Articulo> a = articulosStream.collect(Collectors.toList());

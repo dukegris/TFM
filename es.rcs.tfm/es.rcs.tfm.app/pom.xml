@@ -15,8 +15,13 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
+	
+	<properties>
+		<mainclass>es.rcs.tfm.main.AppBoot</mainclass>
+		<mainclass>CommandTool</mainclass>
+	</properties>
 
 	<dependencies>
 	
@@ -26,43 +31,43 @@
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Idx</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Db</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Nlp</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Srv</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Api</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Spa</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Web</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -324,6 +329,12 @@
 			<artifactId>spark-nlp_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.johnsnowlabs.nlp</groupId>
+			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
+			<version>2.2.2</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 LOGGER
@@ -379,7 +390,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>CommandTool</mainClass>
+							<mainClass>${mainclass}</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

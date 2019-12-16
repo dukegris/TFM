@@ -11,8 +11,36 @@ public class AppNames {
 	public static final String APP_NAME = 						"TCS TFM Web App";
 	public static final String APP_CONFIG = 					"taoConfig";
 	public static final String APP_CONFIG_PKG = 				"es.rcs.tfm.main.config";
+	public static final String APP_COMPONENTS_PKG = 			"es.rcs.tfm.main.components";
 	public static final String APP_PROPERTIES_LOADER = 			"taoPropertiesLoader";
 	public static final String APP_MESSAGES_LOADER = 			"taoMessagesLoader";
+
+	public static final String APP_PRODUCTION = 				"production";
+	public static final String APP_TEST = 						"test";
+	public static final String APP_DEVELOPMENT = 				"deveopment";
+
+	// -------------------------------------------------------------------------------------
+	// APP: SHELL
+	public static final String APP_SHELL = 						"taoShell";
+	public static final String BIOC =							"BIOC";
+	public static final String PUBTATOR =						"PUBTATOR";
+	public static final String APP_TRAIN_COMMAND = 				"taoTrainCommand";
+	public static final String APP_CONLL_COMMAND = 				"taoConllCommand";
+	public static final String APP_DOWNLOAD_COMMAND = 			"taoDownloadCommand";
+	public static final String APP_HELP_COMMAND = 				"taoHelpCommand";
+
+	// -------------------------------------------------------------------------------------
+	// APP: SHELL EXIT CODES
+	public static final int OK =								0;
+	
+	public static final int GENERATE_INVALID_FILE =				1;
+	public static final int GENERATE_INVALID_TYPE =				2;
+	public static final int GENERATE_START_FAILED =				99;
+	
+	public static final int TRAIN_INVALID_TRAIN_FILE =			3;
+	public static final int TRAIN_INVALID_TEST_FILE =			4;
+	public static final int TRAIN_INVALID_DIRECTORY =			5;
+	public static final int TRAIN_START_FAILED =				98;
 
 	// -------------------------------------------------------------------------------------
 	// J2EE: WEB SERVER

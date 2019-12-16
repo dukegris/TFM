@@ -8,15 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.srv.SrvNames;
-import es.rcs.tfm.srv.components.PrepareNerConllFromTxtTask;
-import es.rcs.tfm.srv.components.TrainNerFromConllTask;
-import es.rcs.tfm.srv.services.OspmcLoaderService;
-import es.rcs.tfm.srv.services.PubmedLoaderService;
+import es.rcs.tfm.srv.services.corpus.OspmcLoaderService;
+import es.rcs.tfm.srv.services.corpus.PubmedLoaderService;
+import es.rcs.tfm.srv.services.train.PrepareCoNLL2003Task;
+import es.rcs.tfm.srv.services.train.TrainNerFromCoNLL2003Task;
 
 @EnableScheduling
 @DependsOn(value = {
@@ -28,13 +29,22 @@ public class QuartzConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QuartzConfig.class);
 
+	@Profile( AppNames.APP_PRODUCTION )
 	@Scheduled(
-	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
-			cron = "0 0 4 * * SUN-SAT")
+			cron = "0 */1 * * * SUN-SAT") // Cada minuto
+			//cron = "0 0 4 * * SUN-SAT")
+	public void loadPubmedNewDataProduction() {
+		pubmedLoader.doLoadNewData();
+	}
+
+	@Profile( AppNames.APP_DEVELOPMENT )
+	@Scheduled(
+			cron = "0 */1 * * * SUN-SAT") // Cada minuto
 	public void loadPubmedNewData() {
 		pubmedLoader.doLoadNewData();
 	}
 
+	
 	@Scheduled(
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			cron = "0 0 0 * * SUN-SAT")
@@ -97,10 +107,10 @@ public class QuartzConfig {
 	
 	@Autowired
 	@Qualifier(value = SrvNames.PREPARE_CONLL_FROM_TXT_TASK)
-	private PrepareNerConllFromTxtTask prepareNerConllFromTxtTask;
+	private PrepareCoNLL2003Task prepareNerConllFromTxtTask;
 	
 	@Autowired
 	@Qualifier(value = SrvNames.TRAIN_NER_MODEL_TASK)
-	private TrainNerFromConllTask trainNerFromConllTask;
+	private TrainNerFromCoNLL2003Task trainNerFromConllTask;
 	
 }

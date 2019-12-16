@@ -11,6 +11,7 @@ public class ApiNames {
 	// -------------------------------------------------------------------------------------
 	// TFM-API: CONFIGURACION
 	public static final String API_CONTROLLER_PKG = 			"es.rcs.tfm.api.controller";
+	public static final String API_REPOSITORY_PKG =				"es.rcs.tfm.api.repository";
 
 	// -------------------------------------------------------------------------------------
 	// TFM-API: SETUP

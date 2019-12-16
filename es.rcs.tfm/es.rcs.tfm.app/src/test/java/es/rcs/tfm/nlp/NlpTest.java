@@ -18,8 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.main.config.SparkConfig;
-import es.rcs.tfm.nlp.util.NerDLPipeline;
-import es.rcs.tfm.nlp.util.TestSpark;
+import es.rcs.tfm.nlp.repository.TestSpark;
 import es.rcs.tfm.nlp.util.TestSparkNLP;
 import scala.Tuple2;
 
@@ -76,9 +75,10 @@ public class NlpTest {
 	public void testTrain() {
 	
 		try {
-			
-			NerDLPipeline p = new NerDLPipeline(spark);
+			/*
+			NerPipeline p = new NerPipeline(spark);
 			p.test();
+			*/
 			
 		} catch (Exception ex) {
 			System.out.println("EX: " + ex.getLocalizedMessage());

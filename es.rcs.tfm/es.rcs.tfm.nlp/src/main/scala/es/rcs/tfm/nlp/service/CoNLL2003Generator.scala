@@ -7,7 +7,7 @@ import org.apache.spark.ml.param.{BooleanParam, Param, ParamMap, StringArrayPara
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
-import es.rcs.tfm.nlp.util.TfmType
+import es.rcs.tfm.nlp.model.TfmType
 
 /**
  * Clase encargada de mezclar en un fichero CONLL2003 el resultado de un 
@@ -17,14 +17,15 @@ import es.rcs.tfm.nlp.util.TfmType
  * @author raul
  *
  */
-class ConllWritter(spark: SparkSession) {
+class CoNLL2003Generator(spark: SparkSession) {
 
+  
   /**
    * Genera un dataset procesado por NerDL a formato CONLL2003 
    * @param data Datos a exportar
 	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo generico de NER
    */
-  def generateConll(data: DataFrame, mantainNerFromGenericModel: Boolean): DataFrame = {
+  def generate(data: DataFrame, mantainNerFromGenericModel: Boolean): DataFrame = {
     
     import data.sparkSession.implicits._ // for row casting
 
@@ -177,36 +178,6 @@ class ConllWritter(spark: SparkSession) {
             }
             coords = coords + " - (" + iob(0)._1 + ", " + iob(0)._2 + ")" + " encontradas " + iob.length + " notas"
 
-            /*
-            // CASO DE UNA MUTACION DESDOBLADA EN VARIOS NER
-            if     ((tupla._1._1 == iob(0)._1) && (tupla._1._2 + 1 <  iob(0)._2) ) {
-              enc = 1
-              str = "B-" + iob(0)._4
-            } else if((tupla._1._1 >  iob(0)._1) && (tupla._1._2 + 1 <  iob(0)._2) ) {
-              str = "I-" + iob(0)._4
-            } else if((tupla._1._1 >  iob(0)._1) && (tupla._1._2 + 1 == iob(0)._2) ) {
-              str = "E-" + iob(0)._4
-            // CASO DE UNA MUTACION COINCIDENTE CON UN NER
-            } else if((tupla._1._1 == iob(0)._1) && (tupla._1._2 + 1 == iob(0)._2) ) {
-              enc = 1
-              str = iob(0)._4
-            // CASO DE UNA MUTACION QUE ARRANCA CON UN NER
-            } else if((tupla._1._1 <= iob(0)._1) && (tupla._1._2 + 1 >= iob(0)._1) ) {
-              enc = 1
-              str = "B-" + iob(0)._4
-            // CASO DE UNA MUTACION QUE ACABA CON UN NER
-            } else if((tupla._1._1 <= iob(0)._2) && (tupla._1._2 + 1 >= iob(0)._2) ) {
-              str = "E-" + iob(0)._4
-            // CASO DE UNA MUTACION ASOCIADA A MAS TEXTO EN UN SOLO NER
-            } else if((tupla._1._1 <= iob(0)._1) && (tupla._1._2 + 1 >= iob(0)._2) ) {
-              enc = 1
-              str = iob(0)._4
-            // CASO DE UNA MUTACION ASOCIADA A MAS TEXTO EN UN SOLO NER
-            } else {
-              enc = 1
-              str = iob(0)._4
-            } 
-            */
           }
           
         }        	    
@@ -236,12 +207,13 @@ class ConllWritter(spark: SparkSession) {
     
   }
   
+  
   /**
    * Guarda un dataset procesado por NerDL a formato CONLL2003 
    * @param data Datos a exportar
    * @param outputPath Directorio destino de la exportacion
    */
-  def saveConll(data: DataFrame, outputPath: String): Double = {
+  def save(data: DataFrame, outputPath: String): Double = {
 
     println(java.time.LocalTime.now + ": saveConll")
 
@@ -301,6 +273,7 @@ class ConllWritter(spark: SparkSession) {
 
   }
 
+  
   // https://fullstackml.com/2015/12/21/how-to-export-data-frame-from-apache-spark/
   def saveDsToCsv(
       ds: Dataset[_], 

@@ -22,36 +22,18 @@ import es.rcs.tfm.main.config.SparkConfig;
 import es.rcs.tfm.nlp.NlpNames;
 import es.rcs.tfm.solr.IndexNames;
 import es.rcs.tfm.srv.SrvNames;
-import es.rcs.tfm.srv.services.TrainService;
+import es.rcs.tfm.srv.services.train.TrainService;
 import es.rcs.tfm.xml.XmlNames;
 
 @ComponentScan(basePackages = {
 		XmlNames.XML_CONFIG_PKG,
-		DbNames.DB_CONFIG_PKG,
-		IndexNames.IDX_CONFIG_PKG,
 		NlpNames.NLP_CONFIG_PKG,
-		SrvNames.SRV_CONFIG_PKG})
+		SrvNames.SRV_TRAIN_SERVICES_PKG})
 @ImportAutoConfiguration(classes = { 
-		DatabaseConfig.class,
-		SolrConfig.class,
 		SparkConfig.class })
 @Configuration(
 		AppNames.CMD_CONFIG)
 public class CommandTool {
-
-	private static final String BIOC =						"BIOC";
-	private static final String PUBTATOR =					"PUBTATOR";
-	
-	private static final int OK =							0;
-	
-	private static final int GENERATE_INVALID_FILE =		1;
-	private static final int GENERATE_INVALID_TYPE =		2;
-	private static final int GENERATE_START_FAILED =		99;
-	
-	private static final int TRAIN_INVALID_TRAIN_FILE =		3;
-	private static final int TRAIN_INVALID_TEST_FILE =		4;
-	private static final int TRAIN_INVALID_DIRECTORY =		5;
-	private static final int TRAIN_START_FAILED =			98;
 
 	private static Class<CommandTool> applicationClass = CommandTool.class;
 	private static AnnotationConfigApplicationContext context;
@@ -110,8 +92,10 @@ public class CommandTool {
 					String type = data[2];
 					String bertmodel = "";
 					String nermodel = "";
-					if (data.length>4) {
+					if (data.length>3) {
 						bertmodel = data[3];
+					}
+					if (data.length>4) {
 						nermodel = data[4];
 					}
 					result = tool.generate(infile, outfile, type, bertmodel, nermodel);
@@ -122,11 +106,19 @@ public class CommandTool {
 					String trainfile = data[0];
 					String testfile = data[1];
 					String outdir = data[2];
+					String posmodel = "";
 					String bertmodel = "";
+					String tfmodel = "";
 					if (data.length>3) {
-						bertmodel = data[3];
+						posmodel = data[3];
 					}
-					result = tool.train(trainfile, testfile, outdir, bertmodel);
+					if (data.length>4) {
+						bertmodel = data[4];
+					}
+					if (data.length>5) {
+						tfmodel = data[5];
+					}
+					result = tool.train(trainfile, testfile, outdir, posmodel, bertmodel, tfmodel);
 				}
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
@@ -141,22 +133,25 @@ public class CommandTool {
 		
 	}
 
-	private int train(String trainfile, String testfile, String outdir, String bertmodel) {
+	private int train(String trainfile, String testfile, String outdir, String posmodel, String bertmodel, String tfmodel) {
 
-		int result = OK;
+		int result = AppNames.OK;
 
 		File f = Paths.get(trainfile).toFile();
-		if (!f.exists() || !f.isFile()) result = TRAIN_INVALID_TRAIN_FILE;
+		if (!f.exists() || !f.isFile()) result = AppNames.TRAIN_INVALID_TRAIN_FILE;
 		f = Paths.get(testfile).toFile();
-		if (!f.exists() || !f.isFile()) result = TRAIN_INVALID_TEST_FILE;
+		if (!f.exists() || !f.isFile()) result = AppNames.TRAIN_INVALID_TEST_FILE;
 		f = Paths.get(outdir).toFile();
-		if (f.exists() && !f.isDirectory()) result = TRAIN_INVALID_DIRECTORY;
+		if (f.exists() && !f.isDirectory()) result = AppNames.TRAIN_INVALID_DIRECTORY;
 		
-		if (result == OK) {
+		if (result == AppNames.OK) {
 			
 			System.out.println(trainfile);
 			System.out.println(testfile);
 			System.out.println(outdir);
+			System.out.println(posmodel);
+			System.out.println(bertmodel);
+			System.out.println(tfmodel);
 
 			try {
 				
@@ -167,10 +162,10 @@ public class CommandTool {
 				SparkSession spark = context.getBean(SrvNames.SPARK_SESSION_TRAIN, SparkSession.class);
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
 				
-				train.trainModel(spark, trainfile, testfile, outdir, bertmodel);
+				train.trainModel(spark, trainfile, testfile, outdir, posmodel, bertmodel, tfmodel);
 
 			} catch (Exception ex) {
-				result = TRAIN_START_FAILED;
+				result = AppNames.TRAIN_START_FAILED;
 				System.out.println("FAILED " + ex);
 			}
 
@@ -182,13 +177,13 @@ public class CommandTool {
 
 	private int generate(String infile, String outfile, String type, String bertmodel, String nermodel) {
 
-		int result = OK;
+		int result = AppNames.OK;
 		
 		File f = Paths.get(infile).toFile();
-		if (!f.exists() || !f.isFile()) result = GENERATE_INVALID_FILE;
-		if (!(BIOC.equals(type.toUpperCase()) || PUBTATOR.equals(type.toUpperCase()))) result = GENERATE_INVALID_TYPE;
+		if (!f.exists() || !f.isFile()) result = AppNames.GENERATE_INVALID_FILE;
+		if (!(AppNames.BIOC.equals(type.toUpperCase()) || AppNames.PUBTATOR.equals(type.toUpperCase()))) result = AppNames.GENERATE_INVALID_TYPE;
 		
-		if (result == OK) {
+		if (result == AppNames.OK) {
 			
 			System.out.println(infile);
 			System.out.println(outfile);
@@ -205,14 +200,14 @@ public class CommandTool {
 				SparkSession spark = context.getBean(SrvNames.SPARK_SESSION_TRAIN, SparkSession.class);
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
 
-				if (BIOC.equals(type.toUpperCase())) {
-					train.prepareDataForTrainingFromBioc(spark, infile, outfile, bertmodel, nermodel);
-				} else if (PUBTATOR.equals(type.toUpperCase())) {
-					train.prepareDataForTrainingFromPubtator(spark, infile, outfile, bertmodel, nermodel);
+				if (AppNames.BIOC.equals(type.toUpperCase())) {
+					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, bertmodel, nermodel, false);
+				} else if (AppNames.PUBTATOR.equals(type.toUpperCase())) {
+					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, bertmodel, nermodel, false);
 				}
 
 			} catch (Exception ex) {
-				result = GENERATE_START_FAILED;
+				result = AppNames.GENERATE_START_FAILED;
 				System.out.println("FAILED " + ex);
 			}
 

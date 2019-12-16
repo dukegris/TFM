@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.corpus.services;
+package es.rcs.tfm.srv.services.corpus;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -73,53 +73,59 @@ public class PubmedLoaderService {
 		
 		// MODELO DE FICHEROS 
 		Stream<Fichero> ficherosStream = Arrays.stream(ftpFiles).//.parallel()
-				// Solo ficheros validos
-				filter(f ->
-						f.isValid() &&
-						f.isFile() &&
-						!f.isDirectory() &&
-						!f.isUnknown() &&
-						SOLO_GZIP_PTRN.matcher(f.getName()).find()).
-				// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
-				map(f -> 
-						Fichero.getInstance(
-								f.getName(),
-								f.getTimestamp(),
-								f.getSize())).
-				// Comprobar si el fichero debe ser procesado
-				map (f->
-					corpusSrvc.isProcessNeeded(f)).
-				// Descargar ficheros
-				map(f -> 
-						f.isHayCambiosEnDisco() ? CorpusService.download(
-								FPT_HOST, FTP_PORT, 
-								FTP_USERNAME, FTP_PASSWORD, 
-								FTP_DIRECTORY,
-								CORPUS_PUBMED_GZIP_DIRECTORY,
-								CORPUS_PUBMED_XML_DIRECTORY,
-								f) : f).
-				// Actualizar datos de los ficheros en DB
-				map(f -> 
-						f.isHayCambiosEnBD() ? corpusSrvc.updateDb(f) : f)
-				;
+			// Solo ficheros validos
+			filter(f ->
+					f.isValid() &&
+					f.isFile() &&
+					!f.isDirectory() &&
+					!f.isUnknown() &&
+					SOLO_GZIP_PTRN.matcher(f.getName()).find()).
+			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
+			map(f -> 
+					Fichero.getInstance(
+							f.getName(),
+							f.getTimestamp(),
+							f.getSize())).
+			// Calcular el fichero debe ser procesado
+			peek (f->
+				corpusSrvc.calculateIfTheProcessIsNeeded(f)).
+			// Descargar ficheros
+			peek(f -> {
+					if (f.isHayCambiosEnDisco()) CorpusService.download(
+							FPT_HOST, FTP_PORT, 
+							FTP_USERNAME, FTP_PASSWORD, 
+							FTP_DIRECTORY,
+							CORPUS_PUBMED_GZIP_DIRECTORY,
+							CORPUS_PUBMED_XML_DIRECTORY,
+							f);}).
+			// Actualizar datos de los ficheros en DB
+			peek(f -> {
+					if (f.isHayCambiosEnBD()) corpusSrvc.updateDb(f); })
+			;
 
 		Stream<Articulo> articulosStream = ficherosStream.
-				// Procesar XML con articulos
-				flatMap(f -> 
-						f.isHayCambiosEnDisco() ? StreamSupport.stream(
-								Spliterators.spliteratorUnknownSize(
-										new PubmedXmlProcessor(Paths.get(FilenameUtils.concat(
-												CORPUS_PUBMED_XML_DIRECTORY, 
-												f.getUncompressFichero()))), 
-										Spliterator.DISTINCT), 
-								false) : null).
-				// Actualizar datos de los ficheros en DB
-				map(a -> 
-						a.isHayCambiosEnBD() ? corpusSrvc.updateDb(a) : a).
-				// Actualizar datos de los ficheros en el indice
-				map(a -> 
-						a.isHayCambiosEnIDX() ? corpusSrvc.updateIdx(a) : a)
-				;
+			filter(f -> 
+					f.isHayCambiosEnDisco()).
+			// Procesar XML con articulos
+			flatMap(f -> 
+					StreamSupport.stream(
+						Spliterators.spliteratorUnknownSize(
+								new PubmedXmlProcessor(Paths.get(FilenameUtils.concat(
+										CORPUS_PUBMED_XML_DIRECTORY, 
+										f.getUncompressFichero()))), 
+								Spliterator.DISTINCT), 
+						false)).
+			//Comprobar si se requiere descargar
+			map (a->
+					corpusSrvc.calculateIfTheProcessIsNeeded(a)).
+			// Actualizar datos de los ficheros en DB
+			// Actualizar datos de los ficheros en DB
+			peek(a -> {
+					if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);}).
+			// Actualizar datos de los ficheros en el indice
+			peek(a -> {
+					if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);})
+			;
 		
 		//List<Fichero> f = ficherosStream.collect(Collectors.toList());
 		List<Articulo> a = articulosStream.collect(Collectors.toList());

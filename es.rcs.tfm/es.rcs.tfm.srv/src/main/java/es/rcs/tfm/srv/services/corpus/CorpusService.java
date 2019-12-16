@@ -1,4 +1,4 @@
-package es.rcs.tfm.srv.corpus.services;
+package es.rcs.tfm.srv.services.corpus;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -118,7 +118,7 @@ public class CorpusService {
 	 * @param obj Fichero con los datos de la carga
 	 * @return Fichero actualizado con las operaciones de actualización requeridas
 	 */
-	public Fichero isProcessNeeded(Fichero obj) {
+	public Fichero calculateIfTheProcessIsNeeded(Fichero obj) {
 		
 		// Buscar en la Base de datos el fichero
 		PubFileEntity db = searchFicheroInDb(obj);
@@ -231,7 +231,7 @@ public class CorpusService {
 	 * @param obj El articulo
 	 * @return el articulo con los requisitos de cambios
 	 */
-	public Articulo isProcessNeeded(Articulo obj) {
+	public Articulo calculateIfTheProcessIsNeeded(Articulo obj) {
 		
 		// ---------------------------------------------------------------------
 		// Search Article in database

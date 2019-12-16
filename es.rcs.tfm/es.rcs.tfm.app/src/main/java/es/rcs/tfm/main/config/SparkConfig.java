@@ -12,8 +12,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 
 import es.rcs.tfm.main.AppNames;
+import es.rcs.tfm.main.setup.SparkSessionFactory;
 import es.rcs.tfm.nlp.NlpNames;
-import es.rcs.tfm.nlp.setup.SparkSessionFactory;
 import es.rcs.tfm.srv.SrvNames;
 
 @Configuration(
@@ -27,6 +27,7 @@ public class SparkConfig {
 	@Value("${spark.master}") private String sparkMaster;
 	@Value("${spark.driver.cores}") private String sparkCores;
 	@Value("${spark.driver.memory}") private String sparkDriverMemory;
+	@Value("${spark.executor.instances}") private String sparkExcutorInstances;
 	@Value("${spark.executor.cores}") private String sparkExcutorCores;
 	@Value("${spark.executor.memory}") private String sparkExcutorMemory;
 	@Value("${spark.ui.enabled}") private String sparkUiEnabled;
@@ -50,6 +51,7 @@ public class SparkConfig {
         		set("spark.driver.cores", sparkCores).
         		set("spark.driver.memory", sparkDriverMemory).
         		set("spark.driver.maxResultSize", "4G").
+        		set("spark.executor.instances", sparkExcutorInstances).
         		set("spark.executor.cores", sparkExcutorCores).
         		set("spark.executor.memory", sparkExcutorMemory).
         		set("spark.ui.enabled", sparkUiEnabled).
@@ -77,7 +79,6 @@ public class SparkConfig {
 		try {
 			spark = getSparkSessionFactory().getObject();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -93,7 +94,6 @@ public class SparkConfig {
 		try {
 			spark = getSparkSessionFactory().getObject();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	

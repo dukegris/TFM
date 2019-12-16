@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 	
 	<properties>
@@ -52,7 +52,7 @@
 				<executions>
 					<execution>
 						<id>NODE App INSTALL</id>
-						<phase>compile</phase>
+						<phase>install</phase>
 						<goals><goal>run</goal></goals>
 						<configuration>
 							<target name="Install dependencies">
@@ -76,7 +76,7 @@
 					 -->
 					<execution>
 						<id>NODE App GS</id>
-						<phase>compile</phase>
+						<phase>install</phase>
 						<goals><goal>run</goal></goals>
 						<configuration>
 							<target name="Build Web">

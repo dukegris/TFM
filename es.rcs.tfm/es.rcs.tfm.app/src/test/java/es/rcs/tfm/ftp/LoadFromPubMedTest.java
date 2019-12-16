@@ -329,22 +329,16 @@ public class LoadFromPubMedTest extends TestCase {
 		    }
 		    
 		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXNotRecognizedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXNotSupportedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

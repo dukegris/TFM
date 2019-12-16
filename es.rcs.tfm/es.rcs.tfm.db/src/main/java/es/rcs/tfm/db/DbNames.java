@@ -33,4 +33,6 @@ public class DbNames {
 	public static final String DB_FILE_REP =		"taoFileRep";
 	public static final String DB_ARTICLE_FILE_REP ="taoArticleFileRep";
 
+	public static final String DB_APP_REP =			"taoApplicationRep";
+	
 }

@@ -27,10 +27,9 @@ import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import es.rcs.tfm.nlp.service.ConllWritter;
-import es.rcs.tfm.nlp.service.NerPrepare;
+import es.rcs.tfm.nlp.service.CoNLL2003Generator;
+import es.rcs.tfm.nlp.service.NerPipeline;
 import es.rcs.tfm.nlp.service.NerTrain;
-import es.rcs.tfm.srv.model.Anotacion;
 import es.rcs.tfm.srv.model.Articulo;
 import es.rcs.tfm.srv.setup.ArticleProcessor;
 
@@ -40,7 +39,7 @@ public class TrainRepository {
 	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
 	private static final String HADOOP_FILE_PREFIX = "file:///";
 	
-	private static Map<Integer, NerPrepare> PREPARERS = new HashMap<Integer, NerPrepare>();
+	private static Map<Integer, NerPipeline> PIPELINES = new HashMap<Integer, NerPipeline>();
 	private static Map<Integer, NerTrain> TRAINERS = new HashMap<Integer, NerTrain>();
 	
 	private static Integer getHash(
@@ -140,6 +139,7 @@ public class TrainRepository {
 	 * @param resultsDirectory
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
+	 * @param tensorflowModelDirectory Directorio de grafos de TensorFlow
 	 * @param targetModelDirectory Directorio de salida de los fichero CONLL
 	 * @param maxSentence Maximo tama�o de una frase (defecto 512, suele ser 128)
 	 * @param dimension Maximo n�mero de dimensiones (defecto 1024, suele ser 768)
@@ -153,6 +153,7 @@ public class TrainRepository {
 			String resultsDirectory,
 			String posModelDirectory,
 			String bertModelDirectory,
+			String tensorflowModelDirectory,
 			String targetModelDirectory,
 			Integer maxSentence,
 			Integer dimension,
@@ -167,6 +168,7 @@ public class TrainRepository {
 		if (StringUtils.isBlank(testFilename)) return false;
 		if (StringUtils.isBlank(posModelDirectory)) return false;
 		if (StringUtils.isBlank(bertModelDirectory)) return false;
+		if (StringUtils.isBlank(tensorflowModelDirectory)) return false;
 
 		Path results = Paths.get(resultsDirectory);
 		if (results.toFile() == null) return false;
@@ -183,6 +185,11 @@ public class TrainRepository {
 		if (bertModel.toFile() == null) return false;
 		if (!bertModel.toFile().exists()) return false;
 		if (!bertModel.toFile().isDirectory()) return false;
+
+		Path tensorflowModel = Paths.get(tensorflowModelDirectory);
+		if (tensorflowModel.toFile() == null) return false;
+		if (!tensorflowModel.toFile().exists()) return false;
+		if (!tensorflowModel.toFile().isDirectory()) return false;
 
 		Path train = Paths.get(trainFilename);
 		if (train.toFile() == null) return false;
@@ -210,6 +217,7 @@ public class TrainRepository {
 					spark,
 					HADOOP_FILE_PREFIX + posModelDirectory,
 					HADOOP_FILE_PREFIX + bertModelDirectory,
+					tensorflowModelDirectory,
 					maxSentence,
 					dimension,
 					batchSize,
@@ -333,7 +341,7 @@ public class TrainRepository {
 				
 				String build = SIMPLE_DATE_FORMAT.format(new Date());
 
-				NerPrepare generator = null;
+				NerPipeline pipeline = null;
 				Integer key = getHash(
 						posModelDirectory, 
 						bertModelDirectory, 
@@ -341,8 +349,8 @@ public class TrainRepository {
 						dimension, 
 						batchSize, 
 						caseSensitive);
-				if (!PREPARERS.containsKey(key)) {
-					generator = new NerPrepare(
+				if (!PIPELINES.containsKey(key)) {
+					pipeline = new NerPipeline(
 							spark.sparkContext(),
 							spark,
 							HADOOP_FILE_PREFIX + posModelDirectory,
@@ -352,29 +360,29 @@ public class TrainRepository {
 							dimension,
 							batchSize,
 							caseSensitive);
-					PREPARERS.put(key, generator);
+					PIPELINES.put(key, pipeline);
 				} else {
-					generator = PREPARERS.get(key);
+					pipeline = PIPELINES.get(key);
 				}
 
 				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
 
-				ConllWritter writter = new ConllWritter(spark);
+				CoNLL2003Generator generator = new CoNLL2003Generator(spark);
 				
-				Dataset<Row> ds = generator.
+				Dataset<Row> ds = pipeline.
 						execute(
 								rows, 
 								structType, 
 								HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(resultsDirectory));
 				
 				@SuppressWarnings("unchecked")
-				Dataset<Row> conllDs = writter.
-						generateConll(
+				Dataset<Row> conllDs = generator.
+						generate(
 								ds,
 								mantainNerFromGenericModel);
 				
-				double tasa = writter.
-						saveConll(
+				double tasa = generator.
+						save(
 								conllDs, 
 								targetFilename);
 

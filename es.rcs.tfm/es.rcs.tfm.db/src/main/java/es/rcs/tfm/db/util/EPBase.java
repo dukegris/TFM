@@ -443,8 +443,7 @@ abstract class EPBase<P extends Path> implements EP<P, Object> {
 							SUPPORTED_SINGLE_VALUED_COMPARISON_OPERATORS
 								.toArray(new EPOperator[SUPPORTED_SINGLE_VALUED_COMPARISON_OPERATORS.size()]), 
 							this.value)
-					.isPresent()) { // TODO: Perhaps check for an
-				// unsupported operator here and throw an error
+					.isPresent()) { // TODO: Perhaps check for an unsupported operator here and throw an error
 				this.next = new SingleValueExpressionBuilder(path, ov.getValue(), this);
 			}
 

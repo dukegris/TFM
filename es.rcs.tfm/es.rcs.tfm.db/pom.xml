@@ -15,7 +15,7 @@
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -26,6 +26,11 @@
 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -102,6 +107,21 @@
 		 -->
 
 		<!-- =====================================
+			 XML
+			 ===================================== -->
+		<!-- JACKSON -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- =====================================
 			 UTILIDADES
 			 ===================================== -->
 		<!-- LOMBOK -->
@@ -125,6 +145,24 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- CRNK -->
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		 -->
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data-jpa</artifactId>
 			<scope>compile</scope>
 		</dependency>
 

@@ -19,6 +19,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import io.crnk.core.resource.annotations.JsonApiId;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public class AuditedBaseEntity {
 	@Transient
 	private static final Logger LOG = LoggerFactory.getLogger(AuditedBaseEntity.class);
 
+	@JsonApiId
 	@Id
 	@GeneratedValue(
 			strategy = GenerationType.IDENTITY)
