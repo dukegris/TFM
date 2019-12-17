@@ -137,19 +137,19 @@ public class TrainService {
 
 	private static Integer getMaxSentence(String name) {
 		Integer result = getData(name, 5);
-		//if (result == -1) result = 512;
+		//TODO if (result == -1) result = 512;
 		if (result == -1) result = 512;
 		return result;
 	}
 	private static Integer getDimension(String name) {
 		Integer result = getData(name, 3);
-		//if (result == -1) result = 1024;
+		//TODO if (result == -1) result = 1024;
 		if (result == -1) result = 768;
 		return result;
 	}
 	private static Integer getBatchSize(String name) {
 		Integer result = getData(name, 6);
-		//if (result == -1) result = 32;
+		//TODO if (result == -1) result = 32;
 		if (result == -1) result = 32;
 		return result;
 	}

@@ -14,13 +14,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.main.AppNames;
-import es.rcs.tfm.main.config.DatabaseConfig;
-import es.rcs.tfm.main.config.SolrConfig;
 import es.rcs.tfm.main.config.SparkConfig;
 import es.rcs.tfm.nlp.NlpNames;
-import es.rcs.tfm.solr.IndexNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.services.train.TrainService;
 import es.rcs.tfm.xml.XmlNames;
@@ -50,7 +46,7 @@ public class CommandTool {
 		Option generate = Option.
 				builder("g").
 				longOpt("generate").
-				desc(	"Genera un fichero <outfile> CONLL2003 " + 
+				desc(	"Genera un fichero <outfile> CoNLL2003 " + 
 						"a partir del fichero <infile> de tipo " + 
 						"<type> PUBTATOR o BIOC." +
 						"betmodel y nermodel son opcionales").

@@ -6,6 +6,8 @@ import com.johnsnowlabs.nlp.training.CoNLL
 import com.johnsnowlabs.nlp.{Annotation}
 import com.johnsnowlabs.nlp.util.io.ExternalResource
 
+import es.rcs.tfm.nlp.model.TfmType
+
 import java.io.{BufferedWriter, File, FileWriter}
 
 import org.apache.spark.SparkContext

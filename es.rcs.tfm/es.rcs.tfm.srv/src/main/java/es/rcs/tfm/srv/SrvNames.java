@@ -7,8 +7,8 @@ public class SrvNames {
 	public static final String SRV_CONFIG =					"taoServicesConfiguration";
 	public static final String SRV_CONFIG_PKG = 			"es.rcs.tfm.srv.config";
 	public static final String SRV_SETUP_PKG =				"es.rcs.tfm.srv.setup";
-	public static final String SRV_CORPUS_SERVICES_PKG =	"es.rcs.tfm.srv.corpus.services";
-	public static final String SRV_TRAIN_SERVICES_PKG =		"es.rcs.tfm.srv.train.services";
+	public static final String SRV_CORPUS_SERVICES_PKG =	"es.rcs.tfm.srv.services.corpus";
+	public static final String SRV_TRAIN_SERVICES_PKG =		"es.rcs.tfm.srv.services.train";
 
 	// -------------------------------------------------------------------------------------
 	// SRV: SERVICES
