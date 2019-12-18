@@ -29,7 +29,6 @@ import org.ncbi.pubmed.ArticleTitle;
 import org.ncbi.pubmed.BookDocument;
 import org.ncbi.pubmed.DeleteCitation;
 import org.ncbi.pubmed.MedlineCitation;
-import org.ncbi.pubmed.ObjectList;
 import org.ncbi.pubmed.PMID;
 import org.ncbi.pubmed.PubMedPubDate;
 import org.ncbi.pubmed.PubmedArticle;
@@ -154,6 +153,8 @@ public class PubMedTest {
 			    									if (instance.getMonth() != null)	calArticleStatusDate.set(Calendar.MONTH,		Integer.parseInt(instance.getMonth().getvalue()));
 			    									if (instance.getYear() != null)		calArticleStatusDate.set(Calendar.YEAR,			Integer.parseInt(instance.getYear().getvalue()));
 
+			    									// TODO
+			    									@SuppressWarnings("unused")
 			    									String strArticleStatus = instance.getPubStatus();
 
 			    								});
@@ -161,7 +162,6 @@ public class PubMedTest {
 			    						}
 
 			    						// Objects
-			    						ObjectList objects = pubmedData.getObjectList();
 			    						if (	(pubmedData.getObjectList() != null) && 
 			    								(pubmedData.getObjectList().getObject() != null) &&
 			    								(!pubmedData.getObjectList().getObject().isEmpty())) {
@@ -189,7 +189,6 @@ public class PubMedTest {
 			    						String strArticleStatus = pubmedData.getPublicationStatus();
 			    						
 			    						// References
-			    						List<ReferenceList> references = pubmedData.getReferenceList();
 			    						if (	(pubmedData.getReferenceList() != null) && 
 			    								(!pubmedData.getReferenceList().isEmpty())) {
 			    							List<ReferenceList> instances = pubmedData.getReferenceList();

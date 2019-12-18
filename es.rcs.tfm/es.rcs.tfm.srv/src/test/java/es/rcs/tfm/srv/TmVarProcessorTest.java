@@ -89,6 +89,10 @@ public class TmVarProcessorTest {
 		}
 		assertNotNull(tmvar);
 		assertNotNull(bioc);
+
+		assertNotNull(resultBIOC);
+		assertNotNull(resultTMC);
+
 		//assertEquals(resultBIOC.size(), 0);
 
 		// Para entrenamiento

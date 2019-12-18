@@ -1687,7 +1687,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	 * @param generalNote
 	 * @return
 	 */
-	private Map<String, String> makeObservacionesMap(List<GeneralNote> generalNote) {
+	// TODO	private Map<String, String> makeObservacionesMap(List<GeneralNote> generalNote) {
+	public Map<String, String> makeObservacionesMap(List<GeneralNote> generalNote) {
 		
 		if (	(generalNote == null) || 
 				(generalNote.isEmpty())) return null;

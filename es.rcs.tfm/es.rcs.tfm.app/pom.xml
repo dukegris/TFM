@@ -380,7 +380,6 @@
 			<!-- Include all jars in one file -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -403,7 +402,6 @@
 			<!-- Make the jar executable by adding a Main-Class and Class-Path to the manifest -->
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -417,7 +415,6 @@
 			<!-- Copy dependencies to lib directory (used by the manifest) -->
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>

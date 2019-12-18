@@ -151,13 +151,11 @@ class NerTrain(
     	setOutputCol(TfmType.TOKEN)
     	
     val pos = PerceptronModel.
-      //pretrained().
       load(this.posModelDirectory).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.POS)
     	
     val embeddings = BertEmbeddings.
-      //pretrained(TfmType.PRETRAINED_BERT, "en").
     	load(this.bertModelDirectory).
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
     	setOutputCol(TfmType.WORD_EMBEDDINGS).

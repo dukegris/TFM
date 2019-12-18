@@ -71,6 +71,7 @@ import junit.framework.TestCase;
 		SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {
 		LoadFromPubMedTest.class })
+@SuppressWarnings("unused")
 public class LoadFromPubMedTest extends TestCase {
     
 	String corpusBaseLineDirectory = "D:\\Workspace-TFM\\TFM\\es.rcs.tfm\\es.rcs.tfm.corpus\\data\\pubmed";
@@ -420,19 +421,22 @@ public class LoadFromPubMedTest extends TestCase {
 		int port = 21;
 		String username = "anonymous";
 		String password = "password";
-		String updateDirectory = "/pubmed/updatefiles";
+		
 		String baselineDirectory = "/pubmed/baseline";
+		//String baselineDirectory2016 = "/pubmed/.baseline-2016";
+		//String baselineDirectory2017 = "/pubmed/.baseline-2017";
+		//String baselineDirectory2018 = "/pubmed/.baseline-2018";
+		//String baselineDirectory2019 = "/pubmed/.baseline-2019";
+
+		String updateDirectory = "/pubmed/updatefiles";
+		//String updateDirectory2016 = "/pubmed/.updatefiles-2016";
+		//String updateDirectory2017 = "/pubmed/.updatefiles-2017";
+		//String updateDirectory2018 = "/pubmed/.updatefiles-2018";
+		//String updateDirectory2019 = "/pubmed/.updatefiles-2019";
 		
-		String baselineDirectory2016 = "/pubmed/.baseline-2016";
-		String baselineDirectory2017 = "/pubmed/.baseline-2017";
-		String baselineDirectory2018 = "/pubmed/.baseline-2018";
-		String updateDirectory2016 = "/pubmed/.updatefiles-2016";
-		String updateDirectory2017 = "/pubmed/.updatefiles-2017";
-		String updateDirectory2018 = "/pubmed/.updatefiles-2018";
-		
-		Path corpusDirectory_0 = Paths.get("/data/corpus");
-		Path corpusDirectory_1 = Paths.get(URI.create("file:///data/corpus/"));
-		Path corpusDirectory_2 = Paths.get("C:\\home\\joe\\foo");
+		//Path corpusDirectory_0 = Paths.get("/data/corpus");
+		//Path corpusDirectory_1 = Paths.get(URI.create("file:///data/corpus/"));
+		//Path corpusDirectory_2 = Paths.get("C:\\home\\joe\\foo");
 		
 		FTPClient ftp = new FTPClient();
 		ftp.setControlKeepAliveTimeout(300);

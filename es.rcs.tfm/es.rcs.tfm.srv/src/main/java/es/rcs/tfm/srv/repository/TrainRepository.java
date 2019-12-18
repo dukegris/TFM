@@ -211,6 +211,7 @@ public class TrainRepository {
 			
 			String ini = SIMPLE_DATE_FORMAT.format(new Date());
 			
+			
 			String[] entities = {};
 			NerTrain nerTrainer = new NerTrain(
 					spark.sparkContext(),
