@@ -36,8 +36,8 @@ from dataset_encoder import DatasetEncoder
 from ner_model_saver import NerModelSaver
 
 CORPUS_PATH="/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/"
-DATASET_PATH=CORPUS_PATH + "datasets/"
-BERT_PATH=DATASET_PATH + 'bert/'
+MODEL_PATH=CORPUS_PATH + "models/"
+BERT_MODEL_PATH=MODEL_PATH + 'tensorflow/'
 
 # %% [markdown]
 # 
@@ -72,7 +72,7 @@ def create_graph(ntags, embeddings_dim, nchars, lstm_size = 128):
         ner.init_variables()
         saver = tf.train.Saver()
         file_name = model_name + '.pb'
-        tf.train.write_graph(ner.session.graph, BERT_PATH, file_name, False)
+        tf.train.write_graph(ner.session.graph, BERT_MODEL_PATH, file_name, False)
         ner.close()
         session.close()
 
@@ -84,7 +84,9 @@ def create_graph(ntags, embeddings_dim, nchars, lstm_size = 128):
 # - 4th attribute: LSTM Size (128)
 
 # %%
-create_graph(14, 1024, 62)
+create_graph(16, 768, 128)
+#create_graph(16, 1024, 128)
+
 #create_graph(80, 200, 125)
 # create_graph(10, 200, 100)
 # create_graph(10, 300, 100)

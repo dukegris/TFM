@@ -1,19 +1,20 @@
-// spark-shell --packages JohnSnowLabs:spark-nlp:2.2.0 --executor-memory=8g --executor-cores=24 --driver-memory=8g
-// spark-shell --packages JohnSnowLabs:spark-nlp:2.2.0 --executor-memory=8g --executor-cores=6 --driver-memory=8g
+// spark-shell --packages JohnSnowLabs:spark-nlp:2.3.4 --executor-memory=8g --executor-cores=24 --driver-memory=8g
+// spark-shell --packages JohnSnowLabs:spark-nlp:2.3.4 --executor-memory=8g --executor-cores=6 --driver-memory=8g
 // scp -r . rcuesta@10.160.1.215:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models
 
 import com.johnsnowlabs.nlp.{SparkNLP, DocumentAssembler, Finisher, AnnotatorType}
 import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
-import com.johnsnowlabs.nlp.annotators.{Tokenizer, Normalizer}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel, ChunkEmbeddings}
+import com.johnsnowlabs.nlp.annotators.{Tokenizer, Normalizer, Chunker, ChunkTokenizer}
 import com.johnsnowlabs.nlp.annotators.ner.NerConverter
-import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, PretrainedNerDL} 
+import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel} 
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
 import com.johnsnowlabs.util.Benchmark
 
 import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.feature.NGram
 
 import spark.implicits._
 
@@ -39,36 +40,64 @@ val token = new Tokenizer().
 	setInputCols(Array("sentences")).
 	setOutputCol("token")
 
+val normalizer = new Normalizer().
+	setInputCols("token").
+	setOutputCol("normal")
+
 val pos = PerceptronModel.
 	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos/pos_anc_en_2.0.2_2.4_1556659930154").
 	setInputCols(Array("sentences", "token")).
 	setOutputCol("pos")
  
 val embeddings = BertEmbeddings.
-	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/uncased_L-12_H-768_A-12_M-128_B-32").
+	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/cased_L-12_H-768_A-12_M-512_B-32").
 	setDimension(768).
 	setMaxSentenceLength(512).
 	setInputCols(Array("sentences", "token")).
 	setOutputCol("embeddings")
 
 val ner = NerDLModel.
-	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/ner_dl_bert_en_2.2.0_2.4_20190828").
+	load("file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/ner_dl_bert_cased_L-12_H-768_A-12_M-512_B-32_2.2.0_2.4_20190830").
 	setInputCols(Array("sentences", "token", "embeddings")).
 	setOutputCol("ner")
 
-val converter = new NerConverter().
+val chunk = new NerConverter().
 	setInputCols(Array("sentences", "token", "ner")).
 	setOutputCol("chunk")
+
+val chunker = new Chunker().
+	setInputCols(Array("document", "pos")).
+	setOutputCol("chunk").
+	setRegexParsers(Array("‹NNP›+", "‹DT|PP\\$›?‹JJ›*‹NN›"))
+
+val chunkEmbeddings = new ChunkEmbeddings().
+	setInputCols(Array("chunk", "embeddings")).
+	setOutputCol("chunk_embeddings").
+	setPoolingStrategy("AVERAGE")
+
+val ngram = new NGram().
+	setN(3).
+	setInputCol("finished_normal").
+	setOutputCol("3-gram")
+
+val gramAssembler = new DocumentAssembler().
+	setInputCol("3-gram").
+	setOutputCol("3-grams")
 
 val finisher = new Finisher().
 	setInputCols(Array(
 		"document", 
 		"sentences", 
 		"token", 
+		"normal", 
 		"pos", 
 		"embeddings", 
 		"ner",
-		"chunk")).
+		"chunk",
+		//"chunk_embeddings"
+		"3-gram",
+		"3-grams"//,
+		)).
 	setIncludeMetadata(true).
 	setCleanAnnotations(false)
 
@@ -77,11 +106,15 @@ val pipeline = new RecursivePipeline().
 		document,
 		sentence,
 		token,
+		normalizer,
 		pos,
 		embeddings,
 		ner,
-		converter,
-		finisher
+		chunker,
+		//chunkEmbeddings,
+		finisher,
+		ngram, 
+		gramAssembler
 ))
 
 val model = pipeline.fit(emptyData)
@@ -90,3 +123,6 @@ val result = model.transform(testData)
 
 result.show
 
+result.withColumn("ner1", org.apache.spark.sql.functions.explode(result.col("ner"))).show
+
+result.withColumn("res", org.apache.spark.sql.functions.explode(result.col("finished_ner"))).select("res").show

@@ -40,6 +40,7 @@ public class TrainCommand {
 			System.out.println(trainfile);
 			System.out.println(testfile);
 			System.out.println(outdir);
+			System.out.println(posmodel);
 			System.out.println(bertmodel);
 			System.out.println(tensorflowmodel);
 

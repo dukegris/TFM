@@ -24,6 +24,7 @@ public class ConllCommand {
 			@ShellOption({"-t", "--type (" + 
 					AppNames.BIOC + " o " + 
 					AppNames.PUBTATOR + ")"})	String type, 
+			@ShellOption({"-p", "--pos"})		String posmodel, 
 			@ShellOption({"-b", "--bert"})		String bertmodel,
 			@ShellOption({"-n", "--ner"}) 		String nermodel) {
 
@@ -38,15 +39,16 @@ public class ConllCommand {
 			System.out.println(infile);
 			System.out.println(outfile);
 			System.out.println(type);
+			System.out.println(posmodel);
 			System.out.println(bertmodel);
 			System.out.println(nermodel);
 
 			try {
 				
 				if (AppNames.BIOC.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
 				} else if (AppNames.PUBTATOR.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
 				}
 
 			} catch (Exception ex) {

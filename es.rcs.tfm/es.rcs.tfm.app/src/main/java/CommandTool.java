@@ -66,7 +66,7 @@ public class CommandTool {
 				hasArg(true).
 				numberOfArgs(5).
 				optionalArg(true).
-				argName("trainfile> <testfile> <outdir> <bertmodel> <nermodel").
+				argName("trainfile> <testfile> <outdir> <bertmodel> <bertmodel> <tf_graph model").
 				build();
 
 		options.addOption(help);
@@ -86,15 +86,19 @@ public class CommandTool {
 					String infile = data[0];
 					String outfile = data[1];
 					String type = data[2];
+					String posmodel = "";
 					String bertmodel = "";
 					String nermodel = "";
 					if (data.length>3) {
-						bertmodel = data[3];
+						posmodel = data[3];
 					}
 					if (data.length>4) {
-						nermodel = data[4];
+						bertmodel = data[4];
 					}
-					result = tool.generate(infile, outfile, type, bertmodel, nermodel);
+					if (data.length>5) {
+						nermodel = data[5];
+					}
+					result = tool.generate(infile, outfile, type, posmodel, bertmodel, nermodel);
 				}
 			} else if (cmd.hasOption("t")) {
 				String[] data = cmd.getOptionValues("t");
@@ -171,7 +175,7 @@ public class CommandTool {
 		
 	}
 
-	private int generate(String infile, String outfile, String type, String bertmodel, String nermodel) {
+	private int generate(String infile, String outfile, String type, String posmodel, String bertmodel, String nermodel) {
 
 		int result = AppNames.OK;
 		
@@ -184,6 +188,7 @@ public class CommandTool {
 			System.out.println(infile);
 			System.out.println(outfile);
 			System.out.println(type);
+			System.out.println(posmodel);
 			System.out.println(bertmodel);
 			System.out.println(nermodel);
 			
@@ -197,9 +202,9 @@ public class CommandTool {
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
 
 				if (AppNames.BIOC.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
 				} else if (AppNames.PUBTATOR.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
 				}
 
 			} catch (Exception ex) {

@@ -141,49 +141,49 @@ def download_and_convert(url, name, max_sentence_length = 128, batch_size = 32, 
 # 1. Base uncased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip'
 name = 'uncased_L-12_H-768_A-12'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 2. Large uncased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zip'
 name = 'uncased_L-24_H-1024_A-16'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 3. Base cased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/cased_L-12_H-768_A-12.zip'
 name = 'cased_L-12_H-768_A-12'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 4. Large cased
 url = 'https://storage.googleapis.com/bert_models/2018_10_18/cased_L-24_H-1024_A-16.zip'
 name = 'cased_L-24_H-1024_A-16'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 5. Multilingual Cased (New, recommended)
 url = 'https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip'
 name = 'multi_cased_L-12_H-768_A-12'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 6. Large uncased
 url = 'https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip'
 name = 'wwm_uncased_L-24_H-1024_A-16'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # 7. Large cased
 url = 'https://storage.googleapis.com/bert_models/2019_05_30/wwm_cased_L-24_H-1024_A-16.zip'
 name = 'wwm_cased_L-24_H-1024_A-16'
-download_and_convert(url, name, max_sentence_length = 128, batch_size = 32)
+download_and_convert(url, name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
@@ -191,7 +191,7 @@ print('All generated models are inside "models/" directory')
 
 
 # %%
-def convert(name, max_sentence_length = 128, batch_size = 32, destination_model_folder = SPARKNLP_BERT_MODEL_PATH):
+def convert(name, max_sentence_length = 512, batch_size = 32, destination_model_folder = SPARKNLP_BERT_MODEL_PATH):
 
     model = create_model(BIOBERT_PATH + name, BERT_PATH + name + '_export_dir', max_sentence_length, batch_size)
     # Remove but it's possible to use this model
@@ -216,14 +216,15 @@ def convert(name, max_sentence_length = 128, batch_size = 32, destination_model_
 
 # %%
 name = 'biobert_v1.1_pubmed'
-convert(name, max_sentence_length = 128, batch_size = 32)
+convert(name, max_sentence_length = 512, batch_size = 32)
 
 
 # %%
 # Create Graph
 from create_models import create_graph
 
-create_graph(BERT_PATH, True, 14, 1024, 62)
+# create_graph(BERT_PATH, True, 16, 1024, 128)
+create_graph(16, 1024, 128)
 
 
 

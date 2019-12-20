@@ -29,7 +29,7 @@ class CoNLL2003Generator(spark: SparkSession) {
     
     import data.sparkSession.implicits._ // for row casting
 
-    println(java.time.LocalTime.now + ": generate init")
+    println(java.time.LocalTime.now + ": NER-CONLL2003: generate init")
     // ---------------------------------------------------------------------------------------
     // Preparacion de los datos para su procesamiento
     val dataSelect = data.select (
@@ -76,9 +76,9 @@ class CoNLL2003Generator(spark: SparkSession) {
 
       // println(java.time.LocalTime.now + ": generate doc: " + row._1)
       // Inicio del documento
-      val conllDoc: ArrayBuffer[(String, String, String, String, Integer, Integer, Integer, Integer, String)] = ArrayBuffer()
-      conllDoc.append(("-DOCSTART-", "-X-", "-X-", "O", docId, 0, 0, 0, ""))
-      conllDoc.append((null, null, null, null, docId, 0, 0, 0, ""))
+      val conllDoc: ArrayBuffer[(String, String, String, String, String, Integer, Integer, Integer, Integer, String)] = ArrayBuffer()
+      conllDoc.append(("-DOCSTART-", "-X-", "-X-", "-X-", "O", docId, 0, 0, 0, ""))
+      conllDoc.append((null, null, null, null, null, docId, 0, 0, 0, ""))
 
       // Tuplas con el formato ((begin, end), text, pos, ner, sentence)
       // Construye la tupla: ((1127,1135),Asp506Gly,NNP,O,9)
@@ -104,7 +104,7 @@ class CoNLL2003Generator(spark: SparkSession) {
         
         // Si hay cambio de frase se induce una linea en blanco
         if (tupla._5 != sentenceId) {
-          conllDoc.append((null, null, null, null, docId, 0, 0, 0, ""))
+          conllDoc.append((null, null, null, null, null, docId, 0, 0, 0, ""))
           sentenceId = tupla._5
         }
         
@@ -129,8 +129,8 @@ class CoNLL2003Generator(spark: SparkSession) {
               	case NOTES_PTR(start: String, end: String, word: String, iob: String) => (start.toInt, end.toInt, word, iob) 
               	case _ => (-2, -2, "", "") }).
             filter(nota => ( (
-          	    (tupla._1._1     <  nota._2) &&
-          	    (tupla._1._2 + 1 >= nota._1) )
+          	    (tupla._1._1 < nota._2) &&
+          	    (tupla._1._2 > nota._1) )
                 /*
           	    // CASO DE UNA MUTACION INCLUIDA EN EL NER
           	    // los datos de NER y los de substring de java funcionan diferentes ya que el rango en ner incluye al ultimo caracter:
@@ -185,23 +185,24 @@ class CoNLL2003Generator(spark: SparkSession) {
         // Linea del fichero CONLL
         var totalNotas = 0;
         if ((row._3 != null) && row._3.size != null) totalNotas = row._3.size
-        conllDoc.append((tupla._2, tupla._3, tupla._4, str, row._1.toInt, sentenceId, enc, totalNotas, coords))
+        // TODO se graba dos veces la tupla 3 (POS) ya que no se dispone del CHUNK
+        conllDoc.append((tupla._2, tupla._3, tupla._3, tupla._4, str, row._1.toInt, sentenceId, enc, totalNotas, coords))
 
       })
 
       // Final del documento
-      conllDoc.append((null, null, null, null, docId, 0, 0, 0, ""))
+      conllDoc.append((null, null, null, null, null, docId, 0, 0, 0, ""))
       docId += 1
 
       conllDoc
       
     })
 
-    println(java.time.LocalTime.now + ": generate coalesce")
+    println(java.time.LocalTime.now + ": NER-CONLL2003: generate coalesce")
     
     val result = conllData.coalesce(1).toDF()
 
-    println(java.time.LocalTime.now + ": generate end")
+    println(java.time.LocalTime.now + ": NER-CONLL2003: generate end")
 
     result
     
@@ -215,7 +216,7 @@ class CoNLL2003Generator(spark: SparkSession) {
    */
   def save(data: DataFrame, outputPath: String): Double = {
 
-    println(java.time.LocalTime.now + ": saveConll")
+    println(java.time.LocalTime.now + ": NER-CONLL2003: save")
 
     import data.sparkSession.implicits._ // for row casting
 
@@ -225,37 +226,38 @@ class CoNLL2003Generator(spark: SparkSession) {
     val conll = data
         // conll._1 -> text
         // conll._2 -> pos
-        // conll._3 -> ner
-        // conll._4 -> str contiene la marcacion de la nota
-        // conll._5 -> docId
-        // conll._6 -> sentenceId
-        // conll._7 -> enc si se ha encontrado una mutacion
-        // conll._8 -> numNotas
+        // conll._3 -> posTODO Falta el syntactic chunk tag 
+        // conll._4 -> ner
+        // conll._5 -> str contiene la marcacion de la nota
+        // conll._6 -> docId
+        // conll._7 -> sentenceId
+        // conll._8 -> enc si se ha encontrado una mutacion
+        // conll._9 -> numNotas
 
-    saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_4"), sep = " ", targetFile = outputPath)
+    saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_5"), sep = " ", targetFile = outputPath)
     saveDsToCsv(ds = conll, sep = " ", targetFile = outputPath+".all")
     
     val enc = conll.
-      select("_5", "_6", "_7", "_8").
-      groupBy("_5").
-      agg( // _5 DOCID
-        "_5" -> "count",
+      select("_6", "_7", "_8", "_9").
+      groupBy("_6").
+      agg( // _6 DOCID
         "_6" -> "count",
-        "_7" -> "sum",
-        "_8" -> "max")
+        "_7" -> "count",
+        "_8" -> "sum",
+        "_9" -> "max")
         
     enc.
       filter(d => (
           d.getLong(3) < 
           d.getInt(4))).
-      foreach(d => println("Error en docId: " + d.get(0) + " encontrados " + d.get(3) + " de " + d.get(4) + " mutaciones"))
+      foreach(d => println("NER-CONLL2003: Error en docId: " + d.get(0) + " encontrados " + d.get(3) + " de " + d.get(4) + " mutaciones"))
     
     val precission = enc.
-      agg( // (_5, count(_5), count(_6), sum(_7), max(_8))
-        "_5" -> "count", // docs
-        "count(_6)" -> "sum", // sentences
-        "sum(_7)" -> "sum", // mutaciones encontradas
-        "max(_8)" -> "sum") // total de notas
+      agg( // (_6, count(_6), count(_7), sum(_8), max(_9))
+        "_6" -> "count", // docs
+        "count(_7)" -> "sum", // sentences
+        "sum(_8)" -> "sum", // mutaciones encontradas
+        "max(_9)" -> "sum") // total de notas
 
     val precRow = precission.first()
     var docs:Long = precRow.getLong(0)
@@ -267,7 +269,7 @@ class CoNLL2003Generator(spark: SparkSession) {
     if (total > 0) {
       result = mutaciones.toDouble / total.toDouble
     }
-    println("Marcados " + mutaciones + " de " + total + " en " + docs + " documentos. PRECISION = " + result)
+    println("NER-CONLL2003: Marcados " + mutaciones + " de " + total + " en " + docs + " documentos. PRECISION = " + result)
 
     result
 
@@ -280,6 +282,8 @@ class CoNLL2003Generator(spark: SparkSession) {
       targetFile: String,
       sep: String = ",", 
       header: Boolean = false): Unit = {
+
+    println(java.time.LocalTime.now + ": NER-CONLL2003: save to CSV")
 
     val tmpParquetDir = "CONLL.tmp.parquet"
 

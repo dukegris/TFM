@@ -135,12 +135,12 @@ public class TrainRepository {
 	 * @param spark Sesion de Spark donde se ejecutar� la preparaci�n de datos
 	 * @param trainFilename
 	 * @param testFilename
-	 * @param resultsFilename
-	 * @param resultsDirectory
+	 * @param targetModelDirectory Directorio de salida del modelo NER entrenado
+	 * @param targetPipelineModelDirectory Directorio de salida del modelo con todo el pipeline entrenado
+	 * @param targetCsvFilename Fichero con los TAGS NER localizados
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param tensorflowModelDirectory Directorio de grafos de TensorFlow
-	 * @param targetModelDirectory Directorio de salida de los fichero CONLL
 	 * @param maxSentence Maximo tama�o de una frase (defecto 512, suele ser 128)
 	 * @param dimension Maximo n�mero de dimensiones (defecto 1024, suele ser 768)
 	 * @return
@@ -149,20 +149,20 @@ public class TrainRepository {
 			SparkSession spark,
 			String trainFilename,
 			String testFilename,
-			String resultsFilename,
-			String resultsDirectory,
+			String targetModelDirectory,
+			String targetPipelineModelDirectory,
+			String targetCsvFilename,
 			String posModelDirectory,
 			String bertModelDirectory,
 			String tensorflowModelDirectory,
-			String targetModelDirectory,
 			Integer maxSentence,
 			Integer dimension,
 			Integer batchSize,
 			Boolean caseSensitive) {
 
 		if (spark == null) return false;
-		if (StringUtils.isBlank(resultsDirectory)) return false;
-		if (StringUtils.isBlank(resultsFilename)) return false;
+		if (StringUtils.isBlank(targetPipelineModelDirectory)) return false;
+		if (StringUtils.isBlank(targetCsvFilename)) return false;
 		if (StringUtils.isBlank(targetModelDirectory)) return false;
 		if (StringUtils.isBlank(trainFilename)) return false;
 		if (StringUtils.isBlank(testFilename)) return false;
@@ -170,9 +170,13 @@ public class TrainRepository {
 		if (StringUtils.isBlank(bertModelDirectory)) return false;
 		if (StringUtils.isBlank(tensorflowModelDirectory)) return false;
 
-		Path results = Paths.get(resultsDirectory);
-		if (results.toFile() == null) return false;
-		if (results.toFile().exists() && (!results.toFile().isDirectory())) return false;
+		Path targetModel = Paths.get(targetModelDirectory);
+		if (targetModel.toFile() == null) return false;
+		if (targetModel.toFile().exists() && (!targetModel.toFile().isDirectory())) return false;
+
+		Path targetPipelineModel = Paths.get(targetPipelineModelDirectory);
+		if (targetPipelineModel.toFile() == null) return false;
+		if (targetPipelineModel.toFile().exists() && (!targetPipelineModel.toFile().isDirectory())) return false;
 
 		//Path target = Paths.get(targetModelDirectory);
 
@@ -213,7 +217,16 @@ public class TrainRepository {
 			
 			
 			String[] entities = {};
-			NerTrain nerTrainer = new NerTrain(
+			NerTrain nerTrainer = null;
+			Integer key = getHash(
+					posModelDirectory, 
+					bertModelDirectory, 
+					maxSentence, 
+					dimension, 
+					batchSize, 
+					caseSensitive);
+			if (!TRAINERS.containsKey(key)) {
+				nerTrainer = new NerTrain(
 					spark.sparkContext(),
 					spark,
 					HADOOP_FILE_PREFIX + posModelDirectory,
@@ -224,23 +237,18 @@ public class TrainRepository {
 					batchSize,
 					caseSensitive,
 					ArticleProcessor.MUTATIONS_NORMALIZE.values().toArray(entities));
+				TRAINERS.put(key, nerTrainer);
+			} else {
+				nerTrainer = TRAINERS.get(key);
+			}
 
 			nerTrainer.train(
 					trainFilename,
 					testFilename,
-					resultsFilename,
-					resultsDirectory);
-/*			
-			nerTrainer.
-				saveNerModel (
-					nerTrainer.
-						measureNerTraining(
-							trainFilename,
-							testFilename,
-							resultsFilename,
-							resultsDirectory),
-						HADOOP_FILE_PREFIX + targetModelDirectory);
-*/			
+					targetModelDirectory,
+					targetPipelineModelDirectory,
+					targetCsvFilename);
+
 			LOG.info(
 					"\r\nTRAIN TIME for [" + trainFilename + "] "  +
 					"\r\n\tINI:" + ini +

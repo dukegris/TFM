@@ -312,6 +312,7 @@
 			<artifactId>hadoop-hdfs</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
 		<!-- SPARK -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
@@ -328,6 +329,7 @@
 			<artifactId>spark-sql_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
 		<!-- NLP -->
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
@@ -339,6 +341,22 @@
 			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
 			<version>2.2.2</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.parquet</groupId>
+			<artifactId>parquet-hadoop</artifactId>
+			<version>1.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.databricks</groupId>
+			<artifactId>spark-xml_${scala.main}</artifactId>
+			<version>0.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.databricks</groupId>
+			<artifactId>spark-csv_${scala.main}</artifactId>
+			<version>1.5.0</version>
 		</dependency>
 
 		<!-- =====================================

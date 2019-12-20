@@ -1,5 +1,6 @@
 dist
 node_modules
+old
 target
 .attach_pid*
 .cache*
@@ -11,7 +12,6 @@ target
 __pycache__
 *.log
 /.metadata/
-/old/
 /es.rcs.tfm/es.rcs.tfm.corpus/data/mesh_gzip
 /es.rcs.tfm/es.rcs.tfm.corpus/data/mesh_xml
 /es.rcs.tfm/es.rcs.tfm.corpus/data/pubmed_gzip

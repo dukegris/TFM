@@ -13,11 +13,13 @@ import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.training.CoNLL
 import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs}
 
-import java.io.File
+import java.io.{BufferedWriter, File, FileWriter}
 
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
 import org.apache.spark.ml.PipelineModel
+
+import scala.collection.mutable
 
 import es.rcs.tfm.nlp.model.TfmType
 
@@ -51,8 +53,9 @@ class NerTrain(
   def train(
       trainFileName: String, 
       testFileName: String, 
-      predictionsCsvFileName: String, 
-      pipelineModelDirectory: String): PipelineModel = {
+      modelDirectory: String, 
+      pipelineModelDirectory: String, 
+      predictionsCsvFileName: String): PipelineModel = {
 
     println(java.time.LocalTime.now + ": NER-TRAIN: measureNerTraining")
     val nerReader = CoNLL()
@@ -61,28 +64,22 @@ class NerTrain(
     val trainDataset = nerReader.readDataset(spark, trainFile.path)
     val testDataset = nerReader.readDataset(spark, testFile.path)
 
-    val tmpParquetDir = testDataset.write.mode("overwrite").parquet("./CONLL-test.tmp.parquet")
-
     println(java.time.LocalTime.now + s": NER-TRAIN: Lectura en ${(System.nanoTime() - System.nanoTime())/1e9}\n")
-    val model = trainNerModel(nerReader, trainDataset, trainDataset)
-  
-//    measureNerModel(nerReader, model, trainFile, false)
+    val pipelineModel = trainNerModel(nerReader, trainDataset, testDataset)
     
-//    measureNerModel(nerReader, model, testFile, false)
+    // Guardar el pipeline
+    pipelineModel.write.overwrite().save(pipelineModelDirectory)
+
+    // Guardar el modelo
+    saveNerModel(pipelineModel, modelDirectory)
     
-//    val df = model.transform(nerReader.readDataset(spark, testFile.path))
+    // Medir el entrenamiento del modelo generado sobre los conjuntos de train y de test
+    val trainTransformed = measureNerModel(pipelineModel, trainDataset, predictionsCsvFileName + "_train.csv", false)
+    val testTransformed = measureNerModel(pipelineModel, testDataset, predictionsCsvFileName + "_test.csv", false)
     
-//    val nerHelper = new NerHelper(spark)
-  
-//    val annotation = Annotation.collect(df, TfmType.NAMED_ENTITY_SPAN)
-//    nerHelper.saveNerSpanTags(annotation, predictionsCsvFileName)
-    
-//    model.write.overwrite().save(pipelineModelDirectory)
-//    val loadedModel = PipelineModel.read.load(pipelineModelDirectory)
-    
-//    nerHelper.measureExact(nerReader, loadedModel, trainFile)
-    
-//    nerHelper.measureExact(nerReader, loadedModel, testFile)
+    // Medir el entrenamiento del modelo NER guardado
+    measureNerModelExact(pipelineModel, trainTransformed)
+    measureNerModelExact(pipelineModel, testTransformed)
 
     val dir = new File("./CONLL-test.tmp.parquet")
     dir.listFiles.foreach(f => {
@@ -90,7 +87,7 @@ class NerTrain(
     })
     dir.delete
     
-    model
+    pipelineModel
     
   }
  
@@ -102,9 +99,13 @@ class NerTrain(
 
     println(java.time.LocalTime.now + ": NER-TRAIN: trainNerModel")
 
+    // TODO En vez de testdata se debiera repartir el traindata en un 85-15
+    val preparedDataset = trainDataset.randomSplit(Array(0.85, 0.15), seed = 11L)
+    val tmpParquetDir = preparedDataset(1).write.mode("overwrite").format("parquet").save("./CONLL-test.tmp.parquet")
     val stages = createPipelineStagesDl("./CONLL-test.tmp.parquet")
+
     val pipeline = new RecursivePipeline().setStages(stages)
-    val model = pipeline.fit(trainDataset)
+    val model = pipeline.fit(preparedDataset(0))
 
     model
     
@@ -131,6 +132,135 @@ class NerTrain(
          
   }
   
+  
+  def measureNerModel(
+      model: PipelineModel, 
+      df: Dataset[_], 
+      csvFile: String,
+      extended: Boolean = true, 
+      errorsToPrint: Int = 0): DataFrame = {
+    
+    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel")
+    val nerTF = model.
+      stages.
+      filter(s => s.isInstanceOf[NerDLModel]).
+      head.
+      asInstanceOf[NerDLModel].
+      getModelIfNotSet
+
+    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel readed")
+    val transformed = model.transform(df)
+      
+    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel collect")
+    val annotation = Annotation.collect(transformed, TfmType.NAMED_ENTITY_SPAN)
+    saveNerSpanTags(annotation, csvFile)
+
+    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel transformed")
+    val labeled = NerTagged.
+      collectTrainingInstances(
+          transformed, 
+          Seq(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS), TfmType.LABEL)
+
+    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel labeled")
+    nerTF.measure(labeled, (s: String) => System.out.println(s), extended, errorsToPrint)
+
+    transformed
+    
+  }
+
+
+  def measureNerModelExact(
+      model: PipelineModel, 
+      transformed: DataFrame,  
+      printErrors: Int = 0): Unit = {
+    
+    val rows = transformed.select(TfmType.NAMED_ENTITY_SPAN, TfmType.LABEL_SPAN).collect()
+
+    val correctPredicted = mutable.Map[String, Int]()
+    val predicted = mutable.Map[String, Int]()
+    val correct = mutable.Map[String, Int]()
+    var toPrintErrors = printErrors
+
+    for (row <- rows) {
+
+      val predictions = NerTagged.getAnnotations(row, 0).filter(a => a.result != "O")
+      val labels = NerTagged.getAnnotations(row, 1).filter(a => a.result != "O")
+
+      for (p <- predictions) {
+        val tag = p.metadata("entity")
+        predicted(tag) = predicted.getOrElse(tag, 0) + 1
+      }
+
+      for (l <- labels) {
+        val tag = l.metadata("entity")
+        correct(tag) = correct.getOrElse(tag, 0) + 1
+      }
+
+      val correctPredictions = labels.toSet.intersect(predictions.toSet)
+
+      for (a <- correctPredictions) {
+        val tag = a.metadata("entity")
+        correctPredicted(tag) = correctPredicted.getOrElse(tag, 0) + 1
+      }
+
+      if (toPrintErrors > 0) {
+        for (p <- predictions) {
+          if (toPrintErrors > 0 && !correctPredictions.contains(p)) {
+            System.out.println(s"Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
+            toPrintErrors -= 1
+          }
+        }
+
+        for (p <- labels) {
+          if (toPrintErrors > 0 && !correctPredictions.contains(p)) {
+            System.out.println(s"Correct\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
+            toPrintErrors -= 1
+          }
+        }
+      }
+    }
+
+    val (prec, rec, f1) = calcStat(correct.values.sum, predicted.values.sum, correctPredicted.values.sum)
+    System.out.println(s"$prec\t$rec\t$f1")
+
+    val tags = (correct.keys ++ predicted.keys ++ correctPredicted.keys).toList.distinct
+
+    for (tag <- tags) {
+      val (prec, rec, f1) = calcStat(correct.getOrElse(tag, 0), predicted.getOrElse(tag, 0), correctPredicted.getOrElse(tag, 0))
+      System.out.println(s"$tag\t$prec\t$rec\t$f1")
+    }
+  }
+
+  
+  def calcStat(correct: Int, predicted: Int, predictedCorrect: Int): (Float, Float, Float) = {
+    // prec = (predicted & correct) / predicted
+    // rec = (predicted & correct) / correct
+    val prec = predictedCorrect.toFloat / predicted
+    val rec = predictedCorrect.toFloat / correct
+    val f1 = 2 * prec * rec / (prec + rec)
+
+    (prec, rec, f1)
+  }
+
+  
+  /**
+    * Saves ner results to csv file
+    * @param annotations
+    * @param file
+    */
+  def saveNerSpanTags(
+      annotations: Array[Array[Annotation]], 
+      file: String): Unit = {
+    val bw = new BufferedWriter(new FileWriter(new File(file)))
+
+    bw.write(s"start\tend\ttag\ttext\n")
+    for (i <- 0 until annotations.length) {
+      for (a <- annotations(i))
+        bw.write(s"${a.begin}\t${a.end}\t${a.result}\t${a.metadata("entity").replace("\n", " ")}\n")
+    }
+    bw.close()
+  }
+
 
   def createPipelineStagesDl(
       testDataset: String) = {
@@ -164,7 +294,7 @@ class NerTrain(
     	setCaseSensitive(caseSensitive).
     	setBatchSize(batchSize)
 
-    val nerTagger =  new NerDLApproach().
+    val ner =  new NerDLApproach().
 
       // CONFIGURACION TENSORFLOW
       // setConfigProtoBytes(bytes). // ConfigProto from tensorflow, serialized into byte array
@@ -228,43 +358,11 @@ class NerTrain(
     		token,
     		pos,
     		embeddings,
-    		nerTagger,
+    		ner,
     		converter,
     		labelConverter
     )
  
   }
-
-  /*
-  
-  def measureNerModel(nerReader: CoNLL, model: PipelineModel, file: ExternalResource, extended: Boolean = true, errorsToPrint: Int = 0): Unit = {
-    
-    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel")
-    val ner = model.
-      stages.
-      filter(s => s.isInstanceOf[NerDLModel]).
-      head.
-      asInstanceOf[NerDLModel].
-      getModelIfNotSet
-
-    val df = nerReader.
-      readDataset(spark, file.path).
-      toDF()
-
-    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel readed")
-    val transformed = model.
-      transform(df)
-
-    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel transformed")
-    val labeled = NerTagged.
-      collectTrainingInstances(
-          transformed, 
-          Seq(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS), TfmType.LABEL)
-
-    println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel labeled")
-    ner.measure(labeled, (s: String) => System.out.println(s), extended, errorsToPrint)
-
-  }
-  */
   
 }
