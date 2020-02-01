@@ -19,7 +19,6 @@ import es.rcs.tfm.nlp.model.TfmType
  */
 class CoNLL2003Generator(spark: SparkSession) {
 
-  
   /**
    * Genera un dataset procesado por NerDL a formato CONLL2003 
    * @param data Datos a exportar
@@ -52,12 +51,12 @@ class CoNLL2003Generator(spark: SparkSession) {
     		Array[(String, String)])]
     
     // ---------------------------------------------------------------------------------------
-    // Expresiones regulares para tratar las tuplas
+    // Expresiones regulares para tratar las tuplas.
     // note [655, 661, G13513A, MUT_DMA]
     val NOTES_PTR:Regex = raw"\[\s*(\d+)\s*,\s*(\d+)\s*,\s*(.+)\s*,\s*(\w+)\s*\]".r
     
     // [token,1509,1511,the,Map(sentence -> 10),WrappedArray()]
-    // Esta expresion procesa este texto con case
+    // Esta expresion procesa este texto con case en vez de utilizar el esquema de anotaciones de SparkNLP
     val TOKEN_PTR:Regex = raw"\[(\w+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(.+)\s*,\s*.*\]".r 
 
     // ---------------------------------------------------------------------------------------
@@ -161,20 +160,20 @@ class CoNLL2003Generator(spark: SparkSession) {
             // CASO DE UNA MUTACION COINCIDENTE COIN UN TOKEN
             if         ((tupla._1._1 == iob(0)._1) && (tupla._1._2 + 1 == iob(0)._2) ) {
               enc = iob.length
-              str = iob(0)._4
+              str = "I-" + iob(0)._4 // Forzado por SparkNLP
             // CASO DE UNA MUTACION QUE ARRANCA CON UN NER
             } else if  ((tupla._1._1 <= iob(0)._1) && (tupla._1._2 + 1 >  iob(0)._1) ) {
               enc = iob.length
               str = "B-" + iob(0)._4
             // CASO DE UNA MUTACION QUE ACABA CON UN NER
             } else if  ((tupla._1._1 <  iob(0)._2) && (tupla._1._2 + 1 >= iob(0)._2) ) {
-              str = "E-" + iob(0)._4
+              str = "I-" + iob(0)._4 // E- para formatos IOB2
             // CASO DE UNA MUTACION QUE DENTRO DE UN NER
             } else if  ((tupla._1._1 > iob(0)._1)  && (tupla._1._2 + 1 <  iob(0)._2) ) {
               str = "I-" + iob(0)._4
             } else {
               enc = iob.length
-              str = iob(0)._4
+              str = "I-" + iob(0)._4 // Forzado por SparkNLP
             }
             coords = coords + " - (" + iob(0)._1 + ", " + iob(0)._2 + ")" + " encontradas " + iob.length + " notas"
 

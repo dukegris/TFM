@@ -152,7 +152,7 @@ class NerTrain(
     val transformed = model.transform(df)
       
     println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel collect")
-    val annotation = Annotation.collect(transformed, TfmType.NAMED_ENTITY_SPAN)
+    val annotation = Annotation.collect(transformed, TfmType.CONVERTER_NAMED_ENTITY)
     saveNerSpanTags(annotation, csvFile)
 
     println(java.time.LocalTime.now + ": NER-TRAIN: measureNerModel transformed")
@@ -174,7 +174,7 @@ class NerTrain(
       transformed: DataFrame,  
       printErrors: Int = 0): Unit = {
     
-    val rows = transformed.select(TfmType.NAMED_ENTITY_SPAN, TfmType.LABEL_SPAN).collect()
+    val rows = transformed.select(TfmType.CONVERTER_NAMED_ENTITY, TfmType.CONVERTER_LABEL).collect()
 
     val correctPredicted = mutable.Map[String, Int]()
     val predicted = mutable.Map[String, Int]()
@@ -331,11 +331,11 @@ class NerTrain(
 
     val converter = new NerConverter().
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).
-    	setOutputCol(TfmType.NAMED_ENTITY_SPAN)
+    	setOutputCol(TfmType.CONVERTER_NAMED_ENTITY)
 
     val labelConverter = new NerConverter()
       .setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.LABEL))
-      .setOutputCol(TfmType.LABEL_SPAN)
+      .setOutputCol(TfmType.CONVERTER_LABEL)
 
     val finisher = new Finisher().
     	setInputCols(Array(
@@ -347,8 +347,9 @@ class NerTrain(
           TfmType.POS, 
           TfmType.WORD_EMBEDDINGS, 
           TfmType.NAMED_ENTITY, 
-          TfmType.NAMED_ENTITY_CHUNK,
-          TfmType.LABEL_SPAN)).
+          TfmType.CONVERTER_NAMED_ENTITY,
+          TfmType.LABEL,
+          TfmType.CONVERTER_LABEL)).
     	setIncludeMetadata(true).
       setCleanAnnotations(false)
 

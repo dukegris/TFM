@@ -126,7 +126,7 @@ class NerPipeline(
 
     val converter = new NerConverter().
     	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY)).
-    	setOutputCol(TfmType.NAMED_ENTITY_CHUNK)
+    	setOutputCol(TfmType.CONVERTER_NAMED_ENTITY)
 
     val finisher = new Finisher().
       setInputCols(Array(
@@ -138,7 +138,7 @@ class NerPipeline(
           TfmType.POS, 
           TfmType.WORD_EMBEDDINGS, 
           TfmType.NAMED_ENTITY, 
-          TfmType.NAMED_ENTITY_CHUNK)).
+          TfmType.CONVERTER_NAMED_ENTITY)).
       setIncludeMetadata(true).
       setCleanAnnotations(false)
 
