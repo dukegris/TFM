@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 
 import es.rcs.tfm.db.model.PubArticleEntity;
-import es.rcs.tfm.solr.model.IdxArticleSolr;
+import es.rcs.tfm.solr.model.PubArticleIdx;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -93,7 +93,7 @@ public class Articulo {
 	private Fichero ficheroPubmed;
 	
 	private PubArticleEntity entidad;
-	private IdxArticleSolr indice;
+	private PubArticleIdx indice;
 
 	public Articulo() {
 		super();

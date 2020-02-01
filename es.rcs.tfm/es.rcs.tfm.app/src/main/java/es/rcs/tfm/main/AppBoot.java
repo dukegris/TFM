@@ -13,18 +13,17 @@ import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.nlp.NlpNames;
 import es.rcs.tfm.solr.IndexNames;
 import es.rcs.tfm.srv.SrvNames;
-import es.rcs.tfm.web.WebNames;
 import es.rcs.tfm.xml.XmlNames;
 
 @ComponentScan(basePackages = {
 		AppNames.APP_CONFIG_PKG,
+		AppNames.APP_SERVICES_PKG,
 		XmlNames.XML_CONFIG_PKG,
 		DbNames.DB_CONFIG_PKG,
 		IndexNames.IDX_CONFIG_PKG,
 		NlpNames.NLP_CONFIG_PKG,
 		SrvNames.SRV_CONFIG_PKG,
-		ApiNames.API_CONFIG_PKG,
-		WebNames.WEB_CONFIG_PKG
+		ApiNames.API_CONFIG_PKG
 		})
 public class AppBoot implements WrapperListener {
 	

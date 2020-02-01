@@ -134,6 +134,7 @@ public class Fichero {
 		
 	}
 	
+
 	/**
 	 * Se encarga de instanciar un objeto fichero a partir de un fichero del FTP de PubMed
 	 * @param filename Ruta al fichero

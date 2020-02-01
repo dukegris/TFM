@@ -19,6 +19,8 @@ public class Termino {
 	public static final String ORGANISMO = "Organism";
 	public static final String DOLENCIA = "Disease";
 
+	public static final String MESH = "MESH";
+
 	private String type;
 	private String name;
 	private String value;
@@ -37,8 +39,9 @@ public class Termino {
 		this.value = value;
 	}
 
-	public Termino(String name, String value, Map<String, String> cualificadores) {
+	public Termino(String type, String name, String value, Map<String, String> cualificadores) {
 		super();
+		this.type = type;
 		this.name = name;
 		this.value = value;
 		addTerms(cualificadores);

@@ -1,5 +1,6 @@
 package es.rcs.tfm.web.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -7,6 +8,10 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.rcs.tfm.web.WebNames;
 
@@ -35,5 +40,12 @@ public class WebConfig implements WebMvcConfigurer {
 		}
 	}
 
+	@Bean ( name = WebNames.WEB_JACKSON_MAPPER )
+	public ObjectMapper getObjectMapper() {
+		ObjectMapper bean = new ObjectMapper();
+		bean.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		bean.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, true);
+		return bean;
+	}
 
 }

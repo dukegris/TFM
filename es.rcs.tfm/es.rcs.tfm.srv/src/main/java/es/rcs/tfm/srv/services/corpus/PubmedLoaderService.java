@@ -82,10 +82,26 @@ public class PubmedLoaderService {
 					SOLO_GZIP_PTRN.matcher(f.getName()).find()).
 			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
 			map(f -> 
+					/*
+					f.getGroup();
+					f.getHardLinkCount();
+					f.getLink();
+					f.getName();
+					f.getRawListing();
+					f.getSize();
+					f.getType();
+					f.getTimestamp();
+					f.getUser();
+					f.isDirectory();
+					f.isFile();
+					f.isSymbolicLink();
+					f.isUnknown();
+					f.isValid();
+					*/
 					Fichero.getInstance(
 							f.getName(),
 							f.getTimestamp(),
-							f.getSize())).
+							f.getSize()) ).
 			// Calcular el fichero debe ser procesado
 			peek (f->
 				corpusSrvc.calculateIfTheProcessIsNeeded(f)).
@@ -109,16 +125,15 @@ public class PubmedLoaderService {
 			// Procesar XML con articulos
 			flatMap(f -> 
 					StreamSupport.stream(
-						Spliterators.spliteratorUnknownSize(
-								new PubmedXmlProcessor(Paths.get(FilenameUtils.concat(
-										CORPUS_PUBMED_XML_DIRECTORY, 
-										f.getUncompressFichero()))), 
-								Spliterator.DISTINCT), 
-						false)).
+							Spliterators.spliteratorUnknownSize(
+									new PubmedXmlProcessor(Paths.get(FilenameUtils.concat(
+											CORPUS_PUBMED_XML_DIRECTORY, 
+											f.getUncompressFichero()))), 
+									Spliterator.DISTINCT), 
+							false)).
 			//Comprobar si se requiere descargar
 			map (a->
 					corpusSrvc.calculateIfTheProcessIsNeeded(a)).
-			// Actualizar datos de los ficheros en DB
 			// Actualizar datos de los ficheros en DB
 			peek(a -> {
 					if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);}).
@@ -128,6 +143,7 @@ public class PubmedLoaderService {
 			;
 		
 		//List<Fichero> f = ficherosStream.collect(Collectors.toList());
+		//System.out.println("\t" + f.size());
 		List<Articulo> a = articulosStream.collect(Collectors.toList());
 		System.out.println("\t" + a.size());
 		//System.out.println(f.size() + "\t" + a.size());

@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.solr.IndexNames;
-import es.rcs.tfm.solr.model.IdxArticleSolr;
+import es.rcs.tfm.solr.model.PubArticleIdx;
 
 @Configuration( AppNames.SOLR_CONFIG )
 @PropertySource("classpath:/META-INF/solr.properties")
@@ -37,7 +37,7 @@ public class SolrConfig {
     	// return new HttpSolrClient.Builder(solrURL).build();
         //EmbeddedSolrServerFactory factory = new EmbeddedSolrServerFactory("classpath:solr");
     	//return factory.getSolrClient();
-    	EmbeddedSolrServer server = new EmbeddedSolrServer(Paths.get(solrHome), IdxArticleSolr.CORE);
+    	EmbeddedSolrServer server = new EmbeddedSolrServer(Paths.get(solrHome), PubArticleIdx.CORE);
     	return server;
     	
     }

@@ -8,7 +8,7 @@
 	
 	
 	<persistence-unit 
-		name="TfmPU" 
+		name="TFM-PU" 
 		transaction-type="RESOURCE_LOCAL">
 	</persistence-unit>
 	

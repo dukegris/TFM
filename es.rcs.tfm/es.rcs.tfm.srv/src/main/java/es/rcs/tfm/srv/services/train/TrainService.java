@@ -54,7 +54,7 @@ public class TrainService {
 	
 	private @Value("${tfm.mutations.in.model.pos}")				String MUTATIONS_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
 	private @Value("${tfm.mutations.in.model.bert}")			String MUTATIONS_IN_BERT_MODEL =			"uncased_L-24_H-1024_A-16_M-128_B-32";
-	private @Value("${tfm.mutations.out.pubtator.model.ner}")	String MUTATIONS_FROM_PUBTATOR_NER_MODEL =	"tfm_ner_pubtator_1.0.0_uncased_L-24_H-1024_A-16_M-128_B-32";
+	private @Value("${tfm.mutations.out.pubtator.model.ner}")	String MUTATIONS_FROM_PUBTATOR_NER_MODEL =	"tfm_ner_pubtator_1.0.0-uncased_L-24_H-1024_A-16_M-128_B-32";
 	private @Value("${tfm.mutations.out.bioc.model.ner}")		String MUTATIONS_FROM_BIOC_NER_MODEL =		"tfm_ner_bioc_1.0.0_uncased_L-24_H-1024_A-16_M-128_B-32";
 
 	public void trainModel(SparkSession spark) {
@@ -168,18 +168,6 @@ public class TrainService {
 		}
 		return result;
 	}
-		
-
-	/**
-	 * Genera un modelo NER entrenado a parti de datos en CONLL2003
-	 * @param spark La instancia de Spark
-	 * @param trainfile Fichero de entrenamiento
-	 * @param testfile Fichero de Pruebas
-	 * @param outdir Directorio donde se generará el modelo NER 
-	 * @param posmodel El modelo POS 
-	 * @param bertmodel El modelo BERT 
-	 * @param tensorflowmodel Directorio con los grafos de TensorFLow para el entrenamiento
-	 */
 	public void trainModel(
 			SparkSession spark, 
 			String trainfile, 
@@ -218,12 +206,12 @@ public class TrainService {
 					spark, 
 					trainfile, 
 					testfile, 
-					outdir,
+					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".csv", 
 					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
-					outdirname.toFile().getName() + "_" + filename.toFile().getName(), 
 					posmodelDirectory.getAbsolutePath(),
 					bertmodelDirectory.getAbsolutePath(), 
 					tensorflowmodelDirectory.getAbsolutePath(), 
+					outdir,
 					getMaxSentence(bertmodel),
 					getDimension(bertmodel),
 					getBatchSize(bertmodel),
@@ -267,8 +255,8 @@ public class TrainService {
 					(posmodelDirectory == null) || 
 					!posmodelDirectory.exists() || 
 					!posmodelDirectory.isDirectory()) 
-				posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
-
+				posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			
 			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
 			if (	StringUtils.isBlank(bertmodel) ||
 					(bertmodelDirectory == null) || 
@@ -313,6 +301,7 @@ public class TrainService {
 	 * @param spark La instancia de Spark
 	 * @param infile Fichero Pubtator
 	 * @param outfile Fichero Conll
+	 * @param posmodel El modelo POS 
 	 * @param bertmodel El modelo BERT 
 	 * @param nermodel  El modelo NER
 	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
@@ -330,6 +319,13 @@ public class TrainService {
 			
 			Path filename = Paths.get(infile);
 			
+			File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
+			if (	StringUtils.isBlank(posmodel) ||
+					(posmodelDirectory == null) || 
+					!posmodelDirectory.exists() || 
+					!posmodelDirectory.isDirectory()) 
+				posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+
 			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
 			if (	StringUtils.isBlank(bertmodel) ||
 					(bertmodelDirectory == null) || 
@@ -348,7 +344,7 @@ public class TrainService {
 					spark, 
 					new TmVarTxtProcessor(filename), 
 					infile, 
-					FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL),
+					posmodelDirectory.getAbsolutePath(),
 					bertmodelDirectory.getAbsolutePath(), 
 					nermodelDirectory.getAbsolutePath(),
 					outfile,

@@ -1,5 +1,5 @@
 package es.rcs.tfm.api.repository;
 
-public class AuthorRep {
+public class AuthorRepository {
 
 }

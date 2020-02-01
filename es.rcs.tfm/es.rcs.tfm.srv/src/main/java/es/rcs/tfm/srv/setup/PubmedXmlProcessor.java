@@ -110,7 +110,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	private static final String YES = 					"Y";
 	private static final String NO =					"N";
 
-	private static final String DATE_FULL_FMT =			"yyyyMMdd HHmmss";
+	//private static final String DATE_FULL_FMT =			"yyyyMMdd HHmmss";
 	private static final SimpleDateFormat DATE_FMT =	new SimpleDateFormat("yyyy/MM/dd");
 	private static final String DATE_SIMPLE_FMT =		"%s-%s-%s";
 	private static final String DATE_EUR_MADRID =		"Europe/Madrid";
@@ -613,10 +613,10 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance ->	{
 				String type = null;
-			    if (StringUtils.isBlank(instance.getIdType())) {
-			    	if (IS_NUMERIC.matcher(instance.getIdType()).matches()) type = "pmid";
-			    	if ("rspb".indexOf(instance.getIdType()) >= 0) type = "doi";
-				}
+		    	if ((type == null) && (IS_NUMERIC.matcher(instance.getIdType()).matches())) type = Articulo.PUBMED_ID_NAME;
+		    	if ((type == null) && ("pubmed".equals(instance.getIdType()))) type = Articulo.PUBMED_ID_NAME;
+		    	if ((type == null) && ("rspb".indexOf(instance.getIdType()) >= 0)) type = Articulo.DOI_ID_NAME;
+		    	if (type == null) type = instance.getIdType();
 				return new SimpleEntry<String, String>(
 							type,
 							instance.getvalue());
@@ -1818,6 +1818,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							p -> p.getValue(),
 							(o1, o2) -> o1 + ", " + o2 ));
 				return new Termino(
+						Termino.MESH,
 						instance.getDescriptorName().getUI(),
 						instance.getDescriptorName().getvalue(),
 						items);			

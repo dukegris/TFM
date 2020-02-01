@@ -87,6 +87,8 @@ public class LoadFromPubMedTest extends TestCase {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
 	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+	        spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+	        spf.setFeature("http://xml.org/sax/features/validation", false);
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 	        InputSource inputSource = new InputSource(new FileReader(pathXML.toFile()));
 	        SAXSource source = new SAXSource(xmlReader, inputSource);

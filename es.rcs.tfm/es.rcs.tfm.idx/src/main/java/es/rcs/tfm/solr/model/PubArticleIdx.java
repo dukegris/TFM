@@ -11,8 +11,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@SolrDocument(collection = IdxArticleSolr.CORE)
-public class IdxArticleSolr {
+@SolrDocument(collection = PubArticleIdx.CORE)
+public class PubArticleIdx {
 
 	public static final String COLLECTION		= "article_collection";
 	public static final String CORE				= "article_core";

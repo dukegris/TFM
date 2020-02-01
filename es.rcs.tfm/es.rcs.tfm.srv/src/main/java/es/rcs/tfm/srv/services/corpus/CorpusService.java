@@ -21,8 +21,8 @@ import es.rcs.tfm.db.model.PubFileEntity;
 import es.rcs.tfm.db.repository.PubArticleRepository;
 import es.rcs.tfm.db.repository.PubFileRepository;
 import es.rcs.tfm.solr.IndexNames;
-import es.rcs.tfm.solr.model.IdxArticleSolr;
-import es.rcs.tfm.solr.repository.IdxArticleRepository;
+import es.rcs.tfm.solr.model.PubArticleIdx;
+import es.rcs.tfm.solr.repository.PubArticleIdxRepository;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
 import es.rcs.tfm.srv.model.Fichero;
@@ -119,6 +119,8 @@ public class CorpusService {
 	 * @return Fichero actualizado con las operaciones de actualización requeridas
 	 */
 	public Fichero calculateIfTheProcessIsNeeded(Fichero obj) {
+		
+		if (obj == null) return null;
 		
 		// Buscar en la Base de datos el fichero
 		PubFileEntity db = searchFicheroInDb(obj);
@@ -293,11 +295,11 @@ public class CorpusService {
 			
 			// ---------------------------------------------------------------------
 			// Search Article in index
-			IdxArticleSolr idx = null;
+			PubArticleIdx idx = null;
 			boolean idxFound = false;
 			
 			if (!idxFound && (StringUtils.isNotBlank(obj.getPmid()))) {
-				List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
+				List<PubArticleIdx> idxs = articleSOLR.findByPmid(obj.getPmid());
 				if ((idxs != null) && (!idxs.isEmpty())) {
 					idxFound = true;
 					idx = idxs.get(0);
@@ -308,12 +310,13 @@ public class CorpusService {
 			if (!idxFound) {
 				if (idx == null) {
 					idxUpdateNeeded = true;
-					idx = new IdxArticleSolr();
+					idx = new PubArticleIdx();
 				}
 				obj.setIndice(idx);
 			}
 
 			// Check Articulo changes vs index
+			// TODO Solo revisamos Titulo y resumen
 			if (!idxUpdateNeeded) {
 				if		(StringUtils.isNotBlank(obj.getTitulo().getTitulo())) {
 					if 	(StringUtils.isBlank(idx.getTitle())) {
@@ -351,6 +354,40 @@ public class CorpusService {
 		try {
 			
 			PubArticleEntity db = searchArticuloInDb(obj);
+			
+			obj.getAutores();
+			obj.getBlocks();
+			//obj.getBlocksOfType(type);
+			obj.getDatos();
+			obj.getDescriptores();
+			obj.getEntidad();
+			obj.getEstado();
+			obj.getFarmacos();
+			obj.getFasciculo();
+			obj.getFechas();
+			obj.getFicheroPmc();
+			obj.getFicheroPubmed();
+			obj.getGenes();
+			obj.getIdioma();
+			obj.getIds();
+			obj.getKeywords();
+			obj.getLibro();
+			obj.getLocalizacion();
+			obj.getMedio();
+			obj.getObservaciones();
+			obj.getPermisos();
+			obj.getPmid();
+			obj.getReferencias();
+			obj.getResumen();
+			obj.getResumenAlternativo();
+			obj.getRevista();
+			obj.getSecciones();
+			obj.getTerminos();
+			obj.getTitulo();
+			obj.getTituloOriginal();
+			obj.getVersion();
+			obj.getVersionFecha();
+			
 /*
 			db.setFilePmc(filePmc);
 			db.setFilePubmed(filePubmed);
@@ -405,7 +442,7 @@ public class CorpusService {
 
 		try {
 			
-			IdxArticleSolr idx = searchArticuloInIdx(obj);
+			PubArticleIdx idx = searchArticuloInIdx(obj);
 			
 			idx.setPmid(obj.getPmid());
 			idx.setTitle(obj.getTitulo().getTitulo());
@@ -465,17 +502,17 @@ public class CorpusService {
 	 * @param obj Datos del articulo
 	 * @return Articulo en la base de datos
 	 */
-	public IdxArticleSolr searchArticuloInIdx(
+	public PubArticleIdx searchArticuloInIdx(
 			Articulo obj) {
 		
-		IdxArticleSolr idx = obj.getIndice();
+		PubArticleIdx idx = obj.getIndice();
 		
 		try {
 			
 			if (	(idx == null) &&
 					(StringUtils.isNotBlank(obj.getPmid()))) {
 	
-				List<IdxArticleSolr> idxs = articleSOLR.findByPmid(obj.getPmid());
+				List<PubArticleIdx> idxs = articleSOLR.findByPmid(obj.getPmid());
 				if ((idxs != null) && (!idxs.isEmpty())) {
 					idx = idxs.get(0);
 				}
@@ -487,7 +524,7 @@ public class CorpusService {
 		}
 
 		if (	(idx == null)) {
-			idx = new IdxArticleSolr();
+			idx = new PubArticleIdx();
 		}
 
 		return idx;		
@@ -504,6 +541,6 @@ public class CorpusService {
 	
 	@Autowired
 	@Qualifier( value = IndexNames.IDX_ALL_ARTICLES_REP )
-	IdxArticleRepository articleSOLR;
+	PubArticleIdxRepository articleSOLR;
 
 }

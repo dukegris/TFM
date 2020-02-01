@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.google.common.base.Preconditions;
 
 import es.rcs.tfm.api.ApiNames;
-import es.rcs.tfm.solr.model.IdxArticleSolr;
-import es.rcs.tfm.solr.repository.IdxArticleRepository;
+import es.rcs.tfm.solr.model.PubArticleIdx;
+import es.rcs.tfm.solr.repository.PubArticleIdxRepository;
 
 @Controller
 @RequestMapping(ApiNames.API_URL_BASE + ApiNames.API_ARTICLES)
 public class ArticleController {
 
     @Autowired
-    private IdxArticleRepository repository;
+    private PubArticleIdxRepository repository;
 
 	public static class RestPreconditions {
 	    public static <T> T checkFound(T resource) throws Exception {
@@ -35,28 +35,28 @@ public class ArticleController {
 	}
 	
 	@GetMapping
-	public Iterable<IdxArticleSolr> findAll() {
-		Iterable<IdxArticleSolr> instances = repository.findAll();
+	public Iterable<PubArticleIdx> findAll() {
+		Iterable<PubArticleIdx> instances = repository.findAll();
 		return instances;
 	}
 
 	@GetMapping(value = "/{id}")
-	public IdxArticleSolr findById(@PathVariable("id") String id) throws Exception {
-		IdxArticleSolr instance = RestPreconditions.checkFound(repository.findById(id).get());
+	public PubArticleIdx findById(@PathVariable("id") String id) throws Exception {
+		PubArticleIdx instance = RestPreconditions.checkFound(repository.findById(id).get());
 		return instance;
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public IdxArticleSolr create(@RequestBody IdxArticleSolr resource) {
+	public PubArticleIdx create(@RequestBody PubArticleIdx resource) {
 		Preconditions.checkNotNull(resource);
-		IdxArticleSolr instance = repository.save(resource);
+		PubArticleIdx instance = repository.save(resource);
 		return instance;
 	}
 
 	@PutMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void update(@PathVariable("id") String id, @RequestBody IdxArticleSolr resource) {
+	public void update(@PathVariable("id") String id, @RequestBody PubArticleIdx resource) {
 		Preconditions.checkNotNull(resource);
 		Preconditions.checkNotNull(repository.findById(resource.getId()).get());
 		repository.save(resource);

@@ -123,7 +123,7 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter {
     }
     
 	@Autowired
-	@Qualifier(value = WebNames.WEB_JACKSON_MAPPER )
+	@Qualifier( value = WebNames.WEB_JACKSON_MAPPER )
 	private ObjectMapper objectMapper;
 
 }

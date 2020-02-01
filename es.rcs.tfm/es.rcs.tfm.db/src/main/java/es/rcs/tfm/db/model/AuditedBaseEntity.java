@@ -19,6 +19,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -27,15 +30,17 @@ import lombok.Setter;
 import lombok.ToString;
 
 @MappedSuperclass
-@Getter()
+@Getter
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper=false)
 public class AuditedBaseEntity {
 
+	
 	@Transient
 	private static final Logger LOG = LoggerFactory.getLogger(AuditedBaseEntity.class);
 
+	
 	@JsonApiId
 	@Id
 	@GeneratedValue(
@@ -47,6 +52,10 @@ public class AuditedBaseEntity {
 			updatable = true)
 	protected Long id;
 	
+	
+	@JsonProperty(
+			value = "uuid",
+			required = true)
 	@Column(
 			nullable = false, 
 			unique = true, 
@@ -54,18 +63,46 @@ public class AuditedBaseEntity {
 	@Getter(AccessLevel.NONE)
 	protected String uuid;
 
-	@Version
+	
+	@JsonProperty(
+			value = "release",
+			required = true)
 	@Column(
 			unique = false, 
 			nullable = false)
+	@Version
 	protected Long lock = 1L;
+	
+	
+	@JsonProperty(
+			value = "status",
+			required = true)
+	@Column(
+			unique = false, 
+			nullable = true, 
+			length = 32)
+    protected String status;	
+	
+	
+	@JsonProperty(
+			value = "comment",
+			required = false)
+	@Column(
+			unique = false, 
+			nullable = true, 
+			length = 1024)
+    protected String comment;	
 
+	
+	@JsonIgnore
 	@Column(
 			unique = false, 
 			nullable = false)
     @CreatedDate
     private ZonedDateTime createdAt;
 	
+	
+	@JsonIgnore
 	@Column(
 			unique = false, 
 			nullable = false, 
@@ -73,31 +110,23 @@ public class AuditedBaseEntity {
     @CreatedBy
     private String createdBy;
 	
+	
+	@JsonIgnore
 	@Column(
 			unique = false, 
 			nullable = false)
     @LastModifiedDate
     private ZonedDateTime modifiedAt;
 	
+	@JsonIgnore
 	@Column(
 			unique = false, 
 			nullable = false, 
 			length = 256)
     @LastModifiedBy
     private String modifiedBy;	
-	
-	@Column(
-			unique = false, 
-			nullable = true, 
-			length = 32)
-    protected String status;	
-	
-	@Column(
-			unique = false, 
-			nullable = true, 
-			length = 1024)
-    protected String comment;	
 
+	
 	@PrePersist
     public void prePersist() {
         this.uuid = getUuid();

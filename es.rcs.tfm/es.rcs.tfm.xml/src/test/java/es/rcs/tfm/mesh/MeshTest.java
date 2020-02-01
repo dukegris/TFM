@@ -73,6 +73,8 @@ public class MeshTest {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
 	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+	        spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+	        spf.setFeature("http://xml.org/sax/features/validation", false);
 	        spf.setNamespaceAware(true);
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
 	        InputSource inputSource = new InputSource(new FileReader(file));

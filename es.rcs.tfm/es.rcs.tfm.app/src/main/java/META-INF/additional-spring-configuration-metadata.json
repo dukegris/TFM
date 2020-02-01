@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "crnk.config.resource.request.allow-unknown-parameters",
+    "type": "java.lang.String",
+    "description": "A description for 'crnk.config.resource.request.allow-unknown-parameters'"
+  },
+  {
+    "name": "crnk.enforceDotSeparator",
+    "type": "java.lang.String",
+    "description": "A description for 'crnk.enforceDotSeparator'"
+  }
+]}

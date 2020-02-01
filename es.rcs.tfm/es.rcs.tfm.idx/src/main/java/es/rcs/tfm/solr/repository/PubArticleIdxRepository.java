@@ -9,25 +9,25 @@ import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
 import es.rcs.tfm.solr.IndexNames;
-import es.rcs.tfm.solr.model.IdxArticleSolr;
+import es.rcs.tfm.solr.model.PubArticleIdx;
 
 @Repository(IndexNames.IDX_ALL_ARTICLES_REP)
-public interface IdxArticleRepository extends 
-		SolrCrudRepository<IdxArticleSolr, String> {
+public interface PubArticleIdxRepository extends 
+		SolrCrudRepository<PubArticleIdx, String> {
 	 
-	public List<IdxArticleSolr> findByTitle(
+	public List<PubArticleIdx> findByTitle(
 			String title);
 	 
-	public List<IdxArticleSolr> findByPmid(
+	public List<PubArticleIdx> findByPmid(
 			String pmid);
 	 
 	@Query( "id:*?0* OR title:*?0*" )
-	public Page<IdxArticleSolr> findByCustomQuery(
+	public Page<PubArticleIdx> findByCustomQuery(
 			String searchTerm, 
 			Pageable pageable);
 	 
 	@Query( name = "Article.findInSummary" )
-	public Page<IdxArticleSolr> findInSummary(
+	public Page<PubArticleIdx> findInSummary(
 			String searchTerm, 
 			Pageable pageable);
 
