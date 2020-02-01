@@ -3,7 +3,14 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+	production: false,
+	numRowsInPage: 20,
+	accountLoginUrl: '/api/account/login',
+	accountMeUrl: '/api/account/me',
+	crnkApiUrl: 'http://localhost:4101/api/data',
+	applicationUrl: 'applications',
+	moduleUrl: 'modules',
+	functionUrl: 'functions',
 };
 
 /*

@@ -1,0 +1,40 @@
+<mat-toolbar 
+        color="primary">
+    <mat-toolbar-row>
+        <button 
+                mat-icon-button
+                (click)="sidenavToggle()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <h1>TFM: B&uacute;squeda de Bioentidades</h1>
+        <span class="menu-spacer"></span>
+        <div *ngIf="applications">
+            <div 
+                    *ngFor="let element of applications">
+                <a mat-button [routerLink]="[element.url.toLowerCase()]"> {{element.name}} </a>
+            </div>
+        </div>
+
+		<!--Usuario-->
+		<div>
+			<button	mat-icon-button
+					[matMenuTriggerFor]="menuUser">
+				<mat-icon>person</mat-icon>
+			</button>
+			<mat-menu #menuUser="matMenu">
+				<div	*ngFor="let element of userMenu">
+					<a 		mat-list-item 
+							*ngIf="('-'.indexOf(element.name) < 0) && isUserMenuPermited(element)"
+							[routerLink]="[element.url.toLowerCase()]">
+						<button mat-menu-item>
+							<mat-icon>{{element.icon}}</mat-icon>
+							<span>{{element.name}}</span>
+						</button>
+					</a>
+					<hr *ngIf="('-'.indexOf(element.name) >= 0) && isUserMenuPermited(element)">
+				</div>
+			</mat-menu>
+		</div>
+
+    </mat-toolbar-row>
+</mat-toolbar>

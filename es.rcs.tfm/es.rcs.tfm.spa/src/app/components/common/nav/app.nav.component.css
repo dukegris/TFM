@@ -1,0 +1,62 @@
+h1.nav-app-name {
+	margin-left: 8px;
+	font-size: 18px;
+	color: white;
+}
+
+a{
+	text-decoration: none;
+}
+
+.mat-toolbar{
+	background-color: black !important;
+}
+
+.mat-toolbar-row, .mat-toolbar-single-row{
+	height: 56px;	
+}
+
+.nav-container {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.nav-toolbar {
+	position: fixed;
+	/*	Make sure the toolbar will stay on top of the content as it scrolls past. */
+	z-index: 2;
+}
+
+.nav-sidenav-container {
+	/*	When the sidenav is fixed, don't constrain the height of the sidenav container. This allows the
+		`<body>` to be our scrolling element for mobile layouts. */
+	flex: 1 0 auto;
+}
+
+.nav-sidenav{
+	min-width: 240px;
+}
+
+mat-sidenav-content{
+	transition: margin-left 0.2s;
+}
+
+:host /deep/ mat-sidenav-container {
+	margin-top: 0px!important; 
+}
+
+:host /deep/ .mat-list-item-content {
+	padding: 0!important;
+}
+
+.menu-spacer {
+	/*	This fills the remaining space, by using flexbox. 
+		Every toolbar row uses a flexbox row layout. 
+	*/
+	flex: 1 1 auto;
+}
