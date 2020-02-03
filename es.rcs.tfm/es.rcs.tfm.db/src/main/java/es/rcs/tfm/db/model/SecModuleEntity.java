@@ -134,6 +134,8 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = "application")
 	@JsonApiRelation(
+			idField = "applicationId",
+			mappedBy = "modules",
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JoinColumn(
@@ -175,7 +177,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	@OneToMany(
 			mappedBy = "module",
 			fetch = FetchType.EAGER,
-			cascade = { CascadeType.ALL })
+			cascade = { CascadeType.ALL } )
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)

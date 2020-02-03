@@ -119,16 +119,17 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = "modulesIds")
+			value = "moduleIds")
 	@JsonApiRelationId
 	@Transient
-	private Set<Long> modulesIds = null;
+	private Set<Long> moduleIds = null;
 
 	
 	@JsonProperty(
 			value = "modules",
 			required = false)
 	@JsonApiRelation( 
+			idField = "moduleIds", 
 			mappedBy = "application",
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -144,24 +145,51 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = "authoritiesIds")
+			value = "roleIds")
 	@JsonApiRelationId
 	@Transient
-	private Set<Long> authoritiesIds = null;
+	private Set<Long> roleIds = null;
+
+	
+	@JsonProperty(
+			value = "roles",
+			required = false)
+	@JsonApiRelation(
+			idField = "roleIds", 
+			mappedBy = "application",
+			serialize = SerializeType.EAGER,
+			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+	@OneToMany(
+			fetch = FetchType.EAGER,
+			cascade = { CascadeType.ALL },
+			mappedBy = "application")
+	@EqualsAndHashCode.Exclude
+	@Setter(
+			value = AccessLevel.NONE)
+	private Set<SecRoleEntity> roles;
+
+	
+	@JsonProperty(
+			value = "authorityIds")
+	@JsonApiRelationId
+	@Transient
+	private Set<Long> authorityIds = null;
 
 	
 	@JsonProperty(
 			value = "authorities",
 			required = false)
 	@JsonApiRelation(
+			idField = "authorityIds", 
 			mappedBy = "application",
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
 	@OneToMany(
-			mappedBy = "application",
 			fetch = FetchType.EAGER,
-			cascade = { CascadeType.ALL })
+			cascade = { CascadeType.ALL },
+			mappedBy = "application")
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -195,12 +223,17 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 	public void setModules(Set<SecModuleEntity> items) {
 		this.modules = items;
-		if (items != null) this.modulesIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if (items != null) this.moduleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
 	public void setAuthorities(Set<SecAuthorityEntity> items) {
 		this.authorities = items;
-		if (items != null) this.authoritiesIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+	}
+
+	public void setRoles(Set<SecRoleEntity> items) {
+		this.roles = items;
+		if (items != null) this.roleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
 }

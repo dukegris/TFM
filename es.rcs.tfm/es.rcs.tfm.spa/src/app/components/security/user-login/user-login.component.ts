@@ -23,13 +23,16 @@ import { AccountModel } from 'src/app/models/security/account.model';
 export class UserLoginComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
 
 	private account: AccountModel = new AccountModel();
+	private isAuthenticatedSubscription: Subscription;
+
 	public messages: Messages = new Messages();
 	public form: FormGroup;
 	public icon: string;
+	public error: string;
 
 	constructor(
 		private formBuilder: FormBuilder,
-		private service: AuthService,
+		private authService: AuthService,
 		private router: Router) {
 		this.icon = '/assets/header.png';
 	}
@@ -42,11 +45,24 @@ export class UserLoginComponent implements OnInit, OnDestroy, OnChanges, AfterVi
 		};
 		this.form = this.formBuilder.group(controls);
 
+		this.isAuthenticatedSubscription = this.authService.isAuthenticated.subscribe(result => {
+			if (result) {
+				this.router.navigateByUrl('/');
+				// if (sus) { sus.unsubscribe(); }
+			} else {
+				// ERROR
+				this.error = 'ERROR: datos';
+				// Completar errores de formulario
+				// if (sus) { sus.unsubscribe(); }
+			}
+		});
+
 		console.log('LoginDialogComponent: ngOnInit');
 
 	}
 
 	ngOnDestroy(): void {
+		this.isAuthenticatedSubscription.unsubscribe();
 		console.log('LoginDialogComponent: ngOnDestroy');
 	}
 
@@ -60,18 +76,12 @@ export class UserLoginComponent implements OnInit, OnDestroy, OnChanges, AfterVi
 
 	onOk() {
 
-		this.service.login(
+		this.error = '';
+
+		this.authService.login(
 			this.form.get('username').value,
 			this.form.get('password').value );
 
-		const sus = this.service.isAuthenticated.subscribe(result => {
-			if (result) {
-				this.router.navigateByUrl('/');
-				sus.unsubscribe();
-			} else {
-				// ERROR
-			}
-		});
 		console.log('LoginDialogComponent: OK');
 
 	}

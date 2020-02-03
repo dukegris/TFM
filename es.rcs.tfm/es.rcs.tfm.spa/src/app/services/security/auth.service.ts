@@ -7,6 +7,8 @@ import {
 import { of, from, Observable, BehaviorSubject, Subscription, throwError } from 'rxjs';
 import { map, catchError, finalize } from 'rxjs/operators';
 
+import * as qs from 'qs';
+
 import { notEmpty } from 'src/app/utiles';
 
 import { environment } from 'src/environments/environment';
@@ -18,10 +20,16 @@ import { AccountModel } from 'src/app/models/security/account.model';
 
 export class AuthService {
 
-	private static readonly TOKEN: string = 'token';
 	private static readonly BEARER: string = 'Bearer ';
 	private static readonly BASIC: string = 'Basic ';
 	private static readonly AUTHORIZATION: string = 'Authorization';
+
+	private static readonly BEARER_TOKEN: string = 'BearerToken';
+	private static readonly REFRESH_TOKEN: string = 'RefreshToken';
+	private static readonly CREDENTIALS: string = 'UserDetails';
+
+	private globalHeaders: HttpHeaders;
+	private globalRequestOptions: object = {};
 
 	private isAuthenticatedBehaviorSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 	readonly isAuthenticated = this.isAuthenticatedBehaviorSubject.asObservable();
@@ -47,8 +55,8 @@ export class AuthService {
 	}
 
 	constructor(
-			private http: HttpClient) {
-		localStorage.setItem(AuthService.TOKEN, null);
+			private service: HttpClient) {
+		localStorage.setItem(AuthService.BEARER_TOKEN, null);
 	}
 
 	public login(
@@ -56,24 +64,22 @@ export class AuthService {
 		password: string) {
 
 		const requestHeaders: HttpHeaders = new HttpHeaders({
+			Accept: 'application/json',
 			Authorization : (username && password) ? AuthService.BASIC + btoa(username + ':' + password) : '',
 		});
 
-		const requestOptions: object = {
+		const requestOptions: object = this._buildRequestOptions({
 			headers: requestHeaders,
-			observe: 'response'
-		};
+			observe: 'response' });
 
 		const body: any = {};
 
-		const observable: Observable<any> = this.http
-			.post<object>(environment.accountLoginUrl, body, requestOptions)
+		this.service
+			.post<object>(environment.apiUrl + environment.accountLoginUrl, body, requestOptions)
 			.pipe(
 				catchError((error: HttpErrorResponse) =>
 					throwError(error))
-				);
-
-		const subscription = observable
+				)
 			.subscribe(
 				(result) => {
 					let response: HttpResponseBase = null;
@@ -86,12 +92,10 @@ export class AuthService {
 					if ((response != null) && (response.status === 200)) {
 						const token = AuthService.getBearerToken(response.headers.get(AuthService.AUTHORIZATION));
 						if (notEmpty(token)) {
+							this.isAuthenticatedDS.isAuthenticated = true;
+							localStorage.setItem(AuthService.BEARER_TOKEN, token);
 
 							this.credentials = new AccountModel(username, password);
-
-							this.isAuthenticatedDS.isAuthenticated = true;
-							localStorage.setItem(AuthService.TOKEN, token);
-
 							this.me();
 
 						}
@@ -101,23 +105,18 @@ export class AuthService {
 
 	}
 
-	public me() {
+	public me(
+			headers?: HttpHeaders
+	) {
 
-		const requestHeaders: HttpHeaders = new HttpHeaders();
+		const requestOptions: object = this._buildRequestOptions({ headers, observe: 'response' });
 
-		const requestOptions: object = {
-			headers: requestHeaders,
-			observe: 'response'
-		};
-
-		const observable: Observable<any> = this.http
-			.get<object>(environment.accountMeUrl, requestOptions)
+		this.service
+			.get<object>(environment.apiUrl + environment.accountMeUrl, requestOptions)
 			.pipe(
 				catchError((error: HttpErrorResponse) =>
 					throwError(error))
-				);
-
-		const subscription = observable
+				)
 			.subscribe(
 				(result) => {
 					let response: HttpResponseBase = null;
@@ -140,14 +139,23 @@ export class AuthService {
 						this.credentials.groups = [];
 						this.credentials.roles = [];
 					}
+					localStorage.setItem(AuthService.CREDENTIALS, JSON.stringify(this.credentials));
 					this.authorizationsBehaviorSubject.next(Object.assign({}, this.authorizationsDS).authorizations);
 				});
 	}
 
 	public getAuthToken(): string {
-		let token = localStorage.getItem(AuthService.TOKEN);
+		let token = localStorage.getItem(AuthService.BEARER_TOKEN);
 		if ('null'.localeCompare(token) === 0) { token = null; }
 		return token;
+	}
+
+	public getUserDetails() {
+		if (localStorage.getItem(AuthService.CREDENTIALS)) {
+			return JSON.parse(sessionStorage.getItem(AuthService.CREDENTIALS));
+		} else {
+			return null;
+		}
 	}
 
 	public authenticated(): boolean {
@@ -165,6 +173,47 @@ export class AuthService {
 	public retryFailedRequests(): void {
 		// retry the requests. this method can
 		// be called after the token is refreshed
+	}
+
+	private _buildRequestOptions(customOptions: any = {}): object {
+
+		const httpHeaders: HttpHeaders = this._buildHttpHeaders(customOptions.headers);
+		const requestOptions: object = Object.assign(
+				customOptions, {
+				headers: httpHeaders
+		});
+		return Object.assign(this.globalRequestOptions, requestOptions);
+
+	}
+
+	private _buildHttpHeaders(customHeaders?: HttpHeaders): HttpHeaders {
+
+		/*
+		let requestHeaders: HttpHeaders = new HttpHeaders({
+				'Accept': 'application/vnd.api+json',
+				'Content-Type': 'application/vnd.api+json'
+		});
+		*/
+		let requestHeaders: HttpHeaders = new HttpHeaders({
+			Accept: 'application/json',
+			'Content-Type': 'application/json'
+		});
+		if (this.globalHeaders) {
+			this.globalHeaders.keys().forEach((key) => {
+				if (this.globalHeaders.has(key)) {
+					requestHeaders = requestHeaders.set(key, this.globalHeaders.get(key));
+				}
+			});
+		}
+		if (customHeaders) {
+			customHeaders.keys().forEach((key) => {
+				if (customHeaders.has(key)) {
+					requestHeaders = requestHeaders.set(key, customHeaders.get(key));
+				}
+			 });
+		}
+		return requestHeaders;
+
 	}
 
 }

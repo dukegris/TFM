@@ -101,8 +101,10 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = "users")
+			value = "application")
 	@JsonApiRelation(
+			idField = "applicationId",
+			mappedBy = "authorities",
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JoinColumn(
@@ -138,9 +140,9 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			idField = "userIds", 
 			mappedBy = "authorities")
 	@ManyToMany(
+			mappedBy = "authorities",
 			cascade = { CascadeType.DETACH },
-			fetch = FetchType.LAZY,
-			mappedBy = "authorities")
+			fetch = FetchType.LAZY)
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -160,9 +162,9 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			idField = "roleIds", 
 			mappedBy = "authorities")
 	@ManyToMany(
-			cascade = { CascadeType.DETACH },
+			mappedBy = "authorities",
 			fetch = FetchType.LAZY,
-			mappedBy = "authorities")
+			cascade = { CascadeType.DETACH })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -182,9 +184,9 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			idField = "groupIds", 
 			mappedBy = "authorities")
 	@ManyToMany(
-			cascade = { CascadeType.DETACH },
+			mappedBy = "authorities",
 			fetch = FetchType.LAZY,
-			mappedBy = "authorities")
+			cascade = { CascadeType.DETACH })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)

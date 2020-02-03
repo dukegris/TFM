@@ -1,8 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ChangeDetectorRef, HostBinding, HostListener } from '@angular/core';
+import {
+	Component,
+	OnInit, OnDestroy, OnChanges, AfterViewInit,
+	SimpleChanges, ChangeDetectorRef, 
+	HostBinding, HostListener } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { AppsService } from 'src/app/services/security/apps.service';
 import { SideBarService } from 'src/app/services/interface/sidebar.service';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/services/security/auth.service';
+import { Module } from 'src/app/resources/module';
 
 declare var $: any;
 
@@ -12,7 +18,82 @@ declare var $: any;
 	styleUrls: ['./app.sidenav.component.css']
 })
 
-export class AppSidenavComponent implements OnInit, OnDestroy {
+export class AppSidenavComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
+
+	private isAuthenticatedSubscription: Subscription;
+	private modulesSubscription: Subscription;
+	private mobileQueryListener: () => void;
+
+	public isAuthenticated = false;
+	public modules: Module[];
+	public mobileQuery: MediaQueryList;
+	public isOpen = true;
+
+	constructor(
+		changeDetectorRef: ChangeDetectorRef,
+		media: MediaMatcher,
+		private sideBarService: SideBarService,
+		private authService: AuthService,
+		private appService: AppsService
+	) {
+		this.mobileQueryListener = () => changeDetectorRef.detectChanges();
+		this.mobileQuery = media.matchMedia('(max-width: 600px)');
+		console.log('AppSidenavComponent: constructor OK');
+	}
+
+	ngOnInit() {
+
+		this.mobileQuery.addListener(this.mobileQueryListener);
+		this.sideBarService.sidebarCurrentToogle.subscribe( (isOpen: boolean) => {
+			this.toggle(isOpen); });
+		this.isAuthenticatedSubscription = this.authService.isAuthenticated.subscribe(
+			data => this.isAuthenticated = data);
+		this.modulesSubscription = this.appService.modules.subscribe(
+			data => this.modules = data);
+
+		console.log('AppSidenavComponent: ngOnInit OK');
+
+	}
+
+	ngOnDestroy(): void {
+		this.mobileQuery.removeListener(this.mobileQueryListener);
+		this.isAuthenticatedSubscription.unsubscribe();
+		console.log('AppSidenavComponent: ngOnDestroy OK');
+	}
+
+	ngAfterViewInit() {
+		console.log('AppSidenavComponent: ngAfterViewInit OK');
+	}
+
+	ngOnChanges(changes: SimpleChanges): void {
+		console.log('AppSidenavComponent: ngOnChanges OK');
+	}
+
+	sidenavToggle() {
+		this.sideBarService.toggle();
+	}
+
+	private toggle(isOpen: boolean) {
+		if (this.isAuthenticated) {
+			if (isOpen) {
+				$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
+				$( '.mat-drawer-inner-container' ).css( 'width', '60px' );
+				$( '.mat-sidenav-content' ).css( 'margin-left', '70px' );
+				$( '.cardImg' ).css( 'margin-right', '0px' );
+				$( '.cardName' ).css( 'display', 'none' );
+			} else {
+				$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
+				$( '.mat-drawer-inner-container' ).css( 'width', '100%' );
+				$( '.mat-sidenav-content' ).css( 'margin-left', '170px' );
+				$( '.cardImg' ).css( 'margin-right', '16px' );
+				$( '.cardName' ).css( 'display', 'inline' );
+			}
+
+		}
+	}
+
+}
+
 
 
 
@@ -27,7 +108,9 @@ export class AppSidenavComponent implements OnInit, OnDestroy {
             [mode]="mobileQuery.matches ? 'over' : 'side'"
             [fixedInViewport]="mobileQuery.matches"
             [(opened)]="isOpen"
-            (opened)="events.push('open!')"
+            (opened)="events.push('open!')"            disableClose="true"
+            class="sidenav-sidenav"
+
             (closed)="events.push('close!')"
             disableClose="true"
             class="sidenav-sidenav"
@@ -54,54 +137,4 @@ export class AppSidenavComponent implements OnInit, OnDestroy {
             <div *ngFor="let e of events">{{e}}</div>
         </div>
     </mat-sidenav-content>
-*/
-
-	constructor(
-		changeDetectorRef: ChangeDetectorRef,
-		media: MediaMatcher,
-		private appsService: AppsService,
-		private sideBarService: SideBarService
-	) {
-		this.mobileQueryListener = () => changeDetectorRef.detectChanges();
-		this.mobileQuery = media.matchMedia('(max-width: 600px)');
-		this.app = appsService.getSelectedApp();
-	}
-
-	mobileQuery: MediaQueryList;
-	private mobileQueryListener: () => void;
-
-	isOpen = true;
-	events: string[] = [];
-	app;
-
-	sidenavToggle() {
-		this.sideBarService.toggle();
-	}
-
-	private toggle(isOpen: boolean) {
-		if (isOpen) {
-			$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
-			$( '.mat-drawer-inner-container' ).css( 'width', '60px' );
-			$( '.mat-sidenav-content' ).css( 'margin-left', '70px' );
-			$( '.cardImg' ).css( 'margin-right', '0px' );
-			$( '.cardName' ).css( 'display', 'none' );
-		} else {
-			$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
-			$( '.mat-drawer-inner-container' ).css( 'width', '100%' );
-			$( '.mat-sidenav-content' ).css( 'margin-left', '170px' );
-			$( '.cardImg' ).css( 'margin-right', '16px' );
-			$( '.cardName' ).css( 'display', 'inline' );
-		}
-	}
-
-	ngOnInit() {
-		this.mobileQuery.addListener(this.mobileQueryListener);
-		this.sideBarService.sidebarCurrentToogle.subscribe( (isOpen: boolean) => {
-			this.toggle(isOpen);
-		});
-	}
-
-	ngOnDestroy(): void {
-		this.mobileQuery.removeListener(this.mobileQueryListener);
-	  }
-}
+ */

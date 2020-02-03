@@ -216,8 +216,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			inverseForeignKey = @ForeignKey (
 					name = "sec_role_user_fk"))
 	@ManyToMany (
-			cascade = { CascadeType.DETACH, CascadeType.PERSIST },
-			fetch = FetchType.LAZY)
+			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
+			// mappedBy = "users",
+			fetch = FetchType.EAGER,
+			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -249,8 +251,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			inverseForeignKey = @ForeignKey (
 					name = "sec_group_user_fk"))
 	@ManyToMany (
-			cascade = { CascadeType.DETACH, CascadeType.PERSIST },
-			fetch = FetchType.LAZY)
+			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
+			// mappedBy = "users",
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -282,8 +286,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			inverseForeignKey = @ForeignKey (
 					name = "sec_auth_user_fk"))
 	@ManyToMany (
-			cascade = { CascadeType.DETACH, CascadeType.PERSIST },
-			fetch = FetchType.LAZY)
+			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
+			// mappedBy = "users",
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -308,7 +314,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
 	@OneToMany(
 			mappedBy = "user",
-			fetch = FetchType.EAGER,
+			fetch = FetchType.LAZY,
 			cascade = { CascadeType.ALL })
 	@EqualsAndHashCode.Exclude
 	@Setter(

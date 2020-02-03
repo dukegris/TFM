@@ -1,7 +1,36 @@
 <mat-sidenav-container 
-        #sidenavcontainer
-        fullscreen 
-        class="sidenav-container"
-        [style.marginTop.px]="mobileQuery.matches ? 64 : 0">
+	#sidenavcontainer
+	fullscreen 
+	class="sidenav-container"
+	[style.marginTop.px]="mobileQuery.matches ? 64 : 0">
 
+    <mat-sidenav
+            #sidenav
+            mode="side"
+            fixedTopGap="64"
+            disableClose="true"
+            class="sidenav-sidenav"
+            [mode]="mobileQuery.matches ? 'over' : 'side'"
+            [fixedInViewport]="mobileQuery.matches"
+            [(opened)]="isOpen"
+			[style.marginTop.px]="mobileQuery.matches ? 64 : 0"
+			*ngIf="isAuthenticated">
+
+        <mat-nav-list>
+            <div *ngFor="let element of modules">
+                <a      mat-list-item
+                        [routerLink]="[isOpen, element.url.toLowerCase()]"
+                        routerLinkActive="active-list-item">
+                    <button mat-menu-item>
+                        <mat-icon class="cardImg">{{element.icon}}</mat-icon>
+                        <span class="cardName">{{element.name}}</span>
+                    </button>
+                </a>
+            </div>
+        </mat-nav-list>
+    </mat-sidenav>
+
+	<mat-sidenav-content autosize>
+		<router-outlet></router-outlet>
+	</mat-sidenav-content>
 </mat-sidenav-container>

@@ -18,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.SecAuthorityEntity;
@@ -38,23 +40,60 @@ public class TaoUserDetailsService implements UserDetailsService {
 	private static final Logger LOG = LoggerFactory.getLogger(TaoUserDetailsService.class);
 
 	@Override
+	@Transactional(
+			transactionManager = DbNames.DB_TX,
+			propagation = Propagation.REQUIRED)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
 		SecUserEntity user = null;
+		UserDetails userDetails = null;
+
 		if (EmailValidator.getInstance().isValid(username)) {
 			user = this.userRepository.findByEmail(username);
 		} else {
 			user = this.userRepository.findByUsername(username);
 		}
-
-		UserDetails details = null;
-		if (user != null) {
-			details = getDetails(user);
-		} else {
+		if (user == null) {
+			if (LOG.isInfoEnabled())
+				LOG.info("Usuario '" + username + "' no encontrado");
 			throw new UsernameNotFoundException("No user found with username " + username);
 		}
+
+		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+
+		try {
+
+			for (SecAuthorityEntity auth: user.getAuthorities()) {
+				authorities.add(new SimpleGrantedAuthority(auth.getCode()));
+			}
+			
+			for (SecRoleEntity role : user.getRoles()) {
+				for (SecAuthorityEntity auth: role.getAuthorities()) {
+					authorities.add(new SimpleGrantedAuthority(auth.getCode()));
+				}
+			}
+			
+			for (SecGroupEntity group : user.getGroups()) {
+				for (SecAuthorityEntity auth: group.getAuthorities()) {
+					authorities.add(new SimpleGrantedAuthority(auth.getCode()));
+				}
+			}
+
+		} catch (Exception ex) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("Error al recuperar los permisos");
+		}
+
+		userDetails = new User(
+				user.getUsername(), 
+				user.getPassword(), 
+				user.isEnabled(), 
+				!user.isExpired(), 
+				!user.isPasswordExpired(), 
+				!user.isLocked(), 
+				authorities);
 		
-		return details;
+		return userDetails;
 
 	}
 	
@@ -63,35 +102,33 @@ public class TaoUserDetailsService implements UserDetailsService {
 		if (user == null) {
 			if (LOG.isInfoEnabled())
 				LOG.info("Usuario no encontrado");
-			throw new UsernameNotFoundException("Usuario no encontrado");
+			throw new UsernameNotFoundException("User not found");
 		} 
 		
-		Set<GrantedAuthority> setAuths = new HashSet<GrantedAuthority>();
+		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
 		try {
 
 			for (SecAuthorityEntity auth: user.getAuthorities()) {
-				setAuths.add(new SimpleGrantedAuthority(auth.getCode()));
+				authorities.add(new SimpleGrantedAuthority(auth.getCode()));
 			}
 			
 			for (SecRoleEntity role : user.getRoles()) {
 				for (SecAuthorityEntity auth: role.getAuthorities()) {
-					setAuths.add(new SimpleGrantedAuthority(auth.getCode()));
+					authorities.add(new SimpleGrantedAuthority(auth.getCode()));
 				}
 			}
 			
 			for (SecGroupEntity group : user.getGroups()) {
 				for (SecAuthorityEntity auth: group.getAuthorities()) {
-					setAuths.add(new SimpleGrantedAuthority(auth.getCode()));
+					authorities.add(new SimpleGrantedAuthority(auth.getCode()));
 				}
 			}
 
 		} catch (Exception ex) {
 			if (LOG.isDebugEnabled())
-				LOG.debug("Error al rcuperar los permisos");
+				LOG.debug("Error al recuperar los permisos");
 		}
-
-		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(setAuths);
 
 		User userDetails = new User(
 				user.getUsername(), 

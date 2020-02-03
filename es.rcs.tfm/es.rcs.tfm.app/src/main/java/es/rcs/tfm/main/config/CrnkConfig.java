@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +28,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -53,8 +56,6 @@ import es.rcs.tfm.db.repository.SecModuleRepository;
 import es.rcs.tfm.db.repository.SecRoleRepository;
 import es.rcs.tfm.db.repository.SecUserRepository;
 import es.rcs.tfm.main.AppNames;
-import es.rcs.tfm.main.config.CrnkConfig.CrnkTransactionRunner;
-import es.rcs.tfm.main.config.CrnkConfig.RollbackOnlyException;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
@@ -134,7 +135,8 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 
 	}
 
-	@Bean( name = AppNames.CRNK_SEC_CONFIG )
+	@Bean(
+			name = AppNames.CRNK_SEC_CONFIG)
 	public SecurityModuleConfigurer securityModuleConfiguration() {
 		SecurityModuleConfigurer bean = new SecurityModuleConfigurer() {
 			@Override
@@ -152,14 +154,16 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 		return bean;
 	}
 	
-	@Bean( name = AppNames.CRNK_CORS_FILTER )
+	@Bean(
+			name = AppNames.CRNK_CORS_FILTER)
 	public FilterRegistrationBean<CorsFilter> corsFilter() {
 		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(corsConfigurationSource()));
 		bean.setOrder(0);
 		return bean;
 	}
 
-    @Bean( name = AppNames.CRNK_CORS_SETUP )
+    @Bean(
+    		name = AppNames.CRNK_CORS_SETUP)
     public CorsConfigurationSource corsConfigurationSource() {
     	
     	final CorsConfiguration config = new CorsConfiguration();
@@ -182,13 +186,15 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
         
     }
     
-    @Bean ( name = AppNames.CRNK_TX_MODULE )
+    @Bean (
+    		name = AppNames.CRNK_TX_MODULE)
     public TransactionRunner transactionRunner() {
     	TransactionRunner bean = new CrnkTransactionRunner(transactionManager);
     	return bean;
     }
     
-    @Bean ( name = AppNames.CRNK_JPA_MODULE )
+    @Bean (
+    		name = AppNames.CRNK_JPA_MODULE)
 	public JpaModuleConfig jpaConfig() {
 		JpaModuleConfig bean = new JpaModuleConfig();
 		bean.setQueryFactory(QuerydslQueryFactory.newInstance());
@@ -197,21 +203,29 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 	}
     
 	@Autowired
-	@Qualifier( value = AppNames.WEB_JACKSON_MAPPER )
+	@Qualifier(
+			value = AppNames.WEB_JACKSON_MAPPER)
 	private ObjectMapper objectMapper;
 
     @Autowired
-    @Qualifier(value = DbNames.DB_EMF)
+    @Qualifier(
+    		value = DbNames.DB_EMF)
     private EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    @Qualifier(value = DbNames.DB_TX)
+    @Qualifier(
+    		value = DbNames.DB_TX)
     private PlatformTransactionManager transactionManager;
 
-    @PersistenceContext(unitName = AppNames.BBDD_PU)
+    @PersistenceContext(
+    		unitName = AppNames.BBDD_PU,
+    		type = PersistenceContextType.EXTENDED)
     private EntityManager entityManager;
 	
 	@PostConstruct
+	@Transactional(
+			transactionManager = DbNames.DB_TX,
+			propagation = Propagation.REQUIRED)
 	public void setup() {
 		
 		try {
@@ -322,8 +336,9 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 				//adminUsr.setPassword(passwordEncoder.encode("dukegris"));
 	
 				adminUsr.setEnabled(true);
-				adminUsr.setPasswordExpired(false);
 				adminUsr.setLocked(false);
+				adminUsr.setExpired(false);
+				adminUsr.setPasswordExpired(false);
 	
 				adminUsr = segUsrRep.save(adminUsr);
 				

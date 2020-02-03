@@ -128,6 +128,8 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = "module")
 	@JsonApiRelation(
+			idField = "moduleId",
+			mappedBy = "functions",
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JoinColumn(

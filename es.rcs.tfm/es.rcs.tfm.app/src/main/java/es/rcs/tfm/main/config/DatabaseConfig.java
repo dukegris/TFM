@@ -25,9 +25,9 @@ import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.main.AppNames;
 
 @Configuration(
-		value = AppNames.BBDD_CONFIG )
+		value = AppNames.BBDD_CONFIG)
 @PropertySource( 
-		{"classpath:/META-INF/db.properties"} )
+		{"classpath:/META-INF/db.properties"})
 public class DatabaseConfig {
 
 	@Value("${tfm.datasource.url}") private String dbUrl;
@@ -36,7 +36,8 @@ public class DatabaseConfig {
 	@Value("${tfm.datasource.password}") private String dbPassword;
 	@Value("${tfm.jpa.properties.hibernate.dialect}") private String dbDialect;
 	
-	@Bean( name = AppNames.BBDD_JPA_DIALECT )
+	@Bean(
+			name = AppNames.BBDD_JPA_DIALECT)
 	public JpaDialect getJpaDialect() {
 		HibernateJpaDialect bean = 
 				new HibernateJpaDialect();
@@ -44,7 +45,8 @@ public class DatabaseConfig {
 		return bean;
 	}
 
-	@Bean( name = AppNames.BBDD_JPA_VENDOR )
+	@Bean(
+			name = AppNames.BBDD_JPA_VENDOR)
 	public HibernateJpaVendorAdapter getJpaVendorAdapter() {
 		
 		HibernateJpaVendorAdapter bean = 
@@ -58,7 +60,8 @@ public class DatabaseConfig {
 		
 	}
 
-	@Bean( name = AppNames.BBDD_CONSOLE )
+	@Bean(
+			name = AppNames.BBDD_CONSOLE)
 	public ServletRegistrationBean<HttpServlet> h2servletRegistration() {
 
 		WebServlet servlet = new WebServlet();
@@ -73,7 +76,8 @@ public class DatabaseConfig {
 		
 	}
 
-	@Bean( name = AppNames.BBDD_DATASOURCE )
+	@Bean(
+			name = AppNames.BBDD_DATASOURCE)
 	public DataSource getDataSource() {
 		
         
@@ -87,14 +91,14 @@ public class DatabaseConfig {
 		 */
 		
 		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl( dbUrl );
-		config.setDriverClassName( dbDriver );
-        config.setUsername( dbUsernamer );
-        config.setPassword( dbPassword );
-        config.addDataSourceProperty( "cachePrepStmts" , "true" );
-        config.addDataSourceProperty( "prepStmtCacheSize" , "250" );
-        config.addDataSourceProperty( "prepStmtCacheSqlLimit" , "2048" );
-        HikariDataSource bean = new HikariDataSource( config );
+		config.setJdbcUrl( dbUrl);
+		config.setDriverClassName( dbDriver);
+        config.setUsername( dbUsernamer);
+        config.setPassword( dbPassword);
+        config.addDataSourceProperty( "cachePrepStmts" , "true");
+        config.addDataSourceProperty( "prepStmtCacheSize" , "250");
+        config.addDataSourceProperty( "prepStmtCacheSqlLimit" , "2048");
+        HikariDataSource bean = new HikariDataSource( config);
         
         return bean; 
 
@@ -109,7 +113,8 @@ public class DatabaseConfig {
 		
 	}
 	
-	@Bean( name = DbNames.DB_EMF )
+	@Bean(
+			name = DbNames.DB_EMF)
 	public LocalContainerEntityManagerFactoryBean getEntityManager() {
 
 		Properties jpaProperties = new Properties();
@@ -142,12 +147,12 @@ public class DatabaseConfig {
 
 	}
 	
-	@Bean(	name = DbNames.DB_TX )
+	@Bean(
+			name = DbNames.DB_TX)
 	public PlatformTransactionManager getTransactionManager() {
 		
 		JpaTransactionManager bean = 
 				new JpaTransactionManager();
-		
 		bean.setEntityManagerFactory(getEntityManager().getObject());
 		
 		return bean;

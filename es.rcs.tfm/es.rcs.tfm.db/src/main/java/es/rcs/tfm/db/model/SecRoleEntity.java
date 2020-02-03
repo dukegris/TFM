@@ -105,6 +105,7 @@ public class SecRoleEntity extends AuditedBaseEntity {
 			value = "application")
 	@JsonApiRelation(
 			idField = "applicationId",
+			mappedBy = "roles",
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JoinColumn(
@@ -140,9 +141,9 @@ public class SecRoleEntity extends AuditedBaseEntity {
 			idField = "userIds", 
 			mappedBy = "roles")
 	@ManyToMany(
-			cascade = { CascadeType.DETACH },
+			mappedBy = "roles",
 			fetch = FetchType.LAZY,
-			mappedBy = "roles")
+			cascade = { CascadeType.DETACH })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -161,9 +162,6 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	@JsonApiRelation(
 			idField = "authorityIds", 
 			mappedBy = "roles")
-	@ManyToMany (
-			cascade = { CascadeType.DETACH, CascadeType.PERSIST },
-			fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "sec_role_authorities",
 			joinColumns = @JoinColumn (
@@ -176,6 +174,11 @@ public class SecRoleEntity extends AuditedBaseEntity {
 					name = "sec_role_auth_fk"),
 			inverseForeignKey = @ForeignKey (
 					name = "sec_auth_role_fk"))
+	@ManyToMany (
+			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
+			// mappedBy = "roles",
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)

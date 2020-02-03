@@ -88,6 +88,9 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.addAllowedOrigin("*");
+        
+        // Permitir el acceso a esta cabecera
+        config.addExposedHeader("Authorization");
         //config.setAllowedMethods(Arrays.asList(new String[]{"*"}));
         //config.setAllowedOrigins(Arrays.asList(new String[]{"*"}));
         //config.setAllowedHeaders(Arrays.asList(new String[]{"*"}));

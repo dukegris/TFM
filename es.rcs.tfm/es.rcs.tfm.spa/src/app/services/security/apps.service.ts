@@ -58,9 +58,9 @@ export class AppsService {
 
 		this.applicationsSubscription = this.applicationsDS.instances.subscribe(
 			data => {
-				this.applicationsBehaviorSubject.next(Object.assign({}, data));
+				this.applicationsBehaviorSubject.next(data);
 				if (data.length > 0) {
-					this.selectedApplicationBehaviorSubject.next(Object.assign({}, data[0]));
+					this.selectedApplicationBehaviorSubject.next(data[0]);
 				}
 			}
 		);
@@ -76,9 +76,9 @@ export class AppsService {
 
 		this.modulesSubscription = this.modulesDS.instances.subscribe(
 			data => {
-				this.modulesBehaviorSubject.next(Object.assign({}, data));
+				this.modulesBehaviorSubject.next(data);
 				if (data.length > 0) {
-					this.selectedModuleBehaviorSubject.next(Object.assign({}, data[0]));
+					this.selectedModuleBehaviorSubject.next(data[0]);
 				}
 			}
 		);
@@ -94,9 +94,9 @@ export class AppsService {
 
 		this.functionsSubscription = this.functionsDS.instances.subscribe(
 			data => {
-				this.functionsBehaviorSubject.next(Object.assign({}, data));
+				this.functionsBehaviorSubject.next(data);
 				if (data.length > 0) {
-					this.selectedFunctionBehaviorSubject.next(Object.assign({}, data[0]));
+					this.selectedFunctionBehaviorSubject.next(data[0]);
 				}
 			}
 		);

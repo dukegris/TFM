@@ -9,10 +9,10 @@
         <h1>TFM: B&uacute;squeda de Bioentidades</h1>
         <span class="menu-spacer"></span>
         <div *ngIf="applications">
-            <div 
+            <span 
                     *ngFor="let element of applications">
                 <a mat-button [routerLink]="[element.url.toLowerCase()]"> {{element.name}} </a>
-            </div>
+		</span>
         </div>
 
 		<!--Usuario-->

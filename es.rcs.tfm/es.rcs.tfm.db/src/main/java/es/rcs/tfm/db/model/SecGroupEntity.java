@@ -100,9 +100,9 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = "users")
 	@ManyToMany(
+			mappedBy = "groups",
 			cascade = { CascadeType.DETACH },
-			fetch = FetchType.LAZY,
-			mappedBy = "groups")
+			fetch = FetchType.LAZY)
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -119,7 +119,7 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = "authorities")
 	@JsonApiRelation(
-			idField = "authorityIds", 
+			idField = "authorityIds",
 			mappedBy = "groups")
 	@JoinTable (
 			name = "sec_group_authorities",
@@ -134,8 +134,10 @@ public class SecGroupEntity extends AuditedBaseEntity {
 			inverseForeignKey = @ForeignKey (
 					name = "sec_auth_group_fk"))
 	@ManyToMany (
-			cascade = { CascadeType.DETACH, CascadeType.PERSIST },
-			fetch = FetchType.LAZY)
+			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
+			// mappedBy = "groups",
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
