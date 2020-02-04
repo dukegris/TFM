@@ -44,8 +44,8 @@ public class ModuleFunctionsRepository
 
 		for (Long id: sourceIds) {
 			querySpec.addFilter(new FilterSpec(Arrays.asList("moduleId"), FilterOperator.EQ, id));
-			ResourceList<SecFunctionEntity> item = rep.findAll(querySpec);
-			if (item != null) result.put(id, item);
+			ResourceList<SecFunctionEntity> list = rep.findAll(querySpec);
+			if ((list != null) && (!list.isEmpty())) result.put(id, list);
 		}
 
 		return result;

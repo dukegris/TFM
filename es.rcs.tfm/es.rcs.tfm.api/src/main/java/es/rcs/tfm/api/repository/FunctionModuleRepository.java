@@ -1,5 +1,6 @@
 package es.rcs.tfm.api.repository;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,8 +44,11 @@ public class FunctionModuleRepository
 		Map<Long, SecModuleEntity>result = new HashMap<>();
 
 		for (Long id: sourceIds) {
-			SecModuleEntity item = rep.findOne(id, querySpec);
-			if (item != null) result.put(id, item);
+			SecFunctionEntity item = repPri.findOne(id, querySpec);
+			if (item != null) {
+				SecModuleEntity data = repSec.findOne(item.getModuleId(), querySpec);
+				if (data != null) result.put(id, data);
+			}
 		}
 
 		return result;
@@ -52,7 +56,11 @@ public class FunctionModuleRepository
 	}
 
 	@Autowired
+	@Qualifier(value = ApiNames.API_FUN_REP)
+	private FunctionRepository repPri;
+
+	@Autowired
 	@Qualifier(value = ApiNames.API_MOD_REP)
-	private ModuleRepository rep;
+	private ModuleRepository repSec;
 
 }

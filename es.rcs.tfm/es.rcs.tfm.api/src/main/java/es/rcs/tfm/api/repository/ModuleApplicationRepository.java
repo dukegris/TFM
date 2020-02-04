@@ -1,5 +1,6 @@
 package es.rcs.tfm.api.repository;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +39,11 @@ public class ModuleApplicationRepository extends OneRelationshipRepositoryBase<S
 		Map<Long, SecApplicationEntity>result = new HashMap<>();
 
 		for (Long id: sourceIds) {
-			SecApplicationEntity item = rep.findOne(id, querySpec);
-			if (item != null) result.put(id, item);
+			SecModuleEntity item = repPri.findOne(id, querySpec);
+			if (item != null) {
+				SecApplicationEntity data = repSec.findOne(item.getApplicationId(), querySpec);
+				if (data != null) result.put(id, data);
+			}
 		}
 
 		return result;
@@ -47,7 +51,11 @@ public class ModuleApplicationRepository extends OneRelationshipRepositoryBase<S
 	}
 
 	@Autowired
+	@Qualifier(value = ApiNames.API_MOD_REP)
+	private ModuleRepository repPri;
+
+	@Autowired
 	@Qualifier(value = ApiNames.API_APP_REP)
-	private ApplicationRepository rep;
+	private ApplicationRepository repSec;
 
 }

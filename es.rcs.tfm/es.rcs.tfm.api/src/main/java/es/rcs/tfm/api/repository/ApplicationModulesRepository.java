@@ -44,8 +44,8 @@ public class ApplicationModulesRepository
 
 		for (Long id: sourceIds) {
 			querySpec.addFilter(new FilterSpec(Arrays.asList("applicationId"), FilterOperator.EQ, id));
-			ResourceList<SecModuleEntity> item = rep.findAll(querySpec);
-			if (item != null) result.put(id, item);
+			ResourceList<SecModuleEntity> list = rep.findAll(querySpec);
+			if ((list != null) && (!list.isEmpty())) result.put(id, list);
 		}
 
 		return result;
