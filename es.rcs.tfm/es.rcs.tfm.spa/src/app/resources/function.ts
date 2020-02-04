@@ -9,7 +9,6 @@ import { Module } from './module';
 export interface Function extends Resource {
 	code?: string;
 	name?: string;
-	icon?: string;
 	url?: string;
 	release?: number;
 	status?: string;

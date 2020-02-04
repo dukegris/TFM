@@ -6,6 +6,11 @@
 
 .sidenav-sidenav {
     background-color: #333;
+    width: 200px;
+}
+
+.sidenav-content {
+    margin-left: 200px;
 }
 
 .is-mobile .sidenav-container {
@@ -18,3 +23,17 @@
     /* Note: You could also use a custom theme */
     color: #3F51B5 !important; 
 }
+
+.cardImg {
+    color: #FFFFFF;
+}
+
+.cardName {
+    color: #FFFFFF;
+}
+
+
+.mat-menu-item {
+    padding: 0px 0px 0px 8px;
+}
+ 

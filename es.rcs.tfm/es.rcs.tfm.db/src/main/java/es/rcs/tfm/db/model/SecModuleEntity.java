@@ -68,10 +68,10 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El código no puede ser nulo")
+			message = "El cï¿½digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El códigono no puede sobrepasar los {max} carcateres.")
+			message = "El cï¿½digono no puede sobrepasar los {max} carcateres.")
 	public String code;
 
 	
@@ -89,20 +89,6 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			max = 64, 
 			message = "El nombre no puede sobrepasar los {max} carcateres.")
 	public String name;
-
-	
-	@JsonProperty(
-			value = "icon",
-			required = true)
-	@Column(
-			name = "mod_icon", 
-			unique = false,
-			nullable = true, 
-			length = 64)
-	@Size(
-			max = 64, 
-			message = "El identificador del icono no puede sobrepasar los {max} carcateres.")
-	public String icon;
 
 	
 	@JsonProperty(
@@ -191,7 +177,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El cï¿½digo no puede ser nulo") @Size(max = 32, message = "El cï¿½digono puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} carcateres.") String name) {
 		super();
 		this.code = code;
@@ -201,14 +187,12 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono no puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El cï¿½digo no puede ser nulo") @Size(max = 32, message = "El cï¿½digono no puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} carcateres.") String name,
-			@Size(max = 64, message = "El identificador del icono no puede sobrepasar los {max} carcateres.") String icon,
 			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} carcateres.") String url) {
 		super();
 		this.code = code;
 		this.name = name;
-		this.icon = icon;
 		this.url = url;
 		this.setApplication(application);
 	}

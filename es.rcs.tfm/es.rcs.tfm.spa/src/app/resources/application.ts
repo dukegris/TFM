@@ -10,7 +10,6 @@ import { Module } from './module';
 export interface Application extends Resource {
 	code?: string;
 	name?: string;
-	icon?: string;
 	url?: string;
 	release?: number;
 	status?: string;
