@@ -163,6 +163,7 @@
 		<sfm-csv.version>7.0.0</sfm-csv.version>
 		<google-guava.version>15.0</google-guava.version>
 		<google-collections.version>1.0</google-collections.version>
+		<atomikos.version>5.0.6</atomikos.version>
 		<hikari.version>3.3.1</hikari.version>
 		<netty.version>3.10.6.Final</netty.version>
 		<netty-all.version>4.1.37.Final</netty-all.version>
@@ -765,6 +766,49 @@
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
 			<version>${google-collections.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- ATOMIKOS -->
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>atomikos-util</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-api</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jdbc</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jta</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-hibernate4</artifactId>
+		    <version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions</artifactId>
+		    <version>${atomikos.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- HIKARI -->

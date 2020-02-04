@@ -1,0 +1,697 @@
+Spark context Web UI available at http://192.168.1.10:4040
+Spark context available as 'sc' (master = local[*], app id = local-1578865177795).
+Spark session available as 'spark'.
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 2.4.4
+      /_/
+         
+Using Scala version 2.11.12 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_231)
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> // spark-shell --packages JohnSnowLabs:spark-nlp:2.3.4 --executor-memory=8g --executor-cores=24 --driver-memory=8g
+
+scala> // spark-shell --packages JohnSnowLabs:spark-nlp:2.3.4 --executor-memory=16g --executor-cores=6 --driver-memory=16g
+
+scala> // scp -r . rcuesta@10.160.1.215:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models
+
+scala> // spark-shell --packages JohnSnowLabs:spark-nlp:2.3.4 --jars --executor-memory=8g --executor-cores=24 --driver-memory=8g > crf.txt
+
+scala> // spark-shell --packages com.johnsnowlabs.nlp:spark-nlp_2.11:2.3.5,org.slf4j:slf4j-log4j12:1.7.28 --jars es.rcs.tfm.nlp/target/RCS-Nlp-0.0.4-SNAPSHOT.jar --executor -memory=32g --executor-cores=6 --driver-memory=24g --conf "spark.executor.extraJavaOptions='-Dlog4j.configuration=/opt/spark/conf/log4j.properties'" --conf "spark.driver.ma xResultSize=3g" > dl.txt
+
+scala> sc.setLogLevel("WARN")
+
+scala> 
+
+scala> /*
+     |  * DOS COSAS:
+     |  * SENTENCE NO GENERADAS EN CONLL READER Y DA PROBLEMAS DESPUES EN NERDL. SE DEBE DE PONER DOCUMENT EN VEZ DE SENTENCE
+     |  * LOS IOB SON RECORTADOS POR LO QUE SOLO ENTIENDE I- En los entrenamientos en ingles solo tiene I-, no B- y menos aun E-
+     |  * En CRF requiere SENTENCE, así que ya veremos
+     |  */
+     | import com.johnsnowlabs.nlp.{Annotation, SparkNLP, DocumentAssembler, Finisher, AnnotatorType, AnnotatorModel}
+import com.johnsnowlabs.nlp.{Annotation, SparkNLP, DocumentAssembler, Finisher, AnnotatorType, AnnotatorModel}
+
+scala> import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
+import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
+
+scala> import com.johnsnowlabs.nlp.annotators.{Stemmer, Tokenizer, Normalizer}
+import com.johnsnowlabs.nlp.annotators.{Stemmer, Tokenizer, Normalizer}
+
+scala> import com.johnsnowlabs.nlp.annotators.common.NerTagged
+import com.johnsnowlabs.nlp.annotators.common.NerTagged
+
+scala> import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
+import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
+
+scala> import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
+import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
+
+scala> import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel, NerCrfApproach}
+import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel, NerCrfApproach}
+
+scala> import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
+import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
+
+scala> import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
+import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
+
+scala> import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
+
+scala> import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
+import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
+
+scala> import com.johnsnowlabs.nlp.training.CoNLL
+import com.johnsnowlabs.nlp.training.CoNLL
+
+scala> import com.johnsnowlabs.nlp.util.io.{ExternalResource, ResourceHelper, OutputHelper, ReadAs}
+import com.johnsnowlabs.nlp.util.io.{ExternalResource, ResourceHelper, OutputHelper, ReadAs}
+
+scala> 
+
+scala> import es.rcs.tfm.nlp.model.TfmType
+import es.rcs.tfm.nlp.model.TfmType
+
+scala> import es.rcs.tfm.nlp.util.TfmHelper
+import es.rcs.tfm.nlp.util.TfmHelper
+
+scala> 
+
+scala> import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{SparkConf, SparkContext}
+
+scala> import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
+import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
+
+scala> import org.apache.spark.ml.PipelineModel
+import org.apache.spark.ml.PipelineModel
+
+scala> 
+
+scala> import scala.Any
+import scala.Any
+
+scala> import scala.collection.mutable
+import scala.collection.mutable
+
+scala> import scala.collection.mutable.WrappedArray
+import scala.collection.mutable.WrappedArray
+
+scala> import spark.implicits._
+import spark.implicits._
+
+scala> 
+
+scala> val BERT_DIR = "file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/"
+BERT_DIR: String = file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/
+
+scala> val BERT_MODELS = Array(
+     |     //Array("biobert_v1.1_pubmed_M-128_B-32", 768, 128),
+     |     Array("biobert_v1.1_pubmed_M-512_B-32", 768, 512),
+     | 
+     |     //Array("cased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("cased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     |     //Array("uncased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("uncased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     |     //Array("multi_cased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("multi_cased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     | 
+     |     //Array("wwm_cased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("wwm_cased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     |     //Array("wwm_uncased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("wwm_uncased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     | 
+     |     //Array("cased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     Array("cased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     |     //Array("uncased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     Array("uncased_L-24_H-1024_A-16_M-512_B-32", 1024, 512)
+     | )
+BERT_MODELS: Array[Array[Any]] = Array(Array(biobert_v1.1_pubmed_M-512_B-32, 768, 512), Array(cased_L-24_H-1024_A-16_M-512_B-32, 1024, 512), Array(uncased_L-24_H-1024_A-16_M-512_B-32, 1024, 512))
+
+scala> 
+
+scala> val CONLL_MODELS = Array(
+     |    // Array("ner_txt_cdr_train.conll", "ner_txt_cdr_test.conll"),
+     |     //Array("ner_txt_cdr_train.conll", "ner_txt_dnorm_test.conll"),
+     |     //Array("ner_txt_cdr_train.conll", "ner_txt_chem_test.conll"),
+     |     //Array("ner_txt_cdr_devel.conll", "ner_txt_chem_test.conll"),
+     |     //Array("JNLPBA_train.conll",      "JNLPBA_test.conll"),
+     |     Array("ner_txt_train.conll",     "ner_txt_test.conll")
+     | )
+CONLL_MODELS: Array[Array[String]] = Array(Array(ner_txt_train.conll, ner_txt_test.conll))
+
+scala> 
+
+scala> val TFGRAPH_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow"
+TFGRAPH_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow
+
+scala> val NER_MODEL_DIR = "file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/"
+NER_MODEL_DIR: String = file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/
+
+scala> val NERDL_PARAMS = Array(
+     |     //FUERA: Array("DL020 LR:0.003   PO:0        DROP:0.10", 20, 3e-3f, 0f, 0.10f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.50", 20, 3e-3f, 0f, 0.50f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.68", 20, 3e-3f, 0f, 0.68f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.80", 20, 3e-3f, 0f, 0.80f)
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.50", 20, 3e-4f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.68", 20, 3e-4f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.80", 20, 3e-4f, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.50", 20, 3e-5f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.68", 20, 3e-5f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.80", 20, 3e-5f, 0f, 0.80f)
+     |     Array("DL020 LR:0.002   PO:0        DROP:0.50", 20, 2e-3F, 0f, 0.50f),
+     |     Array("DL020 LR:0.002   PO:0        DROP:0.68", 20, 2e-3F, 0f, 0.68f),
+     |     Array("DL020 LR:0.002   PO:0        DROP:0.80", 20, 2e-3F, 0f, 0.80f),
+     |     Array("DL020 LR:0.001   PO:0        DROP:0.50", 20, 1e-3F, 0f, 0.50f),
+     |     Array("DL020 LR:0.001   PO:0        DROP:0.68", 20, 1e-3F, 0f, 0.68f),
+     |     Array("DL020 LR:0.001   PO:0        DROP:0.80", 20, 1e-3F, 0f, 0.80f),
+     |     Array("DL020 LR:0.01    PO:0        DROP:0.50", 20, 1e-2F, 0f, 0.50f),
+     |     Array("DL020 LR:0.01    PO:0        DROP:0.68", 20, 1e-2F, 0f, 0.68f),
+     |     Array("DL020 LR:0.01    PO:0        DROP:0.80", 20, 1e-2F, 0f, 0.80f),
+     |     Array("DL020 LR:0.05    PO:0        DROP:0.50", 20, 5e-2F, 0f, 0.50f),
+     |     Array("DL020 LR:0.05    PO:0        DROP:0.68", 20, 5e-2F, 0f, 0.68f),
+     |     Array("DL020 LR:0.05    PO:0        DROP:0.80", 20, 5e-2F, 0f, 0.80f)
+     | )
+NERDL_PARAMS: Array[Array[Any]] = Array(Array(DL020 LR:0.002   PO:0        DROP:0.50, 20, 0.002, 0.0, 0.5), Array(DL020 LR:0.002   PO:0        DROP:0.68, 20, 0.002, 0.0, 0.68), Array(DL020 LR:0.002   PO:0        DROP:0.80, 20, 0.002, 0.0, 0.8), Array(DL020 LR:0.001   PO:0        DROP:0.50, 20, 0.001, 0.0, 0.5), Array(DL020 LR:0.001   PO:0        DROP:0.68, 20, 0.001, 0.0, 0.68), Array(DL020 LR:0.001   PO:0        DROP:0.80, 20, 0.001, 0.0, 0.8), Array(DL020 LR:0.01    PO:0        DROP:0.50, 20, 0.01, 0.0, 0.5), Array(DL020 LR:0.01    PO:0        DROP:0.68, 20, 0.01, 0.0, 0.68), Array(DL020 LR:0.01    PO:0        DROP:0.80, 20, 0.01, 0.0, 0.8), Array(DL020 LR:0.05    PO:0        DROP:0.50, 20, 0.05, 0.0, 0.5), Array(DL020 LR:0.05    PO:0        DROP:0.68, 20, 0.05, 0.0, 0.68), Array(DL02...
+scala> 
+
+scala> val TRAINING_NER_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/"
+TRAINING_NER_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/
+
+scala> val TRAINING_TMP_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/"
+TRAINING_TMP_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/
+
+scala> 
+
+scala> for (bertModel <- 0 to BERT_MODELS.length - 1) {
+     |     //var bertModel = 9
+     |     println(BERT_MODELS(bertModel)(0).toString + " ------------------------------------------------------------------")
+     |     val embeddings = TfmHelper.prepareBert(
+     |         BERT_DIR +
+     |         BERT_MODELS(bertModel)(0).toString,
+     |         BERT_MODELS(bertModel)(2).asInstanceOf[Int],
+     |         BERT_MODELS(bertModel)(1).asInstanceOf[Int])
+     | 
+     |     for (conllModel <- 0 to CONLL_MODELS.length - 1) {
+     |         //var conllModel = 4
+     |         println(CONLL_MODELS(conllModel)(0).toString + "/" + CONLL_MODELS(conllModel)(1).toString + " -------------------")
+     |         val nerReader = CoNLL(explodeSentences = false)
+     |         val trainData = TfmHelper.prepareData(nerReader, TRAINING_NER_DIR + CONLL_MODELS(conllModel)(0).toString)
+     |         val testData = TfmHelper.prepareData(nerReader,  TRAINING_NER_DIR + CONLL_MODELS(conllModel)(1).toString)
+     |         val trainDataEmbeddings = embeddings.transform(trainData)
+     |         val testDataEmbeddings =  embeddings.transform(testData)
+     |         val testDatasetDirectory = TRAINING_TMP_DIR + CONLL_MODELS(conllModel)(1).toString + "-test.tmp.parquet"
+     | 
+     |         TfmHelper.saveParquetDataSet(testDataEmbeddings, testDatasetDirectory)
+     | 
+     |         for (nerDlModel <- 0 to NERDL_PARAMS.length - 1) {
+     |             //var nerDlModel = 2
+     |             println("DL  - " + NERDL_PARAMS(nerDlModel)(0).toString + " -----------------------------------------------------")
+     |             val nerTaggerTEST = TfmHelper.prepareNerDL(
+     |                 TFGRAPH_DIR,
+     |                 NERDL_PARAMS(nerDlModel)(1).asInstanceOf[Int],
+     |                 NERDL_PARAMS(nerDlModel)(2).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(3).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(4).asInstanceOf[Float],
+     |                 testDatasetDirectory,
+     |                 0.20f,
+     |                 32)
+     | 
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: BEGIN TRAIN")
+     |             val nerTest = nerTaggerTEST.fit(trainDataEmbeddings)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TRAIN: " + CONLL_MODELS(conllModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TEST:  " + CONLL_MODELS(conllModel)(1).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "BERT:  " + BERT_MODELS(bertModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "NER:   " + NERDL_PARAMS(nerDlModel)(0).toString)
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: END   TRAIN")
+     | 
+     |             TfmHelper.saveModel(
+     |                 nerTest,
+     |                 NER_MODEL_DIR + "TFM-DL-" + nerTaggerTEST.toString)
+     |         }
+     |     }
+     | }
+biobert_v1.1_pubmed_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.80 -----------------------------------------------------
+cased_L-24_H-1024_A-16_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.80 -----------------------------------------------------
+uncased_L-24_H-1024_A-16_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.001   PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.01    PO:0        DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.05    PO:0        DROP:0.80 -----------------------------------------------------
+
+scala> 
+
+scala> 
+
+scala> val NERDL_PARAMS = Array(
+     |     //FUERA POR DROP: Array("DL020 LR:0.003   PO:0        DROP:0.10", 20, 3e-3f, 0f, 0.10f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.50", 20, 3e-3f, 0f, 0.50f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.68", 20, 3e-3f, 0f, 0.68f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.80", 20, 3e-3f, 0f, 0.80f)
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.50", 20, 3e-4f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.68", 20, 3e-4f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.80", 20, 3e-4f, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.50", 20, 3e-5f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.68", 20, 3e-5f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.80", 20, 3e-5f, 0f, 0.80f)
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.50", 20, 2e-3F, 0f, 0.50f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.68", 20, 2e-3F, 0f, 0.68f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.80", 20, 2e-3F, 0f, 0.80f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.50", 20, 1e-3F, 0f, 0.50f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.68", 20, 1e-3F, 0f, 0.68f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.80", 20, 1e-3F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.50", 20, 1e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.68", 20, 1e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.80", 20, 1e-2F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.50", 20, 5e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.68", 20, 5e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.80", 20, 5e-2F, 0f, 0.80f)
+     |     // DE 2 A 3
+     |     Array("DL020 LR:0.002   PO:-0.017   DROP:0.50", 20, 2e-3F, -0.017f, 0.50f),
+     |     Array("DL020 LR:0.002   PO:-0.017   DROP:0.68", 20, 2e-3F, -0.017f, 0.68f),
+     |     Array("DL020 LR:0.002   PO:-0.017   DROP:0.80", 20, 2e-3F, -0.017f, 0.80f),
+     |     // DE 3 A 2. TIENE MAS SENTIDO
+     |     Array("DL020 LR:0.003   PO: 0.023   DROP:0.50", 20, 3e-3F,  0.023f, 0.50f),
+     |     Array("DL020 LR:0.003   PO: 0.023   DROP:0.68", 20, 3e-3F,  0.023f, 0.68f),
+     |     Array("DL020 LR:0.003   PO: 0.023   DROP:0.80", 20, 3e-3F,  0.023f, 0.80f),
+     |     // DE 4 A 3. TIENE MAS SENTIDO
+     |     Array("DL020 LR:0.004   PO: 0.016   DROP:0.50", 20, 4e-3F,  0.016f, 0.50f),
+     |     Array("DL020 LR:0.004   PO: 0.016   DROP:0.68", 20, 4e-3F,  0.016f, 0.68f),
+     |     Array("DL020 LR:0.004   PO: 0.016   DROP:0.80", 20, 4e-3F,  0.016f, 0.80f)
+     | )
+NERDL_PARAMS: Array[Array[Any]] = Array(Array(DL020 LR:0.002   PO:-0.017   DROP:0.50, 20, 0.002, -0.017, 0.5), Array(DL020 LR:0.002   PO:-0.017   DROP:0.68, 20, 0.002, -0.017, 0.68), Array(DL020 LR:0.002   PO:-0.017   DROP:0.80, 20, 0.002, -0.017, 0.8), Array(DL020 LR:0.003   PO: 0.023   DROP:0.50, 20, 0.003, 0.023, 0.5), Array(DL020 LR:0.003   PO: 0.023   DROP:0.68, 20, 0.003, 0.023, 0.68), Array(DL020 LR:0.003   PO: 0.023   DROP:0.80, 20, 0.003, 0.023, 0.8), Array(DL020 LR:0.004   PO: 0.016   DROP:0.50, 20, 0.004, 0.016, 0.5), Array(DL020 LR:0.004   PO: 0.016   DROP:0.68, 20, 0.004, 0.016, 0.68), Array(DL020 LR:0.004   PO: 0.016   DROP:0.80, 20, 0.004, 0.016, 0.8))
+
+scala> 
+
+scala> val TRAINING_NER_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/"
+TRAINING_NER_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/
+
+scala> val TRAINING_TMP_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/"
+TRAINING_TMP_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/
+
+scala> 
+
+scala> for (bertModel <- 0 to BERT_MODELS.length - 1) {
+     |     //var bertModel = 9
+     |     println(BERT_MODELS(bertModel)(0).toString + " ------------------------------------------------------------------")
+     |     val embeddings = TfmHelper.prepareBert(
+     |         BERT_DIR +
+     |         BERT_MODELS(bertModel)(0).toString,
+     |         BERT_MODELS(bertModel)(2).asInstanceOf[Int],
+     |         BERT_MODELS(bertModel)(1).asInstanceOf[Int])
+     | 
+     |     for (conllModel <- 0 to CONLL_MODELS.length - 1) {
+     |         //var conllModel = 4
+     |         println(CONLL_MODELS(conllModel)(0).toString + "/" + CONLL_MODELS(conllModel)(1).toString + " -------------------")
+     |         val nerReader = CoNLL(explodeSentences = false)
+     |         val trainData = TfmHelper.prepareData(nerReader, TRAINING_NER_DIR + CONLL_MODELS(conllModel)(0).toString)
+     |         val testData = TfmHelper.prepareData(nerReader,  TRAINING_NER_DIR + CONLL_MODELS(conllModel)(1).toString)
+     |         val trainDataEmbeddings = embeddings.transform(trainData)
+     |         val testDataEmbeddings =  embeddings.transform(testData)
+     |         val testDatasetDirectory = TRAINING_TMP_DIR + CONLL_MODELS(conllModel)(1).toString + "-test.tmp.parquet"
+     | 
+     |         TfmHelper.saveParquetDataSet(testDataEmbeddings, testDatasetDirectory)
+     | 
+     |         for (nerDlModel <- 0 to NERDL_PARAMS.length - 1) {
+     |             //var nerDlModel = 2
+     |             println("DL  - " + NERDL_PARAMS(nerDlModel)(0).toString + " -----------------------------------------------------")
+     |             val nerTaggerTEST = TfmHelper.prepareNerDL(
+     |                 TFGRAPH_DIR,
+     |                 NERDL_PARAMS(nerDlModel)(1).asInstanceOf[Int],
+     |                 NERDL_PARAMS(nerDlModel)(2).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(3).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(4).asInstanceOf[Float],
+     |                 testDatasetDirectory,
+     |                 0.20f,
+     |                 32)
+     | 
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: BEGIN TRAIN")
+     |             val nerTest = nerTaggerTEST.fit(trainDataEmbeddings)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TRAIN: " + CONLL_MODELS(conllModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TEST:  " + CONLL_MODELS(conllModel)(1).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "BERT:  " + BERT_MODELS(bertModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "NER:   " + NERDL_PARAMS(nerDlModel)(0).toString)
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: END   TRAIN")
+     | 
+     |             TfmHelper.saveModel(
+     |                 nerTest,
+     |                 NER_MODEL_DIR + "TFM-DL-" + nerTaggerTEST.toString)
+     |         }
+     |     }
+     | }
+biobert_v1.1_pubmed_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.80 -----------------------------------------------------
+cased_L-24_H-1024_A-16_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.80 -----------------------------------------------------
+uncased_L-24_H-1024_A-16_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.002   PO:-0.017   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.003   PO: 0.023   DROP:0.80 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.50 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.68 -----------------------------------------------------
+DL  - DL020 LR:0.004   PO: 0.016   DROP:0.80 -----------------------------------------------------
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> val BERT_DIR = "file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/"
+BERT_DIR: String = file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert/
+
+scala> val BERT_MODELS = Array(
+     |     //Array("biobert_v1.1_pubmed_M-128_B-32", 768, 128),
+     |     Array("biobert_v1.1_pubmed_M-512_B-32", 768, 512)
+     | 
+     |     //Array("cased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("cased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     |     //Array("uncased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("uncased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     |     //Array("multi_cased_L-12_H-768_A-12_M-128_B-32", 768, 128),
+     |     //Array("multi_cased_L-12_H-768_A-12_M-512_B-32", 768, 512),
+     | 
+     |     //Array("wwm_cased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("wwm_cased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     |     //Array("wwm_uncased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("wwm_uncased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     | 
+     |     //Array("cased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("cased_L-24_H-1024_A-16_M-512_B-32", 1024, 512),
+     |     //Array("uncased_L-24_H-1024_A-16_M-128_B-32", 1024, 128),
+     |     //Array("uncased_L-24_H-1024_A-16_M-512_B-32", 1024, 512)
+     | )
+BERT_MODELS: Array[Array[Any]] = Array(Array(biobert_v1.1_pubmed_M-512_B-32, 768, 512))
+
+scala> 
+
+scala> val CONLL_MODELS = Array(
+     |    // Array("ner_txt_cdr_train.conll", "ner_txt_cdr_test.conll"),
+     |     //Array("ner_txt_cdr_train.conll", "ner_txt_dnorm_test.conll"),
+     |     //Array("ner_txt_cdr_train.conll", "ner_txt_chem_test.conll"),
+     |     //Array("ner_txt_cdr_devel.conll", "ner_txt_chem_test.conll"),
+     |     //Array("JNLPBA_train.conll",      "JNLPBA_test.conll"),
+     |     Array("ner_txt_train.conll",     "ner_txt_test.conll")
+     | )
+CONLL_MODELS: Array[Array[String]] = Array(Array(ner_txt_train.conll, ner_txt_test.conll))
+
+scala> 
+
+scala> val TFGRAPH_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow"
+TFGRAPH_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow
+
+scala> val NER_MODEL_DIR = "file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/"
+NER_MODEL_DIR: String = file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/
+
+scala> val NERDL_PARAMS = Array(
+     |     //FUERA POR DROP: Array("DL020 LR:0.003   PO:0        DROP:0.10", 20, 3e-3f, 0f, 0.10f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.50", 20, 3e-3f, 0f, 0.50f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.68", 20, 3e-3f, 0f, 0.68f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.80", 20, 3e-3f, 0f, 0.80f)
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.50", 20, 3e-4f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.68", 20, 3e-4f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.80", 20, 3e-4f, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.50", 20, 3e-5f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.68", 20, 3e-5f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.80", 20, 3e-5f, 0f, 0.80f)
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.50", 20, 2e-3F, 0f, 0.50f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.68", 20, 2e-3F, 0f, 0.68f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.80", 20, 2e-3F, 0f, 0.80f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.50", 20, 1e-3F, 0f, 0.50f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.68", 20, 1e-3F, 0f, 0.68f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.80", 20, 1e-3F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.50", 20, 1e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.68", 20, 1e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.80", 20, 1e-2F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.50", 20, 5e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.68", 20, 5e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.80", 20, 5e-2F, 0f, 0.80f)
+     |     // DE 2 A 3
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.50", 20, 2e-3F, -0.017f, 0.50f),
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.68", 20, 2e-3F, -0.017f, 0.68f),
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.80", 20, 2e-3F, -0.017f, 0.80f),
+     |     // DE 3 A 2. TIENE MAS SENTIDO
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.50", 20, 3e-3F,  0.023f, 0.50f),
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.68", 20, 3e-3F,  0.023f, 0.68f),
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.80", 20, 3e-3F,  0.023f, 0.80f),
+     |     // DE 4 A 3. TIENE MAS SENTIDO
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.50", 20, 4e-3F,  0.016f, 0.50f),
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.68", 20, 4e-3F,  0.016f, 0.68f),
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.80", 20, 4e-3F,  0.016f, 0.80f)
+     |     Array("DL080 LR:0.004   PO: 0.001   DROP:0.80", 20, 4e-3F,  0.001f, 0.80f)
+     | )
+NERDL_PARAMS: Array[Array[Any]] = Array(Array(DL080 LR:0.004   PO: 0.001   DROP:0.80, 20, 0.004, 0.001, 0.8))
+
+scala> 
+
+scala> val TRAINING_NER_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/"
+TRAINING_NER_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/
+
+scala> val TRAINING_TMP_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/"
+TRAINING_TMP_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/
+
+scala> 
+
+scala> for (bertModel <- 0 to BERT_MODELS.length - 1) {
+     |     //var bertModel = 9
+     |     println(BERT_MODELS(bertModel)(0).toString + " ------------------------------------------------------------------")
+     |     val embeddings = TfmHelper.prepareBert(
+     |         BERT_DIR +
+     |         BERT_MODELS(bertModel)(0).toString,
+     |         BERT_MODELS(bertModel)(2).asInstanceOf[Int],
+     |         BERT_MODELS(bertModel)(1).asInstanceOf[Int])
+     | 
+     |     for (conllModel <- 0 to CONLL_MODELS.length - 1) {
+     |         //var conllModel = 4
+     |         println(CONLL_MODELS(conllModel)(0).toString + "/" + CONLL_MODELS(conllModel)(1).toString + " -------------------")
+     |         val nerReader = CoNLL(explodeSentences = false)
+     |         val trainData = TfmHelper.prepareData(nerReader, TRAINING_NER_DIR + CONLL_MODELS(conllModel)(0).toString)
+     |         val testData = TfmHelper.prepareData(nerReader,  TRAINING_NER_DIR + CONLL_MODELS(conllModel)(1).toString)
+     |         val trainDataEmbeddings = embeddings.transform(trainData)
+     |         val testDataEmbeddings =  embeddings.transform(testData)
+     |         val testDatasetDirectory = TRAINING_TMP_DIR + CONLL_MODELS(conllModel)(1).toString + "-test.tmp.parquet"
+     | 
+     |         TfmHelper.saveParquetDataSet(testDataEmbeddings, testDatasetDirectory)
+     | 
+     |         for (nerDlModel <- 0 to NERDL_PARAMS.length - 1) {
+     |             //var nerDlModel = 2
+     |             println("DL  - " + NERDL_PARAMS(nerDlModel)(0).toString + " -----------------------------------------------------")
+     |             val nerTaggerTEST = TfmHelper.prepareNerDL(
+     |                 TFGRAPH_DIR,
+     |                 NERDL_PARAMS(nerDlModel)(1).asInstanceOf[Int],
+     |                 NERDL_PARAMS(nerDlModel)(2).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(3).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(4).asInstanceOf[Float],
+     |                 testDatasetDirectory,
+     |                 0.20f,
+     |                 32)
+     | 
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: BEGIN TRAIN")
+     |             val nerTest = nerTaggerTEST.fit(trainDataEmbeddings)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TRAIN: " + CONLL_MODELS(conllModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TEST:  " + CONLL_MODELS(conllModel)(1).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "BERT:  " + BERT_MODELS(bertModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "NER:   " + NERDL_PARAMS(nerDlModel)(0).toString)
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: END   TRAIN")
+     | 
+     |             TfmHelper.saveModel(
+     |                 nerTest,
+     |                 NER_MODEL_DIR + "TFM-DL-" + nerTaggerTEST.toString)
+     |         }
+     |     }
+     | }
+biobert_v1.1_pubmed_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL080 LR:0.004   PO: 0.001   DROP:0.80 -----------------------------------------------------
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> val TFGRAPH_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow"
+TFGRAPH_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow
+
+scala> val NER_MODEL_DIR = "file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/"
+NER_MODEL_DIR: String = file:///home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner/
+
+scala> val NERDL_PARAMS = Array(
+     |     //FUERA POR DROP: Array("DL020 LR:0.003   PO:0        DROP:0.10", 20, 3e-3f, 0f, 0.10f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.50", 20, 3e-3f, 0f, 0.50f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.68", 20, 3e-3f, 0f, 0.68f),
+     |     //YA: Array("DL020 LR:0.003   PO:0        DROP:0.80", 20, 3e-3f, 0f, 0.80f)
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.50", 20, 3e-4f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.68", 20, 3e-4f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.0003  PO:0        DROP:0.80", 20, 3e-4f, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.50", 20, 3e-5f, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.68", 20, 3e-5f, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.00003 PO:0        DROP:0.80", 20, 3e-5f, 0f, 0.80f)
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.50", 20, 2e-3F, 0f, 0.50f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.68", 20, 2e-3F, 0f, 0.68f),
+     |     //BUENO: Array("DL020 LR:0.002   PO:0        DROP:0.80", 20, 2e-3F, 0f, 0.80f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.50", 20, 1e-3F, 0f, 0.50f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.68", 20, 1e-3F, 0f, 0.68f),
+     |     //PEOR: Array("DL020 LR:0.001   PO:0        DROP:0.80", 20, 1e-3F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.50", 20, 1e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.68", 20, 1e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.01    PO:0        DROP:0.80", 20, 1e-2F, 0f, 0.80f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.50", 20, 5e-2F, 0f, 0.50f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.68", 20, 5e-2F, 0f, 0.68f),
+     |     //MUCHO PEOR: Array("DL020 LR:0.05    PO:0        DROP:0.80", 20, 5e-2F, 0f, 0.80f)
+     |     // DE 2 A 3
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.50", 20, 2e-3F, -0.017f, 0.50f),
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.68", 20, 2e-3F, -0.017f, 0.68f),
+     |     //Array("DL020 LR:0.002   PO:-0.017   DROP:0.80", 20, 2e-3F, -0.017f, 0.80f),
+     |     // DE 3 A 2. TIENE MAS SENTIDO
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.50", 20, 3e-3F,  0.023f, 0.50f),
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.68", 20, 3e-3F,  0.023f, 0.68f),
+     |     //Array("DL020 LR:0.003   PO: 0.023   DROP:0.80", 20, 3e-3F,  0.023f, 0.80f),
+     |     // DE 4 A 3. TIENE MAS SENTIDO
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.50", 20, 4e-3F,  0.016f, 0.50f),
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.68", 20, 4e-3F,  0.016f, 0.68f),
+     |     //Array("DL020 LR:0.004   PO: 0.016   DROP:0.80", 20, 4e-3F,  0.016f, 0.80f)
+     |     Array("DL080 LR:0.004   PO: 0.001   DROP:0.80", 80, 4e-3F,  0.001f, 0.80f)
+     | )
+NERDL_PARAMS: Array[Array[Any]] = Array(Array(DL080 LR:0.004   PO: 0.001   DROP:0.80, 80, 0.004, 0.001, 0.8))
+
+scala> 
+
+scala> val TRAINING_NER_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/"
+TRAINING_NER_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner/
+
+scala> val TRAINING_TMP_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/"
+TRAINING_TMP_DIR: String = /home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/
+
+scala> 
+
+scala> for (bertModel <- 0 to BERT_MODELS.length - 1) {
+     |     //var bertModel = 9
+     |     println(BERT_MODELS(bertModel)(0).toString + " ------------------------------------------------------------------")
+     |     val embeddings = TfmHelper.prepareBert(
+     |         BERT_DIR +
+     |         BERT_MODELS(bertModel)(0).toString,
+     |         BERT_MODELS(bertModel)(2).asInstanceOf[Int],
+     |         BERT_MODELS(bertModel)(1).asInstanceOf[Int])
+     | 
+     |     for (conllModel <- 0 to CONLL_MODELS.length - 1) {
+     |         //var conllModel = 4
+     |         println(CONLL_MODELS(conllModel)(0).toString + "/" + CONLL_MODELS(conllModel)(1).toString + " -------------------")
+     |         val nerReader = CoNLL(explodeSentences = false)
+     |         val trainData = TfmHelper.prepareData(nerReader, TRAINING_NER_DIR + CONLL_MODELS(conllModel)(0).toString)
+     |         val testData = TfmHelper.prepareData(nerReader,  TRAINING_NER_DIR + CONLL_MODELS(conllModel)(1).toString)
+     |         val trainDataEmbeddings = embeddings.transform(trainData)
+     |         val testDataEmbeddings =  embeddings.transform(testData)
+     |         val testDatasetDirectory = TRAINING_TMP_DIR + CONLL_MODELS(conllModel)(1).toString + "-test.tmp.parquet"
+     | 
+     |         TfmHelper.saveParquetDataSet(testDataEmbeddings, testDatasetDirectory)
+     | 
+     |         for (nerDlModel <- 0 to NERDL_PARAMS.length - 1) {
+     |             //var nerDlModel = 2
+     |             println("DL  - " + NERDL_PARAMS(nerDlModel)(0).toString + " -----------------------------------------------------")
+     |             val nerTaggerTEST = TfmHelper.prepareNerDL(
+     |                 TFGRAPH_DIR,
+     |                 NERDL_PARAMS(nerDlModel)(1).asInstanceOf[Int],
+     |                 NERDL_PARAMS(nerDlModel)(2).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(3).asInstanceOf[Float],
+     |                 NERDL_PARAMS(nerDlModel)(4).asInstanceOf[Float],
+     |                 testDatasetDirectory,
+     |                 0.20f,
+     |                 32)
+     | 
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: BEGIN TRAIN")
+     |             val nerTest = nerTaggerTEST.fit(trainDataEmbeddings)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TRAIN: " + CONLL_MODELS(conllModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "TEST:  " + CONLL_MODELS(conllModel)(1).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "BERT:  " + BERT_MODELS(bertModel)(0).toString)
+     |             OutputHelper.writeAppend(nerTaggerTEST.toString, "NER:   " + NERDL_PARAMS(nerDlModel)(0).toString)
+     |             //println(java.time.LocalTime.now + ": NER-TRAIN: END   TRAIN")
+     | 
+     |             TfmHelper.saveModel(
+     |                 nerTest,
+     |                 NER_MODEL_DIR + "TFM-DL-" + nerTaggerTEST.toString)
+     |         }
+     |     }
+     | }
+biobert_v1.1_pubmed_M-512_B-32 ------------------------------------------------------------------
+ner_txt_train.conll/ner_txt_test.conll -------------------
+DL  - DL080 LR:0.004   PO: 0.001   DROP:0.80 -----------------------------------------------------
+
+scala> 
+
+scala> 
+
+scala> 
+
+scala> 
