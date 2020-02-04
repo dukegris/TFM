@@ -87,7 +87,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "La fehca de último uso no puede ser nula")
+			message = "La fehca de Ã³ltimo uso no puede ser nula")
 	private Date lastUsed;
 
 	

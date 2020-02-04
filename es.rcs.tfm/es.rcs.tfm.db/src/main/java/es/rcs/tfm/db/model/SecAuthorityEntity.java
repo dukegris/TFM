@@ -67,10 +67,10 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c骴igo no puede ser nulo")
+			message = "El c贸digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c骴igono puede sobrepasar los {max} carcateres.")
+			message = "El c贸digono puede sobrepasar los {max} carcateres.")
 	public String code;
 
 	
@@ -121,6 +121,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -143,6 +144,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			mappedBy = "authorities",
 			cascade = { CascadeType.DETACH },
 			fetch = FetchType.LAZY)
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -165,6 +167,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			mappedBy = "authorities",
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -200,7 +203,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	public SecAuthorityEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El c骴igo no puede ser nulo") @Size(max = 32, message = "El c骴igono puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El c贸digo no puede ser nulo") @Size(max = 32, message = "El c贸digono puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} carcateres.") String name) {
 		super();
 		this.code = code;

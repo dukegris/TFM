@@ -69,10 +69,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c骴igo no puede ser nulo")
+			message = "El c贸digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c骴igono puede sobrepasar los {max} carcateres.")
+			message = "El c贸digono puede sobrepasar los {max} carcateres.")
 	public String code;
 */
 	
@@ -106,7 +106,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "La habilitaci髇 del usuario no puede ser nula")
+			message = "La habilitaci贸n del usuario no puede ser nula")
 	public boolean enabled = false;
 
 	
@@ -118,7 +118,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "El estado de expiraci髇 del usuario no puede ser nulo")
+			message = "El estado de expiraci贸n del usuario no puede ser nulo")
 	public boolean expired = true;
 
 	
@@ -143,10 +143,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 64)
 	@NotNull(
-			message = "La contrase馻 no puede ser nula")
+			message = "La contrase贸a no puede ser nula")
 	@Size(
 			max = 64, 
-			message = "La contrase馻 no puede sobrepasar los {max} carcateres.")
+			message = "La contrase贸a no puede sobrepasar los {max} carcateres.")
 	public String password;
 
 	
@@ -158,7 +158,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "El estado de expiraci髇 de la contrase馻 del usuario no puede ser nulo")
+			message = "El estado de expiraci贸n de la contrase贸a del usuario no puede ser nulo")
 	public boolean passwordExpired = true;
 
 	
@@ -171,10 +171,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 128)
 	@NotNull(
-			message = "El correo electr髇ico del usuario no puede ser nulo")
+			message = "El correo electr贸nico del usuario no puede ser nulo")
 	@Size(
 			max = 128, 
-			message = "El correo electr髇ico del usuario no puede sobrepasar los {max} carcateres.")
+			message = "El correo electr贸nico del usuario no puede sobrepasar los {max} carcateres.")
 	public String email;
 
 	
@@ -187,7 +187,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 128)
 	@NotNull(
-			message = "La verificaci髇 del correo electr髇ico del usuario no puede ser nula")
+			message = "La verificaci贸n del correo electr贸nico del usuario no puede ser nula")
 	public boolean emailConfirmed = false;
 
 	
@@ -220,6 +220,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			// mappedBy = "users",
 			fetch = FetchType.EAGER,
 			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -255,6 +256,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			// mappedBy = "users",
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -290,6 +292,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			// mappedBy = "users",
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -316,6 +319,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			mappedBy = "user",
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.ALL })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -329,8 +333,8 @@ public class SecUserEntity extends AuditedBaseEntity {
 
 	public SecUserEntity(
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} carcateres.") String username,
-			@NotNull(message = "El correo electr髇ico del usuario no puede ser nulo") @Size(max = 128, message = "El correo electr髇ico del usuario no puede sobrepasar los {max} carcateres.") String email,
-			@NotNull(message = "La contrase馻 no puede ser nula") @Size(max = 64, message = "La contrase馻 no puede sobrepasar los {max} carcateres.") String password) {
+			@NotNull(message = "El correo electr贸nico del usuario no puede ser nulo") @Size(max = 128, message = "El correo electr贸nico del usuario no puede sobrepasar los {max} carcateres.") String email,
+			@NotNull(message = "La contrase贸a no puede ser nula") @Size(max = 64, message = "La contrase贸a no puede sobrepasar los {max} carcateres.") String password) {
 		super();
 		this.username = username;
 		this.email = email;

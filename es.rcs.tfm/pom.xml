@@ -164,6 +164,7 @@
 		<google-guava.version>15.0</google-guava.version>
 		<google-collections.version>1.0</google-collections.version>
 		<hikari.version>3.3.1</hikari.version>
+		<atomikos.version>5.0.6</atomikos.version>
 		<netty.version>3.10.6.Final</netty.version>
 		<netty-all.version>4.1.37.Final</netty-all.version>
 		<crnk.version>3.1.20191113192440</crnk.version>
@@ -703,6 +704,7 @@
 			<version>${antlr.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -710,6 +712,7 @@
 			<version>${lombok.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<!-- DSL -->
 		<dependency>
 			<groupId>com.querydsl</groupId>
@@ -723,6 +726,7 @@
 			<version>${querydsl.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<!-- JAVERS -->
 		<dependency>
 			<groupId>org.javers</groupId>
@@ -754,6 +758,7 @@
 			<version>${javers.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<!-- GOOGLE -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -767,6 +772,7 @@
 			<version>${google-collections.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<!-- HIKARI -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -774,6 +780,45 @@
 		    <version>${hikari.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- ATOMIKOS JTA -->
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>atomikos-util</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-api</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jdbc</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jta</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-hibernate4</artifactId>
+			<version>${atomikos.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- WRAPPER -->
 		<dependency>
 			<!-- this must match with the actual JSW runtime distribution, the scope must set as provided since this plugin already add wrapper.jar into the classpath -->
@@ -782,6 +827,7 @@
 			<version>${wrapper.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		
 		<!-- SFM CSV -->
 		<dependency>
 			<groupId>org.simpleflatmapper</groupId>

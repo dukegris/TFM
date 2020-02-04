@@ -68,10 +68,10 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c�digo no puede ser nulo")
+			message = "El código no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c�digono no puede sobrepasar los {max} carcateres.")
+			message = "El códigono no puede sobrepasar los {max} carcateres.")
 	public String code;
 
 	
@@ -138,6 +138,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -164,6 +165,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			mappedBy = "module",
 			fetch = FetchType.EAGER,
 			cascade = { CascadeType.ALL } )
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -177,7 +179,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} carcateres.") String name) {
 		super();
 		this.code = code;
@@ -187,7 +189,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono no puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono no puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} carcateres.") String name,
 			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} carcateres.") String url) {
 		super();

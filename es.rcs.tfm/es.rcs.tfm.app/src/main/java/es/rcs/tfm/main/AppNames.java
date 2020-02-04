@@ -123,6 +123,9 @@ public class AppNames {
 
 	public static final String BBDD_PU							= "TFM_PU";
 	public static final String BBDD_DB							= "taoBBDDDB";
+	public static final String BBDD_TR_SERVICE					= "taoTransactionService";
+	public static final String BBDD_TR_MANAGER					= "taoTransactionManager";
+	public static final String BBDD_TR_USER_MANAGER				= "taoUserTransactionManager";
 	
 	public static final String BBDD_JPA_VENDOR					= "taoBBDD_JPA_VA";
 	public static final String BBDD_JPA_DIALECT					= "taoBBDD_JPA_DIALECT";

@@ -19,7 +19,7 @@
         <mat-nav-list>
             <div *ngFor="let element of modules">
                 <a      mat-list-item
-                        [routerLink]="[isOpen, element.url.toLowerCase()]"
+                        [routerLink]="[element.url.toLowerCase()]"
                         routerLinkActive="active-list-item">
                     <button mat-menu-item>
                         <mat-icon class="cardImg">{{iconos.moduleIcons[element.code]}}</mat-icon>

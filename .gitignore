@@ -27,3 +27,6 @@ __pycache__
 /es.rcs.tfm/es.rcs.tfm.app/hadoop
 /es.rcs.tfm/es.rcs.tfm.app/solr
 /es.rcs.tfm/es.rcs.tfm.app/spark
+/es.rcs.tfm/es.rcs.tfm.app/tmp
+/es.rcs.tfm/es.rcs.tfm.xml/data
+/es.rcs.tfm/es.rcs.tfm.xml/esquemas
