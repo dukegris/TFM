@@ -38,8 +38,8 @@ public interface SecUserRepository extends
 		
 	}
 
-	SecUserEntity findByUsername(
-			@Param("username") String username);
+	SecUserEntity findByName(
+			@Param("name") String name);
 	SecUserEntity findByEmail(
 			@Param("email") String email);
 

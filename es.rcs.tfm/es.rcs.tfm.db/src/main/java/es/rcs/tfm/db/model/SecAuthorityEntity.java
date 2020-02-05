@@ -44,7 +44,7 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = true)
 @JsonApiResource(
-		type = SecAuthorityEntity.RES_NAME,
+		type = SecAuthorityEntity.RES_TYPE,
 		resourcePath = SecAuthorityEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -62,8 +62,8 @@ import lombok.ToString;
 					name = SecAuthorityEntity.DB_CODE_UK, 
 					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_CODE }) ,
 			@UniqueConstraint(
-					name = SecAuthorityEntity.DB_AUTHORITY_UK, 
-					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_AUTHORITY }) })
+					name = SecAuthorityEntity.DB_NAME_UK, 
+					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_NAME }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -74,13 +74,13 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	protected Logger LOG = LoggerFactory.getLogger(SecAuthorityEntity.class);
 
 	public static final String RES_ACTION			= "authorities";
-	public static final String RES_NAME				= "Authority";
+	public static final String RES_TYPE				= "Authority";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_AUTHORITY		= "authority";
+	public static final String RES_NAME				= "name";
 
-	public static final String RES_APPLICATION_ID	= "aplicationId";
-	public static final String RES_APPLICATION		= "aplication";
+	public static final String RES_APPLICATION_ID	= "applicationId";
+	public static final String RES_APPLICATION		= "application";
 
 	public static final String RES_FUNCTION_IDS		= "functionIds";
 	public static final String RES_FUNCTIONS		= "functions";
@@ -94,22 +94,22 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE 			= "sec_authority";
 	public static final String DB_ID_PK 			= "sec_aut_pk";
 	public static final String DB_UID_UK			= "sec_aut_uid_uk";
-	public static final String DB_AUTHORITY_UK		= "sec_aut_aut_uk";
+	public static final String DB_NAME_UK			= "sec_aut_aut_uk";
 	public static final String DB_CODE_UK			= "sec_aut_cod_uk";
 	public static final String DB_APPLICATION_ID_FK	= "sec_aut_app_fk";
 
 	public static final String DB_CODE				= "aut_cod";
-	public static final String DB_AUTHORITY			= "aut_txt";
+	public static final String DB_NAME				= "aut_txt";
 	public static final String DB_APPLICATION_ID	= "app_id";
 
 	public static final String ATT_APPLICATION		= "application";
 	public static final String ATT_APPLICATION_ID	= "applicationId";
 	public static final String ATT_ROLES			= "roles";
-	public static final String ATT_ROLE_IDS		= "roleIds";
+	public static final String ATT_ROLE_IDS			= "roleIds";
 	public static final String ATT_GROUPS			= "groups";
 	public static final String ATT_GROUP_IDS		= "groupIds";
 	public static final String ATT_USERS			= "users";
-	public static final String ATT_USER_IDS		= "userIds";
+	public static final String ATT_USER_IDS			= "userIds";
 
 	
 	@JsonProperty(
@@ -121,18 +121,18 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El código no puede ser nulo")
+			message = "El cÃ³digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El código no puede sobrepasar los {max} caracteres.")
+			message = "El cÃ³digo no puede sobrepasar los {max} caracteres.")
 	private String code;
 
 
 	@JsonProperty(
-			value = RES_AUTHORITY,
+			value = RES_NAME,
 			required = true)
 	@Column(
-			name = DB_AUTHORITY, 
+			name = DB_NAME, 
 			unique = true,
 			nullable = false, 
 			length = 64)
@@ -155,7 +155,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_APPLICATION_ID,
+			idField = ATT_APPLICATION_ID,
 			mappedBy = SecApplicationEntity.ATT_AUTHORITIES,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
@@ -192,7 +192,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = RES_USERS)
 	@JsonApiRelation(
-			idField = RES_USER_IDS, 
+			idField = ATT_USER_IDS, 
 			mappedBy = SecUserEntity.ATT_AUTHORITIES)
 	@ManyToMany(
 			mappedBy = SecUserEntity.ATT_AUTHORITIES,
@@ -215,7 +215,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = RES_ROLES)
 	@JsonApiRelation(
-			idField = RES_ROLE_IDS, 
+			idField = ATT_ROLE_IDS, 
 			mappedBy = SecRoleEntity.ATT_AUTHORITIES)
 	@ManyToMany(
 			mappedBy = SecRoleEntity.ATT_AUTHORITIES,
@@ -236,7 +236,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	
 	
 	@JsonApiRelation(
-			idField = RES_GROUPS_IDS, 
+			idField = ATT_GROUP_IDS, 
 			mappedBy = SecGroupEntity.ATT_AUTHORITIES)
 	@JsonProperty(
 			value = RES_GROUPS)

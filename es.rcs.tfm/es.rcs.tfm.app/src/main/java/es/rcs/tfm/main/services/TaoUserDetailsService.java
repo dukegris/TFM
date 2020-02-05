@@ -49,9 +49,9 @@ public class TaoUserDetailsService implements UserDetailsService {
 		UserDetails userDetails = null;
 
 		if (EmailValidator.getInstance().isValid(username)) {
-			user = this.userRepository.findByUsername(username);
+			user = this.userRepository.findByName(username);
 		} else {
-			user = this.userRepository.findByUsername(username);
+			user = this.userRepository.findByName(username);
 		}
 		if (user == null) {
 			if (LOG.isInfoEnabled())
@@ -85,7 +85,7 @@ public class TaoUserDetailsService implements UserDetailsService {
 		}
 
 		userDetails = new User(
-				user.getUsername(), 
+				user.getName(), 
 				user.getPassword(), 
 				user.isEnabled(), 
 				!user.isExpired(), 

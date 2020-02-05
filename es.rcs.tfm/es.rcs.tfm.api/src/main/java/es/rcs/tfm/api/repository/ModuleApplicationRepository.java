@@ -1,6 +1,5 @@
 package es.rcs.tfm.api.repository;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,34 +14,30 @@ import es.rcs.tfm.db.model.SecModuleEntity;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.OneRelationshipRepositoryBase;
 import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.resource.list.ResourceList;
 
 @Repository(value = ApiNames.API_MOD_APP_REP)
-public class ModuleApplicationRepository extends OneRelationshipRepositoryBase<SecModuleEntity, Long, SecApplicationEntity, Long> {
+public class ModuleApplicationRepository
+		extends OneRelationshipRepositoryBase<SecModuleEntity, Long, SecApplicationEntity, Long> {
 
 	@Override
-    public RelationshipMatcher getMatcher() {
+	public RelationshipMatcher getMatcher() {
 		RelationshipMatcher matcher = new RelationshipMatcher();
-		matcher
-			.rule()
-			.source(SecModuleEntity.class)
-			.target(SecApplicationEntity.class)
-			.add();
+		matcher.rule().source(SecModuleEntity.class).target(SecApplicationEntity.class).add();
 		return matcher;
-    }
+	}
 
 	@Override
-	public Map<Long, SecApplicationEntity> findOneRelations(
-			Collection<Long> sourceIds, 
-			String fieldName, 
+	public Map<Long, SecApplicationEntity> findOneRelations(Collection<Long> sourceIds, String fieldName,
 			QuerySpec querySpec) {
 
-		Map<Long, SecApplicationEntity>result = new HashMap<>();
+		Map<Long, SecApplicationEntity> result = new HashMap<>();
 
-		for (Long id: sourceIds) {
-			SecModuleEntity item = repPri.findOne(id, querySpec);
+		ResourceList<SecModuleEntity> list = repPri.findAll(sourceIds, querySpec);
+		for (SecModuleEntity item: list) {
 			if (item != null) {
 				SecApplicationEntity data = repSec.findOne(item.getApplicationId(), querySpec);
-				if (data != null) result.put(id, data);
+				if (data != null) result.put(item.getId(), data);
 			}
 		}
 

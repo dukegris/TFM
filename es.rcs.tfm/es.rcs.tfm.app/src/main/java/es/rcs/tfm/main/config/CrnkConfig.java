@@ -239,12 +239,12 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 			// SEGURIDAD - CONTROL DE LEGISLATURA
 			
 			app = segAppRep.findByCode("tfm.app.adm");
-			adminUsr = segUsrRep.findByUsername("admin");
+			adminUsr = segUsrRep.findByName("admin");
 			if (app == null) {
 				//app = segAppRep.findByCode("tfm.app.adm");
 				//if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.adm",		"Administración", 	"/admin"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios", 		"/admin/users"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.adm",		"Administracion",	"/admin"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios",			"/admin/users"));
 				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.grp",	"Grupos", 			"/admin/groups"));
 				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.app",	"Aplicaciones", 	"/admin/applications"));
 				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.mod",	"Modulos", 			"/admin/modules"));
@@ -284,11 +284,11 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 							"tfm.rol.admin",
 							"Administrador General",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.adm.admin","Administrar módulo de Administración")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.admin","Administrar módulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.admin","Administrar módulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.admin","Administrar módulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.admin","Administrar módulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.adm.admin","Administrar modulo de Administracion")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.admin","Administrar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.admin","Administrar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.admin","Administrar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.admin","Administrar modulo de Corpus")) )) ));
 				
 				SecRoleEntity userRol = 
 					segRolRep.save(
@@ -297,10 +297,10 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 							"tfm.rol.user",
 							"Usuario de consulta",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.user","Consultar módulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.user","Consultar módulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.user","Consultar módulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.user","Consultar módulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.user","Consultar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.user","Consultar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.user","Consultar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.user","Consultar modulo de Corpus")) )) ));
 				
 				SecRoleEntity queryRol = 
 					segRolRep.save(
@@ -309,10 +309,10 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 							"tfm.rol.query",
 							"Usuario de consulta",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.query","Consultar módulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.query","Consultar módulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.query","Consultar módulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.query","Consultar módulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.query","Consultar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.query","Consultar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.query","Consultar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.query","Consultar modulo de Corpus")) )) ));
 	
 				// GRUPOS
 				SecGroupEntity editorGrp =
@@ -321,17 +321,17 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 							"tfm.grp.edit",
 							"Usuario",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.edit","Editar módulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.edit","Editar módulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.edit","Editar módulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.edit","Editar módulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.edit","Editar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.edit","Editar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.edit","Editar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.edit","Editar modulo de Corpus")) )) ));
 			
 			}
 			
 			if (adminUsr == null) {
 				// USUARIOS
 				adminUsr = new SecUserEntity("admin", "dukegris@gmail.com", passwordEncoder.encode("dukegris"));
-				//adminUsr.setUsername("dukegris");
+				//adminUsr.setName("dukegris");
 				//adminUsr.setEmail("dukegris@gmail.com");
 				//adminUsr.setPassword(passwordEncoder.encode("dukegris"));
 	

@@ -43,9 +43,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode(
-	callSuper = true)
+		callSuper = true)
 @JsonApiResource(
-		type = SecModuleEntity.RES_NAME,
+		type = SecModuleEntity.RES_TYPE,
 		resourcePath = SecModuleEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -54,17 +54,17 @@ import lombok.ToString;
 		name = SecModuleEntity.DB_TABLE,
 		uniqueConstraints = {
 			@UniqueConstraint(
-				name = SecModuleEntity.DB_ID_PK, 
-				columnNames = { SecModuleEntity.DB_ID }),
-		@UniqueConstraint(
-				name = SecModuleEntity.DB_UID_UK, 
-				columnNames = { SecModuleEntity.DB_UID }),
-		@UniqueConstraint(
-				name = SecModuleEntity.DB_CODE_UK, 
-				columnNames = { SecModuleEntity.DB_CODE }),
-		@UniqueConstraint(
-				name = SecModuleEntity.DB_MODULE_UK, 
-				columnNames = { SecModuleEntity.DB_MODULE}) })
+					name = SecModuleEntity.DB_ID_PK, 
+					columnNames = { SecModuleEntity.DB_ID }),
+			@UniqueConstraint(
+					name = SecModuleEntity.DB_UID_UK, 
+					columnNames = { SecModuleEntity.DB_UID }),
+			@UniqueConstraint(
+					name = SecModuleEntity.DB_CODE_UK, 
+					columnNames = { SecModuleEntity.DB_CODE }),
+			@UniqueConstraint(
+					name = SecModuleEntity.DB_NAME_UK, 
+					columnNames = { SecModuleEntity.DB_NAME}) })
 @Entity
 @Audited
 @EntityListeners(
@@ -75,12 +75,12 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	private static final Logger LOG = LoggerFactory.getLogger(SecModuleEntity.class);
 
 	public static final String RES_ACTION			= "modules";
-	public static final String RES_NAME				= "Module";
+	public static final String RES_TYPE				= "Module";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_MODULE			= "name";
+	public static final String RES_NAME				= "name";
 	public static final String RES_URL				= "url";
-	public static final String RES_APLICACION_ID	= "applicationId";
+	public static final String RES_APPLICATION_ID	= "applicationId";
 	public static final String RES_APPLICATION		= "application";
 	public static final String RES_FUNCTION_IDS		= "functionIds";
 	public static final String RES_FUNCTIONS		= "functions";
@@ -89,11 +89,11 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	public static final String DB_ID_PK 			= "sec_mod_pk";
 	public static final String DB_UID_UK			= "sec_mod_uid_uk";
 	public static final String DB_CODE_UK			= "sec_mod_cod_uk";
-	public static final String DB_MODULE_UK			= "sec_mod_txt_uk";
+	public static final String DB_NAME_UK			= "sec_mod_txt_uk";
 	public static final String DB_APPLICATION_ID_FK	= "sec_mod_app_fk";
 
 	public static final String DB_CODE				= "mod_cod";
-	public static final String DB_MODULE			= "mod_txt";
+	public static final String DB_NAME				= "mod_txt";
 	public static final String DB_URL				= "mod_url";
 	public static final String DB_APPLICATION_ID	= "app_id";
 
@@ -112,18 +112,18 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c贸digo del m贸dulo o puede ser nulo")
+			message = "El c骴igo del m骴ulo o puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c贸digo del m贸dulo no puede sobrepasar los {max} caracteres.")
+			message = "El c骴igo del m骴ulo no puede sobrepasar los {max} caracteres.")
 	private String code;
 
 	
 	@JsonProperty(
-			value = RES_MODULE,
+			value = RES_NAME,
 			required = true)
 	@Column(
-			name = DB_MODULE, 
+			name = DB_NAME, 
 			unique = true,
 			nullable = false, 
 			length = 64)
@@ -132,7 +132,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	@Size(
 			max = 64, 
 			message = "El nombre del m贸dulo no puede sobrepasar los {max} caracteres.")
-	private String module;
+	private String name;
 
 	
 	@JsonProperty(
@@ -153,7 +153,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_APLICACION_ID)
+			value = RES_APPLICATION_ID)
 	@Column(
 			name = DB_APPLICATION_ID,
 			unique = false,
@@ -164,7 +164,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_APLICACION_ID,
+			idField = ATT_APPLICATION_ID,
 			mappedBy = SecApplicationEntity.ATT_MODULES,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
@@ -199,7 +199,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_FUNCTION_IDS, 
+			idField = ATT_FUNCTION_IDS, 
 			mappedBy = SecFunctionEntity.ATT_MODULE,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -236,11 +236,11 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	public SecModuleEntity(
 			SecApplicationEntity application,
 			@NotNull(message = "El c贸digo no puede ser nulo") @Size(max = 32, message = "El c贸digono no puede sobrepasar los {max} caracteres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} caracteres.") String module,
+			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} caracteres.") String name,
 			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.") String url) {
 		super();
 		this.code = code;
-		this.module = module;
+		this.name = name;
 		this.url = url;
 		this.setApplication(application);
 	}

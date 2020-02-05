@@ -29,7 +29,7 @@ public class TaoRememberMeService implements PersistentTokenRepository {
 		SecUserEntity user = null;
 		SecTokenEntity userToken = null;
 		
-		user = userRepository.findByUsername(token.getUsername());
+		user = userRepository.findByName(token.getUsername());
 		userToken = new SecTokenEntity(user, token.getSeries(), token.getTokenValue(), token.getDate());
 		tokenRepository.save(userToken);
         	
@@ -62,7 +62,7 @@ public class TaoRememberMeService implements PersistentTokenRepository {
 
 		if (userToken != null) {
 			return new PersistentRememberMeToken(
-					userToken.getUser().getUsername(), 
+					userToken.getUser().getName(), 
 					userToken.getSerie(), 
 					userToken.getToken(), 
 					userToken.getLastUsed());

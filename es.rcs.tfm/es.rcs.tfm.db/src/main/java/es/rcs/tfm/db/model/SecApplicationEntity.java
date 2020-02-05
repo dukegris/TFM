@@ -42,7 +42,7 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = true)
 @JsonApiResource(
-		type = SecApplicationEntity.RES_NAME,
+		type = SecApplicationEntity.RES_TYPE,
 		resourcePath = SecApplicationEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -72,10 +72,10 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	private static final Logger LOG = LoggerFactory.getLogger(SecApplicationEntity.class);
 
 	public static final String RES_ACTION			= "applications";
-	public static final String RES_NAME				= "Application";
+	public static final String RES_TYPE				= "Application";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_APPLICATION		= "application";
+	public static final String RES_APPLICATION		= "name";
 	public static final String RES_URL				= "url";
 	public static final String RES_MODULE_IDS		= "moduleIds";
 	public static final String RES_MODULES			= "modules";
@@ -98,7 +98,7 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	public static final String ATT_MODULES			= "modules";
 	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
 	public static final String ATT_AUTHORITIES		= "authorities";
-	public static final String ATT_ROLES_IDS		= "roleIds";
+	public static final String ATT_ROLE_IDS			= "roleIds";
 	public static final String ATT_ROLES			= "roles";
 
 	
@@ -111,10 +111,10 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c�digo no puede ser nulo")
+			message = "El codigo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c�digo no puede sobrepasar los {max} caracteres.")
+			message = "El codigo no puede sobrepasar los {max} caracteres.")
 	private String code;
 
 	
@@ -158,7 +158,7 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 
 	@JsonApiRelation(
-			idField = RES_MODULE_IDS,
+			idField = ATT_MODULE_IDS,
 			mappedBy = SecModuleEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -185,7 +185,7 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_ROLE_IDS, 
+			idField = ATT_ROLE_IDS, 
 			mappedBy = SecRoleEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -212,7 +212,7 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_AUTHORITY_IDS, 
+			idField = ATT_AUTHORITY_IDS, 
 			mappedBy = SecAuthorityEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -237,7 +237,7 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	}
 
 	public SecApplicationEntity(
-			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
 		super();
 		this.code = code;

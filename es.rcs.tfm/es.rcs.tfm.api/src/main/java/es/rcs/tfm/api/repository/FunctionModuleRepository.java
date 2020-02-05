@@ -1,6 +1,5 @@
 package es.rcs.tfm.api.repository;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +14,7 @@ import es.rcs.tfm.db.model.SecModuleEntity;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.OneRelationshipRepositoryBase;
 import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.resource.list.ResourceList;
 
 @Repository(value = ApiNames.API_FUN_MOD_REP)
 public class FunctionModuleRepository 
@@ -43,11 +43,11 @@ public class FunctionModuleRepository
 
 		Map<Long, SecModuleEntity>result = new HashMap<>();
 
-		for (Long id: sourceIds) {
-			SecFunctionEntity item = repPri.findOne(id, querySpec);
+		ResourceList<SecFunctionEntity> list = repPri.findAll(sourceIds, querySpec);
+		for (SecFunctionEntity item: list) {
 			if (item != null) {
 				SecModuleEntity data = repSec.findOne(item.getModuleId(), querySpec);
-				if (data != null) result.put(id, data);
+				if (data != null) result.put(item.getId(), data);
 			}
 		}
 

@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -38,7 +39,7 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = true)
 @JsonApiResource(
-		type = SecTokenEntity.RES_NAME,
+		type = SecTokenEntity.RES_TYPE,
 		resourcePath = SecTokenEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -48,7 +49,10 @@ import lombok.ToString;
 		uniqueConstraints = {
 				@UniqueConstraint(
 						name = SecTokenEntity.DB_ID_PK, 
-						columnNames = { SecTokenEntity.DB_ID }) })
+						columnNames = { SecTokenEntity.DB_ID }),
+				@UniqueConstraint(
+					name = SecTokenEntity.DB_UID_UK, 
+					columnNames = { SecTokenEntity.DB_UID }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -59,7 +63,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 	private static final Logger LOG = LoggerFactory.getLogger(SecTokenEntity.class);
 
 	public static final String RES_ACTION		= "tokens";
-	public static final String RES_NAME			= "Token";
+	public static final String RES_TYPE			= "Token";
 
 	public static final String RES_SERIE		= "serie";
 	public static final String RES_TOKEN		= "token";
@@ -69,6 +73,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 
 	public static final String DB_TABLE 		= "sec_user_tokens";
 	public static final String DB_ID_PK 		= "sec_tkn_pk";
+	public static final String DB_UID_UK		= "sec_mod_uid_uk";
 	public static final String DB_USER_ID_FK	= "sec_tkn_usr_fk";
 
 	public static final String DB_ID			= "id";
@@ -78,6 +83,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 	public static final String DB_USER_ID		= "usr_id";
 
 	public static final String ATT_USER			= "user";
+	public static final String ATT_USER_ID		= "userId";
 
 	
 	@JsonProperty(
@@ -135,7 +141,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_USER_ID,
+			idField = ATT_USER_ID,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JsonProperty(

@@ -45,7 +45,7 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = true)
 @JsonApiResource(
-		type = SecRoleEntity.RES_NAME,
+		type = SecRoleEntity.RES_TYPE,
 		resourcePath = SecRoleEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -63,8 +63,8 @@ import lombok.ToString;
 					name = SecRoleEntity.DB_CODE_UK, 
 					columnNames = { SecRoleEntity.DB_CODE }),
 			@UniqueConstraint(
-					name = SecRoleEntity.DB_ROLENAME_UK, 
-					columnNames = { SecRoleEntity.DB_ROLENAME })})
+					name = SecRoleEntity.DB_NAME_UK, 
+					columnNames = { SecRoleEntity.DB_NAME })})
 @Entity
 @Audited
 @EntityListeners(
@@ -75,26 +75,26 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	protected Logger LOG = LoggerFactory.getLogger(SecRoleEntity.class);
 
 	public static final String RES_ACTION			= "roles";
-	public static final String RES_NAME				= "Role";
+	public static final String RES_TYPE				= "Role";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_ROLENAME			= "rolename";
+	public static final String RES_NAME				= "name";
 
-	public static final String RES_APLICACION_ID	= "applicationId";
+	public static final String RES_APPLICATION_ID	= "applicationId";
 	public static final String RES_APPLICATION		= "application";
 	public static final String RES_USERS_IDS		= "userIds";
 	public static final String RES_USERS			= "users";
-	public static final String RES_AUTHORITIES_IDS	= "authorityIds";
+	public static final String RES_AUTHORITY_IDS	= "authorityIds";
 	public static final String RES_AUTHORITIES		= "authorities";
 
 	public static final String DB_TABLE 			= "sec_role";
 	public static final String DB_ID_PK 			= "sec_rol_pk";
 	public static final String DB_UID_UK			= "sec_rol_uid_uk";
 	public static final String DB_CODE_UK			= "sec_rol_cod_uk";
-	public static final String DB_ROLENAME_UK		= "sec_rol_rol_uk";
+	public static final String DB_NAME_UK			= "sec_rol_rol_uk";
 	
 	public static final String DB_CODE				= "rol_cod";
-	public static final String DB_ROLENAME			= "rol_txt";
+	public static final String DB_NAME				= "rol_txt";
 
 	public static final String DB_TABLA_ROLE_AUTH	= "sec_role_authorities";
 	public static final String DB_ROLEAUTHS_FK		= "sec_rol_aut_fk";
@@ -108,7 +108,7 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	public static final String ATT_APPLICATION		= "application";
 	public static final String ATT_APPLICATION_ID	= "applicationId";
 	public static final String ATT_AUTHORITIES		= "authorities";
-	public static final String ATT_AUTHORITIES_IDS	= "authorityIds";
+	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
 	public static final String ATT_USERS			= "users";
 	public static final String ATT_USERS_IDS		= "userIds";
 
@@ -130,10 +130,10 @@ public class SecRoleEntity extends AuditedBaseEntity {
 
 
 	@JsonProperty(
-			value = RES_ROLENAME,
+			value = RES_NAME,
 			required = true)
 	@Column(
-			name = DB_ROLENAME, 
+			name = DB_NAME, 
 			unique = true,
 			nullable = false, 
 			length = 64)
@@ -142,12 +142,12 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	@Size(
 			max = 64, 
 			message = "El nombre puede sobrepasar los {max} caracteres.")
-	public String rolename;
+	public String name;
 
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_APLICACION_ID)
+			value = RES_APPLICATION_ID)
 	@Column(
 			name = DB_APPLICATION_ID,
 			unique = false,
@@ -156,8 +156,8 @@ public class SecRoleEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_APLICACION_ID,
-			mappedBy = ATT_APPLICATION_ID,
+			idField = ATT_APPLICATION_ID,
+			mappedBy = SecApplicationEntity.ATT_ROLES,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
 	@JsonProperty(
@@ -191,7 +191,7 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	
 	
 	@JsonApiRelation(
-			idField = RES_USERS_IDS, 
+			idField = ATT_USERS_IDS, 
 			mappedBy = SecUserEntity.ATT_ROLES)
 	@JsonProperty(
 			value = RES_USERS)
@@ -208,13 +208,13 @@ public class SecRoleEntity extends AuditedBaseEntity {
 
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_AUTHORITIES_IDS)
+			value = RES_AUTHORITY_IDS)
 	@Transient
 	private Set<Long> authorityIds = null;
 
 
 	@JsonApiRelation(
-			idField = RES_AUTHORITIES_IDS, 
+			idField = ATT_AUTHORITY_IDS, 
 			mappedBy = SecAuthorityEntity.ATT_ROLES)
 	@JsonProperty(
 			value = RES_AUTHORITIES)
@@ -250,11 +250,11 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	public SecRoleEntity(
 			SecApplicationEntity application,
 			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String rolename,
+			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name,
 			Set<SecAuthorityEntity> authorities) {
 		super();
 		this.code = code;
-		this.rolename = rolename;
+		this.name = name;
 		this.setApplication(application);
 		this.setAuthorities(authorities);
 	}

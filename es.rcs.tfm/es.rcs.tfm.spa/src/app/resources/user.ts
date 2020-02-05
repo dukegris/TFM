@@ -9,7 +9,7 @@ import { Group } from './group';
 import { Role } from './role';
 
 export interface User extends Resource {
-	username?: string;
+	name?: string;
 	password?: string;
 	passwordExpired?: boolean;
 	email?: string;

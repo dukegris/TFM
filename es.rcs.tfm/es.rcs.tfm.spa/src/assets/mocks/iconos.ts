@@ -25,6 +25,6 @@ export class Iconos {
 
 	functionIcons = {
 		'tfm.app.adm': 'settings',
-	}
-	
+	};
+
 }

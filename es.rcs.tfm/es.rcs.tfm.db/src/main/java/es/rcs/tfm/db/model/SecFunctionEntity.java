@@ -58,8 +58,8 @@ import lombok.ToString;
 					name = SecFunctionEntity.DB_CODE_UK, 
 					columnNames = { SecFunctionEntity.DB_CODE }),
 			@UniqueConstraint(
-					name = SecFunctionEntity.DB_FUNCTION_UK, 
-					columnNames = { SecFunctionEntity.DB_FUNCTION}) })
+					name = SecFunctionEntity.DB_NAME_UK, 
+					columnNames = { SecFunctionEntity.DB_NAME}) })
 @Entity
 @Audited
 @EntityListeners(
@@ -73,7 +73,7 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE			= "Function";
 
 	public static final String RES_CODE			= "code";
-	public static final String RES_FUNCTION		= "function";
+	public static final String RES_NAME			= "name";
 	public static final String RES_URL			= "url";
 
 	public static final String RES_MODULE_ID	= "moduleId";
@@ -84,11 +84,11 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 	public static final String DB_ID_PK 		= "sec_fun_pk";
 	public static final String DB_UID_UK		= "sec_fun_uid_uk";
 	public static final String DB_CODE_UK		= "sec_fun_cod_uk";
-	public static final String DB_FUNCTION_UK	= "sec_fun_txt_uk";
+	public static final String DB_NAME_UK		= "sec_fun_txt_uk";
 	public static final String DB_MODULE_ID_FK	= "sec_fun_mod_fk";
 
 	public static final String DB_CODE			= "fun_cod";
-	public static final String DB_FUNCTION		= "fun_txt";
+	public static final String DB_NAME			= "fun_txt";
 	public static final String DB_URL			= "fun_url";
 	public static final String DB_MODULE_ID		= "mod_id";
 
@@ -105,18 +105,18 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El código no puede ser nulo")
+			message = "El cÃ³digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El códigono puede sobrepasar los {max} caracteres.")
+			message = "El cÃ³digono puede sobrepasar los {max} caracteres.")
 	private String code;
 
 	
 	@JsonProperty(
-			value = RES_FUNCTION,
+			value = RES_NAME,
 			required = true)
 	@Column(
-			name = DB_FUNCTION, 
+			name = DB_NAME, 
 			unique = false,
 			nullable = false, 
 			length = 64)
@@ -155,7 +155,7 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 
 	
 	@JsonApiRelation(
-			idField = RES_MODULE_ID,
+			idField = ATT_MODULE_ID,
 			mappedBy = SecModuleEntity.ATT_FUNCTIONS,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)

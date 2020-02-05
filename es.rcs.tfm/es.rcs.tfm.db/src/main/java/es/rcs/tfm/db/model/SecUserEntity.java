@@ -46,7 +46,7 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = true)
 @JsonApiResource(
-		type = SecUserEntity.RES_NAME,
+		type = SecUserEntity.RES_TYPE,
 		resourcePath = SecUserEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
@@ -64,8 +64,8 @@ import lombok.ToString;
 						name = SecUserEntity.DB_EMAIL_UK, 
 						columnNames = { SecUserEntity.DB_EMAIL }),
 				@UniqueConstraint(
-						name = SecUserEntity.DB_USERNAME_UK, 
-						columnNames = { SecUserEntity.DB_USERNAME }) })
+						name = SecUserEntity.DB_NAME_UK, 
+						columnNames = { SecUserEntity.DB_NAME }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -76,9 +76,9 @@ public class SecUserEntity extends AuditedBaseEntity {
 	private static final Logger LOG = LoggerFactory.getLogger(SecUserEntity.class);
 
 	public static final String RES_ACTION			= "users";
-	public static final String RES_NAME				= "User";
+	public static final String RES_TYPE				= "User";
 
-	public static final String RES_USERNAME			= "username";
+	public static final String RES_NAME				= "name";
 	public static final String RES_USR_ENABLED		= "enabled";
 	public static final String RES_USR_EXPIRED		= "expired";
 	public static final String RES_USR_LOCKED		= "locked";
@@ -87,22 +87,22 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String RES_PWD_EXPIRED		= "expiredPassword";
 	public static final String RES_EMAIL			= "email";
 	public static final String RES_EMA_CONFIRMED	= "emailConfirmed";
-	public static final String RES_ROLES_IDS		= "roleIds";
+	public static final String RES_ROLE_IDS			= "roleIds";
 	public static final String RES_ROLES			= "roles";
-	public static final String RES_GROUPS_IDS		= "groupIds";
+	public static final String RES_GROUP_IDS		= "groupIds";
 	public static final String RES_GROUPS			= "groups";
-	public static final String RES_AUTHORITIES_IDS	= "authorityIds";
+	public static final String RES_AUTHORITIY_IDS	= "authorityIds";
 	public static final String RES_AUTHORITIES		= "authorities";
-	public static final String RES_TOKENS_IDS		= "tokenIds";
+	public static final String RES_TOKEN_IDS		= "tokenIds";
 	public static final String RES_TOKENS			= "tokenss";
 
 	public static final String DB_TABLE 			= "sec_users";
 	public static final String DB_ID_PK 			= "sec_usr_pk";
 	public static final String DB_UID_UK			= "sec_usr_uid_uk";
-	public static final String DB_USERNAME_UK		= "sec_usr_usr_uk";
+	public static final String DB_NAME_UK			= "sec_usr_usr_uk";
 	public static final String DB_EMAIL_UK			= "sec_usr_ema_uk";
 
-	public static final String DB_USERNAME			= "usr_txt";
+	public static final String DB_NAME				= "usr_txt";
 	public static final String DB_USR_ENABLED		= "usr_ena";
 	public static final String DB_USR_EXPIRED		= "usr_exp";
 	public static final String DB_USR_LOCKED		= "usr_lck";
@@ -130,19 +130,19 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String DB_GROUP_ID			= "grp_id";
 	
 	public static final String ATT_AUTHORITIES		= "authorities";
-	public static final String ATT_AUTHORITIES_IDS	= "authorityIds";
+	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
 	public static final String ATT_GROUPS			= "groups";
-	public static final String ATT_GROUPS_IDS		= "groupIds";
+	public static final String ATT_GROUP_IDS		= "groupIds";
 	public static final String ATT_ROLES			= "roles";
-	public static final String ATT_ROLES_IDS		= "roleIds";
+	public static final String ATT_ROLE_IDS			= "roleIds";
 	public static final String ATT_TOKENS			= "tokens";
-	public static final String ATT_TOKENS_IDS		= "tokenIds";
+	public static final String ATT_TOKEN_IDS		= "tokenIds";
 	
 	@JsonProperty(
-			value = RES_USERNAME,
+			value = RES_NAME,
 			required = true)
 	@Column(
-			name = DB_USERNAME, 
+			name = DB_NAME, 
 			unique = true,
 			nullable = false, 
 			length = 64)
@@ -151,7 +151,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 	@Size(
 			max = 64, 
 			message = "El nombre del usuario no puede sobrepasar los {max} caracteres.")
-	private String username;
+	private String name;
 
 	
 	@JsonProperty(
@@ -162,7 +162,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "La habilitaciï¿½n del usuario no puede ser nula")
+			message = "La habilitación del usuario no puede ser nula")
 	private boolean enabled = false;
 
 	
@@ -174,7 +174,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "El estado de expiraciï¿½n del usuario no puede ser nulo")
+			message = "El estado de expiración del usuario no puede ser nulo")
 	private boolean expired = true;
 
 	
@@ -220,7 +220,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "El estado de expiraciï¿½n de la contraseï¿½a del usuario no puede ser nulo")
+			message = "El estado de expiración de la contraseóa del usuario no puede ser nulo")
 	private boolean passwordExpired = true;
 
 	
@@ -233,10 +233,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 128)
 	@NotNull(
-			message = "El correo electrï¿½nico del usuario no puede ser nulo.")
+			message = "El correo electrónico del usuario no puede ser nulo.")
 	@Size(
 			max = 128, 
-			message = "El correo electrï¿½nico del usuario no puede sobrepasar los {max} caracteres.")
+			message = "El correo electrónico del usuario no puede sobrepasar los {max} caracteres.")
 	private String email;
 
 	
@@ -248,13 +248,13 @@ public class SecUserEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "La verificaciï¿½n del correo electrï¿½nico del usuario no puede ser nula")
+			message = "La verificación del correo electrónico del usuario no puede ser nula")
 	private boolean emailConfirmed = false;
 
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_ROLES_IDS)
+			value = RES_ROLE_IDS)
 	@Transient
 	private Set<Long> roleIds = null;
 
@@ -262,7 +262,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 	@JsonProperty(
 			value = RES_ROLES)
 	@JsonApiRelation(
-			idField = RES_ROLES_IDS, 
+			idField = ATT_ROLE_IDS, 
 			mappedBy = SecRoleEntity.ATT_USERS)
 	@JoinTable (
 			name = DB_TABLE_USER_ROLES,
@@ -290,13 +290,13 @@ public class SecUserEntity extends AuditedBaseEntity {
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_GROUPS_IDS)
+			value = RES_GROUP_IDS)
 	@Transient
 	private Set<Long> groupIds = null;
 
 	
 	@JsonApiRelation(
-			idField = RES_GROUPS_IDS, 
+			idField = ATT_GROUP_IDS, 
 			mappedBy = SecGroupEntity.ATT_USERS)
 	@JsonProperty(
 			value = RES_GROUPS)
@@ -326,13 +326,13 @@ public class SecUserEntity extends AuditedBaseEntity {
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_AUTHORITIES_IDS)
+			value = RES_AUTHORITIY_IDS)
 	@Transient
 	private Set<Long> authorityIds = null;
 
 	
 	@JsonApiRelation(
-			idField = RES_AUTHORITIES_IDS, 
+			idField = ATT_AUTHORITY_IDS, 
 			mappedBy = SecAuthorityEntity.ATT_USERS)
 	@JsonProperty(
 			value = RES_AUTHORITIES)
@@ -362,13 +362,13 @@ public class SecUserEntity extends AuditedBaseEntity {
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = RES_TOKENS_IDS)
+			value = RES_TOKEN_IDS)
 	@Transient
 	private Set<Long> tokenIds = null;
 
 	
 	@JsonApiRelation( 
-			idField = RES_TOKENS_IDS, 
+			idField = ATT_TOKEN_IDS, 
 			mappedBy = SecTokenEntity.ATT_USER,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
@@ -393,31 +393,31 @@ public class SecUserEntity extends AuditedBaseEntity {
 	}
 
 	public SecUserEntity(
-			@NotNull(message = "El nombre del usuario no puede ser nulo") @Size(max = 64, message = "El nombre ndel usuario o puede sobrepasar los {max} caracteres.") String username,
-			@NotNull(message = "El correo electrï¿½nico del usuario no puede ser nulo") @Size(max = 128, message = "El correo electrï¿½nico del usuario no puede sobrepasar los {max} caracteres.") String email,
-			@NotNull(message = "La clave del usuario no puede ser nula") @Size(max = 64, message = "La clave del usuario no puede sobrepasar los {max} caracteres.") String password) {
+			@NotNull(message = "El nombre del usuario no puede ser nulo") @Size(max = 64, message = "El nombre ndel usuario o puede sobrepasar los {max} caracteres.") final String name,
+			@NotNull(message = "El correo electrónico del usuario no puede ser nulo") @Size(max = 128, message = "El correo electrónico del usuario no puede sobrepasar los {max} caracteres.") final String email,
+			@NotNull(message = "La clave del usuario no puede ser nula") @Size(max = 64, message = "La clave del usuario no puede sobrepasar los {max} caracteres.") final String password) {
 		super();
-		this.username = username;
+		this.name = name;
 		this.email = email;
 		this.password = password;
 	}
 
-	public void setTokens(Set<SecTokenEntity> items) {
+	public void setTokens(final Set<SecTokenEntity> items) {
 		this.tokens = items;
 		if (items != null) this.tokenIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
-	public void setRoles(Set<SecRoleEntity> items) {
+	public void setRoles(final Set<SecRoleEntity> items) {
 		this.roles = items;
 		if (items != null) this.roleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
-	public void setGroups(Set<SecGroupEntity> items) {
+	public void setGroups(final Set<SecGroupEntity> items) {
 		this.groups = items;
 		if (items != null) this.groupIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
-	public void setAuthorities(Set<SecAuthorityEntity> items) {
+	public void setAuthorities(final Set<SecAuthorityEntity> items) {
 		this.authorities = items;
 		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
