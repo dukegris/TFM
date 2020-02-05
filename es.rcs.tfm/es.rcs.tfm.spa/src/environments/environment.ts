@@ -9,9 +9,9 @@ export const environment = {
 	accountMeUrl: '/account/me',
 	apiUrl: 'http://localhost:4101/api',
 	crnkApiUrl: 'http://localhost:4101/api/data',
-	applicationUrl: 'applications',
-	moduleUrl: 'modules',
-	functionUrl: 'functions',
+	applicationUrl: '/applications',
+	moduleUrl: '/modules',
+	functionUrl: '/functions',
 };
 
 /*

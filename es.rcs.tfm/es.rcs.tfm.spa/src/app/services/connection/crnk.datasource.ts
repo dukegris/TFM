@@ -40,8 +40,7 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 
 	constructor(
 			private service: CrnkService,
-			private baseUrl: string,
-			private endpointUrl: string,
+			private url: string,
 			sort: SortModel[],
 			filters: FilterModel[],
 			pagination: PaginationModel,
@@ -52,6 +51,10 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 		this.pagination = (pagination !== undefined) ? pagination : new PaginationModel(1, environment.numRowsInPage);
 		this.selection = (selection !== undefined) ?  selection : new SelectionModel<T>(false, []);
 
+	}
+
+	changeURL(href: any) {
+		this.url = href;
 	}
 
 	/**
@@ -142,7 +145,7 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 			params.push(pagination);
 		}
 
-		const url: string = this._buildUrl(this.baseUrl, this.endpointUrl, undefined, params);
+		const url: string = this._buildUrl(this.url, undefined, params);
 		this.isLoadingBehaviorSubject.next(true);
 		this.service
 			.findAll(url)
@@ -165,7 +168,7 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 			id: string,
 			params?: any) {
 
-		const url: string = this._buildUrl(this.baseUrl, this.endpointUrl, id, params);
+		const url: string = this._buildUrl(this.url, id, params);
 		this.isLoadingBehaviorSubject.next(true);
 		this.service
 			.findRecord(url)
@@ -188,7 +191,7 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 			data: T,
 			params?: any) {
 
-		const url: string = this._buildUrl(this.baseUrl, this.endpointUrl, data.id, params);
+		const url: string = this._buildUrl(this.url, data.id, params);
 		this.isLoadingBehaviorSubject.next(true);
 		this.service
 			.saveRecord(url, data)
@@ -216,7 +219,7 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 			data: T,
 			params?: any)  {
 
-		const url: string = this._buildUrl(this.baseUrl, this.endpointUrl, data.id, params);
+		const url: string = this._buildUrl(this.url, data.id, params);
 		this.isLoadingBehaviorSubject.next(true);
 		this.service
 			.deleteRecord(url, data)
@@ -234,14 +237,13 @@ export class CrnkDatasource<T extends Resource> implements DataSource<T> {
 	}
 
 	private _buildUrl(
-			baseUrl?: string,
-			endpointUrl?: string,
+			url?: string,
 			id?: string,
 			params?: any): string {
 
 		const queryParams: string = this._toQueryString(params);
-		const url: string = [baseUrl, endpointUrl, id].filter((x) => x).join('/');
-		return queryParams ? `${url}?${queryParams}` : url;
+		const generatedUrl: string = [url, id].filter((x) => x).join('/');
+		return queryParams ? '${generatedUrl}?${queryParams}' : url;
 
 	}
 

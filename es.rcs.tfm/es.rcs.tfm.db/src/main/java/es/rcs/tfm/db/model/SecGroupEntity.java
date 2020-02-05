@@ -19,6 +19,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.envers.Audited;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,108 +38,155 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(
+		callSuper = true)
 @JsonApiResource(
-		type = "Group",
-		resourcePath = "groups",
+		type = SecGroupEntity.RES_NAME,
+		resourcePath = SecGroupEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
 		pagingSpec = NumberSizePagingSpec.class )
+@Table(
+		name = SecGroupEntity.DB_TABLE,
+		uniqueConstraints = {
+			@UniqueConstraint(
+				name = SecGroupEntity.DB_ID_PK, 
+				columnNames = { SecGroupEntity.DB_ID }),
+		@UniqueConstraint(
+				name = SecGroupEntity.DB_UID_UK, 
+				columnNames = { SecGroupEntity.DB_UID }),
+		@UniqueConstraint(
+				name = SecGroupEntity.DB_CODE_UK, 
+				columnNames = { SecGroupEntity.DB_CODE }),
+		@UniqueConstraint(
+				name = SecGroupEntity.DB_GROUPNAME_UK, 
+				columnNames = { SecGroupEntity.DB_GROUPNAME }) })
 @Entity
 @Audited
-@Table(
-		name = "sec_groups",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "sec_grp_code_uk", 
-						columnNames = { "grp_code" })})
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(
+		value = AuditingEntityListener.class)
 public class SecGroupEntity extends AuditedBaseEntity {
 
+	@Transient
+	protected Logger LOG = LoggerFactory.getLogger(SecGroupEntity.class);
+
+	public static final String RES_ACTION			= "groups";
+	public static final String RES_NAME				= "Group";
+
+	public static final String RES_CODE				= "code";
+	public static final String RES_GROUPNAME		= "groupname";
+	public static final String RES_USER_IDS			= "userIds";
+	public static final String RES_USERS			= "users";
+	public static final String RES_AUTHORITY_IDS	= "authorityIds";
+	public static final String RES_AUTHORITIES		= "authorities";
+
+	public static final String DB_TABLE 			= "sec_group";
+	public static final String DB_ID_PK 			= "sec_grp_pk";
+	public static final String DB_UID_UK			= "sec_grp_uid_uk";
+	public static final String DB_CODE_UK			= "sec_grp_cod_uk";
+	public static final String DB_GROUPNAME_UK		= "sec_grp_grp_uk";
 	
-	@JsonProperty(
-			value = "code",
-			required = true)
-	@Column(
-			name = "grp_code", 
-			unique = false,
-			nullable = false, 
-			length = 32)
-	@NotNull(
-			message = "El c骴igo no puede ser nulo")
-	@Size(
-			max = 32, 
-			message = "El c骴igono puede sobrepasar los {max} carcateres.")
-	public String code;
+	public static final String DB_CODE				= "grp_cod";
+	public static final String DB_GROUPNAME			= "grp_txt";
+
+	public static final String DB_TABLE_GROUP_AUTH	= "sec_group_authorities";
+	public static final String DB_AUTHGROUPS_FK		= "sec_aut_grp_fk";
+	public static final String DB_GROUPAUTHS_FK		= "sec_grp_aut_fk";
+
+	public static final String DB_GROUP_ID			= "grp_id";
+	public static final String DB_AUTH_ID			= "aut_id";
+	
+	public static final String ATT_AUTHORITIES		= "authorities";
+	public static final String ATT_AUTHORITY_IDS	= "authoritiyIds";
+	public static final String ATT_USERS			= "users";
+	public static final String ATT_USER_IDS			= "userIds";
 
 	
 	@JsonProperty(
-			value = "name",
+			value = RES_CODE,
 			required = true)
 	@Column(
-			name = "grp_name", 
-			unique = false,
-			nullable = false, 
+			name = DB_CODE,
+			unique = true,
+			nullable = false,
 			length = 32)
 	@NotNull(
-			message = "El nombre no puede ser nulo")
+			message = "El c贸digo del grupo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El nombre puede sobrepasar los {max} carcateres.")
-	public String name;
+			message = "El c贸digo del grupo no puede sobrepasar los {max} caracteres.")
+	private String code;
+
+	
+	@JsonProperty(
+			value = RES_GROUPNAME,
+			required = true)
+	@Column(
+			name = DB_GROUPNAME, 
+			unique = true,
+			nullable = false, 
+			length = 256)
+	@NotNull(
+			message = "El nombre del grupo no puede ser nulo")
+	@Size(
+			max = 256, 
+			message = "El nombre del grupo no puede sobrepasar los {max} caracteres.")
+	private String groupname;
 
 	
 	@JsonApiRelationId
 	@JsonProperty(
-			value = "userIds")
+			value = RES_USER_IDS)
 	@Transient
 	private Set<Long> userIds = null;
 	
 	
 	@JsonApiRelation(
-			idField = "userIds", 
-			mappedBy = "groups")
+			idField = RES_USER_IDS, 
+			mappedBy = SecUserEntity.ATT_GROUPS)
 	@JsonProperty(
-			value = "users")
+			value = RES_USERS)
 	@ManyToMany(
-			mappedBy = "groups",
+			mappedBy = SecUserEntity.ATT_GROUPS,
 			cascade = { CascadeType.DETACH },
 			fetch = FetchType.LAZY)
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
 	private Set<SecUserEntity> users = null;
 
 	
-	@JsonProperty(
-			value = "authorityIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_AUTHORITY_IDS)
 	@Transient
 	private Set<Long> authorityIds = null;
 
-	
-	@JsonProperty(
-			value = "authorities")
+
 	@JsonApiRelation(
-			idField = "authorityIds",
-			mappedBy = "groups")
+			idField = RES_AUTHORITY_IDS,
+			mappedBy = SecAuthorityEntity.ATT_GROUPS)
+	@JsonProperty(
+			value = RES_AUTHORITIES)
 	@JoinTable (
-			name = "sec_group_authorities",
+			name = DB_TABLE_GROUP_AUTH,
 			joinColumns = @JoinColumn (
-					name = "grp_id", 
-					referencedColumnName="id"),
+					name = DB_GROUP_ID, 
+					referencedColumnName = DB_ID),
 			inverseJoinColumns = @JoinColumn (
-					name = "auth_id", 
-					referencedColumnName = "id"),
+					name = DB_AUTH_ID, 
+					referencedColumnName = SecAuthorityEntity.DB_ID),
 			foreignKey = @ForeignKey (
-					name = "sec_group_auth_fk"),
+					name = DB_GROUPAUTHS_FK),
 			inverseForeignKey = @ForeignKey (
-					name = "sec_auth_group_fk"))
+					name = DB_AUTHGROUPS_FK))
 	@ManyToMany (
 			// Associations marked as mappedBy must not define database mappings like @JoinTable or @JoinColumn		
 			// mappedBy = "groups",
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH, CascadeType.PERSIST })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -150,12 +199,12 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	}
 
 	public SecGroupEntity(
-			@NotNull(message = "El c骴igo no puede ser nulo") @Size(max = 32, message = "El c骴igono puede sobrepasar los {max} carcateres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} carcateres.") String name,
+			@NotNull(message = "El c贸digo del grupo no puede ser nulo") @Size(max = 32, message = "El c贸digo del grupo no puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El nombre del grupo no puede ser nulo") @Size(max = 256, message = "El nombre del grupo no puede sobrepasar los {max} carcateres.") String groupname,
 			Set<SecAuthorityEntity> authorities) {
 		super();
 		this.code = code;
-		this.name = name;
+		this.groupname = groupname;
 		this.setAuthorities(authorities);
 	}
 
@@ -169,5 +218,4 @@ public class SecGroupEntity extends AuditedBaseEntity {
 		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 	}
 
-	
 }

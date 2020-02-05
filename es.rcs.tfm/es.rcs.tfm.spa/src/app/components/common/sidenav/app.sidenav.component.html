@@ -19,10 +19,10 @@
         <mat-nav-list>
             <div *ngFor="let element of modules">
                 <a      mat-list-item
-                        [routerLink]="[isOpen, element.url.toLowerCase()]"
+                        [routerLink]="[element.url.toLowerCase()]"
                         routerLinkActive="active-list-item">
                     <button mat-menu-item>
-                        <mat-icon class="cardImg">{{element.icon}}</mat-icon>
+                        <mat-icon class="cardImg">{{iconos.moduleIcons[element.code]}}</mat-icon>
                         <span class="cardName">{{element.name}}</span>
                     </button>
                 </a>
@@ -30,7 +30,9 @@
         </mat-nav-list>
     </mat-sidenav>
 
-	<mat-sidenav-content autosize>
+    <mat-sidenav-content 
+            autosize
+            class="sidenav-content">
 		<router-outlet></router-outlet>
 	</mat-sidenav-content>
 </mat-sidenav-container>

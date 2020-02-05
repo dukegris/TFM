@@ -9,6 +9,7 @@ import { SideBarService } from 'src/app/services/interface/sidebar.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/security/auth.service';
 import { Module } from 'src/app/resources/module';
+import { Iconos } from 'src/assets/mocks/iconos';
 
 declare var $: any;
 
@@ -28,6 +29,8 @@ export class AppSidenavComponent implements OnInit, OnDestroy, OnChanges, AfterV
 	public modules: Module[];
 	public mobileQuery: MediaQueryList;
 	public isOpen = true;
+
+	public iconos: Iconos = new Iconos();
 
 	constructor(
 		changeDetectorRef: ChangeDetectorRef,
@@ -76,17 +79,15 @@ export class AppSidenavComponent implements OnInit, OnDestroy, OnChanges, AfterV
 	private toggle(isOpen: boolean) {
 		if (this.isAuthenticated) {
 			if (isOpen) {
-				$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
-				$( '.mat-drawer-inner-container' ).css( 'width', '60px' );
-				$( '.mat-sidenav-content' ).css( 'margin-left', '70px' );
-				$( '.cardImg' ).css( 'margin-right', '0px' );
-				$( '.cardName' ).css( 'display', 'none' );
-			} else {
-				$( '.mat-list-item-content' ).css( 'padding', '16px 0px 16px 0px' );
 				$( '.mat-drawer-inner-container' ).css( 'width', '100%' );
-				$( '.mat-sidenav-content' ).css( 'margin-left', '170px' );
-				$( '.cardImg' ).css( 'margin-right', '16px' );
+				$( '.sidenav-sidenav' ).css( 'width', '200px' );
+				$( '.sidenav-content' ).css( 'margin-left', '200px' );
 				$( '.cardName' ).css( 'display', 'inline' );
+			} else {
+				$( '.mat-drawer-inner-container' ).css( 'width', '74px' );
+				$( '.sidenav-sidenav' ).css( 'width', '74px' );
+				$( '.sidenav-content' ).css( 'margin-left', '74px' );
+				$( '.cardName' ).css( 'display', 'none' );
 			}
 
 		}

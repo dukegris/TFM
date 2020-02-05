@@ -31,11 +31,11 @@ export class AuthService {
 	private globalHeaders: HttpHeaders;
 	private globalRequestOptions: object = {};
 
-	private isAuthenticatedBehaviorSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+	private isAuthenticatedBehaviorSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(null);
 	readonly isAuthenticated = this.isAuthenticatedBehaviorSubject.asObservable();
 	private isAuthenticatedDS: { isAuthenticated: boolean } = { isAuthenticated: (false) };
 
-	private authorizationsBehaviorSubject: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
+	private authorizationsBehaviorSubject: BehaviorSubject<string[]> = new BehaviorSubject<string[]>(null);
 	readonly authorizations = this.authorizationsBehaviorSubject.asObservable();
 	private authorizationsDS: { authorizations: string[] } = { authorizations: ([]) };
 
@@ -56,7 +56,25 @@ export class AuthService {
 
 	constructor(
 			private service: HttpClient) {
-		localStorage.setItem(AuthService.BEARER_TOKEN, null);
+
+		const token = this.getAuthToken();
+		this.credentials = this.getUserDetails();
+
+		if (this.credentials != null) {
+			this.authorizationsDS.authorizations = this.credentials.authorities;
+			this.authorizationsBehaviorSubject.next(Object.assign({}, this.authorizationsDS).authorizations);
+			if (token == null) {
+				this.login(this.credentials.username, this.credentials.password);
+			} else {
+				this.isAuthenticatedDS.isAuthenticated = true;
+				this.isAuthenticatedBehaviorSubject.next(Object.assign({}, this.isAuthenticatedDS).isAuthenticated);
+			}
+		} else if (token != null) { 
+			this.isAuthenticatedDS.isAuthenticated = true;
+			this.isAuthenticatedBehaviorSubject.next(Object.assign({}, this.isAuthenticatedDS).isAuthenticated);
+		}
+
+
 	}
 
 	public login(
@@ -127,19 +145,16 @@ export class AuthService {
 					}
 					this.authorizationsDS.authorizations = [];
 					if ((response != null) && (response.status === 200)) {
-
-						this.authorizationsDS.authorizations = response['body']['authorities'];
-
 						this.credentials.authorities = response['body']['authorities'];
 						this.credentials.groups = [];
 						this.credentials.roles = [];
-
 					} else {
 						this.credentials.authorities = [];
 						this.credentials.groups = [];
 						this.credentials.roles = [];
 					}
 					localStorage.setItem(AuthService.CREDENTIALS, JSON.stringify(this.credentials));
+					this.authorizationsDS.authorizations = this.credentials.authorities;
 					this.authorizationsBehaviorSubject.next(Object.assign({}, this.authorizationsDS).authorizations);
 				});
 	}
@@ -152,7 +167,7 @@ export class AuthService {
 
 	public getUserDetails() {
 		if (localStorage.getItem(AuthService.CREDENTIALS)) {
-			return JSON.parse(sessionStorage.getItem(AuthService.CREDENTIALS));
+			return JSON.parse(localStorage.getItem(AuthService.CREDENTIALS));
 		} else {
 			return null;
 		}
@@ -188,12 +203,6 @@ export class AuthService {
 
 	private _buildHttpHeaders(customHeaders?: HttpHeaders): HttpHeaders {
 
-		/*
-		let requestHeaders: HttpHeaders = new HttpHeaders({
-				'Accept': 'application/vnd.api+json',
-				'Content-Type': 'application/vnd.api+json'
-		});
-		*/
 		let requestHeaders: HttpHeaders = new HttpHeaders({
 			Accept: 'application/json',
 			'Content-Type': 'application/json'

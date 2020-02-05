@@ -49,8 +49,7 @@ export class AppsService {
 
 		this.applicationsDS = new CrnkDatasource<Application>(
 			this.service,
-			environment.crnkApiUrl,
-			environment.applicationUrl,
+			environment.crnkApiUrl + environment.applicationUrl,
 			null,
 			null,
 			null,
@@ -60,6 +59,8 @@ export class AppsService {
 			data => {
 				this.applicationsBehaviorSubject.next(data);
 				if (data.length > 0) {
+					this.modulesDS.changeURL(data[0].modules.links.related.href);
+					this.modulesDS.refresh();
 					this.selectedApplicationBehaviorSubject.next(data[0]);
 				}
 			}
@@ -67,8 +68,7 @@ export class AppsService {
 
 		this.modulesDS = new CrnkDatasource<Module>(
 			this.service,
-			environment.crnkApiUrl,
-			environment.moduleUrl,
+			environment.crnkApiUrl + environment.moduleUrl,
 			null,
 			null,
 			null,
@@ -78,6 +78,8 @@ export class AppsService {
 			data => {
 				this.modulesBehaviorSubject.next(data);
 				if (data.length > 0) {
+					this.functionsDS.changeURL(data[0].functions.links.related.href);
+					this.functionsDS.refresh();
 					this.selectedModuleBehaviorSubject.next(data[0]);
 				}
 			}
@@ -85,8 +87,7 @@ export class AppsService {
 
 		this.functionsDS = new CrnkDatasource<Function>(
 			this.service,
-			environment.crnkApiUrl,
-			environment.functionUrl,
+			environment.crnkApiUrl + environment.functionUrl,
 			null,
 			null,
 			null,
@@ -100,6 +101,8 @@ export class AppsService {
 				}
 			}
 		);
+
+		this.getApps();
 
 	}
 

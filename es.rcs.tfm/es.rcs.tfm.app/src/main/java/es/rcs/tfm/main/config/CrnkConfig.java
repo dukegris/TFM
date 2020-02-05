@@ -243,38 +243,38 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 			if (app == null) {
 				//app = segAppRep.findByCode("tfm.app.adm");
 				//if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.adm",		"Administración", 			"settings",		"admin"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios", 				"people",		"users"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.grp",	"Grupos", 					"group",		"groups"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.app",	"Aplicaciones", 			"view_comfy",	"applications"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.mod",	"Modulos", 					"view_module",	"modules"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.fun",	"Funciones", 				"view_list",	"functions"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.rol",	"Roles", 					"",	"roles"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.aut",	"Autorizaciones", 			"security",		"authorizations"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.adm",		"Administración", 	"/admin"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios", 		"/admin/users"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.grp",	"Grupos", 			"/admin/groups"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.app",	"Aplicaciones", 	"/admin/applications"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.mod",	"Modulos", 			"/admin/modules"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.fun",	"Funciones", 		"/admin/functions"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.rol",	"Roles", 			"/admin/roles"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.aut",	"Autorizaciones", 	"/admin/authorizations"));
 				
 				app = segAppRep.findByCode("tfm.app.bus");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.bus",		"Buscador", 				"search",		"search"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.bus.art",	"Articulos", 				"",	"articles"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.bus",		"Buscador", 		"/search"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.bus.art",	"Articulos", 		"/search/articles"));
 				
 				app = segAppRep.findByCode("tfm.app.the");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.the",		"Thesaurus", 				"account_tree",	"thesaurus"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.des",	"Descriptores", 			"",	"descriptors"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.cua",	"Cualificadores", 			"",	"qualifiers"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.the",		"Thesaurus", 		"/thesaurus"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.des",	"Descriptores", 	"/thesaurus/descriptors"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.cua",	"Cualificadores", 	"/thesaurus/qualifiers"));
 				
 				app = segAppRep.findByCode("tfm.app.dic");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.dic",		"Diccionario", 				"",	"dictionary"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.dic.voc",	"Vocablos", 				"view_list",	"vocable"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.dic",		"Diccionario", 		"/dictionary"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.dic.voc",	"Vocablos", 		"/dictionary/vocable"));
 				
 				app = segAppRep.findByCode("tfm.app.cor");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.cor",		"Corpus", 					"library_books","corpus"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.med",	"Pubmed Citas", 			"",	"pubmed"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.pmc",	"Pubmed Central", 			"",	"pmc"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.dat",	"Datasets", 				"",	"datasets"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.mod",	"Modelos", 					"",	"models"));
+					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.cor",		"Corpus", 			"/corpus"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.med",	"Pubmed Citas", 	"/corpus/pubmed"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.pmc",	"Pubmed Central", 	"/corpus/pmc"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.dat",	"Datasets", 		"/corpus/datasets"));
+				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.mod",	"Modelos", 			"/corpus/models"));
 	
 				// ROLES
 				SecRoleEntity adminRol = 

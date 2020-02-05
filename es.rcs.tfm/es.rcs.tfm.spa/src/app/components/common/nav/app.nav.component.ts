@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/security/auth.service';
 import { Menu } from 'src/app/models/security/menu.model';
 import { Application } from 'src/app/resources/application';
 import { Module } from 'src/app/resources/module';
+import { Iconos } from 'src/assets/mocks/iconos';
 
 @Component({
 	selector: 'app-nav',
@@ -32,6 +33,8 @@ export class AppNavComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
 	public applications: Application[];
 	private applicationsSubscription: Subscription;
 
+	public iconos: Iconos = new Iconos();
+
 	constructor(
 		private authService: AuthService,
 		private appService: AppsService,
@@ -39,8 +42,9 @@ export class AppNavComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
 	) {
 		console.log('AppNavComponent: constructor OK');
 	}
+	
 	ngOnInit() {
-		this.appService.getApps();
+		//this.appService.getApps();
 		this.isAuthenticatedSubscription = this.authService.isAuthenticated.subscribe(
 			data => this.isAuthenticated = data);
 		this.authorizationsSubscription = this.authService.authorizations.subscribe(

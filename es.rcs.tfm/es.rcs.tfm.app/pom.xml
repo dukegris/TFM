@@ -81,7 +81,7 @@
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.validation</groupId>
@@ -256,7 +256,15 @@
 			<artifactId>antlr4-runtime</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- ATOMIKOS -->
+
+		<!-- HIKARI -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- ATOMIKOS JTA -->
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>atomikos-util</artifactId>
@@ -264,35 +272,30 @@
 		</dependency>
 		<dependency>
 			<groupId>com.atomikos</groupId>
-			<artifactId>transactions</artifactId>
-			<scope>runtime</scope>
+			<artifactId>transactions-api</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.atomikos</groupId>
-			<artifactId>transactions-api</artifactId>
-			<scope>runtime</scope>
+			<artifactId>transactions</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-jdbc</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-jta</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-hibernate4</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- HIKARI -->
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-		    <artifactId>HikariCP</artifactId>
-			<scope>compile</scope>
-		</dependency>
+
 		<!-- WRAPPER -->
 		<dependency>
 			<groupId>tanukisoft</groupId>
@@ -377,6 +380,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>compile</scope>
+
 		</dependency>
 		<!-- CRNK -->
 		<dependency>

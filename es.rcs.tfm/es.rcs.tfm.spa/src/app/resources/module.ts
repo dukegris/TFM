@@ -11,7 +11,6 @@ import { Function } from './function';
 export interface Module extends Resource {
 	code?: string;
 	name?: string;
-	icon?: string;
 	url?: string;
 	release?: number;
 	status?: string;

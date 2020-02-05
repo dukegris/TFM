@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.envers.Audited;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,152 +41,207 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(
+		callSuper = true)
 @JsonApiResource(
-		type = "Authority",
-		resourcePath = "authorities",
+		type = SecAuthorityEntity.RES_NAME,
+		resourcePath = SecAuthorityEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
 		pagingSpec = NumberSizePagingSpec.class )
+@Table(
+		name = SecAuthorityEntity.DB_TABLE,
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = SecAuthorityEntity.DB_ID_PK, 
+					columnNames = { SecAuthorityEntity.DB_ID }),
+			@UniqueConstraint(
+					name = SecAuthorityEntity.DB_UID_UK, 
+					columnNames = { SecAuthorityEntity.DB_UID }),
+			@UniqueConstraint(
+					name = SecAuthorityEntity.DB_CODE_UK, 
+					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_CODE }) ,
+			@UniqueConstraint(
+					name = SecAuthorityEntity.DB_AUTHORITY_UK, 
+					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_AUTHORITY }) })
 @Entity
 @Audited
-@Table(
-		name = "sec_authorities",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "sec_aut_code_uk", 
-						columnNames = { "auth_code" })})
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(
+		value = AuditingEntityListener.class)
 public class SecAuthorityEntity extends AuditedBaseEntity {
+
+	@Transient
+	protected Logger LOG = LoggerFactory.getLogger(SecAuthorityEntity.class);
+
+	public static final String RES_ACTION			= "authorities";
+	public static final String RES_NAME				= "Authority";
+
+	public static final String RES_CODE				= "code";
+	public static final String RES_AUTHORITY		= "authority";
+
+	public static final String RES_APPLICATION_ID	= "aplicationId";
+	public static final String RES_APPLICATION		= "aplication";
+
+	public static final String RES_FUNCTION_IDS		= "functionIds";
+	public static final String RES_FUNCTIONS		= "functions";
+	public static final String RES_ROLE_IDS			= "roleIds";
+	public static final String RES_ROLES			= "roles";
+	public static final String RES_GROUP_IDS		= "groupIds";
+	public static final String RES_GROUPS			= "groups";
+	public static final String RES_USER_IDS			= "userIds";
+	public static final String RES_USERS			= "users";
+
+	public static final String DB_TABLE 			= "sec_authority";
+	public static final String DB_ID_PK 			= "sec_aut_pk";
+	public static final String DB_UID_UK			= "sec_aut_uid_uk";
+	public static final String DB_AUTHORITY_UK		= "sec_aut_aut_uk";
+	public static final String DB_CODE_UK			= "sec_aut_cod_uk";
+	public static final String DB_APPLICATION_ID_FK	= "sec_aut_app_fk";
+
+	public static final String DB_CODE				= "aut_cod";
+	public static final String DB_AUTHORITY			= "aut_txt";
+	public static final String DB_APPLICATION_ID	= "app_id";
+
+	public static final String ATT_APPLICATION		= "application";
+	public static final String ATT_APPLICATION_ID	= "applicationId";
+	public static final String ATT_ROLES			= "roles";
+	public static final String ATT_ROLE_IDS		= "roleIds";
+	public static final String ATT_GROUPS			= "groups";
+	public static final String ATT_GROUP_IDS		= "groupIds";
+	public static final String ATT_USERS			= "users";
+	public static final String ATT_USER_IDS		= "userIds";
 
 	
 	@JsonProperty(
-			value = "code",
+			value = RES_CODE,
 			required = true)
 	@Column(
-			name = "auth_code", 
-			unique = false,
+			name = DB_CODE,
+			unique = true,
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El c骴igo no puede ser nulo")
+			message = "El c贸digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El c骴igono puede sobrepasar los {max} carcateres.")
-	public String code;
+			message = "El c贸digo no puede sobrepasar los {max} caracteres.")
+	private String code;
 
-	
+
 	@JsonProperty(
-			value = "name",
+			value = RES_AUTHORITY,
 			required = true)
 	@Column(
-			name = "auth_name", 
-			unique = false,
+			name = DB_AUTHORITY, 
+			unique = true,
 			nullable = false, 
 			length = 64)
 	@NotNull(
 			message = "El nombre no puede ser nulo")
 	@Size(
 			max = 64, 
-			message = "El nombre puede sobrepasar los {max} carcateres.")
-	public String name;
+			message = "El nombre puede sobrepasar los {max} caracteres.")
+	private String name;
 
 	
-	@JsonProperty(
-			value = "applicationId")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_APPLICATION_ID)
 	@Column(
-			name = "app_id",
+			name = DB_APPLICATION_ID,
 			unique = false,
 			nullable = false)
 	private Long applicationId;
 
 	
-	@JsonProperty(
-			value = "application")
 	@JsonApiRelation(
-			idField = "applicationId",
-			mappedBy = "authorities",
+			idField = RES_APPLICATION_ID,
+			mappedBy = SecApplicationEntity.ATT_AUTHORITIES,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
+	@JsonProperty(
+			value = RES_APPLICATION)
 	@JoinColumn(
-			name = "app_id", 
+			name = DB_APPLICATION_ID,
+			referencedColumnName = SecApplicationEntity.DB_ID,
 			unique = false,
-			nullable = false, 
+			nullable = false,
 			insertable = false,
 			updatable = false,
-			referencedColumnName = "id",
 			foreignKey = @ForeignKey(
 					value = ConstraintMode.NO_CONSTRAINT,
-					name = "sec_mods_app_fk"))
+					name = DB_APPLICATION_ID_FK))
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
 	private SecApplicationEntity application;
 
 	
-	@JsonProperty(
-			value = "userIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_USER_IDS)
 	@Transient
 	private Set<Long> userIds = null;
 	
 	
 	@JsonProperty(
-			value = "users")
+			value = RES_USERS)
 	@JsonApiRelation(
-			idField = "userIds", 
-			mappedBy = "authorities")
+			idField = RES_USER_IDS, 
+			mappedBy = SecUserEntity.ATT_AUTHORITIES)
 	@ManyToMany(
-			mappedBy = "authorities",
+			mappedBy = SecUserEntity.ATT_AUTHORITIES,
 			cascade = { CascadeType.DETACH },
 			fetch = FetchType.LAZY)
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
 	private Set<SecUserEntity> users = null;
 
 	
-	@JsonProperty(
-			value = "roleIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_ROLE_IDS)
 	@Transient
 	private Set<Long> roleIds = null;
-	
+
 	
 	@JsonProperty(
-			value = "roles")
+			value = RES_ROLES)
 	@JsonApiRelation(
-			idField = "roleIds", 
-			mappedBy = "authorities")
+			idField = RES_ROLE_IDS, 
+			mappedBy = SecRoleEntity.ATT_AUTHORITIES)
 	@ManyToMany(
-			mappedBy = "authorities",
+			mappedBy = SecRoleEntity.ATT_AUTHORITIES,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
 	private Set<SecRoleEntity> roles = null;
 
-	
-	@JsonProperty(
-			value = "groupIds")
+
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_GROUP_IDS)
 	@Transient
 	private Set<Long> groupIds = null;
 	
 	
-	@JsonProperty(
-			value = "groups")
 	@JsonApiRelation(
-			idField = "groupIds", 
-			mappedBy = "authorities")
+			idField = RES_GROUPS_IDS, 
+			mappedBy = SecGroupEntity.ATT_AUTHORITIES)
+	@JsonProperty(
+			value = RES_GROUPS)
 	@ManyToMany(
-			mappedBy = "authorities",
+			mappedBy = SecGroupEntity.ATT_AUTHORITIES,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
 	@EqualsAndHashCode.Exclude
@@ -200,8 +257,8 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	public SecAuthorityEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El c骴igo no puede ser nulo") @Size(max = 32, message = "El c骴igono puede sobrepasar los {max} carcateres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} carcateres.") String name) {
+			@NotNull(message = "El c贸digo no puede ser nulo") @Size(max = 32, message = "El c贸digono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
 		super();
 		this.code = code;
 		this.name = name;
