@@ -9,10 +9,13 @@ import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.envers.Audited;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,26 +35,56 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(
+		callSuper = true)
 @JsonApiResource(
-		type = "Token",
-		resourcePath = "tokens",
+		type = SecTokenEntity.RES_NAME,
+		resourcePath = SecTokenEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
 		pagingSpec = NumberSizePagingSpec.class )
+@Table(
+		name = SecTokenEntity.DB_TABLE,
+		uniqueConstraints = {
+				@UniqueConstraint(
+						name = SecTokenEntity.DB_ID_PK, 
+						columnNames = { SecTokenEntity.DB_ID }) })
 @Entity
 @Audited
-@Table(
-		name = "sec_user_tokens")
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(
+		value = AuditingEntityListener.class)
 public class SecTokenEntity extends AuditedBaseEntity {
+
+	@Transient
+	private static final Logger LOG = LoggerFactory.getLogger(SecTokenEntity.class);
+
+	public static final String RES_ACTION		= "tokens";
+	public static final String RES_NAME			= "Token";
+
+	public static final String RES_SERIE		= "serie";
+	public static final String RES_TOKEN		= "token";
+	public static final String RES_LASTUSED		= "lastUsed";
+	public static final String RES_USER_ID		= "userId";
+	public static final String RES_USER			= "user";
+
+	public static final String DB_TABLE 		= "sec_user_tokens";
+	public static final String DB_ID_PK 		= "sec_tkn_pk";
+	public static final String DB_USER_ID_FK	= "sec_tkn_usr_fk";
+
+	public static final String DB_ID			= "id";
+	public static final String DB_SERIE			= "tkn_ser";
+	public static final String DB_TOKEN			= "tkn_txt";
+	public static final String DB_LASTUSED		= "tkn_tsp";
+	public static final String DB_USER_ID		= "usr_id";
+
+	public static final String ATT_USER			= "user";
 
 	
 	@JsonProperty(
-			value = "serie",
+			value = RES_SERIE,
 			required = true)
 	@Column(
-			name = "tk_serie", 
+			name = DB_SERIE, 
 			unique = false,
 			nullable = false, 
 			length = 64)
@@ -59,15 +92,15 @@ public class SecTokenEntity extends AuditedBaseEntity {
 			message = "La serie no puede ser nula")
 	@Size(
 			max = 64, 
-			message = "ELa serie no puede sobrepasar los {max} carcateres.")
-	public String serie;
+			message = "La serie no puede sobrepasar los {max} caracteres.")
+	private String serie;
 
 	
 	@JsonProperty(
-			value = "token",
+			value = RES_TOKEN,
 			required = true)
 	@Column(
-			name = "tk_token", 
+			name = DB_TOKEN, 
 			unique = false,
 			nullable = false, 
 			length = 64)
@@ -75,38 +108,38 @@ public class SecTokenEntity extends AuditedBaseEntity {
 			message = "El token no puede ser nulo")
 	@Size(
 			max = 64, 
-			message = "El token puede sobrepasar los {max} carcateres.")
-	public String token;
+			message = "El token puede sobrepasar los {max} caracteres.")
+	private String token;
 
 
 	@JsonProperty(
-			value = "lastUsed",
+			value = RES_LASTUSED,
 			required = true)
 	@Column(
-			name = "tk_lastused", 
+			name = DB_LASTUSED, 
 			unique = false,
 			nullable = false)
 	@NotNull(
-			message = "La fehca de óltimo uso no puede ser nula")
+			message = "La fecha de �ltimo uso no puede ser nula")
 	private Date lastUsed;
 
 	
-	@JsonProperty(
-			value = "userId")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_USER_ID)
 	@Column(
-			name = "usr_id",
+			name = DB_USER_ID,
 			unique = false,
 			nullable = false)
 	private Long userId;
 
 	
-	@JsonProperty(
-			value = "user")
 	@JsonApiRelation(
-			idField = "userId",
+			idField = RES_USER_ID,
 			lookUp = LookupIncludeBehavior.NONE,
 			serialize = SerializeType.ONLY_ID)
+	@JsonProperty(
+			value = RES_USER)
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
@@ -114,10 +147,11 @@ public class SecTokenEntity extends AuditedBaseEntity {
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
-	SecUserEntity user;
+	private SecUserEntity user;
 	
 	
 	// CONSTRUCTOR -------------------------------------------------------------------------------------------
+
 	public SecTokenEntity() {
 		super();
 	}

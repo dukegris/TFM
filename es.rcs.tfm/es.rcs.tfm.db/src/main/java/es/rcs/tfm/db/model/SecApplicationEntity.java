@@ -16,6 +16,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.envers.Audited;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,62 +39,106 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(
+		callSuper = true)
 @JsonApiResource(
-		type = "Application",
-		resourcePath = "applications",
+		type = SecApplicationEntity.RES_NAME,
+		resourcePath = SecApplicationEntity.RES_ACTION,
 		postable = false, patchable = false, deletable = false, 
 		readable = true, sortable = true, filterable = true,
 		pagingSpec = NumberSizePagingSpec.class )
+@Table(
+		name = SecApplicationEntity.DB_TABLE,
+		uniqueConstraints = {
+			@UniqueConstraint(
+				name = SecApplicationEntity.DB_ID_PK, 
+				columnNames = { SecApplicationEntity.DB_ID }),
+			@UniqueConstraint(
+					name = SecApplicationEntity.DB_UID_UK, 
+					columnNames = { SecApplicationEntity.DB_UID }),
+			@UniqueConstraint(
+					name = SecApplicationEntity.DB_CODE_UK, 
+					columnNames = { SecApplicationEntity.DB_CODE }),
+			@UniqueConstraint(
+					name = SecApplicationEntity.DB_APPLICATION_UK, 
+					columnNames = { SecApplicationEntity.DB_APPLICATION}) })
 @Entity
 @Audited
-@Table(
-		name = "sec_apps",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "sec_apps_code_uk", 
-						columnNames = { "app_code" })})
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(
+		value = AuditingEntityListener.class)
 public class SecApplicationEntity extends AuditedBaseEntity {
+
+	@Transient
+	private static final Logger LOG = LoggerFactory.getLogger(SecApplicationEntity.class);
+
+	public static final String RES_ACTION			= "applications";
+	public static final String RES_NAME				= "Application";
+
+	public static final String RES_CODE				= "code";
+	public static final String RES_APPLICATION		= "application";
+	public static final String RES_URL				= "url";
+	public static final String RES_MODULE_IDS		= "moduleIds";
+	public static final String RES_MODULES			= "modules";
+	public static final String RES_AUTHORITY_IDS	= "authorityIds";
+	public static final String RES_AUTHORITIES		= "authorities";
+	public static final String RES_ROLE_IDS			= "roleIds";
+	public static final String RES_ROLES			= "roles";
+
+	public static final String DB_TABLE 			= "sec_application";
+	public static final String DB_ID_PK 			= "sec_app_pk";
+	public static final String DB_UID_UK			= "sec_app_uid_uk";
+	public static final String DB_CODE_UK			= "sec_app_cod_uk";
+	public static final String DB_APPLICATION_UK	= "sec_app_txt_uk";
+
+	public static final String DB_CODE				= "app_cod";
+	public static final String DB_APPLICATION		= "app_txt";
+	public static final String DB_URL				= "app_url";
+
+	public static final String ATT_MODULE_IDS		= "moduleIds";
+	public static final String ATT_MODULES			= "modules";
+	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
+	public static final String ATT_AUTHORITIES		= "authorities";
+	public static final String ATT_ROLES_IDS		= "roleIds";
+	public static final String ATT_ROLES			= "roles";
 
 	
 	@JsonProperty(
-			value = "code",
+			value = RES_CODE,
 			required = true)
 	@Column(
-			name = "app_code", 
-			unique = false,
+			name = DB_CODE, 
+			unique = true,
 			nullable = false, 
 			length = 32)
 	@NotNull(
-			message = "El código no puede ser nulo")
+			message = "El c�digo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El códigono puede sobrepasar los {max} carcateres.")
-	public String code;
+			message = "El c�digo no puede sobrepasar los {max} caracteres.")
+	private String code;
 
 	
 	@JsonProperty(
-			value = "name",
+			value = RES_APPLICATION,
 			required = true)
 	@Column(
-			name = "app_name", 
-			unique = false,
+			name = DB_APPLICATION, 
+			unique = true,
 			nullable = false, 
 			length = 32)
 	@NotNull(
 			message = "El nombre no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El nombre puede sobrepasar los {max} carcateres.")
-	public String name;
+			message = "El nombre puede sobrepasar los {max} caracteres.")
+	private String name;
 
 	
 	@JsonProperty(
-			value = "url",
+			value = RES_URL,
 			required = true)
 	@Column(
-			name = "mod_url", 
+			name = DB_URL, 
 			unique = false,
 			nullable = false, 
 			length = 64)
@@ -100,29 +146,29 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 			message = "La url base no puede ser nula")
 	@Size(
 			max = 64, 
-			message = "La url base no puede sobrepasar los {max} carcateres.")
+			message = "La url base no puede sobrepasar los {max} caracteres.")
 	public String url;
 
 	
-	@JsonProperty(
-			value = "moduleIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_MODULE_IDS)
 	@Transient
 	private Set<Long> moduleIds = null;
 
-	
-	@JsonProperty(
-			value = "modules",
-			required = false)
-	@JsonApiRelation( 
-			idField = "moduleIds", 
-			mappedBy = "application",
+
+	@JsonApiRelation(
+			idField = RES_MODULE_IDS,
+			mappedBy = SecModuleEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+	@JsonProperty(
+			value = RES_MODULES,
+			required = false)
 	@OneToMany(
-			mappedBy = "application",
-			fetch = FetchType.EAGER,
+			mappedBy = SecModuleEntity.ATT_APPLICATION,
+			fetch = FetchType.LAZY,
 			cascade = { CascadeType.ALL })
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
@@ -131,26 +177,26 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	private Set<SecModuleEntity> modules;
 
 	
-	@JsonProperty(
-			value = "roleIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_ROLE_IDS)
 	@Transient
 	private Set<Long> roleIds = null;
 
 	
-	@JsonProperty(
-			value = "roles",
-			required = false)
 	@JsonApiRelation(
-			idField = "roleIds", 
-			mappedBy = "application",
+			idField = RES_ROLE_IDS, 
+			mappedBy = SecRoleEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+	@JsonProperty(
+			value = RES_ROLES,
+			required = false)
 	@OneToMany(
+			mappedBy = SecRoleEntity.ATT_APPLICATION,
 			fetch = FetchType.EAGER,
-			cascade = { CascadeType.ALL },
-			mappedBy = "application")
+			cascade = { CascadeType.ALL })
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
@@ -158,26 +204,26 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	private Set<SecRoleEntity> roles;
 
 	
-	@JsonProperty(
-			value = "authorityIds")
 	@JsonApiRelationId
+	@JsonProperty(
+			value = RES_AUTHORITY_IDS)
 	@Transient
 	private Set<Long> authorityIds = null;
 
 	
-	@JsonProperty(
-			value = "authorities",
-			required = false)
 	@JsonApiRelation(
-			idField = "authorityIds", 
-			mappedBy = "application",
+			idField = RES_AUTHORITY_IDS, 
+			mappedBy = SecAuthorityEntity.ATT_APPLICATION,
 			serialize = SerializeType.EAGER,
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+	@JsonProperty(
+			value = RES_AUTHORITIES,
+			required = false)
 	@OneToMany(
-			fetch = FetchType.EAGER,
-			cascade = { CascadeType.ALL },
-			mappedBy = "application")
+			mappedBy = SecAuthorityEntity.ATT_APPLICATION,
+			fetch = FetchType.LAZY,
+			cascade = { CascadeType.ALL })
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
@@ -191,17 +237,17 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	}
 
 	public SecApplicationEntity(
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} carcateres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} carcateres.") String name) {
+			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
 		super();
 		this.code = code;
 		this.name = name;
 	}
 
 	public SecApplicationEntity(
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} carcateres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} carcateres.") String name,
-			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} carcateres.") String url) {
+			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.") String name,
+			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.") String url) {
 		super();
 		this.code = code;
 		this.name = name;

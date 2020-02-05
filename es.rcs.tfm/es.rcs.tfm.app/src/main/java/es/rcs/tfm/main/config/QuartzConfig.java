@@ -34,14 +34,14 @@ public class QuartzConfig {
 			cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			//cron = "0 0 4 * * SUN-SAT")
 	public void loadPubmedNewDataProduction() {
-		pubmedLoader.doLoadNewData();
+//		pubmedLoader.doLoadNewData();
 	}
 
 	@Profile( AppNames.APP_DEVELOPMENT )
 	@Scheduled(
 			cron = "0 */1 * * * SUN-SAT") // Cada minuto
 	public void loadPubmedNewData() {
-		pubmedLoader.doLoadNewData();
+//		pubmedLoader.doLoadNewData();
 	}
 
 	
@@ -49,14 +49,14 @@ public class QuartzConfig {
 	//		cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			cron = "0 0 0 * * SUN-SAT")
 	public void loadPubmedBaseline() {
-		pubmedLoader.doLoadBaselineData();
+//		pubmedLoader.doLoadBaselineData();
 	}
 
 	@Scheduled(
 			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
 			cron = "0 0 10 * * SUN-SAT")
 	public void loadPMC() {
-		pmcLoader.doLoadNewData();
+//		pmcLoader.doLoadNewData();
 	}
 	
 	//@Scheduled(
