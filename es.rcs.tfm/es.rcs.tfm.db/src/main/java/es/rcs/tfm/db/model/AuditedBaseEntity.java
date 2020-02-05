@@ -44,8 +44,8 @@ public class AuditedBaseEntity {
 	public static final String RES_ID				= "id";
 	public static final String RES_UID				= "uuid";
 	public static final String RES_RELEASE			= "release";
-	public static final String RES_STATUS			= "estado";
-	public static final String RES_COMMENT			= "observaciones";
+	public static final String RES_STATUS			= "status";
+	public static final String RES_COMMENT			= "comments";
 
 	public static final String DB_ID				= "id";
 	public static final String DB_UID				= "uuid";
@@ -118,7 +118,7 @@ public class AuditedBaseEntity {
 	@Size(
 		max = 1024, 
 		message = "{Los comentarios no puede sobrepasar los {max} caracteres.}")
-		protected String comment;
+	protected String comment;
 
 
 	@JsonIgnore
