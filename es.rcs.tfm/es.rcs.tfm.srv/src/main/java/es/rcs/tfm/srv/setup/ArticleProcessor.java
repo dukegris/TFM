@@ -1,7 +1,10 @@
 package es.rcs.tfm.srv.setup;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +58,9 @@ public abstract class ArticleProcessor implements Iterator<Articulo>  {
 	        //spf.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
 	        
 	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-	        InputSource inputSource = new InputSource(new FileReader(path.toFile()));
+	        InputStream inputStream = new FileInputStream(path.toFile());
+	        Reader reader = new InputStreamReader(inputStream, "UTF-8");
+	        InputSource inputSource = new InputSource(reader);
 	        
 	        source = new SAXSource(xmlReader, inputSource);
 

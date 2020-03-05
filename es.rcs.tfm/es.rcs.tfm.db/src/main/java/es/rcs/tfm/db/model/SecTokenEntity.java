@@ -1,6 +1,6 @@
 package es.rcs.tfm.db.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -127,7 +127,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 			nullable = false)
 	@NotNull(
 			message = "La fecha de �ltimo uso no puede ser nula")
-	private Date lastUsed;
+	private LocalDateTime lastUsed;
 
 	
 	@JsonApiRelationId
@@ -162,7 +162,7 @@ public class SecTokenEntity extends AuditedBaseEntity {
 		super();
 	}
 
-	public SecTokenEntity(SecUserEntity user, String serie, String token, Date lastUsed) {
+	public SecTokenEntity(SecUserEntity user, String serie, String token, LocalDateTime lastUsed) {
 		super();
 		this.setUser(user);
 		this.serie = serie;
@@ -170,9 +170,13 @@ public class SecTokenEntity extends AuditedBaseEntity {
 		this.lastUsed = lastUsed;
 	}
 
-	private void setUser(SecUserEntity user) {
-		this.user = user;
-		this.userId = (user != null) ? user.getId() : null;
+	private void setUser(SecUserEntity item) {
+		if (item != null) {
+			this.user = item;
+			if (user.getId() != null) {
+				this.userId = item.getId();
+			}
+		}
 	}
 
 }

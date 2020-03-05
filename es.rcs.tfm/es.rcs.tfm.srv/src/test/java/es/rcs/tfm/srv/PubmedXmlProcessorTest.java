@@ -3,8 +3,8 @@ package es.rcs.tfm.srv;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 
 @RunWith(
@@ -30,26 +31,28 @@ import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 		PubmedXmlProcessorTest.class })
 public class PubmedXmlProcessorTest {
 
-	public static final String PUBMED_FILE = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/corpus/pubmed_xml/pubmed19n0973.xml";
+	public static final String PUBMED_FILE = "pubmed19n0973.xml";
 	
 	@Test
 	public void unmarshallFile() {
 		
-		String[] ficheros = {
-				PUBMED_FILE
+		Fichero[] ficheros = {
+				Fichero.getInstance(PUBMED_FILE, Calendar.getInstance(), 0) 
 		};
 		
 		System.out.println ("-" + "A novel missense mutation Asp506Gly in Exon 13 of the F11 gene in an asymptomatic Korean woman with mild factor XI deficiency.".substring(26,35) + "-");
 
-		Stream<String> ficherosStream = Arrays.asList(ficheros).stream();
+		Stream<Fichero> ficherosStream = Arrays.asList(ficheros).stream();
 		
 		Stream<Articulo> articulosStream = ficherosStream.
 			flatMap(f -> 
 					StreamSupport.stream(
 							Spliterators.spliteratorUnknownSize(
-									new PubmedXmlProcessor(Paths.get(f)), 
+									new PubmedXmlProcessor(
+											f,
+											"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/data/corpus/pubmed_xml"), 
 									Spliterator.DISTINCT), 
-									false));
+								false));
 								
 		List<Articulo> a = articulosStream.collect(Collectors.toList());
 		assertNotNull(a);

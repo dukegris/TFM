@@ -259,11 +259,11 @@ public class SecUserEntity extends AuditedBaseEntity {
 	private Set<Long> roleIds = null;
 
 	
-	@JsonProperty(
-			value = RES_ROLES)
 	@JsonApiRelation(
 			idField = ATT_ROLE_IDS, 
 			mappedBy = SecRoleEntity.ATT_USERS)
+	@JsonProperty(
+			value = RES_ROLES)
 	@JoinTable (
 			name = DB_TABLE_USER_ROLES,
 			joinColumns = @JoinColumn (
@@ -393,9 +393,15 @@ public class SecUserEntity extends AuditedBaseEntity {
 	}
 
 	public SecUserEntity(
-			@NotNull(message = "El nombre del usuario no puede ser nulo") @Size(max = 64, message = "El nombre ndel usuario o puede sobrepasar los {max} caracteres.") final String name,
-			@NotNull(message = "El correo electrónico del usuario no puede ser nulo") @Size(max = 128, message = "El correo electrónico del usuario no puede sobrepasar los {max} caracteres.") final String email,
-			@NotNull(message = "La clave del usuario no puede ser nula") @Size(max = 64, message = "La clave del usuario no puede sobrepasar los {max} caracteres.") final String password) {
+			@NotNull(message = "El nombre del usuario no puede ser nulo")
+			@Size(max = 64, message = "El nombre ndel usuario o puede sobrepasar los {max} caracteres.")
+			final String name,
+			@NotNull(message = "El correo electrónico del usuario no puede ser nulo")
+			@Size(max = 128, message = "El correo electrónico del usuario no puede sobrepasar los {max} caracteres.")
+			final String email,
+			@NotNull(message = "La clave del usuario no puede ser nula")
+			@Size(max = 64, message = "La clave del usuario no puede sobrepasar los {max} caracteres.")
+			final String password) {
 		super();
 		this.name = name;
 		this.email = email;
@@ -403,23 +409,43 @@ public class SecUserEntity extends AuditedBaseEntity {
 	}
 
 	public void setTokens(final Set<SecTokenEntity> items) {
-		this.tokens = items;
-		if (items != null) this.tokenIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.tokens = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.tokenIds = itemIds;
+			}
+		}
 	}
 
 	public void setRoles(final Set<SecRoleEntity> items) {
-		this.roles = items;
-		if (items != null) this.roleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.roles = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.roleIds = itemIds;
+			}
+		}
 	}
 
 	public void setGroups(final Set<SecGroupEntity> items) {
-		this.groups = items;
-		if (items != null) this.groupIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.groups = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.groupIds = itemIds;
+			}
+		}
 	}
 
 	public void setAuthorities(final Set<SecAuthorityEntity> items) {
-		this.authorities = items;
-		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.authorities = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.authorityIds = itemIds;
+			}
+		}
 	}
 
 }

@@ -13,7 +13,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(
+		callSuper = false)
 public class Autor {
 
 	private HashMap<String, String> ids = new HashMap<String, String>();
@@ -23,7 +24,6 @@ public class Autor {
 	private String sufijo;
 	private String nombre;
 	private String apellidos;
-	private String grupo;
 
 	public void addIds(Map<String, String> items) {
 		if ((items!= null) && (!items.isEmpty())) this.ids.putAll(items);

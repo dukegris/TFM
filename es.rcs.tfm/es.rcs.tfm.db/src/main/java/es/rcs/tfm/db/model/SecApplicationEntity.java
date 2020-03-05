@@ -35,7 +35,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
 @Getter
 @Setter
 @ToString
@@ -50,18 +49,18 @@ import lombok.ToString;
 @Table(
 		name = SecApplicationEntity.DB_TABLE,
 		uniqueConstraints = {
-			@UniqueConstraint(
-				name = SecApplicationEntity.DB_ID_PK, 
-				columnNames = { SecApplicationEntity.DB_ID }),
-			@UniqueConstraint(
-					name = SecApplicationEntity.DB_UID_UK, 
-					columnNames = { SecApplicationEntity.DB_UID }),
-			@UniqueConstraint(
-					name = SecApplicationEntity.DB_CODE_UK, 
-					columnNames = { SecApplicationEntity.DB_CODE }),
-			@UniqueConstraint(
-					name = SecApplicationEntity.DB_APPLICATION_UK, 
-					columnNames = { SecApplicationEntity.DB_APPLICATION}) })
+				@UniqueConstraint(
+					name = SecApplicationEntity.DB_ID_PK, 
+					columnNames = { SecApplicationEntity.DB_ID }),
+				@UniqueConstraint(
+						name = SecApplicationEntity.DB_UID_UK, 
+						columnNames = { SecApplicationEntity.DB_UID }),
+				@UniqueConstraint(
+						name = SecApplicationEntity.DB_CODE_UK, 
+						columnNames = { SecApplicationEntity.DB_CODE }),
+				@UniqueConstraint(
+						name = SecApplicationEntity.DB_APPLICATION_UK, 
+						columnNames = { SecApplicationEntity.DB_APPLICATION}) })
 @Entity
 @Audited
 @EntityListeners(
@@ -203,14 +202,14 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 			value = AccessLevel.NONE)
 	private Set<SecRoleEntity> roles;
 
-	
+
 	@JsonApiRelationId
 	@JsonProperty(
 			value = RES_AUTHORITY_IDS)
 	@Transient
 	private Set<Long> authorityIds = null;
 
-	
+
 	@JsonApiRelation(
 			idField = ATT_AUTHORITY_IDS, 
 			mappedBy = SecAuthorityEntity.ATT_APPLICATION,
@@ -237,17 +236,27 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	}
 
 	public SecApplicationEntity(
-			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
+			@NotNull(message = "El codigo no puede ser nulo")
+			@Size(max = 32, message = "El codigo no puede sobrepasar los {max} caracteres.")
+			String code,
+			@NotNull(message = "El nombre no puede ser nulo")
+			@Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.")
+			String name) {
 		super();
 		this.code = code;
 		this.name = name;
 	}
 
 	public SecApplicationEntity(
-			@NotNull(message = "El c�digo no puede ser nulo") @Size(max = 32, message = "El c�digono puede sobrepasar los {max} caracteres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.") String name,
-			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.") String url) {
+			@NotNull(message = "El codigo no puede ser nulo")
+			@Size(max = 32, message = "El codigono puede sobrepasar los {max} caracteres.")
+			String code,
+			@NotNull(message = "El nombre no puede ser nulo")
+			@Size(max = 32, message = "El nombre puede sobrepasar los {max} caracteres.")
+			String name,
+			@NotNull(message = "La url base no puede ser nula")
+			@Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.")
+			String url) {
 		super();
 		this.code = code;
 		this.name = name;
@@ -255,18 +264,33 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	}
 
 	public void setModules(Set<SecModuleEntity> items) {
-		this.modules = items;
-		if (items != null) this.moduleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.modules = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.moduleIds = itemIds;
+			}
+		}
 	}
 
 	public void setAuthorities(Set<SecAuthorityEntity> items) {
-		this.authorities = items;
-		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.authorities = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.authorityIds = itemIds;
+			}
+		}
 	}
 
 	public void setRoles(Set<SecRoleEntity> items) {
-		this.roles = items;
-		if (items != null) this.roleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.roles = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.roleIds = itemIds;
+			}
+		}
 	}
 
 }

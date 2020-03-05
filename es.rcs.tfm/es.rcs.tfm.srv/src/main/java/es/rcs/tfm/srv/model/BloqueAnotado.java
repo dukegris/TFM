@@ -17,9 +17,10 @@ import lombok.ToString;
 		callSuper = false)
 public class BloqueAnotado {
 
-	public static final String PASSAGE_TYPE				= "type";
-	public static final String PASSAGE_TYPE_TITLE		= "title";
-	public static final String PASSAGE_TYPE_ABSTRACT	= "abstract";
+	public static final String PASSAGE_TYPE					= "type";
+	public static final String PASSAGE_TYPE_TITLE			= "title";
+	public static final String PASSAGE_TYPE_ABSTRACT		= "abstract";
+	public static final String PASSAGE_TYPE_OTHER_ABSTRACT	= "other";
 
 	private Integer offset = 0;
 	private String type = "";

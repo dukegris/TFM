@@ -133,7 +133,7 @@ public interface EP<P extends Path, V> {
 	 * @throws UnsupportedOperationException if an operator is used in unsupported order or on unsupported digits (for example, startWith operator being used on String values)
 	 */
 	public static <S extends String> Optional<EPOperator> isOperator(EPOperator[] operators, final S value) {
-		if (operators != null && StringUtils.isNotBlank(value)) {
+		if (operators != null && StringUtils.isNotEmpty(value)) {
 			for (EPOperator operator : operators) {
 				if (isOperator(operator, value)) {
 					return Optional.of(operator);
@@ -167,7 +167,7 @@ public interface EP<P extends Path, V> {
 	 * @throws IllegalArgumentException if an invalid composition is found in provided <code>value</code>
 	 */
 	static void validateComposition(final String value) {
-		if (StringUtils.isNotBlank(value)) {
+		if (StringUtils.isNotEmpty(value)) {
 			if (isOperator(value).isPresent()) {
 				int count = 0;
 				int opening_bracket = OPERATOR_VALUE_DELIMITER_PREFIX.charAt(0);

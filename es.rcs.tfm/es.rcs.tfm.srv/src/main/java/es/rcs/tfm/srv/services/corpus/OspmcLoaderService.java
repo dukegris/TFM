@@ -88,7 +88,9 @@ public class OspmcLoaderService {
 						stream()).
 			// Comprobar si se requiere descargar
 			peek (f->
-					corpusSrvc.calculateIfTheProcessIsNeeded(f)).
+					corpusSrvc.calculateIfTheProcessIsNeeded(
+							CORPUS_PMC_GZIP_DIRECTORY,
+							f)).
 			// Descargar ficheros
 			peek(f -> {
 					if (	SOLO_GZIP_PTRN.matcher(f.getGzFichero()).find() &&

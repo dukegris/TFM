@@ -1,10 +1,9 @@
 package es.rcs.tfm.srv.model;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -29,16 +28,20 @@ public class Fichero {
 
 	private String gzDirectorio;
 	private String gzFichero;
-	private ZonedDateTime gzInstante;
+	private LocalDateTime gzInstante;
 	private long gzTamanio;
 
 	private boolean md5 = false;
 	private String md5Fichero;
 
 	private String uncompressFichero;
+	
+	private int numArticlesProcessed = 0;
+	private int numArticlesTotal = 0;
 
 	private boolean hayCambiosEnBD = false;
 	private boolean hayCambiosEnDisco = false;
+	private boolean procesoArticulosCompletado = false;
 
 	private PubFileEntity entidad = null;
 
@@ -89,7 +92,7 @@ public class Fichero {
 			String filename,
 			String title,
 			String pmcId,
-			Date timestamp,
+			LocalDateTime timestamp,
 			String pmid,
 			String license) {
 		
@@ -103,16 +106,19 @@ public class Fichero {
 		String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
 		String nombre = FilenameUtils.removeExtension(uncompressFilename);
 
+		/*
 		ZonedDateTime gztimestamp = ZonedDateTime.ofInstant(
 				timestamp.toInstant(), 
-				ZoneId.systemDefault());
+				ZoneId.of("UTC"));
+		*/
 		
 		Fichero fichero = new Fichero();
 		fichero.setTipo(PubFileEntity.FTP_PMC);
 		fichero.setNombre(nombre);
 		fichero.setGzDirectorio(gzDirectorio);
 		fichero.setGzFichero(gzFilename);
-		fichero.setGzInstante(gztimestamp);
+		fichero.setGzInstante(timestamp);
+		fichero.setMd5(false);
 		
 		fichero.setUncompressFichero(uncompressFilename);
 		
@@ -151,19 +157,26 @@ public class Fichero {
 		String gzFilename = FilenameUtils.getName(filename);
 		String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
 		String nombre = FilenameUtils.removeExtension(uncompressFilename);
+		String md5Fichero = gzFilename + ".md5";
 
+		/*
 		ZonedDateTime gztimestamp = ZonedDateTime.ofInstant(
 				timestamp.toInstant(), 
-				ZoneId.systemDefault());
+				ZoneId.of("UTC"));
+		 */
 		
 		Fichero fichero = new Fichero();
 		fichero.setTipo(PubFileEntity.FTP_PUBMED);
 		fichero.setNombre(nombre);
 		fichero.setGzDirectorio(gzDirectorio);
 		fichero.setGzFichero(gzFilename);
-		fichero.setGzInstante(gztimestamp);
+		if (timestamp != null) {
+			fichero.setGzInstante(LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.of("UTC")));
+		}
 		fichero.setGzTamanio(size);
 		fichero.setUncompressFichero(uncompressFilename);
+		fichero.setMd5(true);
+		fichero.setMd5Fichero(md5Fichero);
 		
 		return fichero;
 		

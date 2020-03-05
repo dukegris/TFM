@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.main.config.SparkConfig;
-import es.rcs.tfm.nlp.repository.TestSpark;
 import es.rcs.tfm.nlp.util.TestSparkNLP;
 import scala.Tuple2;
 
@@ -63,6 +62,9 @@ public class NlpTest {
 				result.foreach(r -> {
 					
 				});
+				
+				ssc.close();
+				jsc.close();
 
 			}
 		} catch (Exception ex) {

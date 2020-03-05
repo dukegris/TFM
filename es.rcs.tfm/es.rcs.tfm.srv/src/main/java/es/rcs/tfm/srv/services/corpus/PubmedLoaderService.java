@@ -1,6 +1,5 @@
 package es.rcs.tfm.srv.services.corpus;
 
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +18,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
 import es.rcs.tfm.srv.model.Fichero;
+import es.rcs.tfm.srv.repository.DatabaseRepository;
 import es.rcs.tfm.srv.repository.FtpRepository;
 import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 
@@ -72,7 +74,10 @@ public class PubmedLoaderService {
 		}
 		
 		// MODELO DE FICHEROS 
-		Stream<Fichero> ficherosStream = Arrays.stream(ftpFiles).//.parallel()
+		Stream<Fichero> ficherosStream = Arrays.
+			stream(ftpFiles).//.parallel()
+			//TODO
+			parallel().
 			// Solo ficheros validos
 			filter(f ->
 					f.isValid() &&
@@ -102,51 +107,89 @@ public class PubmedLoaderService {
 							f.getName(),
 							f.getTimestamp(),
 							f.getSize()) ).
-			// Calcular el fichero debe ser procesado
-			peek (f->
-				corpusSrvc.calculateIfTheProcessIsNeeded(f)).
-			// Descargar ficheros
-			peek(f -> {
-					if (f.isHayCambiosEnDisco()) CorpusService.download(
-							FPT_HOST, FTP_PORT, 
-							FTP_USERNAME, FTP_PASSWORD, 
-							FTP_DIRECTORY,
-							CORPUS_PUBMED_GZIP_DIRECTORY,
-							CORPUS_PUBMED_XML_DIRECTORY,
-							f);}).
-			// Actualizar datos de los ficheros en DB
-			peek(f -> {
-					if (f.isHayCambiosEnBD()) corpusSrvc.updateDb(f); })
-			;
+			peek (f-> procesaFichero(f, FTP_DIRECTORY));
 
-		Stream<Articulo> articulosStream = ficherosStream.
-			filter(f -> 
-					f.isHayCambiosEnDisco()).
-			// Procesar XML con articulos
-			flatMap(f -> 
-					StreamSupport.stream(
-							Spliterators.spliteratorUnknownSize(
-									new PubmedXmlProcessor(Paths.get(FilenameUtils.concat(
-											CORPUS_PUBMED_XML_DIRECTORY, 
-											f.getUncompressFichero()))), 
-									Spliterator.DISTINCT), 
-							false)).
-			//Comprobar si se requiere descargar
-			map (a->
-					corpusSrvc.calculateIfTheProcessIsNeeded(a)).
-			// Actualizar datos de los ficheros en DB
-			peek(a -> {
-					if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);}).
-			// Actualizar datos de los ficheros en el indice
-			peek(a -> {
-					if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);})
-			;
+		// Puede ser null
+		if (ficherosStream != null) {
+			ficherosStream.forEach(f -> {
+//				if ("pubmed20n1093.xml.gz".equals(f.getGzFichero())) {
+				if (!f.isProcesoArticulosCompletado()) {
+					
+					PubmedXmlProcessor processor = new PubmedXmlProcessor(
+							f,
+							CORPUS_PUBMED_XML_DIRECTORY);
+					
+					Stream<Articulo> articulosStream = StreamSupport.
+							stream(
+									Spliterators.spliteratorUnknownSize(
+											processor, 
+											Spliterator.DISTINCT), 
+									false).
+							//TODO 
+							parallel().
+							peek(a -> procesaArticulo(a));
+
+					List<Articulo> articulos = articulosStream.collect(Collectors.toList());
+					
+					DatabaseRepository.saveStats(1);
+					
+					// TODO trainModel.process(articulos);
+					// TODO update bloques de los articulos
+					
+					f.setProcesoArticulosCompletado(processor.getItemsSize()*0.9 <= articulos.size());
+					f.setNumArticlesTotal(processor.getItemsSize());
+					f.setNumArticlesProcessed(articulos.size());
+					corpusSrvc.updateDb(f);
+
+				} 
+//				}
+			});
+		}
+	}
+
+	@Transactional(
+		transactionManager = DbNames.DB_TX,
+		propagation = Propagation.REQUIRES_NEW)
+	private Fichero procesaFichero(Fichero f, String FTP_DIRECTORY) {
+				
+		// Calcular el fichero debe ser procesado
+		f = corpusSrvc.calculateIfTheProcessIsNeeded(
+				CORPUS_PUBMED_GZIP_DIRECTORY,
+				f);
 		
-		//List<Fichero> f = ficherosStream.collect(Collectors.toList());
-		//System.out.println("\t" + f.size());
-		List<Articulo> a = articulosStream.collect(Collectors.toList());
-		System.out.println("\t" + a.size());
-		//System.out.println(f.size() + "\t" + a.size());
+		// Descargar ficheros
+		if (f.isHayCambiosEnDisco()) {
+				CorpusService.download(
+						FPT_HOST, FTP_PORT, 
+						FTP_USERNAME, FTP_PASSWORD, 
+						FTP_DIRECTORY,
+						CORPUS_PUBMED_GZIP_DIRECTORY,
+						CORPUS_PUBMED_XML_DIRECTORY,
+						f);
+		}
+		
+		// Actualizar datos de los ficheros en DB
+		if (f.isHayCambiosEnBD()) {
+			f = corpusSrvc.updateDb(f);
+		}
+		
+		return f;
+
+	}
+
+	@Transactional(
+		transactionManager = DbNames.DB_TX,
+		propagation = Propagation.REQUIRES_NEW)
+	private Articulo procesaArticulo(Articulo a) {
+
+		// Comprobar si se requiere descargar
+		a = corpusSrvc.calculateIfTheProcessIsNeeded(a);
+		// Actualizar datos de los ficheros en DB
+		if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);
+		// Actualizar datos de los ficheros en el indice
+		if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);
+
+		return a;
 
 	}
 

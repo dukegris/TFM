@@ -9,7 +9,7 @@ import es.rcs.tfm.solr.IndexNames;
 @Configuration( IndexNames.IDX_CONFIG )
 @ComponentScan( IndexNames.IDX_SETUP_PKG )
 @EnableSolrRepositories(
-		namedQueriesLocation = "classpath:solr/solr-named-queries.properties",
+		namedQueriesLocation = "classpath:META-INF/solr-named-queries.properties",
 		basePackages = IndexNames.IDX_REPOSITORY_PKG,
 		solrClientRef = IndexNames.IDX_CLIENT,
 		solrTemplateRef = IndexNames.IDX_TEMPLATE)

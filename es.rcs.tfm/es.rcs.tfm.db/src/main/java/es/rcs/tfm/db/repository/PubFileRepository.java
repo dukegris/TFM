@@ -1,5 +1,7 @@
 package es.rcs.tfm.db.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -38,8 +40,9 @@ public interface PubFileRepository extends
 
 	}
 	
-	public PubFileEntity findByTypeAndFileName(
-			@Param("type") String source,
+	public Optional<PubFileEntity> findBySourceAndFileName(
+			@Param("source") String source,
 			@Param("fileName") String fileName);
+			
 
 }

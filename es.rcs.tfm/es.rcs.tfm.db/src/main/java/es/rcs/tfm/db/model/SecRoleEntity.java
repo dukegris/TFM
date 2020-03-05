@@ -72,7 +72,7 @@ import lombok.ToString;
 public class SecRoleEntity extends AuditedBaseEntity {
 
 	@Transient
-	protected Logger LOG = LoggerFactory.getLogger(SecRoleEntity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SecRoleEntity.class);
 
 	public static final String RES_ACTION			= "roles";
 	public static final String RES_TYPE				= "Role";
@@ -260,18 +260,32 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	}
 	
 	public void setApplication(SecApplicationEntity item) {
-		this.application = item;
-		this.applicationId = (item != null) ? item.getId() : null;
+		if (item != null) {
+			this.application = item;
+			if (item.getId() != null) {
+				this.applicationId = item.getId();
+			}
+		}
 	}
 
 	public void setUsers(Set<SecUserEntity> items) {
-		this.users = items;
-		if (items != null) this.userIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.users = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.userIds = itemIds;
+			}
+		}
 	}
 
 	public void setAuthorities(Set<SecAuthorityEntity> items) {
-		this.authorities = items;
-		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.authorities = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.authorityIds = itemIds;
+			}
+		}
 	}
 
 }

@@ -231,8 +231,6 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 		try {
 
 			SecApplicationEntity app = null;
-			SecModuleEntity mod = null;
-			SecFunctionEntity fun = null;
 			SecUserEntity adminUsr = null;
 			
 			// ----------------------------------------------------------------------------------------------
@@ -243,88 +241,88 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 			if (app == null) {
 				//app = segAppRep.findByCode("tfm.app.adm");
 				//if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.adm",		"Administracion",	"/admin"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios",			"/admin/users"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.grp",	"Grupos", 			"/admin/groups"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.app",	"Aplicaciones", 	"/admin/applications"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.mod",	"Modulos", 			"/admin/modules"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.fun",	"Funciones", 		"/admin/functions"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.rol",	"Roles", 			"/admin/roles"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.aut",	"Autorizaciones", 	"/admin/authorizations"));
+					app = segAppRep.save(new SecApplicationEntity( 		"tfm.app.adm",		"Administracion",	"/admin"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.usr",	"Usuarios",			"/admin/users"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.grp",	"Grupos", 			"/admin/groups"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.app",	"Aplicaciones", 	"/admin/applications"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.mod",	"Modulos", 			"/admin/modules"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.fun",	"Funciones", 		"/admin/functions"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.rol",	"Roles", 			"/admin/roles"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.adm.aut",	"Autorizaciones", 	"/admin/authorizations"));
 				
 				app = segAppRep.findByCode("tfm.app.bus");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.bus",		"Buscador", 		"/search"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.bus.art",	"Articulos", 		"/search/articles"));
+					app = segAppRep.save(new SecApplicationEntity( 		"tfm.app.bus",		"Buscador", 		"/search"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.bus.art",	"Articulos", 		"/search/articles"));
 				
 				app = segAppRep.findByCode("tfm.app.the");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.the",		"Thesaurus", 		"/thesaurus"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.des",	"Descriptores", 	"/thesaurus/descriptors"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.cua",	"Cualificadores", 	"/thesaurus/qualifiers"));
+					app = segAppRep.save(new SecApplicationEntity( 		"tfm.app.the",		"Thesaurus", 		"/thesaurus"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.des",	"Descriptores", 	"/thesaurus/descriptors"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.the.cua",	"Cualificadores", 	"/thesaurus/qualifiers"));
 				
 				app = segAppRep.findByCode("tfm.app.dic");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.dic",		"Diccionario", 		"/dictionary"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.dic.voc",	"Vocablos", 		"/dictionary/vocable"));
+					app = segAppRep.save(new SecApplicationEntity( 		"tfm.app.dic",		"Diccionario", 		"/dictionary"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.dic.voc",	"Vocablos", 		"/dictionary/vocable"));
 				
 				app = segAppRep.findByCode("tfm.app.cor");
 				if (app == null)
-					app = segAppRep.save(new SecApplicationEntity		( 		"tfm.app.cor",		"Corpus", 			"/corpus"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.med",	"Pubmed Citas", 	"/corpus/pubmed"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.pmc",	"Pubmed Central", 	"/corpus/pmc"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.dat",	"Datasets", 		"/corpus/datasets"));
-				mod = segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.mod",	"Modelos", 			"/corpus/models"));
-	
+					app = segAppRep.save(new SecApplicationEntity( 		"tfm.app.cor",			"Corpus", 			"/corpus"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.med",		"Pubmed Citas", 	"/corpus/pubmed"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.pmc",		"Pubmed Central", 	"/corpus/pmc"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.dat",		"Datasets", 		"/corpus/datasets"));
+				segModRep.save(new SecModuleEntity				( app,	"tfm.app.cor.mod",		"Modelos", 			"/corpus/models"));
+				
 				// ROLES
-				SecRoleEntity adminRol = 
+				//SecRoleEntity adminRol = 
 					segRolRep.save(
 						new SecRoleEntity(
 							app,
 							"tfm.rol.admin",
 							"Administrador General",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.adm.admin","Administrar modulo de Administracion")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.admin","Administrar modulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.admin","Administrar modulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.admin","Administrar modulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.admin","Administrar modulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.adm.admin",	"Administrar modulo de Administracion")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.admin",	"Administrar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.admin",	"Administrar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.admin",	"Administrar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.admin",	"Administrar modulo de Corpus")) )) ));
 				
-				SecRoleEntity userRol = 
+				//SecRoleEntity userRol = 
 					segRolRep.save(
 						new SecRoleEntity(
 							app,
 							"tfm.rol.user",
-							"Usuario de consulta",
+							"Usuario básico",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.user","Consultar modulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.user","Consultar modulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.user","Consultar modulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.user","Consultar modulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.user",		"Usar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.user",		"Usar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.user",		"Usar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.user",		"Usar modulo de Corpus")) )) ));
 				
-				SecRoleEntity queryRol = 
+				//SecRoleEntity queryRol = 
 					segRolRep.save(
 						new SecRoleEntity(
 							app,
 							"tfm.rol.query",
 							"Usuario de consulta",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.query","Consultar modulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.query","Consultar modulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.query","Consultar modulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.query","Consultar modulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.query",	"Consultar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.query",	"Consultar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.query",	"Consultar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.query",	"Consultar modulo de Corpus")) )) ));
 	
 				// GRUPOS
-				SecGroupEntity editorGrp =
+				//SecGroupEntity editorGrp =
 					segGrpRep.save(
 						new SecGroupEntity(
 							"tfm.grp.edit",
 							"Usuario",
 							new HashSet<SecAuthorityEntity>(Arrays.asList(
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.edit","Editar modulo Buscador")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.edit","Editar modulo de Thesaurus")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.edit","Editar modulo de Diccionario")),
-								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.edit","Editar modulo de Corpus")) )) ));
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.bus.edit",		"Editar modulo Buscador")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.the.edit",		"Editar modulo de Thesaurus")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.dic.edit",		"Editar modulo de Diccionario")),
+								segAutRep.save(new SecAuthorityEntity	( app,	"tfm.app.cor.edit",		"Editar modulo de Corpus")) )) ));
 			
 			}
 			

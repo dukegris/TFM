@@ -8,7 +8,7 @@ import com.johnsnowlabs.nlp.annotators.common.NerTagged
 import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach, Verbose}
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
 import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel, NerCrfApproach}
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsModel}
 import com.johnsnowlabs.nlp.training.CoNLL
 import com.johnsnowlabs.nlp.util.io.{ExternalResource, ResourceHelper, ReadAs}
 
@@ -40,7 +40,7 @@ object TfmHelper {
 
     val file = ExternalResource(
         fileName,
-        ReadAs.LINE_BY_LINE,
+        ReadAs.TEXT,
         Map.empty[String, String])
 
     val data = nerReader.

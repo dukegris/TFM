@@ -1,4 +1,4 @@
-package es.rcs.tfm.nlp.util;
+package es.rcs.tfm.nlp;
 
 import java.util.Arrays;
 import java.util.List;

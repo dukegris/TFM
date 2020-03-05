@@ -1,6 +1,8 @@
 package es.rcs.tfm.db.model;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -51,7 +53,7 @@ public class AuditedRevisionEntity {
 
 	@RevisionTimestamp
 	@Column(
-			unique = true, 
+			unique = false, 
 			nullable = false,
 			insertable = true,
 			updatable = true)
@@ -65,8 +67,8 @@ public class AuditedRevisionEntity {
     private String modifiedBy;
 	
 	@Transient
-	public Date getRevisionDate() {
-		return new Date( timestamp );
+	public LocalDateTime getRevisionDate() {
+		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of("UTC")).toLocalDateTime();
 	}
 
 }

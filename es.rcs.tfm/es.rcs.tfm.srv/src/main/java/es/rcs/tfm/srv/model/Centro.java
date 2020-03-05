@@ -11,7 +11,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(
+		callSuper = false)
 public class Centro {
 	
 	private HashMap<String, String> ids = new HashMap<String, String>();

@@ -2,9 +2,9 @@ package es.rcs.tfm.srv.repository;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +36,12 @@ import es.rcs.tfm.srv.setup.ArticleProcessor;
 public class TrainRepository {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TrainRepository.class);
-	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
+	//private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
+	private static final String SIMPLE_DATE_FORMAT = "yyyyMMdd-hhmmss";
 	private static final String HADOOP_FILE_PREFIX = "file:///";
 	
 	private static Map<Integer, NerPipeline> PIPELINES = new HashMap<Integer, NerPipeline>();
-	private static Map<Integer, NerTrain> TRAINERS = new HashMap<Integer, NerTrain>();
+	//private static Map<Integer, NerTrain> TRAINERS = new HashMap<Integer, NerTrain>();
 	
 	private static Integer getHash(
 			String posModelDirectory,
@@ -209,8 +210,7 @@ public class TrainRepository {
 		boolean resultado = true;
 		try {
 			
-			String ini = SIMPLE_DATE_FORMAT.format(new Date());
-			
+			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 			
 			String[] entities = {};
 			NerTrain nerTrainer = new NerTrain(
@@ -246,7 +246,7 @@ public class TrainRepository {
 			LOG.info(
 					"\r\nTRAIN TIME for [" + trainFilename + "] "  +
 					"\r\n\tINI:" + ini +
- 					"\r\n\tEND:" + SIMPLE_DATE_FORMAT.format(new Date()) );
+ 					"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
 
 		} catch (Exception ex) {
 			resultado = false;
@@ -322,7 +322,7 @@ public class TrainRepository {
 		boolean resultado = true;
 		try {
 
-			String ini = SIMPLE_DATE_FORMAT.format(new Date());
+			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 			
 			Stream<Articulo> stream = StreamSupport.stream(
 					Spliterators.spliteratorUnknownSize(
@@ -342,7 +342,7 @@ public class TrainRepository {
 				List<Row> rows = TrainRepository.generateDS(data);
 				StructType structType = TrainRepository.generateStructType();
 				
-				String build = SIMPLE_DATE_FORMAT.format(new Date());
+				String build = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 
 				NerPipeline pipeline = null;
 				Integer key = getHash(
@@ -368,7 +368,7 @@ public class TrainRepository {
 					pipeline = PIPELINES.get(key);
 				}
 
-				String prepare = SIMPLE_DATE_FORMAT.format(new Date());
+				String prepare = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 
 				CoNLL2003Generator generator = new CoNLL2003Generator(spark);
 				
@@ -394,7 +394,7 @@ public class TrainRepository {
 						"\r\n\tINI:" + ini +
 						"\r\n\tDAT:" + build +
 						"\r\n\tPRE:" + prepare +
-						"\r\n\tEND:" + SIMPLE_DATE_FORMAT.format(new Date()) );
+						"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
 
 			}
 		} catch (Exception ex) {

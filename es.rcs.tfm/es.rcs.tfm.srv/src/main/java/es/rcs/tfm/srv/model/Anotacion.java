@@ -14,7 +14,7 @@ import lombok.ToString;
 
 /**
  * https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/tmVar.html
- *
+ *  
  * @author dukegris
  *
  */
@@ -36,7 +36,8 @@ public class Anotacion {
 	private String id = "";
 	private String type = "";
 	private String value = "";
-	private String text = "";
+	private String text = ""; 
+	// La DTD de BIOC admite n posiciones, pero solo he visto una por anotacion
 	private ArrayList<Posicion> pos = new ArrayList<Posicion>();
 
 	public void addPosition(Posicion item) {
@@ -48,18 +49,18 @@ public class Anotacion {
 	public void addInfon(Map<String, String> items) {
 		if ((items!= null) && (!items.isEmpty())) {
 	 		// Realmente el DTD especifica una lista pero hay un type que indica el tipo de 
-			// mutación y que enlaza a otra mutacion (1: type="DNAMutation" 2: DNAMutation="xx|xxx|xxx|xx
+			// mutacion y que enlaza a otra mutacion (1: type="DNAMutation" 2: DNAMutation="xx|xxx|xxx|xx
 			
 			// Buscamos el infon type
 			String type = items.get(BloqueAnotado.PASSAGE_TYPE);
-			if (StringUtils.isNotBlank(type)) {
-				// Buscamos el tipo que utilizaremos en los procesos NER. Si no lo hay lo añadimos
+			if (StringUtils.isNotEmpty(type)) {
+				// Buscamos el tipo que utilizaremos en los procesos NER. Si no lo hay lo aï¿½adimos
 				String ner = ArticleProcessor.MUTATIONS_NORMALIZE.get(type);
 				if (StringUtils.isBlank(ner)) {
 					ArticleProcessor.MUTATIONS_NORMALIZE.put(type, type);
 					ner = type;
 				}
-				// Buscamos la mutación
+				// Buscamos la mutaciï¿½n
 				String mutation = items.get(type);
 				
 				this.type = ner;

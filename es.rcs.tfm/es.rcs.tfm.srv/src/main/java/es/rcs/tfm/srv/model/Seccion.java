@@ -12,4 +12,9 @@ import lombok.ToString;
 public class Seccion {
 	String titulo;
 	String etiqueta;
+	public Seccion(String titulo, String etiqueta) {
+		super();
+		this.titulo = titulo;
+		this.etiqueta = etiqueta;
+	}
 }

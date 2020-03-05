@@ -7,7 +7,7 @@ import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach} 
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsModel}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.util.CoNLLGenerator 
 

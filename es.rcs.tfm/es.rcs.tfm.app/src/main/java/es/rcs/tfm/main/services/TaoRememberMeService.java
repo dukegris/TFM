@@ -1,5 +1,7 @@
 package es.rcs.tfm.main.services;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,11 @@ public class TaoRememberMeService implements PersistentTokenRepository {
 		SecTokenEntity userToken = null;
 		
 		user = userRepository.findByName(token.getUsername());
-		userToken = new SecTokenEntity(user, token.getSeries(), token.getTokenValue(), token.getDate());
+		LocalDateTime localdate = null;
+		if (token.getDate() != null) {
+			localdate = LocalDateTime.ofInstant(token.getDate().toInstant(), ZoneId.of("UTC"));
+		}
+		userToken = new SecTokenEntity(user, token.getSeries(), token.getTokenValue(), localdate);
 		tokenRepository.save(userToken);
         	
 	}
@@ -45,7 +51,11 @@ public class TaoRememberMeService implements PersistentTokenRepository {
         if (userToken != null){
         	
         	userToken.setToken(tokenValue);
-        	userToken.setLastUsed(lastUsed);
+    		LocalDateTime localdate = null;
+    		if (lastUsed != null) {
+    			localdate = LocalDateTime.ofInstant(lastUsed.toInstant(), ZoneId.of("UTC"));
+    		}
+        	userToken.setLastUsed(localdate);
 
     		tokenRepository.save(userToken);
 
@@ -61,11 +71,18 @@ public class TaoRememberMeService implements PersistentTokenRepository {
 		userToken = tokenRepository.findBySerie(seriesId);
 
 		if (userToken != null) {
+			
+    		Date date = null;
+    		if (userToken.getLastUsed() != null) {
+    			date = Date.from(userToken.getLastUsed().atZone(ZoneId.of("UTC")).toInstant());
+    		}
+			
 			return new PersistentRememberMeToken(
 					userToken.getUser().getName(), 
 					userToken.getSerie(), 
-					userToken.getToken(), 
-					userToken.getLastUsed());
+					userToken.getToken(),
+					date);
+			
 		}
 		return null;
 

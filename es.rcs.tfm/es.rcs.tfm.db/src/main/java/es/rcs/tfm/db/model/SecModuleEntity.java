@@ -128,10 +128,10 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			nullable = false, 
 			length = 64)
 	@NotNull(
-			message = "El nombre del módulo no puede ser nulo")
+			message = "El nombre del modulo no puede ser nulo")
 	@Size(
 			max = 64, 
-			message = "El nombre del módulo no puede sobrepasar los {max} caracteres.")
+			message = "El nombre del modulo no puede sobrepasar los {max} caracteres.")
 	private String name;
 
 	
@@ -159,7 +159,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 			unique = false,
 			nullable = true)
 	@NotNull(
-			message = "La aplicación no puede ser nula")
+			message = "La aplicacion no puede ser nula")
 	private Long applicationId;
 
 	
@@ -225,7 +225,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El codigono puede sobrepasar los {max} caracteres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
 		super();
 		this.code = code;
@@ -235,7 +235,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	public SecModuleEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono no puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El codigono no puede sobrepasar los {max} caracteres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre no puede sobrepasar los {max} caracteres.") String name,
 			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.") String url) {
 		super();
@@ -246,13 +246,22 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	}
 
 	public void setApplication(SecApplicationEntity item) {
-		this.application = item;
-		this.applicationId = (item != null) ? item.getId() : null;
+		if (item != null) {
+			this.application = item;
+			if (item.getId() != null) {
+				this.applicationId = item.getId();
+			}
+		}
 	}
 
 	public void setFunctions(Set<SecFunctionEntity> items) {
-		this.functions = items;
-		if (items != null) this.functionIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.functions = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.functionIds = itemIds;
+			}
+		}
 	}
 
 }

@@ -11,6 +11,7 @@ import es.rcs.tfm.srv.SrvNames;
 @ComponentScan(
 		basePackages = {
 				SrvNames.SRV_CORPUS_SERVICES_PKG,
+				SrvNames.SRV_CORPUS_REPOSITORIES_PKG,
 				SrvNames.SRV_TRAIN_SERVICES_PKG
 		})
 @PropertySource(

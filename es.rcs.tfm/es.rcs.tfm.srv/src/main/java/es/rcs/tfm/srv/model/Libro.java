@@ -22,8 +22,8 @@ public class Libro {
 	private String tituloVolumen;
 	private String medio; // internet |
 	private Localizacion localizacion;
-	private ArrayList<Fecha> fechas = new ArrayList<Fecha>();
-	private ArrayList<Autor> autores = new ArrayList<Autor>();
+	private List<Fecha> fechas = new ArrayList<Fecha>();
+	private List<Autor> autores = new ArrayList<Autor>();
 	
 	private String informe;
 	private String edicion;

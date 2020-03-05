@@ -105,8 +105,8 @@ public class PubMedTest {
 		    		List<PMID> deletedPmids = deleteCitation.getPMID();
 		    		if ((deletedPmids != null) && (!deletedPmids.isEmpty())) {
 		    			deletedPmids.forEach(deletedPmid -> {
-		    				String strArticlePmid = deletedPmid.getvalue();
-		    				String strArticleVersion = deletedPmid.getVersion();
+		    				//TODO String strArticlePmid = deletedPmid.getvalue();
+		    				//TODO String strArticleVersion = deletedPmid.getVersion();
 		    			});
 		    		}
 		    	} else if ((pubSet != null) && (!pubSet.isEmpty())) {
@@ -132,8 +132,8 @@ public class PubMedTest {
 			    							if ((instances != null) && (!instances.isEmpty())) {
 			    								instances.forEach(instance -> {
 			    									
-			    									String strArticleIdType = instance.getIdType();
-			    									String strArticleIdValue = instance.getvalue();
+			    									//TODO String strArticleIdType = instance.getIdType();
+			    									//TODO String strArticleIdValue = instance.getvalue();
 
 			    								});
 			    							}
@@ -175,20 +175,20 @@ public class PubMedTest {
 			    											(!instance.getParam().isEmpty())) {
 			    										instance.getParam().forEach(param -> {
 
-			    											String strParamName = param.getName();
-			    											String strParamValue = param.getvalue();
+			    											//TODO String strParamName = param.getName();
+			    											//TODO String strParamValue = param.getvalue();
 
 			    										});
 			    									}
 
-			    									String strParamType = instance.getType();
+			    									//TODO String strParamType = instance.getType();
 
 			    								});
 			    							}
 			    						}
 
 			    						// Status
-			    						String strArticleStatus = pubmedData.getPublicationStatus();
+			    						//TODO String strArticleStatus = pubmedData.getPublicationStatus();
 			    						
 			    						// References
 			    						if (	(pubmedData.getReferenceList() != null) && 
@@ -197,13 +197,13 @@ public class PubMedTest {
 			    							if ((instances != null) && (!instances.isEmpty())) {
 			    								instances.forEach(instance -> {
 			    									
-			    									String strArticleReferenceTitle = instance.getTitle();
+			    									//TODO String strArticleReferenceTitle = instance.getTitle();
 			    									
 			    									if (	(instance.getReference() != null) &&
 			    											(!instance.getReference().isEmpty())) {
 			    										instance.getReference().forEach(reference -> {
 
-			    											String strArticleReferenceCitation = reference.getCitation();
+			    											//TODO String strArticleReferenceCitation = reference.getCitation();
 
 			    										});
 			    									}

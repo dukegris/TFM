@@ -46,6 +46,8 @@ public class DatabaseConfig {
 	private Integer dbPoolSize;
 	@Value("${tfm.jpa.properties.hibernate.dialect}")
 	private String dbDialect;
+	@Value("${tfm.jta.datasource}")
+	private String jtaDatasource;
 	@Value("${tfm.jta.logger}")
 	private String jtaLogger;
 
@@ -149,9 +151,11 @@ public class DatabaseConfig {
 
 		AtomikosDataSourceBean bean = new AtomikosDataSourceBean();
 		bean.setUniqueResourceName("TFM_DB"); 
-		bean.setXaDataSourceClassName("org.h2.jdbcx.JdbcDataSource");
+		//bean.setXaDataSourceClassName("org.h2.jdbcx.JdbcDataSource");
+		bean.setXaDataSourceClassName(jtaDatasource);
 		bean.setXaProperties(xaProperties);
 		bean.setLocalTransactionMode(true);
+		bean.setPoolSize(dbPoolSize);
 		//bean.setLogWriter(out);
 
 		return bean;
@@ -163,7 +167,8 @@ public class DatabaseConfig {
 
 		Properties jpaProperties = new Properties();
 
-		jpaProperties.put("hibernate.show_sql", "true");
+		jpaProperties.put("hibernate.show_sql", "false");
+		// jpaProperties.put("hibernate.format_sql", "false");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "create-drop");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "create");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "validate");
@@ -185,15 +190,13 @@ public class DatabaseConfig {
 		
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
 
-		bean.setJpaProperties(jpaProperties);
-
-		bean.setPersistenceUnitName(AppNames.BBDD_PU);
-		bean.setPersistenceXmlLocation("classpath:/META-INF/persistence.xml");
-
 		bean.setDataSource(getDataSource());
 		bean.setJpaVendorAdapter(getJpaVendorAdapter());
 		bean.setJpaDialect(getJpaDialect());
+		bean.setJpaProperties(jpaProperties);
 
+		bean.setPersistenceUnitName(AppNames.BBDD_PU);
+		//bean.setPersistenceXmlLocation("classpath:/META-INF/persistence.xml");
 		bean.setPackagesToScan(new String[] { DbNames.DB_MODEL_PKG });
 
 		return bean;

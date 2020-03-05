@@ -44,7 +44,15 @@ public interface SecTokenRepository extends
 			@Param("serie") String serie);
 
 	@Modifying
-	@Query(value="delete from SecTokenEntity t where t.user in (select u from SecUserEntity u where u.name = ?1)")
+	@Query(value=
+			"DELETE " + 
+			" FROM SecTokenEntity t " + 
+			" WHERE " + 
+			" t.user IN (" + 
+			"  SELECT u " + 
+			"  FROM SecUserEntity u " + 
+			"  WHERE " + 
+			"   u.name = ?1)")
 	void deleteByUsername(String name);
 
 }

@@ -7,7 +7,7 @@ import org.apache.spark.ml.Pipeline
 
 import com.johnsnowlabs.nlp.{SparkNLP, DocumentAssembler, Finisher}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings}
 import com.johnsnowlabs.nlp.annotators.{Tokenizer, Normalizer}
 import com.johnsnowlabs.nlp.annotators.ner.NerConverter
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel} 

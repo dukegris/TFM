@@ -1,7 +1,8 @@
 package es.rcs.tfm.srv.model;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,12 +14,15 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=false)
 public class Fecha {
 	
-	private String tipo = new String();
-	private String sesion = new String();
-	private String anio = new String();
-	private ZonedDateTime fecha = null;
+	private String tipo;
+	private String sesion;
+	private String anio;
 
-	public Fecha(String tipo, ZonedDateTime fecha) {
+	@Setter(
+			value = AccessLevel.NONE)
+	private LocalDate fecha = null;
+
+	public Fecha(String tipo, LocalDate fecha) {
 		super();
 		this.tipo = tipo;
 		this.fecha = fecha;
@@ -28,5 +32,11 @@ public class Fecha {
 		super();
 		this.tipo = tipo;
 	}
+
+	public void setFecha(LocalDate fecha) {
+		this.fecha = fecha;
+		if (fecha != null) this.anio = Integer.toString(fecha.getYear());
+	}
+	
 	
 }

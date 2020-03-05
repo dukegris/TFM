@@ -39,9 +39,10 @@ public class QuartzConfig {
 
 	@Profile( AppNames.APP_DEVELOPMENT )
 	@Scheduled(
-			cron = "0 */1 * * * SUN-SAT") // Cada minuto
+			cron = "*/10 * * * * SUN-SAT") // Cada diez segundos
+			//cron = "0 */1 * * * SUN-SAT") // Cada minuto
 	public void loadPubmedNewData() {
-//		pubmedLoader.doLoadNewData();
+		pubmedLoader.doLoadNewData();
 	}
 
 	

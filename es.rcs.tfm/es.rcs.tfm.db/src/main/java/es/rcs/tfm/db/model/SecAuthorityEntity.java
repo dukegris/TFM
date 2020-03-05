@@ -52,18 +52,18 @@ import lombok.ToString;
 @Table(
 		name = SecAuthorityEntity.DB_TABLE,
 		uniqueConstraints = {
-			@UniqueConstraint(
-					name = SecAuthorityEntity.DB_ID_PK, 
-					columnNames = { SecAuthorityEntity.DB_ID }),
-			@UniqueConstraint(
-					name = SecAuthorityEntity.DB_UID_UK, 
-					columnNames = { SecAuthorityEntity.DB_UID }),
-			@UniqueConstraint(
-					name = SecAuthorityEntity.DB_CODE_UK, 
-					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_CODE }) ,
-			@UniqueConstraint(
-					name = SecAuthorityEntity.DB_NAME_UK, 
-					columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_NAME }) })
+				@UniqueConstraint(
+						name = SecAuthorityEntity.DB_ID_PK, 
+						columnNames = { SecAuthorityEntity.DB_ID }),
+				@UniqueConstraint(
+						name = SecAuthorityEntity.DB_UID_UK, 
+						columnNames = { SecAuthorityEntity.DB_UID }),
+				@UniqueConstraint(
+						name = SecAuthorityEntity.DB_CODE_UK, 
+						columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_CODE }) ,
+				@UniqueConstraint(
+						name = SecAuthorityEntity.DB_NAME_UK, 
+						columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_NAME }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -71,7 +71,7 @@ import lombok.ToString;
 public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	@Transient
-	protected Logger LOG = LoggerFactory.getLogger(SecAuthorityEntity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SecAuthorityEntity.class);
 
 	public static final String RES_ACTION			= "authorities";
 	public static final String RES_TYPE				= "Authority";
@@ -244,6 +244,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 			mappedBy = SecGroupEntity.ATT_AUTHORITIES,
 			fetch = FetchType.LAZY,
 			cascade = { CascadeType.DETACH })
+	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	@Setter(
 			value = AccessLevel.NONE)
@@ -257,8 +258,12 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 	public SecAuthorityEntity(
 			SecApplicationEntity application,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} caracteres.") String code,
-			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
+			@NotNull(message = "El codigo no puede ser nulo")
+			@Size(max = 32, message = "El codigono puede sobrepasar los {max} caracteres.")
+			String code,
+			@NotNull(message = "El nombre no puede ser nulo")
+			@Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.")
+			String name) {
 		super();
 		this.code = code;
 		this.name = name;
@@ -266,23 +271,42 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	}
 	
 	public void setApplication(SecApplicationEntity item) {
-		this.application = item;
-		this.applicationId = (item != null) ? item.getId() : null;
+		if (item != null) {
+			this.application = item;
+			if (item.getId() != null) {
+				this.applicationId = item.getId();
+			}
+		}
 	}
 
 	public void setUsers(Set<SecUserEntity> items) {
-		this.users = items;
-		if (items != null) this.userIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.users = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.userIds = itemIds;
+			}
+		}
 	}
 
-	public void setARoles(Set<SecRoleEntity> items) {
-		this.roles = items;
-		if (items != null) this.roleIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+	public void setRoles(Set<SecRoleEntity> items) {
+		if ((items != null) && !items.isEmpty()) {
+			this.roles = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.roleIds = itemIds;
+			}
+		}
 	}
 
 	public void setGroups(Set<SecGroupEntity> items) {
-		this.groups = items;
-		if (items != null) this.groupIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.groups = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				if (items != null) this.groupIds = itemIds;
+			}
+		}
 	}
 
 }

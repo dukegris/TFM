@@ -225,7 +225,7 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 					// sentence.getAnntotation();
 					// sentence.getRelation();
 					if (	(sentence.getText() != null) &&
-							(StringUtils.isNotBlank(sentence.getText().getvalue())) ) {
+							(StringUtils.isNotEmpty(sentence.getText().getvalue())) ) {
 						str = sentence.getText().getvalue();
 					}
 				} else if (instance instanceof Text) {
@@ -288,8 +288,8 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 		
 		Map<String, String> resultado = infon.stream().
 			filter(p ->		(p != null) &&
-							(StringUtils.isNotBlank(p.getKey())) &&
-							(StringUtils.isNotBlank(p.getvalue())) ).
+							(StringUtils.isNotEmpty(p.getKey())) &&
+							(StringUtils.isNotEmpty(p.getvalue())) ).
 			map(instance -> {
 				return new SimpleEntry<String, String>(
 						instance.getKey(),

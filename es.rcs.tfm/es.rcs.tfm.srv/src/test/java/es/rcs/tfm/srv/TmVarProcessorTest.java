@@ -71,6 +71,9 @@ public class TmVarProcessorTest {
 		for (int i=0; i<5; i++) {
 			tmvar.get(i).getBlocks().forEach(b -> {
 				b.getNotes().forEach((kn, n) -> {
+					if (n.getPos().size()>1) {
+						System.out.print("DEBUG");
+					}
 					n.getPos().forEach(p -> {
 						assertEquals(n.getText(), b.getText().substring(p.getOffset(), p.getEnd()));
 					});
@@ -81,6 +84,9 @@ public class TmVarProcessorTest {
 		for (int i=0; i<5; i++) {
 			bioc.get(i).getBlocks().forEach(b -> {
 				b.getNotes().forEach((kn, n) -> {
+					if (n.getPos().size()>1) {
+						System.out.print("DEBUG");
+					}
 					n.getPos().forEach(p -> {
 						assertEquals(n.getText(), b.getText().substring(p.getOffset(), p.getEnd()));
 					});

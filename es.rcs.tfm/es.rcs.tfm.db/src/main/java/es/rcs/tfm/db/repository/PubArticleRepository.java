@@ -1,6 +1,7 @@
 package es.rcs.tfm.db.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,15 +17,15 @@ import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.PubArticleEntity;
 import es.rcs.tfm.db.model.QPubArticleEntity;
 
-@Repository(DbNames.DB_ARTICLE_FILE_REP)
+@Repository(DbNames.DB_ARTICLE_REP)
 public interface PubArticleRepository extends 
 		JpaRepository<PubArticleEntity, Long>,
 		QuerydslPredicateExecutor<PubArticleEntity>, 
 		QuerydslBinderCustomizer<QPubArticleEntity> {
-
+	
 	@Override
 	default void customize(QuerydslBindings bindings, QPubArticleEntity root) {
-		
+	
 		bindings
 			.bind(String.class)
 			.first((StringPath path, String value) -> path.containsIgnoreCase(value));
@@ -38,18 +39,26 @@ public interface PubArticleRepository extends
 				root.createdBy,
 				root.modifiedAt,
 				root.modifiedBy);
-
+	
 	}
-
+	
+	/*
 	@Query(
 			"SELECT a" + 
 			" FROM PubArticleEntity a" +
 			" WHERE" +
 			" KEY(a.identifiers) = :type AND VALUE(a.identifiers) = :value")
-	List<PubArticleEntity> findByIdentificador(
+	 */
+	@Query(
+			"SELECT a" + 
+			" FROM PubArticleEntity a JOIN a.identifiers i" +
+			" WHERE" +
+			" i.type = :type AND i.value = :value")
+	List<PubArticleEntity> findByIdentifier(
 			@Param("type") String type, 
 			@Param("value") String value);
 	
-	PubArticleEntity findByPmid(String pmid);
-	
+	Optional<PubArticleEntity> findByPmid(String pmid);
+
 }
+

@@ -11,8 +11,12 @@ import org.springframework.data.web.config.SpringDataWebConfiguration;
 
 import es.rcs.tfm.main.AppNames;
 
-@Configuration( AppNames.APP_CONFIG )
-@ComponentScan(basePackages = { AppNames.APP_COMPONENTS_PKG })
+@Configuration(
+		value = AppNames.APP_CONFIG )
+@ComponentScan(basePackages = { 
+		AppNames.APP_SERVICES_PKG,
+		AppNames.APP_COMPONENTS_PKG 
+		})
 public class AppConfig extends SpringDataWebConfiguration {
 
 	public AppConfig(ApplicationContext context, ObjectFactory<ConversionService> conversionService) {

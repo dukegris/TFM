@@ -8,7 +8,7 @@ import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach}
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach} 
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsFormat, WordEmbeddingsModel}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsModel}
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
 import com.johnsnowlabs.nlp.training.CoNLL
 import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs}
@@ -59,8 +59,8 @@ class NerTrain(
 
     println(java.time.LocalTime.now + ": NER-TRAIN: measureNerTraining")
     val nerReader = CoNLL()
-    val trainFile = ExternalResource(trainFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
-    val testFile = ExternalResource(testFileName, ReadAs.LINE_BY_LINE, Map.empty[String, String])
+    val trainFile = ExternalResource(trainFileName, ReadAs.TEXT, Map.empty[String, String])
+    val testFile = ExternalResource(testFileName, ReadAs.TEXT, Map.empty[String, String])
     val trainDataset = nerReader.readDataset(spark, trainFile.path)
     val testDataset = nerReader.readDataset(spark, testFile.path)
 

@@ -1,6 +1,6 @@
 package es.rcs.tfm.db.model;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -127,7 +127,7 @@ public class AuditedBaseEntity {
 			unique = false, 
 			nullable = false)
     @CreatedDate
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
 
 	@JsonIgnore
@@ -146,7 +146,7 @@ public class AuditedBaseEntity {
 			unique = false, 
 			nullable = false)
     @LastModifiedDate
-    private ZonedDateTime modifiedAt;
+    private LocalDateTime modifiedAt;
 
 
 	@JsonIgnore

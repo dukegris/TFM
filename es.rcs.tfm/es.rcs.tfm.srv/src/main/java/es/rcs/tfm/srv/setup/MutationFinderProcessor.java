@@ -4,9 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import es.rcs.tfm.srv.model.Articulo;
 
@@ -17,7 +14,7 @@ public class MutationFinderProcessor extends ArticleProcessor {
 	private long readedSize = -1;
 	private boolean allOk = false;
 	private StringBuffer nextItem = new StringBuffer();
-	private Map<String, Pattern> notes = new HashMap<String, Pattern>();
+	//private Map<String, Pattern> notes = new HashMap<String, Pattern>();
 	
 	public MutationFinderProcessor(
 			Path pathTexts,
@@ -63,7 +60,7 @@ public class MutationFinderProcessor extends ArticleProcessor {
 		
 	}
 
-	private static final Pattern LINE_NOTE_PTRN = Pattern.compile("(\\d+)(\t(.+))*");
+	//private static final Pattern LINE_NOTE_PTRN = Pattern.compile("(\\d+)(\t(.+))*");
 	private void processNotes(Path pathResults) {
 		
 		

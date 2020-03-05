@@ -111,7 +111,7 @@ public class CorpusRepository {
 		
 		if (result) {
 			
-			if (StringUtils.isNotBlank(md5loaded)) {
+			if (StringUtils.isNotEmpty(md5loaded)) {
 				if (!md5loaded.equals(md5Calculated)) {
 					result = false;
 				}

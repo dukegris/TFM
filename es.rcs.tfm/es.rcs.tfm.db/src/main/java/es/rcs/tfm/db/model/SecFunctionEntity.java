@@ -189,7 +189,7 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 
 	public SecFunctionEntity(
 			SecModuleEntity module,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El codigono puede sobrepasar los {max} caracteres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name) {
 		super();
 		this.code = code;
@@ -199,7 +199,7 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 
 	public SecFunctionEntity(
 			SecModuleEntity module,
-			@NotNull(message = "El código no puede ser nulo") @Size(max = 32, message = "El códigono puede sobrepasar los {max} caracteres.") String code,
+			@NotNull(message = "El codigo no puede ser nulo") @Size(max = 32, message = "El codigono puede sobrepasar los {max} caracteres.") String code,
 			@NotNull(message = "El nombre no puede ser nulo") @Size(max = 64, message = "El nombre puede sobrepasar los {max} caracteres.") String name,
 			@NotNull(message = "La url base no puede ser nula") @Size(max = 64, message = "La url base no puede sobrepasar los {max} caracteres.") String url) {
 		super();
@@ -210,8 +210,12 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 	}
 
 	public void setModule(SecModuleEntity item) {
-		this.module = item;
-		this.moduleId = (item != null) ? item.getId() : null;
+		if (item != null) {
+			this.module = item;
+			if (item.getId() != null) {
+				this.moduleId = item.getId();
+			}
+		}
 	}
 	
 }

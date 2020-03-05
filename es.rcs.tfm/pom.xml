@@ -168,8 +168,11 @@
 		<atomikos.version>5.0.6</atomikos.version>
 		<netty.version>3.10.6.Final</netty.version>
 		<netty-all.version>4.1.37.Final</netty-all.version>
-		<crnk.version>3.1.20191113192440</crnk.version>
-
+		<!-- 
+		 <crnk.version>3.1.20191113192440</crnk.version>
+		 -->
+		 <crnk.version>3.2.20200213145435</crnk.version>
+		 
 		<!-- SERVERS -->
 		<jetty.version>9.4.19.v20190610</jetty.version>
 		<solr.version>8.1.1</solr.version>
@@ -181,7 +184,7 @@
 		<scala.version>2.11.12</scala.version>
 		<hadoop.version>2.10.0</hadoop.version>
 		<spark.version>2.4.4</spark.version>
-		<spark-nlp.version>2.3.5</spark-nlp.version>
+		<spark-nlp.version>2.4.1</spark-nlp.version>
 
 		<!-- LOGS -->
 		<slf4j.version>1.7.25</slf4j.version>
@@ -1170,6 +1173,11 @@
 				
 			<plugins>
 				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>scala-maven-plugin</artifactId>
+					<version>4.3.1</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
@@ -1210,7 +1218,7 @@
 		
 		<plugins>
 		
-			<!-- Default compiler -->
+			<!-- Default compiler
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -1218,13 +1226,8 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals><goal>compile</goal></goals>
-					</execution>
-				</executions>
 			</plugin>
+			-->
 			<!-- Disable Test on Build -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1245,14 +1248,13 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Default resources -->
+			<!-- Default resources
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-						<!-- here the phase you need -->
 						<phase>validate</phase>
 						<goals><goal>copy-resources</goal></goals>
 						<configuration>
@@ -1274,6 +1276,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			 -->
 			
 		</plugins>
 		

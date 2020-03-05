@@ -68,7 +68,7 @@ import lombok.ToString;
 public class SecGroupEntity extends AuditedBaseEntity {
 
 	@Transient
-	protected Logger LOG = LoggerFactory.getLogger(SecGroupEntity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SecGroupEntity.class);
 
 	public static final String RES_ACTION			= "groups";
 	public static final String RES_TYPE				= "Group";
@@ -111,10 +111,10 @@ public class SecGroupEntity extends AuditedBaseEntity {
 			nullable = false,
 			length = 32)
 	@NotNull(
-			message = "El código del grupo no puede ser nulo")
+			message = "El codigo del grupo no puede ser nulo")
 	@Size(
 			max = 32, 
-			message = "El código del grupo no puede sobrepasar los {max} caracteres.")
+			message = "El codigo del grupo no puede sobrepasar los {max} caracteres.")
 	private String code;
 
 	
@@ -199,7 +199,7 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	}
 
 	public SecGroupEntity(
-			@NotNull(message = "El código del grupo no puede ser nulo") @Size(max = 32, message = "El código del grupo no puede sobrepasar los {max} carcateres.") String code,
+			@NotNull(message = "El codigo del grupo no puede ser nulo") @Size(max = 32, message = "El codigo del grupo no puede sobrepasar los {max} carcateres.") String code,
 			@NotNull(message = "El nombre del grupo no puede ser nulo") @Size(max = 256, message = "El nombre del grupo no puede sobrepasar los {max} carcateres.") String name,
 			Set<SecAuthorityEntity> authorities) {
 		super();
@@ -209,13 +209,23 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	}
 
 	public void setUsers(Set<SecUserEntity> items) {
-		this.users = items;
-		if (items != null) this.userIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.users = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.userIds = itemIds;
+			}
+		}
 	}
 
 	public void setAuthorities(Set<SecAuthorityEntity> items) {
-		this.authorities = items;
-		if (items != null) this.authorityIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+		if ((items != null) && !items.isEmpty()) {
+			this.authorities = items;
+			Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
+			if ((itemIds != null) && !itemIds.isEmpty()) {
+				this.authorityIds = itemIds;
+			}
+		}
 	}
 
 }
