@@ -47,7 +47,6 @@ use_contrib = False if os.name == 'nt' else True
 
 name_prefix = 'blstm-noncontrib' if not use_contrib else 'blstm'
 
-
 # %%
 def create_graph(ntags, embeddings_dim, nchars, lstm_size = 128):
     #RCS if sys.version_info[0] != 3 or sys.version_info[1] >= 7:
