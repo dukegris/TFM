@@ -43,7 +43,7 @@ public class SolrConfig {
 
  		CoreContainer container = new CoreContainer(solrHome);
 		container.load();
-    	EmbeddedSolrServer server = new EmbeddedSolrServer(container, PubArticleIdx.CORE);
+    	EmbeddedSolrServer server = new EmbeddedSolrServer(container, PubArticleIdx.IDX_CORE);
     	return server;
     	
     }

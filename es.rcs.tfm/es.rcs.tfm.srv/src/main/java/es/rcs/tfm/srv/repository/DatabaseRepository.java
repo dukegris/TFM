@@ -135,6 +135,7 @@ public class DatabaseRepository {
 		MEDIA.put(		"ELECTRONIC-PRINT",			"IMPRESO DE ELECTRONICO");
 		MEDIA.put(		"ELECTRONIC-ECOLLECTION",	"COLECCION ELECTRONICA");
 		
+		// https://www.loc.gov/marc/languages/language_code.html
 		LANGUAGE.put(	"ENG", 			"en");
 		
 		DATE.put(		"ACCEPTED", 	"ACEPTADO");

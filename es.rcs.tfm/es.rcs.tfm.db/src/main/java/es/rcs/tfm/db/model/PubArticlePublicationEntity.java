@@ -81,7 +81,7 @@ public class PubArticlePublicationEntity {
 	public static final String DB_TABLE 			= "pub_article_publication";
 	public static final String DB_ID_PK 			= "pub_art_pub_pk";
 	public static final String DB_ARTICLE_FK		= "pub_art_pub_art_fk";
-	public static final String DB_PUBLICATION_FK		= "pub_art_pub_pub_fk";
+	public static final String DB_PUBLICATION_FK	= "pub_art_pub_pub_fk";
 
 	public static final String DB_EDITIONTYPE		= "jou_typ";
 	public static final String DB_VOLUME			= "jou_txt";
@@ -99,7 +99,7 @@ public class PubArticlePublicationEntity {
 	public static final String DB_TABLE_IDS_PK		= "pub_art_pub_loc_pk";
 	public static final String DB_TABLE_IDS_FK		= "pub_art_pub_loc_fk";
 	public static final String DB_TABLE_IDS_UK		= "pub_art_pub_loc_uk";
-	public static final String DB_TABLE_IDS_IDX	= "pub_art_pub_loc_id_idx";
+	public static final String DB_TABLE_IDS_IDX		= "pub_art_pub_loc_id_idx";
 
 	public static final String DB_IDS_PUBLICATION_ID= "pub_id";
 	public static final String DB_IDS_ARTICLE_ID	= "art_id";

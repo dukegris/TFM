@@ -15,7 +15,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=false)
 public class Revista {
 	
-	private HashMap<String, String> ids = new HashMap<String, String>();
+	private Map<String, String> ids = new HashMap<String, String>();
 	private String tipo;
 	private String medio; // Electronic | Print
 	private String abreviatura;

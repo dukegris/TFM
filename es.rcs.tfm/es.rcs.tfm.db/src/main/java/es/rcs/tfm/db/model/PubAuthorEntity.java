@@ -105,7 +105,7 @@ public class PubAuthorEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE_IDS_PK				= "pub_aut_ids_pk";
 	public static final String DB_TABLE_IDS_FK				= "pub_aut_ids_fk";
 	public static final String DB_TABLE_IDS_UK				= "pub_aut_ids_uk";
-	public static final String DB_TABLE_IDS_IDX			= "pub_aut_ids_id_idx";
+	public static final String DB_TABLE_IDS_IDX				= "pub_aut_ids_id_idx";
 	
 	public static final String DB_AUTHOR_ID					= "aut_id";
 

@@ -1,656 +1,452 @@
 package es.rcs.tfm.nlp.util
 
-import com.johnsnowlabs.nlp.{Annotation, AnnotatorType, AnnotatorModel, DocumentAssembler, Finisher, RecursivePipeline, LightPipeline}
-import com.johnsnowlabs.nlp.annotators.{Stemmer, Tokenizer, Normalizer}
-import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
-import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
-import com.johnsnowlabs.nlp.annotators.common.NerTagged
-import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, NerApproach, Verbose}
+import com.johnsnowlabs.nlp.{DocumentAssembler, Finisher}
+import com.johnsnowlabs.nlp.annotators.{Tokenizer}
+import com.johnsnowlabs.nlp.annotators.ner.{NerConverter, Verbose}
 import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
 import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel, NerCrfApproach}
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, WordEmbeddingsModel}
+import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
+import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings}
 import com.johnsnowlabs.nlp.training.CoNLL
-import com.johnsnowlabs.nlp.util.io.{ExternalResource, ResourceHelper, ReadAs}
+import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs, ResourceHelper}
+
+import org.apache.spark.sql.{Dataset}
+import java.io.{File}
 
 import es.rcs.tfm.nlp.model.TfmType
 
-import java.io.{BufferedWriter, File, FileWriter}
-import java.util.List;
-
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{SparkSession, DataFrame, Row, Dataset}
-import org.apache.spark.sql.types.{StructType}
-import org.apache.spark.ml.{Pipeline, PipelineModel}
-import org.apache.spark.mllib.evaluation.MulticlassMetrics
-
-import scala.collection.{JavaConversions, JavaConverters}
-import scala.collection.mutable
-import scala.collection.mutable.WrappedArray
-import scala.util.matching.Regex
-
 object TfmHelper {
 
-  val DEBUG = false
-  def prepareData (
-      nerReader: CoNLL,
-      fileName: String
-  ): Dataset[_] = {
+	val DEBUG = false
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareData " + fileName)
+	val nerReader = CoNLL(explodeSentences = false)
 
-    val file = ExternalResource(
-        fileName,
-        ReadAs.TEXT,
-        Map.empty[String, String])
 
-    val data = nerReader.
-        readDataset(
-            ResourceHelper.spark,
-            file.path)
+	def prepareData (
+			nerReader: CoNLL,
+			fileName: String): Dataset[_] = {
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareData " + fileName)
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareData " + fileName)
 
-    data
+		val file = ExternalResource(
+				fileName,
+				ReadAs.TEXT,
+				Map.empty[String, String])
 
-  }
+		val data = nerReader.
+				readDataset(
+				ResourceHelper.spark,
+				file.path)
 
-  def prepareDocument (
-  ): DocumentAssembler = {
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareData " + fileName)
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareDocument ")
+		data
 
-    val document = new DocumentAssembler().
-    	//setCleanupMode("shrink") // disabled, inplace, inplace_full, shrink, shrink_full
-    	setInputCol(TfmType.TEXT).
-    	setOutputCol(TfmType.DOCUMENT)
+	}
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareDocument ")
 
-    document
+	def prepareDocument (): DocumentAssembler = {
 
-  }
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareDocument ")
 
-  def prepareSentence (
-      maxSentenceLength: Integer = 512
-  ): SentenceDetector = {
+		val document = new DocumentAssembler().
+				//setCleanupMode("shrink") // disabled, inplace, inplace_full, shrink, shrink_full
+				setInputCol(TfmType.TEXT).
+				setOutputCol(TfmType.DOCUMENT)
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareSentence ")
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareDocument ")
 
-    val sentence = new SentenceDetector().
-      setMaxLength(maxSentenceLength).
-    	setInputCols(Array(TfmType.DOCUMENT)).
-    	setOutputCol(TfmType.SENTENCES)
+		document
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareSentence ")
+	}
 
-    sentence
 
-  }
+	def prepareSentence (
+			maxSentenceLength: Integer = 512): SentenceDetector = {
 
-  def prepareToken (
-  ): Tokenizer = {
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareSentence ")
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareToken ")
+		val sentence = new SentenceDetector().
+				setMaxLength(maxSentenceLength).
+				setInputCols(Array(TfmType.DOCUMENT)).
+				setOutputCol(TfmType.SENTENCES)
 
-    val token = new Tokenizer().
-    	setInputCols(Array(TfmType.SENTENCES)).
-    	setOutputCol(TfmType.TOKEN)
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareSentence ")
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareToken ")
+		sentence
 
-    token
+	}
 
-  }
 
-  def preparePos (
-      posModelDirectory: String
-  ): PerceptronModel = {
+	def prepareToken (): Tokenizer = {
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN preparePos ")
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareToken ")
 
-    val pos = PerceptronModel.
-      load(posModelDirectory).
-    	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
-    	setOutputCol(TfmType.POS)
+		val token = new Tokenizer().
+				setInputCols(Array(TfmType.SENTENCES)).
+				setOutputCol(TfmType.TOKEN)
 
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   preparePos ")
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareToken ")
 
-    pos
+		token
 
-  }
+	}
 
-  def prepareBert (
-      bertModelDirectory: String,
-      maxSentenceLength: Integer = 512,
-      dimension: Integer = 768,
-      batchSize: Integer = 32
-  ): BertEmbeddings = {
 
-    // PREPARAR BERT
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareBert " + bertModelDirectory)
+	def preparePos (
+			modelDirectory: String): PerceptronModel = {
 
-    val embeddings = BertEmbeddings.
-      load(bertModelDirectory).
-      setDimension(dimension).
-      setMaxSentenceLength(maxSentenceLength).
-      setBatchSize(batchSize).
-      setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
-      setOutputCol(TfmType.WORD_EMBEDDINGS)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareBert " + bertModelDirectory)
-
-    embeddings
-
-  }
-
-  def prepareNerCrfApproach (
-      minEpochs: Int = 1,
-      maxEpochs: Int = 100,
-      l2: Float = 1f,
-      lossEps: Double = 1e-3,
-      c0: Int = 2250000,
-      minW: Double = 0.0
-  ): NerCrfApproach = {
-
-    // PREPARAR NerDLApproach
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNerDL")
-
-    val nerTagger =  new NerCrfApproach().
-      // setConfigProtoBytes(bytes). // ConfigProto from tensorflow, serialized into byte array
-      setRandomSeed(0). // Random seed
-      setMinEpochs(minEpochs). // Minimum number of epochs to train
-      setMaxEpochs(maxEpochs). // Maximum number of epochs to train
-      //setBatchSize(32). // Batch size
-
-      // ENTRENAMIENTO CRF
-      setL2(l2). // L2 regularization coefficient for CRF
-      setC0(c0). // c0 defines decay speed for gradient
-      setLossEps(lossEps). // If epoch relative improvement lass than this value, training is stopped
-      setMinW(minW). // Features with less weights than this value will be filtered out
-
-      // VALIDACIONES
-      //setDicts("").
-      //setExternalFeatures(path, delimiter, readAs, options): Path to file or folder of line separated file that has something like this: Volvo:ORG with such delimiter, readAs LINE_BY_LINE or SPARK_DATASET with options passed to the latter.
-      // MEDIDAS
-      // setEnableOutputLogs(true). // Whether to output to annotators log folder
-      // setEvaluationLogExtended(true). // Whether logs for validation to be extended: it displays time and evaluation of each label. Default is false.
-      setIncludeConfidence(true). // whether to include confidence scores in annotation metadata
-
-      // CONFIGURACION NERDLMODEL
-      // setUseContrib(false) // whether to use contrib LSTM Cells. Not compatible with Windows
-      // setVerbose(2). // Level of verbosity during training
-      //setEntities(Array("MUT-DNA", "MUT-PRO", "MUT_SNP")). // Entities to recognize
-      setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.POS, TfmType.WORD_EMBEDDINGS)).
-      setOutputCol(TfmType.NAMED_ENTITY).
-      setLabelColumn(TfmType.LABEL) // Column with label per each token
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerDL")
-
-    nerTagger
-
-  }
-
-  def prepareNerDL (
-      tfGraphDirectory: String,
-      maxEpochs: Int = 1,
-      lr: Float = 1e-3f,
-      po: Float = 5e-3f,
-      dropout: Float = 0.5f,
-      testDataset: String = null, 
-      validationSplit: Float = 0.20f,
-      batchSize: Int = 512
-  ): NerDLApproach = {
-
-    // PREPARAR NerDLApproach
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNerDL")
-
-    val nerTagger =  new NerDLApproach().
-      // CONFIGURACION TENSORFLOW
-      // setConfigProtoBytes(bytes). // ConfigProto from tensorflow, serialized into byte array
-      // setGraphFolder(path). // Folder path that contain external graph files
-      setRandomSeed(0). // Random seed
-      setMinEpochs(1). // Minimum number of epochs to train
-      setMaxEpochs(maxEpochs). // Maximum number of epochs to train
-      setBatchSize(batchSize). // Batch size
-
-      // ENTRENAMIENTO TENSORFLOW
-      setLr(lr). // Learning Rate
-      setPo(po). // Learning rate decay coefficient. Real Learning Rage = lr / (1 + po * epoch)
-      setDropout(dropout). // Dropout coefficient
-      setGraphFolder(tfGraphDirectory).
-
-      // VALIDACIONES
-      // setValidationSplit(validationSplit). //Choose the proportion of training dataset to be validated against the model on each Epoch. The value should be between 0.0 and 1.0 and by default it is 0.0 and off.
-      setIncludeConfidence(true). // whether to include confidence scores in annotation metadata
-      // setTestDataset("tmvar.test"). // Path to test dataset. If set used to calculate statistic on it during training.
-      //setTestDataset("/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/" + testDataSet).
-      setValidationSplit(validationSplit). //Si no hay conjunto de test, divide el de entrenamiento
-      setTestDataset(testDataset).
-
-      // MEDIDAS
-      setEnableOutputLogs(true). // Whether to output to annotators log folder
-      setEvaluationLogExtended(true). // Whether logs for validation to be extended: it displays time and evaluation of each label. Default is false.
-      setIncludeConfidence(true). // whether to include confidence scores in annotation metadata"
-
-      // CONFIGURACION NERDLMODEL
-      // setUseContrib(false) // whether to use contrib LSTM Cells. Not compatible with Windows
-      setVerbose(Verbose.All). // Level of verbosity during training
-      //setEntities(Array("MUT-DNA", "MUT-PRO", "MUT_SNP")). // Entities to recognize
-      setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
-      setOutputCol(TfmType.NAMED_ENTITY).
-      setLabelColumn(TfmType.LABEL) // Column with label per each token
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerDL")
-
-    nerTagger
-
-  }
-
-  def prepareMeasureNerPipeline (
-    nerTagger: AnnotatorModel[_],
-    data: Dataset[_]
-  ) : PipelineModel = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareMeasureNerPipeline")
-    
-    val converterLabel = new NerConverter().
-        setInputCols(TfmType.SENTENCES, TfmType.TOKEN, TfmType.LABEL).
-        setOutputCol(TfmType.CONVERTER_LABEL)
-
-    val converterNer = new NerConverter().
-        setInputCols(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY). // BUG
-        setOutputCol(TfmType.CONVERTER_NAMED_ENTITY)
-
-    val finisher = new Finisher().
-        setInputCols(
-            TfmType.DOCUMENT, 
-            TfmType.SENTENCES, 
-            TfmType.TOKEN, 
-            TfmType.POS, 
-            TfmType.WORD_EMBEDDINGS, 
-            TfmType.NAMED_ENTITY,
-            TfmType.CONVERTER_NAMED_ENTITY,
-            TfmType.LABEL,
-            TfmType.CONVERTER_LABEL).
-        setIncludeMetadata(true).
-        setCleanAnnotations(false)
-
-    //import spark.implicits._
-    import data.sparkSession.implicits._ // for row casting
-    val stages = Array(
-        nerTagger,
-        converterLabel,
-        converterNer,
-        finisher
-    )
-
-    val trainPipeline = new RecursivePipeline().setStages(stages)
-    val model = trainPipeline.fit(data)
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareMeasureNerPipeline")
-
-    model
-
-}  
-  def saveModel[_](
-      model: AnnotatorModel[_],
-      modelDirectory: String
-  ): AnnotatorModel[_] = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN saveModel")
-
-    model.
-      write.
-      overwrite.
-      save(modelDirectory)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   saveModel")
-
-    model
-
-  }
-
-  def saveParquetDataSet (
-      data: DataFrame,
-      dataDirectory: String = "CONLL-eng.tmp.parquet" 
-  ): Unit = {
-
-    // PREPARAR DATOS DE VALIDACION PARA NerDLApproach
-
-    if (DEBUG) println(java.time.LocalTime.now + ": NER-TRAIN: BEGIN preparsaveParquetDataSeteTestDataSet")
-
-    data.
-        write.
-        mode("overwrite").
-        format("parquet").
-        save(dataDirectory)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": NER-TRAIN: END   saveParquetDataSet")
-
-  }
-  
-  def saveDLModel(
-      model: PipelineModel,
-      nerDirectory: String
-  ): NerDLModel = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN saveDLModel")
-
-    // GUARDAR EL MODELO
-    val ner = model.
-        stages.
-        filter(s => s.isInstanceOf[NerDLModel]).
-        head.
-        asInstanceOf[NerDLModel]
-
-    saveModel(ner, nerDirectory)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   saveDLModel")
-
-    ner
-
-  }
-
-  def saveCrfModel(
-      model: PipelineModel,
-      nerDirectory: String
-  ): NerCrfModel = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN saveCRFModel")
-
-    // GUARDAR EL MODELO
-    val ner = model.
-        stages.
-        filter(s => s.isInstanceOf[NerCrfModel]).
-        head.
-        asInstanceOf[NerCrfModel]
-
-    saveModel(ner, nerDirectory)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   saveCRFModel")
-
-    ner
-
-  }
-
-  /**
-    * Print top n Named Entity annotations
-    */
-  def print(
-      annotations: Seq[Annotation],
-      n: Int
-  ): Unit = {
-
-    for (a <- annotations.take(n)) {
-      System.out.println(s"${a.begin}, ${a.end}, ${a.result}, ${a.metadata("text")}")
-    }
-
-  }
-
-  /**
-    * Saves ner results to csv file
-    * @param annotations
-    * @param file
-    */
-  def saveNerSpanTags(
-      annotations: Array[Array[Annotation]],
-      targetFile: String,
-      sep: String = "\t",
-      header: Boolean = false
-  ): Unit = {
-
-    val bw = new BufferedWriter(new FileWriter(new File(targetFile)))
-
-    if (header) bw.write(s"start${sep}end${sep}tag${sep}text\n")
-    for (i <- 0 until annotations.length) {
-      for (a <- annotations(i))
-        bw.write(s"${a.begin}${sep}${a.end}${sep}${a.result}${sep}${a.metadata("entity").replace("\n", " ")}\n")
-    }
-
-    bw.close()
-
-  }
-
-  // https://fullstackml.com/2015/12/21/how-to-export-data-frame-from-apache-spark/
-  def saveDsToCsvInDatabricks(
-      ds: Dataset[_],
-      targetFile: String,
-      sep: String = ",",
-      header: Boolean = false): Unit = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN saveDsToCsvInDatabricks")
-
-    val tmpParquetDir = "saveDsToCsv.tmp.parquet"
-
-    ds.
-      // repartition(1).
-      write.
-      mode("overwrite").
-      format("com.databricks.spark.csv").
-      option("header", header.toString).
-      option("delimiter", sep).
-      save(tmpParquetDir)
-
-    val dir = new File(tmpParquetDir)
-    dir.listFiles.foreach(f => {
-      if (f.getName().startsWith("part-00000")) {
-        f.renameTo(new File(targetFile))
-      } else {
-        f.delete
-      }
-    })
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   saveDsToCsvInDatabricks")
-
-    dir.delete
-
-  }
-
-  // https://fullstackml.com/2015/12/21/how-to-export-data-frame-from-apache-spark/
-  def saveDsToCsv(
-      ds: Dataset[_],
-      targetFile: String,
-      sep: String = ",",
-      header: Boolean = false): Unit = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN saveDsToCsv")
-
-    ds.
-      // repartition(1).
-      write.
-      mode("overwrite").
-      format("csv").
-      option("header", header.toString).
-      option("delimiter", sep).
-      option("nullValue", "").
-      option("emptyValue", "").
-      save(targetFile)
-
-  }
-
-  def calcStat(
-    correct: Int,
-    predicted: Int,
-    predictedCorrect: Int
-  ): (Float, Float, Float) = {
-
-    // prec = (predicted & correct) / predicted
-    // rec = (predicted & correct) / correct
-    val prec = predictedCorrect.toFloat / predicted
-    val rec = predictedCorrect.toFloat / correct
-    val f1 = 2 * prec * rec / (prec + rec)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   saveDsToCsv")
-
-    (prec, rec, f1)
-
-  }
-
-  def measure(
-    result: Dataset[_]
-  ): Unit = {
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN measure")
-    
-    val rows = result.select(TfmType.CONVERTER_NAMED_ENTITY, TfmType.CONVERTER_LABEL).collect()
-
-    val correctPredicted = mutable.Map[String, Int]()
-    val predicted = mutable.Map[String, Int]()
-    val correct = mutable.Map[String, Int]()
-    var toPrintErrors = 0
-
-    for (row <- rows) {
-
-        val predictions = NerTagged.getAnnotations(row, 0).filter(a => a.result != "O")
-        for (p <- predictions) {
-            val tag = p.metadata("entity")
-            predicted(tag) = predicted.getOrElse(tag, 0) + 1
-        }
-
-        val labels = NerTagged.getAnnotations(row, 1).filter(a => a.result != "O")
-        for (l <- labels) {
-            val tag = l.metadata("entity")
-            correct(tag) = correct.getOrElse(tag, 0) + 1
-        }
-
-        val correctPredictions = labels.toSet.intersect(predictions.toSet)
-        for (a <- correctPredictions) {
-            val tag = a.metadata("entity")
-            correctPredicted(tag) = correctPredicted.getOrElse(tag, 0) + 1
-        }
-
-        if (toPrintErrors > 0) {
-
-            for (p <- predictions) {
-                if (toPrintErrors > 0 && !correctPredictions.contains(p)) {
-                    System.out.println(s"Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
-                    toPrintErrors -= 1
-                }
-            }
-
-            for (p <- labels) {
-                if (toPrintErrors > 0 && !correctPredictions.contains(p)) {
-                    System.out.println(s"Correct\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
-                    toPrintErrors -= 1
-                }
-            }
-
-        }
-    }
-
-    val (prec, rec, f1) = calcStat(correct.values.sum, predicted.values.sum, correctPredicted.values.sum)
-    System.out.println(s"\tprec\t\trec\t\tf1")
-    System.out.println(s"\t$prec\t$rec\t$f1")
-
-    val keys = (correct.keys ++ predicted.keys ++ correctPredicted.keys).toList.distinct
-    for (key <- keys) {
-        val (prec, rec, f1) = calcStat(correct.getOrElse(key, 0), predicted.getOrElse(key, 0), correctPredicted.getOrElse(key, 0))
-        System.out.println(s"$key\t$prec\t$rec\t$f1")
-    }
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   measure")
-
-  }
-  
-  def measureDL(
-    ner: NerDLModel,
-    data: Dataset[_]
-  ): Unit = {
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN measureDL")
-    
-    val model = prepareMeasureNerPipeline(ner, data)
-    val result = model.transform(data)
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   measureDL")
-    
-    measure(result)
-
-    // ESTADISTICAS DEL CONJUNTO DE ENTRENAMIENTO
-    val labeledData = NerTagged.
-        collectTrainingInstances(
-            result,
-            Seq(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS),
-            TfmType.LABEL)
-
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: measureNerModel")
-    
-    ner.getModelIfNotSet.measure(labeledData, (s: String) => System.out.println(s), true, 0)
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: measureNerModel")
-
-  }
-
-  def measureCRF(
-      ner: NerCrfModel,
-      data: Dataset[_]
-  ): Unit = {
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN measureCRF")
-    
-    val model = prepareMeasureNerPipeline(ner, data)
-    val result = model.transform(data)
-    
-    if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   measureCRF")
-    
-    measure(result)
-  }
-
-  /*
-  def measurePredictionsAndLabels(
-      data: Dataset[_]
-  ): Unit = {
-    
-    // Compute raw scores on the test set
-    import data.sparkSession.implicits._ // for row casting
-    val predictionAndLabels = data.
-      select (TfmType.NAMED_ENTITY, TfmType.LABEL).
-      map { row =>
-        val prediction = row.getAs[String](TfmType.NAMED_ENTITY)
-        val label = row.getAs[String](TfmType.LABEL)
-        (prediction, label)
-      }
-    
-    // Instantiate metrics object
-    val metrics = new MulticlassMetrics(predictionAndLabels)
-    
-    // Confusion matrix
-    println("Confusion matrix:")
-    println(metrics.confusionMatrix)
-    
-    // Overall Statistics
-    val accuracy = metrics.accuracy
-    println("Summary Statistics")
-    println(s"Accuracy = $accuracy")
-    
-    // Precision by label
-    val labels = metrics.labels
-    labels.foreach { l =>
-      println(s"Precision($l) = " + metrics.precision(l))
-    }
-    
-    // Recall by label
-    labels.foreach { l =>
-      println(s"Recall($l) = " + metrics.recall(l))
-    }
-    
-    // False positive rate by label
-    labels.foreach { l =>
-      println(s"FPR($l) = " + metrics.falsePositiveRate(l))
-    }
-    
-    // F-measure by label
-    labels.foreach { l =>
-      println(s"F1-Score($l) = " + metrics.fMeasure(l))
-    }
-    
-    // Weighted stats
-    println(s"Weighted precision: ${metrics.weightedPrecision}")
-    println(s"Weighted recall: ${metrics.weightedRecall}")
-    println(s"Weighted F1 score: ${metrics.weightedFMeasure}")
-    println(s"Weighted false positive rate: ${metrics.weightedFalsePositiveRate}")
-    
-  }
-   */
-  
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN preparePos " + modelDirectory)
+
+		val pos = PerceptronModel.
+				load(modelDirectory).
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
+				setOutputCol(TfmType.POS)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   preparePos " + modelDirectory)
+
+		pos
+
+	}
+
+
+	def prepareBert (
+			modelDirectory: String,
+			maxSentenceLength: Integer = 512,
+			dimension: Integer = 768,
+			caseSensitive: Boolean = false,
+			batchSize: Integer = 32): BertEmbeddings = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareBert " + modelDirectory)
+
+		val embeddings = BertEmbeddings.
+				load(modelDirectory).
+				setDimension(dimension).
+				setMaxSentenceLength(maxSentenceLength).
+				setBatchSize(batchSize).
+				setCaseSensitive(caseSensitive).
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
+				setOutputCol(TfmType.WORD_EMBEDDINGS)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareBert " + modelDirectory)
+
+		embeddings
+
+	}
+
+
+	def prepareNerCrfApproach (
+			minEpochs: Int = 1,
+			maxEpochs: Int = 100,
+			l2: Float = 1f,
+			lossEps: Double = 1e-3,
+			c0: Int = 2250000,
+			minW: Double = 0.0): NerCrfApproach = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNerDL")
+
+		val nerTagger =  new NerCrfApproach().
+
+				// CONFIGURACION TENSORFLOW
+				// setConfigProtoBytes(bytes). // ConfigProto from tensorflow, serialized into byte array
+				// setGraphFolder(path). // Folder path that contain external graph files
+				setRandomSeed(0). // Random seed
+				setMinEpochs(minEpochs). // Minimum number of epochs to train
+				setMaxEpochs(maxEpochs). // Maximum number of epochs to train
+				//setBatchSize(32). // Batch size
+
+				// ENTRENAMIENTO CRF
+				setL2(l2). // L2 regularization coefficient for CRF
+				setC0(c0). // c0 defines decay speed for gradient
+				setLossEps(lossEps). // If epoch relative improvement lass than this value, training is stopped
+				setMinW(minW). // Features with less weights than this value will be filtered out
+
+				// VALIDACIONES
+				//setDicts("").
+				//setExternalFeatures(path, delimiter, readAs, options): Path to file or folder of line separated file that has something like this: Volvo:ORG with such delimiter, readAs LINE_BY_LINE or SPARK_DATASET with options passed to the latter.
+				// MEDIDAS
+				// setEnableOutputLogs(true). // Whether to output to annotators log folder
+				// setEvaluationLogExtended(true). // Whether logs for validation to be extended: it displays time and evaluation of each label. Default is false.
+				setIncludeConfidence(true). // whether to include confidence scores in annotation metadata
+
+				// CONFIGURACION NERDLMODEL
+				// setUseContrib(false) // whether to use contrib LSTM Cells. Not compatible with Windows
+				// setVerbose(2). // Level of verbosity during training
+				//setEntities(Array("MUT-DNA", "MUT-PRO", "MUT_SNP")). // Entities to recognize
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.POS, TfmType.WORD_EMBEDDINGS)).
+				setOutputCol(TfmType.NAMED_ENTITY).
+				setLabelColumn(TfmType.LABEL) // Column with label per each token
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerDL")
+
+		nerTagger
+
+	}
+
+
+	def prepareNerDLApproach (
+			testDataset: String,
+			tfGraphDirectory: String,
+			minEpochs: Int = 1,
+			maxEpochs: Int = 1,
+			lr: Float = 1e-3f,
+			po: Float = 5e-3f,
+			dropout: Float = 0.5f,
+			validationSplit: Float = 0.20f,
+			batchSize: Int = 512): NerDLApproach = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNerDL")
+
+		val nerTagger = new NerDLApproach().
+
+				// CONFIGURACION TENSORFLOW
+				// setConfigProtoBytes(bytes). // ConfigProto from tensorflow, serialized into byte array
+				// setGraphFolder(path). // Folder path that contain external graph files
+				setRandomSeed(0). // Random seed
+				setMinEpochs(minEpochs). // Minimum number of epochs to train
+				setMaxEpochs(maxEpochs). // Maximum number of epochs to train
+				setBatchSize(batchSize). // Batch size
+
+				// ENTRENAMIENTO TENSORFLOW
+				setLr(lr). // Learning Rate
+				setPo(po). // Learning rate decay coefficient. Real Learning Rage = lr / (1 + po * epoch)
+				setDropout(dropout). // Dropout coefficient
+				setGraphFolder(tfGraphDirectory).
+
+				// VALIDACIONES
+				// setValidationSplit(validationSplit). //Choose the proportion of training dataset to be validated against the model on each Epoch. The value should be between 0.0 and 1.0 and by default it is 0.0 and off.
+				setIncludeConfidence(true). // whether to include confidence scores in annotation metadata
+				// setTestDataset("tmvar.test"). // Path to test dataset. If set used to calculate statistic on it during training.
+				//setTestDataset("/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/" + testDataSet).
+				setValidationSplit(validationSplit). //Si no hay conjunto de test, divide el de entrenamiento
+
+				// MEDIDAS
+				setEnableOutputLogs(true). // Whether to output to annotators log folder
+				setEvaluationLogExtended(true). // Whether logs for validation to be extended: it displays time and evaluation of each label. Default is false.
+				setIncludeConfidence(true). // whether to include confidence scores in annotation metadata"
+
+				// CONFIGURACION NERDLMODEL
+				// setUseContrib(false) // whether to use contrib LSTM Cells. Not compatible with Windows
+				setVerbose(Verbose.All). // Level of verbosity during training
+				//setEntities(Array("MUT-DNA", "MUT-PRO", "MUT_SNP")). // Entities to recognize
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
+				setOutputCol(TfmType.NAMED_ENTITY).
+				setLabelColumn(TfmType.LABEL) // Column with label per each token
+
+		if (testDataset != null) nerTagger.setTestDataset(testDataset)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerDL")
+
+		nerTagger
+
+	}
+
+
+	def prepareNer (
+			modelDirectory: String) : NerDLModel = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNer " + modelDirectory)
+
+		val ner = NerDLModel.
+				//pretrained(TfmType.PRETRAINED_NER_BERT).
+				load(modelDirectory).
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
+				setOutputCol(TfmType.NAMED_ENTITY)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNer " + modelDirectory)
+
+		ner
+
+	}
+
+
+	def prepareNerConverter (): NerConverter = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareNerConverter ")
+
+		val converterNer = new NerConverter().
+				setInputCols(TfmType.SENTENCES, TfmType.TOKEN, TfmType.NAMED_ENTITY). // BUG
+				setOutputCol(TfmType.CONVERTER_NAMED_ENTITY)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerConverter ")
+
+		converterNer
+
+	}
+
+
+	def prepareLabelConverter (): NerConverter = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareLabelConverter ")
+
+		val converterLabel = new NerConverter().
+				setInputCols(TfmType.SENTENCES, TfmType.TOKEN, TfmType.LABEL). // BUG
+				setOutputCol(TfmType.CONVERTER_LABEL)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareLabelConverter ")
+
+		converterLabel
+
+	}
+
+
+	def prepareProductionFinisher (): Finisher = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareProductionFinisher ")
+
+		val finisher = new Finisher().
+				setInputCols(Array(
+						TfmType.DOCUMENT,
+						TfmType.SENTENCES,
+						TfmType.TOKEN,
+						//TfmType.STEM,
+						//TfmType.NORMAL,
+						TfmType.POS,
+						TfmType.WORD_EMBEDDINGS,
+						TfmType.NAMED_ENTITY,
+						TfmType.CONVERTER_NAMED_ENTITY)).
+				setIncludeMetadata(true).
+				setCleanAnnotations(false)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareProductionFinisher ")
+
+		finisher
+
+	}
+
+
+	def productionPipelineStages(
+			posModelDirectory: String,
+			bertModelDirectory: String,
+			nerModelDirectory: String,
+			maxSentenceLength: Integer = 512,
+			bertDimension: Integer = 768,
+			bertCaseSensitive: Boolean = false,
+			bertBatchSize: Integer = 32) = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN productionPipelineStages ")
+
+		val stages = Array(
+				prepareDocument(),
+				prepareSentence(
+						maxSentenceLength),
+				prepareToken(),
+				// stemmer,
+				// normalizer,
+				preparePos(
+						posModelDirectory),
+				prepareBert(
+						bertModelDirectory,
+						maxSentenceLength,
+						bertDimension,
+						bertCaseSensitive,
+						bertBatchSize),
+				prepareNer(
+				nerModelDirectory),
+				prepareNerConverter(),
+				prepareProductionFinisher())
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   productionPipelineStages ")
+
+		stages
+
+	}
+
+
+	def prepareTrainFinisher (): Finisher = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareTrainFinisher ")
+
+		val finisher = new Finisher().
+				setInputCols(Array(
+						TfmType.DOCUMENT,
+						TfmType.SENTENCES,
+						TfmType.TOKEN,
+						//TfmType.STEM,
+						//TfmType.NORMAL,
+						TfmType.POS,
+						TfmType.WORD_EMBEDDINGS,
+						TfmType.NAMED_ENTITY,
+						TfmType.CONVERTER_NAMED_ENTITY,
+						TfmType.LABEL,
+						TfmType.CONVERTER_LABEL)).
+				setIncludeMetadata(true).
+				setCleanAnnotations(false)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareTrainFinisher ")
+
+		finisher
+
+	}
+
+
+	def trainPipelineFromStages(
+			conllTrainDirectory: String,
+			bertModelDirectory: String,
+			nerTfGraphDirectory: String,
+			bertMaxSentenceLength: Integer = 512,
+			bertDimension: Integer = 768,
+			bertCaseSensitive: Boolean = false,
+			bertBatchSize: Integer = 32,
+			nerTfMinEpochs: Int = 1,
+			nerTfMaxEpochs: Int = 1,
+			nerTfLr: Float = 1e-3f,
+			nerTfPo: Float = 5e-3f,
+			nerTfDropOut: Float = 0.5f,
+			nerTfValidationSplit: Float = 0.20f,
+			nerTfBatchSize: Integer = 32) = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN trainPipelineStages ")
+
+		val d = new File(conllTrainDirectory)
+		if (d.exists && d.isDirectory) {
+
+			val embeddings = TfmHelper.prepareBert(
+					bertModelDirectory,
+					bertMaxSentenceLength,
+					bertDimension,
+					bertCaseSensitive,
+					bertBatchSize)
+
+			var trainData: Dataset[_] = d.
+					listFiles.
+					filter(_.isFile).
+					filter(_.getName().toUpperCase().endsWith("CONLL")).
+					map(f => prepareData(nerReader, f.getAbsolutePath()).asInstanceOf[Dataset[Any]]).
+					reduce(_ union _)
+
+			trainData.coalesce(1)
+
+			val trainDataEmbeddings = embeddings.transform(trainData)
+
+			val nerTagger = TfmHelper.prepareNerDLApproach(
+					null,
+					nerTfGraphDirectory,
+					nerTfMinEpochs,
+					nerTfMaxEpochs,
+					nerTfLr,
+					nerTfPo,
+					nerTfDropOut,
+					nerTfValidationSplit,
+					nerTfBatchSize)
+
+			val nerTrained = nerTagger.fit(trainDataEmbeddings)
+
+			val stages = Array(
+					nerTrained,
+					prepareNerConverter(),
+					prepareLabelConverter(),
+					prepareTrainFinisher())
+
+		} else {
+
+			if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: ERROR trainPipelineStages ")
+
+		}
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   trainPipelineStages ")
+
+	}
+
 }
