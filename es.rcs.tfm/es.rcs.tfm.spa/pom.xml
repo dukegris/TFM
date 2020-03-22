@@ -84,7 +84,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg line="/c &quot;C:\Users\dukeg\AppData\Roaming\npm\ng.cmd build&quot;" />
+									<arg line="/c &quot;c:\Java\nodejs-12.16.1\ng.cmd build&quot;" />
 								</exec>
 								<exec	executable="ng" 
 										dir="${project.basedir}"
