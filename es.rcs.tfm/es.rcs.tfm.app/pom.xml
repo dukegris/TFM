@@ -64,6 +64,24 @@
 			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-BioC</artifactId>
+			<version>${tfm.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-PubMed</artifactId>
+			<version>${tfm.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-MESH_Descriptors</artifactId>
+			<version>${tfm.version}</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 J2EE

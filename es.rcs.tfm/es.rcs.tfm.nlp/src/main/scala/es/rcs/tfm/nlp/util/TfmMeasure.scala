@@ -1,7 +1,7 @@
 package es.rcs.tfm.nlp.util
 
 import com.johnsnowlabs.nlp.annotators.common.NerTagged
-import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel}
+import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
 import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel}
 
 import org.apache.spark.sql.{Dataset}
@@ -32,6 +32,71 @@ object TfmMeasure {
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-MEASURE: END   calcStat")
 
 		(prec, rec, f1)
+
+	}
+
+
+	def measureDL(
+			nerApproach: NerDLApproach,
+			nerTagger: NerDLModel,
+			data: Dataset[_],
+			extended: Boolean = true,
+			errorsToPrint: Int = 0): Unit = {
+
+		println(java.time.LocalTime.now + ": TFM-MEASURE: BEGIN measureDL")
+
+		// Nos hace falta un grafo para con mas tags al incluir B-, I-, E- para cada mutacion 4
+		// Tenemos 14 4x3 + O + ""
+		val instances = NerTagged.collectTrainingInstances(
+				data.toDF(), 
+				Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS), TfmType.LABEL)
+		val labels = instances.
+			flatMap(r => r._1.labels).distinct
+
+		val sentences = instances.
+			map(r => r._2)
+
+		// Tenemos 768 dimensiones (procede del modelo BERT
+		val dims = nerApproach.calculateEmbeddingsDim(sentences)
+
+		// Tenemos 88 caracteres diferentes
+		val chars = instances.
+			flatMap(r => r._2.
+				tokens.
+				flatMap(token => token.token.toCharArray)).
+			distinct
+
+		println("TAGS: " + labels.length)
+		println("SENTENCES: " + sentences.length)
+		println("DIMS: " + dims)
+		println("CHARS: " + chars.length)
+
+		val nerTF = nerTagger.getModelIfNotSet
+		nerTF.measure(instances, (s: String) => System.out.println(s), extended, errorsToPrint)
+
+		println(java.time.LocalTime.now + ": TFM-MEASURE: END   measureDL")
+
+	}
+
+
+	def measureTagsDL(
+			nerTagger: NerDLModel,
+			data: Dataset[_],
+			errorsToPrint: Int = 0): Unit = {
+
+		println(java.time.LocalTime.now + ": TFM-MEASURE: BEGIN measureTagsDL")
+
+		val nerTransform = nerTagger.transform(data)
+		val nerTagsConverted = TfmHelper.
+				prepareNerConverter().
+				transform(nerTransform)
+		val result = TfmHelper.
+				prepareLabelConverter().
+				transform(nerTagsConverted)
+
+		TfmMeasure.measure(result, errorsToPrint)
+
+		println(java.time.LocalTime.now + ": TFM-MEASURE: END   measureTagsDL")
 
 	}
 
@@ -106,7 +171,6 @@ object TfmMeasure {
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-MEASURE: END   measure")
 
 	}
-
 
 	/*
 	def measurePredictionsAndLabels(

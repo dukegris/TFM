@@ -17,15 +17,17 @@ print(sys.path)
 import create_models
 
 # %%
-if __name__ == "__main__":
-	# %%
+if __name__ == '__main__':
 	# Create Graph
 
-	CORPUS_PATH="/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/"
-	MODEL_PATH=CORPUS_PATH + "models/"
-	BERT_MODEL_PATH=MODEL_PATH + 'tensorflow/'
+	TF_PATH='/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow/'
 
 	# create_graph(BERT_PATH, True, 16, 1024, 128)
-	create_models.create_graph(BERT_MODEL_PATH, 16, 1024, 128, 128)
-	create_models.create_graph(BERT_MODEL_PATH, 16,  768, 128, 128)
-	create_models.create_graph(BERT_MODEL_PATH, 14, 1024,  62, 128)
+	#create_models.create_graph(TF_PATH, 16, 1024, 128, 128)
+	#create_models.create_graph(TF_PATH, 16,  768, 128, 128)
+	#create_models.create_graph(TF_PATH, 14, 1024,  62, 128)
+	#create_models.create_graph(TF_PATH, 7,  768,   87, 128)
+	create_models.create_graph(TF_PATH, 7,  768,   88, 128)
+
+
+# %%

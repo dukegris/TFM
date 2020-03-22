@@ -1,10 +1,7 @@
 package es.rcs.tfm.srv.services.train;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,258 +29,211 @@ public class TrainService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrainService.class);
 
-	private @Value("${tfm.model.pos.directory}")				String POS_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
-	private @Value("${tfm.model.bert.directory}")				String BERT_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
-	private @Value("${tfm.model.ner.directory}")				String NER_DIRECTORY =						"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
-	private @Value("${tfm.model.tensorflow.directory}")			String TENSORFLOW_DIRECTORY =				"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow";
-
-	private @Value("${tfm.conll2003.in.model.pos}")				String CONLL2003_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
-	private @Value("${tfm.conll2003.in.model.bert}")			String CONLL2003_IN_BERT_MODEL =			"bert_base_cased_en_2.2.0_2.4_1566671427398";
-	private @Value("${tfm.conll2003.in.model.ner}")				String CONLL2003_IN_NER_MODEL =				"ner_dl_bert_base_cased_en_2.2.0_2.4_1567854461249";
-	private @Value("${tfm.mutations.in.train.pubtator}")		String MUTATIONS_PUBTATOR_TRAIN_DATASET =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.PubTator.txt";
-	private @Value("${tfm.mutations.in.test.pubtator}")			String MUTATIONS_PUBTATOR_TEST_DATASET =	"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.PubTator.txt";
-	private @Value("${tfm.mutations.in.train.bioc}")			String MUTATIONS_BIOC_TRAIN_DATASET =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.BioC.xml";
-	private @Value("${tfm.mutations.in.test.bioc}")				String MUTATIONS_BIOC_TEST_DATASET =		"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.BioC.xml";
+	@Value("${tfm.model.pos.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos}")				
+	private String POS_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
 	
-	private @Value("${tfm.conll2003.out.directory}")			String CONLL2003_OUT_DIRECTORY =			"/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/ner";
-	private @Value("${tfm.conll2003.out.mantain-iob}")			Boolean CONLL2003_OUT_MANTAIN_IOB =			false;
-	private @Value("${tfm.mutations.out.train.pubtator.conll}")	String MUTATIONS_PUBTATOR_TRAIN_CONLL =		"mutations_pubtator_train.conll";
-	private @Value("${tfm.mutations.out.test.pubtator.conll}")	String MUTATIONS_PUBTATOR_TEST_CONLL =		"mutations_pubtator_test.conll";
-	private @Value("${tfm.mutations.out.train.bioc.conll}")		String MUTATIONS_BIOC_TRAIN_CONLL =			"mutations_bioc_train.conll";
-	private @Value("${tfm.mutations.out.test.bioc.conll}")		String MUTATIONS_BIOC_TEST_CONLL =			"mutations_bioc_train.conll";
+	@Value("${tfm.model.bert.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert}")
+	String BERT_DIRECTORY =           "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
 	
-	private @Value("${tfm.mutations.in.model.pos}")				String MUTATIONS_IN_POS_MODEL =				"pos_anc_en_2.0.2_2.4_1556659930154";
-	private @Value("${tfm.mutations.in.model.bert}")			String MUTATIONS_IN_BERT_MODEL =			"uncased_L-24_H-1024_A-16_M-128_B-32";
-	private @Value("${tfm.mutations.out.pubtator.model.ner}")	String MUTATIONS_FROM_PUBTATOR_NER_MODEL =	"tfm_ner_pubtator_1.0.0-uncased_L-24_H-1024_A-16_M-128_B-32";
-	private @Value("${tfm.mutations.out.bioc.model.ner}")		String MUTATIONS_FROM_BIOC_NER_MODEL =		"tfm_ner_bioc_1.0.0_uncased_L-24_H-1024_A-16_M-128_B-32";
+	@Value("${tfm.model.ner.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner}")
+	private String NER_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
 
-	public void trainModel(SparkSession spark) {
+	@Value("${tfm.model.tensorflow.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow}")
+	private String TENSORFLOW_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow";
+
+	@Value("${tfm.dataset.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets}")
+	private String DATASET_DIRECTORY = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets";
+	
+	@Value("${tfm.conll2003.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll}")		
+	String CONLL_DIRECTORY =         "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll";
+	
+	@Value("${tfm.conll2003.in.model.pos:pos_anc_en_2.0.2_2.4_1556659930154}")				
+	private String CONLL2003_IN_POS_MODEL = "pos_anc_en_2.0.2_2.4_1556659930154";
+
+	@Value("${tfm.conll2003.in.model.bert:bert_large_cased_en_2.4.0_2.4_1580580251298}")			
+	private String CONLL2003_IN_BERT_MODEL = "bert_large_cased_en_2.4.0_2.4_1580580251298";
+	
+	@Value("${tfm.conll2003.in.model.bert.MaxSentenceLength:512}")				
+	private Integer CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT = 512;
+	
+	@Value("${tfm.conll2003.in.model.bert.Dimension:1024}")				
+	private Integer CONLL2003_IN_BERT_DIMENSION = 1024;
+	
+	@Value("${tfm.conll2003.in.model.bert.CaseSensitive:true}")				
+	private Boolean CONLL2003_IN_BERT_CASE_SENSITIVE = true;
+	
+	@Value("${tfm.conll2003.in.model.bert.BatchSize:32}")				
+	private Integer CONLL2003_IN_BERT_BATCH_SIZE = 32;
+	
+	@Value("${tfm.conll2003.in.model.bert.PoolingLayer:-1}")				
+	private Integer CONLL2003_IN_BERT_POOLING_LAYER = -1;
+
+	@Value("${tfm.conll2003.in.model.ner:tfm_ner_english_M-512_B-256_bert_large_uncased_en}")				
+	private String CONLL2003_IN_NER_MODEL = "tfm_ner_english_M-512_B-256_bert_large_uncased_en";
+	
+	@Value("${tfm.train.ner.model:tfm_ner_mutations_M-512_B-256_bert_large_uncased_en}")				
+	private String TRAIN_NER_MODEL = "tfm_ner_mutations_M-512_B-256_bert_large_uncased_en";
+
+	@Value("${tfm.train.ner.MinEpochs:1}")				
+	private Integer TRAIN_NER_MIN_EPOCHS = 1;
+
+	@Value("${tfm.train.ner.MaxEpochs:1}")				
+	private Integer TRAIN_NER_MAX_EPOCHS = 1;
 		
-		trainModel(
-				spark,
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TRAIN_CONLL), 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TEST_CONLL), 
-				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_PUBTATOR_NER_MODEL),
-				MUTATIONS_IN_POS_MODEL,
-				MUTATIONS_IN_BERT_MODEL,
-				TENSORFLOW_DIRECTORY);
+	@Value("${tfm.train.ner.Lr:0.003}")				
+	private Float TRAIN_NER_LR = 0.003f;
+	
+	@Value("${tfm.train.ner.Po:0.005}")				
+	private Float TRAIN_NER_PO = 0.005f;
+	
+	@Value("${tfm.train.ner.DropOut:32}")				
+	private Float TRAIN_NER_DROPOUT = 0.5f;
+
+	@Value("${tfm.train.ner.ValidationSplit:0.2}")				
+	private Float TRAIN_NER_VALIDATION_SPLIT = 0.2f;
+	
+	@Value("${tfm.train.ner.BatchSize:32}")				
+	private Integer TRAIN_NER_BATCH_SIZE = 32;
+
+	public boolean testPrepareConll(
+			String inFileName, 
+			String outFileName, 
+			String posModelDirectoryName, 
+			String bertModelDirectoryName, 
+			String nerModelDirectoryName) {
+
+		if (	StringUtils.isBlank(inFileName)) return false;
+		if (	StringUtils.isBlank(outFileName)) return false;
+		if (	StringUtils.isBlank(posModelDirectoryName)) return false;
+		if (	StringUtils.isBlank(bertModelDirectoryName)) return false;
+		if (	StringUtils.isBlank(nerModelDirectoryName)) return false;
 		
-		trainModel(
-				spark,
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TRAIN_CONLL), 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TEST_CONLL), 
-				FilenameUtils.concat(NER_DIRECTORY, MUTATIONS_FROM_BIOC_NER_MODEL),
-				MUTATIONS_IN_POS_MODEL,
-				MUTATIONS_IN_BERT_MODEL,
-				TENSORFLOW_DIRECTORY);
-		
+		File inFile = Paths.get(inFileName).toFile();
+		if (	(inFile == null) || 
+				!inFile.exists() || 
+				!inFile.isFile()) {
+			
+			inFile = Paths.get(FilenameUtils.concat(DATASET_DIRECTORY, inFileName)).toFile();
+			if (	(inFile == null) || 
+					!inFile.exists() || 
+					!inFile.isFile()) 
+				return false;
+			
+		}
+	
+		File posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posModelDirectoryName)).toFile();
+		if (	(posModelDirectory == null) || 
+				!posModelDirectory.exists() || 
+				!posModelDirectory.isDirectory()) 
+			return false;
+
+		File bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertModelDirectoryName)).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(bertModelDirectory == null) || 
+				!bertModelDirectory.exists() || 
+				!bertModelDirectory.isDirectory())
+			return false;
+
+		File nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nerModelDirectoryName)).toFile();
+		if (	(nerModelDirectory == null) || 
+				!nerModelDirectory.exists() || 
+				!nerModelDirectory.isDirectory()) 
+			return false;
+	
+		return true;
+
 	}
 	
-	public void prepareCoNLL2003DataForTraining(SparkSession spark) {
-
-		prepareCoNLL2003DataForTrainingFromPubtator(
-				spark,
-				MUTATIONS_PUBTATOR_TRAIN_DATASET, 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TRAIN_CONLL),
-				CONLL2003_IN_POS_MODEL,
-				CONLL2003_IN_BERT_MODEL,
-				CONLL2003_IN_NER_MODEL,
-				CONLL2003_OUT_MANTAIN_IOB);
-		
-		prepareCoNLL2003DataForTrainingFromPubtator(
-				spark,
-				MUTATIONS_PUBTATOR_TEST_DATASET, 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_PUBTATOR_TEST_CONLL),
-				CONLL2003_IN_POS_MODEL,
-				CONLL2003_IN_BERT_MODEL,
-				CONLL2003_IN_NER_MODEL,
-				CONLL2003_OUT_MANTAIN_IOB);
-		
-		prepareCoNLL2003DataForTrainingFromBioc(
-				spark,
-				MUTATIONS_BIOC_TRAIN_DATASET, 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TRAIN_CONLL),
-				CONLL2003_IN_POS_MODEL,
-				CONLL2003_IN_BERT_MODEL,
-				CONLL2003_IN_NER_MODEL,
-				CONLL2003_OUT_MANTAIN_IOB);
-		
-		prepareCoNLL2003DataForTrainingFromBioc(
-				spark,
-				MUTATIONS_BIOC_TEST_DATASET, 
-				FilenameUtils.concat(CONLL2003_OUT_DIRECTORY, MUTATIONS_BIOC_TEST_CONLL),
-				CONLL2003_IN_POS_MODEL,
-				CONLL2003_IN_BERT_MODEL,
-				CONLL2003_IN_NER_MODEL,
-				CONLL2003_OUT_MANTAIN_IOB);
-
-	}
-
-	// L: Layers
-	// H: Dimension
-	// M: MaxSentence
-	// B: BatchSize
-	// cased_L-12_H-768_A-12_M-512_B-32
-	// cased_L-24_H-1024_A-16_M-512_B-32
-	// multi_cased_L-12_H-768_A-12_M-512_B-32
-	private static final Pattern MODEL_NAME=Pattern.compile("((?:(?:un)|(?:multi-))cased)_L-(\\d+)_H-(\\d+)_A-(\\d+)_M-(\\d+)_B-(\\d+)");
-	private static Integer getData(String name, Integer pos) {
-		Integer result = -1;
-		try {
-			Matcher m = MODEL_NAME.matcher(name);
-			if (m.find()) {
-				result = Integer.parseInt(m.group(pos));
-			}
-		} catch (NumberFormatException | IndexOutOfBoundsException ex) {
-		}
-		return result;
-	}
-
-	private static Integer getMaxSentence(String name) {
-		Integer result = getData(name, 5);
-		//TODO if (result == -1) result = 512;
-		if (result == -1) result = 512;
-		return result;
-	}
-	private static Integer getDimension(String name) {
-		Integer result = getData(name, 3);
-		//TODO if (result == -1) result = 1024;
-		if (result == -1) result = 768;
-		return result;
-	}
-	private static Integer getBatchSize(String name) {
-		Integer result = getData(name, 6);
-		//TODO if (result == -1) result = 32;
-		if (result == -1) result = 32;
-		return result;
-	}
-	private static Boolean getCaseSensitive(String name) {
-		Boolean result = true;
-		try {
-			Matcher m = MODEL_NAME.matcher(name);
-			if (m.find()) {
-				result = "uncased".equals(m.group(1)) ? false : true;
-			}
-		} catch (NumberFormatException | IndexOutOfBoundsException ex) {
-		}
-		return result;
-	}
-	public void trainModel(
-			SparkSession spark, 
-			String trainfile, 
-			String testfile, 
-			String outdir, 
-			String posmodel, 
-			String bertmodel,
-			String tensorflowmodel) {
-		
-		Path outdirname = Paths.get(outdir);
-		Path filename = Paths.get(trainfile);
-		
-		File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
-		if (	StringUtils.isBlank(posmodel) ||
-				(posmodelDirectory == null) || 
-				!posmodelDirectory.exists() || 
-				!posmodelDirectory.isDirectory()) 
-			posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
-
-		File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
-		if (	StringUtils.isBlank(bertmodel) ||
-				(bertmodelDirectory == null) || 
-				!bertmodelDirectory.exists() || 
-				!bertmodelDirectory.isDirectory()) 
-			bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
-
-		File tensorflowmodelDirectory = Paths.get(tensorflowmodel).toFile();
-		if (	StringUtils.isBlank(bertmodel) ||
-				(bertmodelDirectory == null) || 
-				!bertmodelDirectory.exists() || 
-				!bertmodelDirectory.isDirectory()) 
-			tensorflowmodelDirectory = Paths.get(TENSORFLOW_DIRECTORY).toFile();
-		
-		try {
-			boolean result = TrainRepository.trainFromConll(
-					spark, 
-					trainfile, 
-					testfile, 
-					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".csv", 
-					outdirname.toFile().getName() + "_" + filename.toFile().getName() + ".pipeline9", 
-					posmodelDirectory.getAbsolutePath(),
-					bertmodelDirectory.getAbsolutePath(), 
-					tensorflowmodelDirectory.getAbsolutePath(), 
-					outdir,
-					getMaxSentence(bertmodel),
-					getDimension(bertmodel),
-					getBatchSize(bertmodel),
-					getCaseSensitive(bertmodel));
-			if (result) {
-				LOG.info("TRAIN SERVICE: OK");
-			} else {
-				LOG.info("TRAIN SERVICE: FAIL");
-			}
-		} catch (Exception ex) {
-			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
-		}
-		
-	}
-
 	/**
 	 * Genera un fichero CONLL2003 a partir de un fichero de texto en formato BIOC para procesos de extracciï¿½n de entidades
 	 * @param spark La instancia de Spark
-	 * @param infile Fichero BioC
-	 * @param outfile Fichero Conll
-	 * @param posmodel El modelo POS 
-	 * @param bertmodel El modelo BERT 
-	 * @param nermodel  El modelo NER
-	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
+	 * @param inFileName Fichero BioC
+	 * @param outFileName Fichero Conll
+	 * @param posModelDirectoryName El modelo POS 
+	 * @param bertModelDirectoryName El modelo BERT 
+	 * @param nerModelDirectoryName  El modelo NER
+	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genï¿½rico de NER
 	 */
 	public void prepareCoNLL2003DataForTrainingFromBioc(
 			SparkSession spark, 
-			String infile, 
-			String outfile, 
-			String posmodel, 
-			String bertmodel, 
-			String nermodel,
+			String inFileName, 
+			String outFileName, 
+			String posModelDirectoryName, 
+			String bertModelDirectoryName, 
+			String nerModelDirectoryName,
 			Boolean mantainNerFromGenericModel) {
 
 		try {
+	
+			File inFile = Paths.get(inFileName).toFile();
+			if (	(inFile == null) || 
+					!inFile.exists() || 
+					!inFile.isFile()) {
+				
+				inFile = Paths.get(FilenameUtils.concat(DATASET_DIRECTORY, inFileName)).toFile();
+				if (	(inFile == null) || 
+						!inFile.exists() || 
+						!inFile.isFile()) {
+					
+					LOG.warn("PREPARE DATA SERVICE: bioc FAIL - IN FILE NOT EXITS");
+					return;
+					
+				}
+			}
 
-			Path filename = Paths.get(infile);
+			File outFile = Paths.get(FilenameUtils.concat(CONLL_DIRECTORY, outFileName)).toFile();
+			if (	StringUtils.isBlank(outFileName))  {
+				LOG.warn("PREPARE DATA SERVICE: bioc FAIL - OUT FILE NOT EXITS");
+				return;
+			}
 			
-			File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
-			if (	StringUtils.isBlank(posmodel) ||
-					(posmodelDirectory == null) || 
-					!posmodelDirectory.exists() || 
-					!posmodelDirectory.isDirectory()) 
-				posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
-			
-			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
-			if (	StringUtils.isBlank(bertmodel) ||
-					(bertmodelDirectory == null) || 
-					!bertmodelDirectory.exists() || 
-					!bertmodelDirectory.isDirectory()) 
-				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			File posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(posModelDirectoryName) ||
+					(posModelDirectory == null) || 
+					!posModelDirectory.exists() || 
+					!posModelDirectory.isDirectory()) 
+				posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
 
-			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
-			if (	StringUtils.isBlank(nermodel) ||
-					(nermodelDirectory == null) || 
-					!nermodelDirectory.exists() || 
-					!nermodelDirectory.isDirectory()) 
-				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
-			
+			Integer bertMaxSentenceLength = CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT;
+			Integer bertDimension = CONLL2003_IN_BERT_DIMENSION;
+			Integer bertBatchSize = CONLL2003_IN_BERT_BATCH_SIZE;
+			Boolean bertCaseSensitive = CONLL2003_IN_BERT_CASE_SENSITIVE;
+			Integer bertPoolingLayer = CONLL2003_IN_BERT_POOLING_LAYER;
+
+			File bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(bertModelDirectoryName) ||
+					(bertModelDirectory == null) || 
+					!bertModelDirectory.exists() || 
+					!bertModelDirectory.isDirectory()) {
+				bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			} else {
+				if (bertModelDirectoryName.contains("_base_")) bertDimension = 768;
+				if (bertModelDirectoryName.contains("_large_")) bertDimension = 1024;
+				if (bertModelDirectoryName.contains("_cased_")) bertCaseSensitive = true;
+				if (bertModelDirectoryName.contains("_uncased_")) bertCaseSensitive = false;
+			}
+
+			File nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nerModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(nerModelDirectoryName) ||
+					(nerModelDirectory == null) || 
+					!nerModelDirectory.exists() || 
+					!nerModelDirectory.isDirectory()) 
+				nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
+
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new TmBiocXmlProcessor(filename), 
-					infile, 
-					posmodelDirectory.getAbsolutePath(),
-					bertmodelDirectory.getAbsolutePath(), 
-					nermodelDirectory.getAbsolutePath(),
-					outfile,
+					new TmBiocXmlProcessor(inFile.toPath()), 
+					inFile,
+					posModelDirectory,
+					bertModelDirectory, 
+					nerModelDirectory,
+					outFile,
 					mantainNerFromGenericModel,
-					getMaxSentence(bertmodel),
-					getDimension(bertmodel),
-					getBatchSize(bertmodel),
-					getCaseSensitive(bertmodel));
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: bioc OK");
 			} else {
@@ -299,60 +249,93 @@ public class TrainService {
 	/**
 	 * Genera un fichero CONLL2003 a partir de un fichero de texto en formato PUBTATOR para procesos de extracciï¿½n de entidades
 	 * @param spark La instancia de Spark
-	 * @param infile Fichero Pubtator
-	 * @param outfile Fichero Conll
-	 * @param posmodel El modelo POS 
-	 * @param bertmodel El modelo BERT 
-	 * @param nermodel  El modelo NER
-	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
+	 * @param inFileName Fichero Pubtator
+	 * @param outFileName Fichero Conll
+	 * @param posModelDirectoryName El modelo POS 
+	 * @param bertModelDirectoryName El modelo BERT 
+	 * @param nerModelDirectoryName  El modelo NER
+	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genï¿½rico de NER
 	 */
 	public void prepareCoNLL2003DataForTrainingFromPubtator(
 			SparkSession spark, 
-			String infile, 
-			String outfile, 
-			String posmodel, 
-			String bertmodel, 
-			String nermodel,
+			String inFileName, 
+			String outFileName, 
+			String posModelDirectoryName, 
+			String bertModelDirectoryName, 
+			String nerModelDirectoryName,
 			Boolean mantainNerFromGenericModel) {
 		
 		try {
 			
-			Path filename = Paths.get(infile);
-			
-			File posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posmodel)).toFile();
-			if (	StringUtils.isBlank(posmodel) ||
-					(posmodelDirectory == null) || 
-					!posmodelDirectory.exists() || 
-					!posmodelDirectory.isDirectory()) 
-				posmodelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			File inFile = Paths.get(inFileName).toFile();
+			if (	(inFile == null) || 
+					!inFile.exists() || 
+					!inFile.isFile()) {
+				
+				inFile = Paths.get(FilenameUtils.concat(DATASET_DIRECTORY, inFileName)).toFile();
+				if (	(inFile == null) || 
+						!inFile.exists() || 
+						!inFile.isFile()) {
 
-			File bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertmodel)).toFile();
-			if (	StringUtils.isBlank(bertmodel) ||
-					(bertmodelDirectory == null) || 
-					!bertmodelDirectory.exists() || 
-					!bertmodelDirectory.isDirectory()) 
-				bertmodelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+					LOG.warn("PREPARE DATA SERVICE: txt FAIL - IN FILE NOT EXITS");
+					return;
 
-			File nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nermodel)).toFile();
-			if (	StringUtils.isBlank(nermodel) ||
-					(nermodelDirectory == null) || 
-					!nermodelDirectory.exists() || 
-					!nermodelDirectory.isDirectory()) 
-				nermodelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
-			
+				}
+			}
+
+			File outFile = Paths.get(FilenameUtils.concat(CONLL_DIRECTORY, outFileName)).toFile();
+			if (	StringUtils.isBlank(outFileName))  {
+				LOG.warn("PREPARE DATA SERVICE: txt FAIL - OUT FILE NOT EXITS");
+				return;
+			}
+
+			File posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, posModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(posModelDirectoryName) ||
+					(posModelDirectory == null) || 
+					!posModelDirectory.exists() || 
+					!posModelDirectory.isDirectory()) 
+				posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
+
+			Integer bertMaxSentenceLength = CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT;
+			Integer bertDimension = CONLL2003_IN_BERT_DIMENSION;
+			Integer bertBatchSize = CONLL2003_IN_BERT_BATCH_SIZE;
+			Boolean bertCaseSensitive = CONLL2003_IN_BERT_CASE_SENSITIVE;
+			Integer bertPoolingLayer = CONLL2003_IN_BERT_POOLING_LAYER;
+
+			File bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, bertModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(bertModelDirectoryName) ||
+					(bertModelDirectory == null) || 
+					!bertModelDirectory.exists() || 
+					!bertModelDirectory.isDirectory()) {
+				bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			} else {
+				if (bertModelDirectoryName.contains("_base_")) bertDimension = 768;
+				if (bertModelDirectoryName.contains("_large_")) bertDimension = 1024;
+				if (bertModelDirectoryName.contains("_cased_")) bertCaseSensitive = true;
+				if (bertModelDirectoryName.contains("_uncased_")) bertCaseSensitive = false;
+			}
+
+			File nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, nerModelDirectoryName)).toFile();
+			if (	StringUtils.isBlank(nerModelDirectoryName) ||
+					(nerModelDirectory == null) || 
+					!nerModelDirectory.exists() || 
+					!nerModelDirectory.isDirectory()) 
+				nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, CONLL2003_IN_NER_MODEL)).toFile();
+	
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new TmVarTxtProcessor(filename), 
-					infile, 
-					posmodelDirectory.getAbsolutePath(),
-					bertmodelDirectory.getAbsolutePath(), 
-					nermodelDirectory.getAbsolutePath(),
-					outfile,
+					new TmVarTxtProcessor(inFile.toPath()), 
+					inFile,
+					posModelDirectory,
+					bertModelDirectory, 
+					nerModelDirectory,
+					outFile,
 					mantainNerFromGenericModel,
-					getMaxSentence(bertmodel),
-					getDimension(bertmodel),
-					getBatchSize(bertmodel),
-					getCaseSensitive(bertmodel));
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
 			
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: txt OK");
@@ -364,5 +347,220 @@ public class TrainService {
 		}
 		
 	}
-	
+
+	public void trainModel(SparkSession spark) {
+		
+		trainModel(
+				spark,
+				CONLL_DIRECTORY,
+				FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL),
+				CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT,
+				CONLL2003_IN_BERT_DIMENSION,
+				CONLL2003_IN_BERT_BATCH_SIZE,
+				CONLL2003_IN_BERT_CASE_SENSITIVE,
+				CONLL2003_IN_BERT_POOLING_LAYER,
+				FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_MODEL),
+				TENSORFLOW_DIRECTORY,
+				TRAIN_NER_MIN_EPOCHS,
+				TRAIN_NER_MAX_EPOCHS,
+				TRAIN_NER_LR,
+				TRAIN_NER_PO,
+				TRAIN_NER_DROPOUT,
+				TRAIN_NER_VALIDATION_SPLIT,
+				TRAIN_NER_BATCH_SIZE);
+
+	}
+
+	public void trainModel(
+			SparkSession spark, 
+			String conllTrainDirectoryName,
+			String bertModelDirectoryName,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer,
+			String nerModelDirectoryName,
+			String nerTensorFlowGraphDirectoryName,
+			Integer nerTfMinEpochs,
+			Integer nerTfMaxEpochs,
+			Float nerTfLr,
+			Float nerTfPo,
+			Float nerTfDropOut,
+			Float nerTfValidationSplit,
+			Integer nerTfBatchSize) {
+		
+		File conllTrainDirectory = Paths.get(conllTrainDirectoryName).toFile();
+		if (	StringUtils.isBlank(conllTrainDirectoryName) ||
+				(conllTrainDirectory == null) || 
+				!conllTrainDirectory.exists() || 
+				!conllTrainDirectory.isDirectory()) 
+			conllTrainDirectory = Paths.get(CONLL_DIRECTORY).toFile();
+
+		File bertModelDirectory = Paths.get(bertModelDirectoryName).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(bertModelDirectory == null) || 
+				!bertModelDirectory.exists() || 
+				!bertModelDirectory.isDirectory()) 
+			bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+		
+		File nerTensorFlowGraphDirectory = Paths.get(nerTensorFlowGraphDirectoryName).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(nerTensorFlowGraphDirectory == null) || 
+				!nerTensorFlowGraphDirectory.exists() || 
+				!nerTensorFlowGraphDirectory.isDirectory()) 
+			nerTensorFlowGraphDirectory = Paths.get(TENSORFLOW_DIRECTORY).toFile();
+		
+		File nerModelDirectory = Paths.get(nerModelDirectoryName).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(nerModelDirectory == null) || 
+				!nerModelDirectory.exists() || 
+				!nerModelDirectory.isDirectory()) 
+			nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_MODEL)).toFile();
+
+		if (bertMaxSentenceLength == null) bertMaxSentenceLength = CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT;
+		if (bertDimension == null) bertDimension = CONLL2003_IN_BERT_DIMENSION;
+		if (bertBatchSize == null) bertBatchSize = CONLL2003_IN_BERT_BATCH_SIZE;
+		if (bertCaseSensitive == null) bertCaseSensitive = CONLL2003_IN_BERT_CASE_SENSITIVE;
+		if (bertPoolingLayer == null) bertPoolingLayer = CONLL2003_IN_BERT_POOLING_LAYER;
+		if (nerTfMinEpochs == null) nerTfMinEpochs = TRAIN_NER_MIN_EPOCHS;
+		if (nerTfMaxEpochs == null) nerTfMaxEpochs = TRAIN_NER_MAX_EPOCHS;
+		if (nerTfLr == null) nerTfLr = TRAIN_NER_LR;
+		if (nerTfPo == null) nerTfPo = TRAIN_NER_PO;
+		if (nerTfDropOut == null) nerTfDropOut = TRAIN_NER_DROPOUT;
+		if (nerTfValidationSplit == null) nerTfValidationSplit = TRAIN_NER_VALIDATION_SPLIT;
+		if (nerTfBatchSize == null) nerTfBatchSize = TRAIN_NER_BATCH_SIZE;
+		
+		try {
+			
+			boolean result = TrainRepository.trainModelFromConll(
+					spark, 
+					conllTrainDirectory, 
+					bertModelDirectory,
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer,
+					nerModelDirectory,
+					nerTensorFlowGraphDirectory,
+					nerTfMinEpochs,
+					nerTfMaxEpochs,
+					nerTfLr,
+					nerTfPo,
+					nerTfDropOut,
+					nerTfValidationSplit,
+					nerTfBatchSize);
+
+			if (result) {
+				LOG.info("TRAIN SERVICE: OK");
+			} else {
+				LOG.info("TRAIN SERVICE: FAIL");
+			}
+		} catch (Exception ex) {
+			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
+		}
+		
+	}	
+
+	public void trainModel(
+			SparkSession spark, 
+			String trainFileName,
+			String testFileName,
+			String bertModelDirectoryName,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer,
+			String nerModel,
+			String nerTensorFlowGraph,
+			Integer nerTfMinEpochs,
+			Integer nerTfMaxEpochs,
+			Float nerTfLr,
+			Float nerTfPo,
+			Float nerTfDropOut,
+			Float nerTfValidationSplit,
+			Integer nerTfBatchSize) {
+		
+		File trainFile = Paths.get(trainFileName).toFile();
+		if (	StringUtils.isBlank(trainFileName) ||
+				(trainFile == null) || 
+				!trainFile.exists() || 
+				!trainFile.isFile()) 
+			return;
+		
+		File testFile = Paths.get(testFileName).toFile();
+		if (	StringUtils.isBlank(testFileName) ||
+				(testFile == null) || 
+				!testFile.exists() || 
+				!testFile.isFile()) 
+			return;
+
+		File bertModelDirectory = Paths.get(bertModelDirectoryName).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(bertModelDirectory == null) || 
+				!bertModelDirectory.exists() || 
+				!bertModelDirectory.isDirectory()) 
+			bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+		
+		File nerModelDirectory = Paths.get(nerModel).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(nerModelDirectory == null) || 
+				!nerModelDirectory.exists() || 
+				!nerModelDirectory.isDirectory()) 
+			nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_MODEL)).toFile();
+		
+		File nerTensorFlowGraphDirectory = Paths.get(nerTensorFlowGraph).toFile();
+		if (	StringUtils.isBlank(bertModelDirectoryName) ||
+				(nerTensorFlowGraphDirectory == null) || 
+				!nerTensorFlowGraphDirectory.exists() || 
+				!nerTensorFlowGraphDirectory.isDirectory()) 
+			nerTensorFlowGraphDirectory = Paths.get(TENSORFLOW_DIRECTORY).toFile();
+
+		if (bertMaxSentenceLength == null) bertMaxSentenceLength = CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT;
+		if (bertDimension == null) bertDimension = CONLL2003_IN_BERT_DIMENSION;
+		if (bertBatchSize == null) bertBatchSize = CONLL2003_IN_BERT_BATCH_SIZE;
+		if (bertCaseSensitive == null) bertCaseSensitive = CONLL2003_IN_BERT_CASE_SENSITIVE;
+		if (nerTfMinEpochs == null) nerTfMinEpochs = TRAIN_NER_MIN_EPOCHS;
+		if (nerTfMaxEpochs == null) nerTfMaxEpochs = TRAIN_NER_MAX_EPOCHS;
+		if (nerTfLr == null) nerTfLr = TRAIN_NER_LR;
+		if (nerTfPo == null) nerTfPo = TRAIN_NER_PO;
+		if (nerTfDropOut == null) nerTfDropOut = TRAIN_NER_DROPOUT;
+		if (nerTfValidationSplit == null) nerTfValidationSplit = TRAIN_NER_VALIDATION_SPLIT;
+		if (nerTfBatchSize == null) nerTfBatchSize = TRAIN_NER_BATCH_SIZE;
+
+		try {
+			
+			boolean result = TrainRepository.trainModelFromConll(
+					spark, 
+					trainFile,
+					testFile,
+					bertModelDirectory,
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer,
+					nerModelDirectory,
+					nerTensorFlowGraphDirectory,
+					nerTfMinEpochs,
+					nerTfMaxEpochs,
+					nerTfLr,
+					nerTfPo,
+					nerTfDropOut,
+					nerTfValidationSplit,
+					nerTfBatchSize);
+
+			if (result) {
+				LOG.info("TRAIN SERVICE: OK");
+			} else {
+				LOG.info("TRAIN SERVICE: FAIL");
+			}
+		} catch (Exception ex) {
+			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
+		}
+		
+	}	
+
 }

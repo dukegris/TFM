@@ -10,186 +10,24 @@
 	<artifactId>RCS-Xml</artifactId>
 	<name>TFM Xml Model Module</name>
 	<description>TFM Xml Model Module</description>	
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	
 	<parent>
 		<groupId>es.rcs.tfm</groupId>
 		<artifactId>RCS-TFM</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
 	</parent>
-
-	<dependencies>
-
-		<!-- =====================================
-			 J2EE
-			 ===================================== -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<!-- =====================================
-			 SPRING
-			 ===================================== -->
-		<!-- FRAMEWORK -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-oxm</artifactId>
-			<scope>compile</scope>
-		</dependency>
 	
-		<!-- =====================================
-			 UTILITIES
-			 ===================================== -->
-		<!-- LOMBOK -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
-		</dependency>
+	<modules>
+		<module>es.rcs.tfm.xml.pubmed</module>
+		<module>es.rcs.tfm.xml.bioc</module>
+		<module>es.rcs.tfm.xml.mesh</module>
+		<!-- 
+		<module>es.rcs.tfm.xml.mesh.descriptors</module>
+		<module>es.rcs.tfm.xml.mesh.qualifiers</module>
+		<module>es.rcs.tfm.xml.mesh.supplemental</module>
+		<module>es.rcs.tfm.xml.mesh.pharmalogical</module>
+		 -->
+	</modules>
 
-		<!-- =====================================
-			 TEST
-			 ===================================== -->
-		<!-- SPRING -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- JUNIT -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		
-	</dependencies>
-
-	<build>
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.jvnet.jaxb2.maven2</groupId>
-					<artifactId>maven-jaxb2-plugin</artifactId>
-					<version>0.14.0</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-		
-			<!--
-				DTD 
-			 -->
-			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>NCBI-PubMed</id>
-						<phase>generate-sources</phase>
-						<goals><goal>generate</goal></goals>
-						<configuration>
-
-							<schemaLanguage>DTD</schemaLanguage>
-							<encoding>UTF-8</encoding>
-							<!-- 
-							<schemas><schema><url>http://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd</url></schema></schemas>
-							 -->
-							<schemaDirectory>${basedir}/src/main/dtd/pubmed/</schemaDirectory>
-							<schemaIncludes><schemaInclude>pubmed_190101.dtd</schemaInclude></schemaIncludes>
-							<accessExternalDTD>true</accessExternalDTD>
-
-							<catalog>${basedir}/src/main/catalogs/pubmed.catalog</catalog>
-
-							<generateDirectory>${project.build.directory}/generated-sources/ncbi_pubmed</generateDirectory>
-							<generatePackage>org.ncbi.pubmed</generatePackage>
-
-							<episodeFile>${project.build.directory}/generated-sources/ncbi_pubmed/META-INF/ncbi_pubmed.episode</episodeFile>
-
-							<strict>false</strict>
-							<debug>false</debug>
-							<verbose>false</verbose>
-
-						</configuration>
-					</execution>
-					<execution>
-						<id>NCBI-Mesh</id>
-						<phase>generate-sources</phase>
-						<goals><goal>generate</goal></goals>
-						<configuration>
-
-							<schemaLanguage>DTD</schemaLanguage>
-							<encoding>UTF-8</encoding>
-							<!-- 
-							<schemas><schema><url>https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20190101.dtd</url></schema></schemas>
-							 -->
-							<schemaDirectory>${basedir}/src/main/dtd/mesh/</schemaDirectory>
-							<schemaIncludes>
-								<schemaInclude>nlmqualifierrecordset_20200101.dtd</schemaInclude>
-								<!-- 
-								<schemaInclude>nlmsupplementalrecordset_20200101.dtd</schemaInclude>
-								<schemaInclude>nlmdescriptorrecordset_20200101.dtd</schemaInclude>
-								 -->
-							</schemaIncludes>
-							
-							<accessExternalDTD>false</accessExternalDTD>
-
-							<catalog>${basedir}/src/main/catalogs/mesh.catalog</catalog>
-
-							<generateDirectory>${project.build.directory}/generated-sources/ncbi_mesh</generateDirectory>
-							<generatePackage>org.ncbi.mesh</generatePackage>
-
-							<episodeFile>${project.build.directory}/generated-sources/ncbi_mesh/META-INF/ncbi_mesh.episode</episodeFile>
-
-							<strict>false</strict>
-							<debug>false</debug>
-							<verbose>false</verbose>
-
-						</configuration>
-					</execution>
-					<execution>
-						<id>BioC</id>
-						<phase>generate-sources</phase>
-						<goals><goal>generate</goal></goals>
-						<configuration>
-
-							<schemaLanguage>DTD</schemaLanguage>
-							<encoding>UTF-8</encoding>
-							<schemaDirectory>${basedir}/src/main/dtd/bioc/</schemaDirectory>
-							<schemaIncludes><schemaInclude>BioC.dtd</schemaInclude></schemaIncludes>
-							<accessExternalDTD>true</accessExternalDTD>
-
-							<catalog>${basedir}/src/main/catalogs/bioc.catalog</catalog>
-
-							<generateDirectory>${project.build.directory}/generated-sources/bioc</generateDirectory>
-							<generatePackage>org.bioc</generatePackage>
-
-							<episodeFile>${project.build.directory}/generated-sources/bioc/META-INF/bioc.episode</episodeFile>
-
-							<strict>false</strict>
-							<debug>false</debug>
-							<verbose>false</verbose>
-
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
- 		</plugins>
-
-	</build>
-	
 </project>

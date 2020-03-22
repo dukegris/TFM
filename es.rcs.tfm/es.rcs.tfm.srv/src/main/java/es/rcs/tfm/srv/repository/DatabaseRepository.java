@@ -73,6 +73,9 @@ import es.rcs.tfm.srv.model.Localizacion;
 import es.rcs.tfm.srv.model.Referencia;
 import es.rcs.tfm.srv.model.Revista;
 import es.rcs.tfm.srv.model.Termino;
+import es.rcs.tfm.srv.model.Termino.DescType;
+import es.rcs.tfm.srv.model.Termino.ProviderType;
+import es.rcs.tfm.srv.model.Termino.TermType;
 
 @Repository(
 		value = SrvNames.DATABASE_REP)
@@ -89,21 +92,22 @@ public class DatabaseRepository {
 	private static int NUMBER = 0;
 	private static LocalTime START_DATETIME = LocalTime.now();
 	private static Vector<Duration> STATS = new Vector<>();
-	private static final HashMap<String, String> STATUS = new HashMap<>();
+	private static final Map<String, String> STATUS = new HashMap<>();
+	private static final Map<String, String> MEDIA = new HashMap<>();
+	private static final Map<String, String> LANGUAGE = new HashMap<>();
+	private static final Map<String, String> DATE = new HashMap<>();
+	private static final Map<String, String> CATEGORY= new HashMap<>();
 
-	private static final HashMap<String, String> MEDIA = new HashMap<>();
-	private static final HashMap<String, String> LANGUAGE = new HashMap<>();
-	private static final HashMap<String, String> DATE = new HashMap<>();
-	private static final HashMap<String, String> CATEGORY= new HashMap<>();
-
+	public static final Map<ProviderType, String> TERM_PROVIDER = new HashMap<>();
+	public static final Map<TermType, String> TERM_TERM = new HashMap<>();
+	public static final Map<DescType, String> TERM_DESC = new HashMap<>();
 	static {
 		/*
 	private String estado; // Completed | In-Process | PubMed-not-MEDLINE | In-Data-Review | Publisher | MEDLINE | OLDMEDLINE
 	private Map<String, String> ids = new HashMap<String, String>(); // NASA | KIE | PIP | POP | ARPL | CPC | IND | CPFH | CLML | NRCBL | NLM | QCIM
 	private List<Autor> autores = new ArrayList<Autor>(); // 	investigators | authors | editors
-	
 		 */
-		// hhttps://dtd.nlm.nih.gov/ncbi/pubmed/att-PubStatus.html
+		// https://dtd.nlm.nih.gov/ncbi/pubmed/att-PubStatus.html
 		STATUS.put(		"RECEIVED", 		"RECIBIDO");
 		STATUS.put(		"ACCEPTED", 		"ACEPTADO");
 		STATUS.put(		"REVISED", 			"REVISADO");
@@ -153,16 +157,33 @@ public class DatabaseRepository {
 		CATEGORY.put(	"CONCLUSIONS", 	"CONCLUSIONS");
 		CATEGORY.put(	"UNASSIGNED", 	"UNASSIGNED");
 
+		TERM_PROVIDER.put(	ProviderType.MESH, 		"MESH");
+
+		TERM_TERM.put(		TermType.DESCRIPTOR, 	"DESCRIPTOR");
+		TERM_TERM.put(		TermType.QUALIFIER, 	"QUALIFIER");
+		TERM_TERM.put(		TermType.SUPPLEMENTAL, 	"SUPPLEMENTAL");
+		TERM_TERM.put(		TermType.PHARMALOGICAL, "PHARMALOGICAL");
+
+		TERM_DESC.put(		DescType.NONE,			"NONE");
+		TERM_DESC.put(		DescType.PROTOCOL,		"PROTOCOL");
+		TERM_DESC.put(		DescType.ORGANISM,		"ORGANISM");
+		TERM_DESC.put(		DescType.DISEASE,		"DISEASE");
+		TERM_DESC.put(		DescType.CHEMICAL,		"CHEMICAL");
+		TERM_DESC.put(		DescType.PUBLICATION,	"PUBLICATION");
+		TERM_DESC.put(		DescType.ECIN,			"ECIN");
+		TERM_DESC.put(		DescType.ECOUT,			"ECOUT");
+		
 	}
 	private static ObjectMapper mapper = new ObjectMapper();
-	private static final String get(HashMap<String, String> map, String key) {
+	private static final String get(Map<String, String> map, String key) {
 		if (StringUtils.isBlank(key)) return null;
 		String value = map.get(key.toUpperCase());
 		if (StringUtils.isBlank(value)) value = key;
 		return value;
 	}
+	
 	/**
-	 * Debido al tamaño desproporcionado de algiunos centros se debe recortar su nombre
+	 * Debido al tamaño desproporcionado de algunos centros se debe recortar su nombre
 	 * @param str Cadena a recortar
 	 * @return Cadena recortada
 	 */
@@ -464,16 +485,16 @@ public class DatabaseRepository {
 
 	}
 
-	private boolean anyDifferences(Termino source, String sourceDesctype, PubTermEntity destination) {
+	private boolean anyDifferences(Termino source, PubTermEntity destination) {
 		
 		if (source == null) return false;
 		if (destination == null) return true;
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(sourceDesctype, destination.getDesctype())) result = true;
-		if (!result && !StringUtils.equals(source.getProvider(), destination.getProvider())) result = true;
-//		if (!result && !StringUtils.equals(source.getTermtype(), destination.getTermtype())) result = true;
+		if (!result && (source.getProvider() != null) && (!TERM_PROVIDER.get(source.getProvider()).equals(destination.getProvider()))) result = true;
+		if (!result && (source.getTermtype() != null) && (!TERM_TERM.get(source.getTermtype()).equals(destination.getTermtype()))) result = true;
+		if (!result && (source.getDesctype() != null) && (!TERM_DESC.get(source.getDesctype()).equals(destination.getDesctype()))) result = true;
 		if (!result && !StringUtils.equals(source.getCode(), destination.getCode())) result = true;
 		if (!result && !StringUtils.equals(source.getValue(), destination.getValue())) result = true;
 		
@@ -664,16 +685,16 @@ public class DatabaseRepository {
 		
 	}
 
-	private PubTermEntity buildEntity(Termino source, String desctype, PubTermEntity destination) {
+	private PubTermEntity buildEntity(Termino source, PubTermEntity destination) {
 		
 		if (	(source == null) || 
 				(destination == null)) return null;
 		
-		if (StringUtils.isNotBlank(desctype)) destination.setDesctype(	desctype);
-		if (StringUtils.isNotBlank(source.getProvider())) destination.setProvider(source.getProvider());
+		if (source.getProvider() != null) destination.setProvider(TERM_PROVIDER.get(source.getProvider()));
+		if (source.getTermtype() != null) destination.setTermtype(TERM_TERM.get(source.getTermtype()));
+		if (source.getDesctype() != null) destination.setDesctype(TERM_DESC.get(source.getDesctype()));
 		if (StringUtils.isNotBlank(source.getCode())) destination.setCode(source.getCode());
 		if (StringUtils.isNotBlank(source.getValue())) destination.setValue(source.getValue());
-		if (StringUtils.isNotEmpty(source.getTermtype())) destination.setTermtype(source.getTermtype());
 		
 		return destination;
 		
@@ -1055,25 +1076,19 @@ public class DatabaseRepository {
 		Set<PubArticleTermEntity> articuloTerminos = new HashSet<PubArticleTermEntity>();
 		for (Termino termino: obj.getTerminos()) {
 			
-			PubTermEntity termDB = updateDB(termino, PubTermEntity.DESCRIPTOR, null);
+			PubTermEntity termDB = updateDB(termino, null);
 			if ((termDB != null) && (articleDB != null)) {
 				PubArticleTermEntity artTermDB = buildRelation (termino, articleDB, termDB, new PubArticleTermEntity());
 				articuloTerminos.add(artTermDB);
+				if (StringUtils.isNotEmpty(termino.getData())) {
+					artTermDB.setData(termino.getData());
+				}
+				articuloTerminos.add(artTermDB);
 			}
 			
-			if (StringUtils.isNotEmpty(termino.getData())) {
-					Termino cualificador = Termino.getTerminoFromData(termino.getData());
-					PubTermEntity cualificadorDB = updateDB(cualificador, PubTermEntity.CUALIFICADOR, termDB);
-					if ((cualificadorDB != null) && (articleDB != null)) {
-						PubArticleTermEntity artCualDB = buildRelation (cualificador, articleDB, cualificadorDB, new PubArticleTermEntity());
-						articuloTerminos.add(artCualDB);
-					}
-			}
-			
-			if ((termino.getCualificadores() != null) && !termino.getCualificadores().isEmpty()) {
-				for (Entry<String, String>item: termino.getCualificadores().entrySet()){
-					Termino cualificador = Termino.getTerminoFromData(item);
-					PubTermEntity cualificadorDB = updateDB(cualificador, PubTermEntity.CUALIFICADOR, termDB);
+			if ((termino.getSubterminos() != null) && !termino.getSubterminos().isEmpty()) {
+				for (Termino cualificador: termino.getSubterminos()){
+					PubTermEntity cualificadorDB = updateDB(cualificador, termDB);
 					if ((cualificadorDB != null) && (articleDB != null)) {
 						PubArticleTermEntity artCualDB = buildRelation (cualificador, articleDB, cualificadorDB, new PubArticleTermEntity());
 						articuloTerminos.add(artCualDB);
@@ -1491,7 +1506,7 @@ public class DatabaseRepository {
 	 * @param obj Datos del descriptor
 	 * @return Descriptor en la base de datos
 	 */
-	private Optional<PubTermEntity> searchTermInDB(Termino obj, String desctype) {
+	private Optional<PubTermEntity> searchTermInDB(Termino obj) {
 		
 		if (	(obj == null) ||
 				(StringUtils.isBlank(obj.getCode()))) return Optional.empty();
@@ -1500,12 +1515,14 @@ public class DatabaseRepository {
 
 		try {
 			
-			searchedDB = termRep.findByProviderAndDesctypeAndCode(Termino.MESH, desctype, obj.getCode());
+			searchedDB = termRep.findByProviderAndDesctypeAndCode(
+					TERM_PROVIDER.get(ProviderType.MESH), 
+					TERM_TERM.get(obj.getTermtype()), 
+					obj.getCode());
 			
 		} catch (Exception ex) {
 			LOG.warn("searchTermInDB" + 
 					"\r\n\t" + obj + 
-					"\r\n\t" + desctype + 
 					"\r\n\t" + ex.getMessage());
 			searchedDB = Optional.empty();
 		}
@@ -2165,25 +2182,25 @@ public class DatabaseRepository {
 	@Transactional(
 			transactionManager = DbNames.DB_TX,
 			propagation = Propagation.REQUIRED)
-	public PubTermEntity updateDB(Termino obj, String desctype, PubTermEntity parent) {
+	public PubTermEntity updateDB(Termino obj, PubTermEntity parent) {
 		
 		if (obj == null) return null;
 
-		Optional<PubTermEntity> searchedDB = searchTermInDB(obj, desctype);
+		Optional<PubTermEntity> searchedDB = searchTermInDB(obj);
 		PubTermEntity db = null;
 		boolean update = false;
 		try {
 
 			if (searchedDB.isPresent()) {
 				db = searchedDB.get();
-				update |= anyDifferences(obj, desctype, db);
+				update |= anyDifferences(obj, db);
 			} else {
 				db = new PubTermEntity();
 				update = true;
 			}
 			
 			if (update) {
-				db = buildEntity(obj, desctype, db);
+				db = buildEntity(obj, db);
 				if (parent != null) db.setParent(parent);
 				db = termRep.save(db);
 			}

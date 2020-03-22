@@ -1,6 +1,7 @@
 package es.rcs.tfm.db.model;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -10,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -34,10 +36,21 @@ public class PubArticleTermEntity {
 	public static final String DB_ARTICLE_FK	= "pub_art_ter_art_fk";
 	public static final String DB_TERM_FK		= "pub_art_ter_ter_fk";
 	
+	public static final String DB_DATA			= "art_ter_dat";
+
 	@EmbeddedId
 	private PubArticleTermKey id;
 
-	
+	@Column(
+			name = DB_DATA, 
+			unique = false,
+			nullable = true, 
+			length = 1024)
+	@Size(
+			max = 1024, 
+			message = "Los datos adicionales no pueden sobrepasar los {max} caracteres.")
+	public String data;
+
 	@JoinColumn(
 			name = PubArticleTermKey.DB_TERM_ID,
 			referencedColumnName = PubTermEntity.DB_ID,

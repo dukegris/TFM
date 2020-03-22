@@ -8,6 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.matching.Regex
 
 import es.rcs.tfm.nlp.model.TfmType
+import es.rcs.tfm.nlp.util.TfmSave
 
 /**
  * Clase encargada de mezclar en un fichero CONLL2003 el resultado de un
@@ -218,7 +219,7 @@ class CoNLL2003Generator(spark: SparkSession) {
 	 */
 	def save(data: DataFrame, outputPath: String): Double = {
 
-		println(java.time.LocalTime.now + ": NER-CONLL2003: save")
+		println(java.time.LocalTime.now + ": NER-CONLL2003: save " + outputPath)
 
 		import data.sparkSession.implicits._ // for row casting
 
@@ -236,8 +237,8 @@ class CoNLL2003Generator(spark: SparkSession) {
 			// conll._8 -> enc si se ha encontrado una mutacion
 			// conll._9 -> numNotas
 
-		saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_5"), sep = " ", targetFile = outputPath)
-		saveDsToCsv(ds = conll, sep = " ", targetFile = outputPath+".all")
+		TfmSave.saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_5"), sep = " ", targetFile = outputPath)
+		TfmSave.saveDsToCsv(ds = conll, sep = " ", targetFile = outputPath+".all")
 
 		val enc = conll.
 			select("_6", "_7", "_8", "_9").
@@ -273,42 +274,10 @@ class CoNLL2003Generator(spark: SparkSession) {
 		}
 		println("NER-CONLL2003: Marcados " + mutaciones + " de " + total + " en " + docs + " documentos. PRECISION = " + result)
 
+		println(java.time.LocalTime.now + ": NER-CONLL2003: saved " + outputPath)
+
+
 		result
-
-	}
-
-
-	// https://fullstackml.com/2015/12/21/how-to-export-data-frame-from-apache-spark/
-	def saveDsToCsv(
-			ds: Dataset[_],
-			targetFile: String,
-			sep: String = ",",
-			header: Boolean = false): Unit = {
-
-		println(java.time.LocalTime.now + ": NER-CONLL2003: save to CSV")
-
-		val tmpParquetDir = "CONLL.tmp.parquet"
-
-		ds.
-			// repartition(1).
-			write.
-			mode("overwrite").
-			format("com.databricks.spark.csv").
-			option("header", header.toString).
-			option("delimiter", sep).
-			save(tmpParquetDir)
-
-		val dir = new File(tmpParquetDir)
-		dir.
-			listFiles.
-			foreach(f => {
-				if (f.getName().startsWith("part-00000")) {
-					f.renameTo(new File(targetFile))
-				} else {
-					f.delete
-				}})
-
-		dir.delete
 
 	}
 

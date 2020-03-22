@@ -43,7 +43,19 @@
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
-			<artifactId>RCS-Xml</artifactId>
+			<artifactId>RCS-Xml-BioC</artifactId>
+			<version>${tfm.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-PubMed</artifactId>
+			<version>${tfm.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-MESH</artifactId>
 			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>
@@ -103,6 +115,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

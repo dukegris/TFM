@@ -1,0 +1,3 @@
+REWRITE_SYSTEM 
+	"file:/C:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.xml/es.rcs.tfm.xml.mesh.qualifiers/src/main/dtd/nlmdescriptorrecordset_20200101.dtd"
+	"maven:es.rcs.tfm:RCS-Xml-MESH_Descriptors:jar::0.0.4-SNAPSHOT!/nlmdescriptorrecordset_20200101.dtd"

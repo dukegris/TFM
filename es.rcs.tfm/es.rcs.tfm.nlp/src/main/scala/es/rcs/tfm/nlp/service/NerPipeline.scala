@@ -22,8 +22,9 @@ class NerPipeline(
 		nerModelDirectory: String,
 		maxSentenceLength: Integer = 512,
 		bertDimension: Integer = 768,
+		bertBatchSize: Integer = 32,
 		bertCaseSensitive: Boolean = false,
-		bertBatchSize: Integer = 32) {
+		bertPoolingLayer: Integer = -1) {
 
 	println(java.time.LocalTime.now + ": NER-PIPELINE constructor")
 
@@ -37,8 +38,9 @@ class NerPipeline(
 			this.nerModelDirectory,
 			this.maxSentenceLength,
 			this.bertDimension,
+			this.bertBatchSize,
 			this.bertCaseSensitive,
-			this.bertBatchSize))
+			this.bertPoolingLayer))
 
 	val model = pipeline.fit(emptyData)
 

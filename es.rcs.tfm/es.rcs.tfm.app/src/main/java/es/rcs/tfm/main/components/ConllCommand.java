@@ -19,36 +19,36 @@ public class ConllCommand {
 
     @ShellMethod("Genera ficheros CONLL a partir de textos en PubTaor o BioC.")
 	private int generate(
-			@ShellOption({"-i", "--infile"})	String infile, 
-			@ShellOption({"-o", "--outfile"})	String outfile, 
+			@ShellOption({"-i", "--infile"})	String inFileName, 
+			@ShellOption({"-o", "--outfile"})	String outFileName, 
 			@ShellOption({"-t", "--type (" + 
 					AppNames.BIOC + " o " + 
 					AppNames.PUBTATOR + ")"})	String type, 
-			@ShellOption({"-p", "--pos"})		String posmodel, 
-			@ShellOption({"-b", "--bert"})		String bertmodel,
-			@ShellOption({"-n", "--ner"}) 		String nermodel) {
+			@ShellOption({"-p", "--pos"})		String posModelDirectoryName, 
+			@ShellOption({"-b", "--bert"})		String bertModelDirectoryName,
+			@ShellOption({"-n", "--ner"}) 		String nerModelDirectoryName) {
 
 		int result = AppNames.OK;
 		
-		File f = Paths.get(infile).toFile();
+		File f = Paths.get(inFileName).toFile();
 		if (!f.exists() || !f.isFile()) result = AppNames.GENERATE_INVALID_FILE;
 		if (!(AppNames.BIOC.equals(type.toUpperCase()) || AppNames.PUBTATOR.equals(type.toUpperCase()))) result = AppNames.GENERATE_INVALID_TYPE;
 		
 		if (result == AppNames.OK) {
 			
-			System.out.println(infile);
-			System.out.println(outfile);
+			System.out.println(inFileName);
+			System.out.println(outFileName);
 			System.out.println(type);
-			System.out.println(posmodel);
-			System.out.println(bertmodel);
-			System.out.println(nermodel);
+			System.out.println(posModelDirectoryName);
+			System.out.println(bertModelDirectoryName);
+			System.out.println(nerModelDirectoryName);
 
 			try {
 				
 				if (AppNames.BIOC.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromBioc(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromBioc(spark, inFileName, outFileName, posModelDirectoryName, bertModelDirectoryName, nerModelDirectoryName, false);
 				} else if (AppNames.PUBTATOR.equals(type.toUpperCase())) {
-					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, infile, outfile, posmodel, bertmodel, nermodel, false);
+					train.prepareCoNLL2003DataForTrainingFromPubtator(spark, inFileName, outFileName, posModelDirectoryName, bertModelDirectoryName, nerModelDirectoryName, false);
 				}
 
 			} catch (Exception ex) {

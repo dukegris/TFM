@@ -34,7 +34,7 @@ public class PrepareCoNLL2003Task extends Thread{
 	@Override
 	public void run() {
 		LOG.info("PREPARE DATA START");
-		train.prepareCoNLL2003DataForTraining(spark);
+		//TODO train.prepareCoNLL2003DataForTraining(spark);
 		LOG.info("PREPARE DATA END");
 	}
 

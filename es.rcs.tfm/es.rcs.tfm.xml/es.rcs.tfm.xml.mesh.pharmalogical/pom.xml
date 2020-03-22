@@ -1,0 +1,80 @@
+<project 
+		xmlns="http://maven.apache.org/POM/4.0.0" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://maven.apache.org/POM/4.0.0 
+			http://maven.apache.org/xsd/maven-4.0.0.xsd">
+			
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>RCS-Xml-MESH_Pharmalogicals</artifactId>
+	<name>TFM XML MESH Pharmalogicals Model Module</name>
+	<description>TFM XML MESH Pharmalogicals Model Module</description>	
+	<packaging>jar</packaging>
+	
+	<parent>
+		<groupId>es.rcs.tfm</groupId>
+		<artifactId>RCS-Xml</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>es.rcs.tfm</groupId>
+			<artifactId>RCS-Xml-MESH_Descriptors</artifactId>
+			<version>${tfm.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+	
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/dtd</directory>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<configuration>
+					<extension>true</extension>
+					<catalog>${basedir}/src/main/catalogs/nlmpharmacologicalactionset.catalog</catalog>
+					<episodes>
+						<episode>
+							<groupId>es.rcs.tfm</groupId>
+							<artifactId>RCS-Xml-MESH_Descriptors</artifactId>
+							<version>${tfm.version}</version>
+						</episode>
+					</episodes>
+				</configuration>				
+				<executions>
+					<execution>
+						<id>NLM-Mesh-Pharmalogicals</id>
+						<phase>generate-sources</phase>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+							<schemaLanguage>DTD</schemaLanguage>
+							<encoding>UTF-8</encoding>
+							<schemaDirectory>${basedir}/src/main/dtd</schemaDirectory>
+							<schemaIncludes><schemaInclude>nlmpharmacologicalactionset_20200101.dtd</schemaInclude></schemaIncludes>
+							<bindingDirectory>${basedir}/src/main/xjb</bindingDirectory>
+							<bindingIncludes><bindingInclude>nlmpharmacologicalactionset.xjb</bindingInclude></bindingIncludes>
+							<accessExternalDTD>file</accessExternalDTD>
+							<catalog>${basedir}/src/main/catalogs/nlmpharmacologicalactionset.catalog</catalog>
+							<generatePackage>org.nlm.mesh.pharmalogicals</generatePackage>
+							<episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/nlmpharmacologicalactionset.episode</episodeFile>
+							<useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
+							<strict>false</strict>
+							<debug>false</debug>
+							<verbose>false</verbose>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		
+	</build>
+
+</project>

@@ -63,7 +63,7 @@
 	<profiles>
 	    <profile>
 	        <id>development</id>
-	        <activation><activeByDefault>false</activeByDefault></activation>
+	        <activation><activeByDefault>true</activeByDefault></activation>
 			<properties>
 				<env>development</env>
 				<spring.profiles.active>development</spring.profiles.active>
@@ -79,7 +79,7 @@
 	    </profile>
 	    <profile>
 	        <id>production</id>
-	        <activation><activeByDefault>true</activeByDefault></activation>
+	        <activation><activeByDefault>false</activeByDefault></activation>
 			<properties>
 				<env>production</env>
 				<spring.profiles.active>production</spring.profiles.active>
@@ -185,7 +185,7 @@
 		<scala.main>2.11</scala.main>
 		<scala.version>2.11.12</scala.version>
 		<hadoop.version>2.10.0</hadoop.version>
-		<spark.version>2.4.4</spark.version>
+		<spark.version>2.4.5</spark.version>
 		<spark-nlp.version>2.4.3</spark-nlp.version>
 
 		<!-- LOGS -->
@@ -1189,9 +1189,9 @@
 				
 			<plugins>
 				<plugin>
-					<groupId>net.alchim31.maven</groupId>
-					<artifactId>scala-maven-plugin</artifactId>
-					<version>4.3.1</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1200,13 +1200,18 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.1.0</version>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jarsigner-plugin</artifactId>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1215,19 +1220,37 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.1</version>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.1.1</version>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.1</version>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.2.3</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>scala-maven-plugin</artifactId>
+					<version>4.3.1</version>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.jvnet.jaxb2.maven2</groupId>
+					<artifactId>maven-jaxb2-plugin</artifactId>
+					<version>0.14.0</version>
+				</plugin>
+				
 			</plugins>
 			
 		</pluginManagement>

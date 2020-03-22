@@ -19,34 +19,50 @@ public class TrainCommand {
 
     @ShellMethod("Genera un modelo NER a partir de ficheros CONLL usando un modelo BertEbedding.")
 	private int train(
-			@ShellOption({"-t", "--trainfile"})		String trainfile, 
-			@ShellOption({"-v", "--testfile"})		String testfile, 
-			@ShellOption({"-o", "--outdir"})		String outdir, 
-			@ShellOption({"-p", "--pos"})			String posmodel, 
-			@ShellOption({"-b", "--bert"})			String bertmodel, 
-			@ShellOption({"-tf", "--tensorflow"})	String tensorflowmodel) {
+			@ShellOption({"-t", "--trainfile"})		String trainFileName, 
+			@ShellOption({"-v", "--testfile"})		String testFileName, 
+			@ShellOption({"-o", "--outdir"})		String nerModelDirectoryName, 
+			@ShellOption({"-b", "--bert"})			String bertModelDirectoryName, 
+			@ShellOption({"-tf", "--tensorflow"})	String nerTensorFlowGraphDirectory) {
 
 		int result = AppNames.OK;
 
-		File f = Paths.get(trainfile).toFile();
+		File f = Paths.get(trainFileName).toFile();
 		if (!f.exists() || !f.isFile()) result = AppNames.TRAIN_INVALID_TRAIN_FILE;
-		f = Paths.get(testfile).toFile();
+		f = Paths.get(testFileName).toFile();
 		if (!f.exists() || !f.isFile()) result = AppNames.TRAIN_INVALID_TEST_FILE;
-		f = Paths.get(outdir).toFile();
+		f = Paths.get(nerModelDirectoryName).toFile();
 		if (f.exists() && !f.isDirectory()) result = AppNames.TRAIN_INVALID_DIRECTORY;
 		
 		if (result == AppNames.OK) {
 			
-			System.out.println(trainfile);
-			System.out.println(testfile);
-			System.out.println(outdir);
-			System.out.println(posmodel);
-			System.out.println(bertmodel);
-			System.out.println(tensorflowmodel);
+			System.out.println(trainFileName);
+			System.out.println(testFileName);
+			System.out.println(nerModelDirectoryName);
+			System.out.println(bertModelDirectoryName);
+			System.out.println(nerTensorFlowGraphDirectory);
 
 			try {
 				
-				train.trainModel(spark, trainfile, testfile, outdir, posmodel, bertmodel, tensorflowmodel);
+				train.trainModel(
+						spark, 
+						trainFileName, 
+						testFileName, 
+						bertModelDirectoryName, 
+						null, 
+						null, 
+						null, 
+						null, 
+						null, 
+						nerModelDirectoryName, 
+						null, 
+						null, 
+						null, 
+						null, 
+						null, 
+						null, 
+						null, 
+						null);
 
 			} catch (Exception ex) {
 				result = AppNames.TRAIN_START_FAILED;

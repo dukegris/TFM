@@ -115,8 +115,9 @@ object TfmHelper {
 			modelDirectory: String,
 			maxSentenceLength: Integer = 512,
 			dimension: Integer = 768,
+			batchSize: Integer = 32,
 			caseSensitive: Boolean = false,
-			batchSize: Integer = 32): BertEmbeddings = {
+			poolingLayer: Integer = -1): BertEmbeddings = {
 
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareBert " + modelDirectory)
 
@@ -126,6 +127,7 @@ object TfmHelper {
 				setMaxSentenceLength(maxSentenceLength).
 				setBatchSize(batchSize).
 				setCaseSensitive(caseSensitive).
+				setPoolingLayer(poolingLayer).
 				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
 				setOutputCol(TfmType.WORD_EMBEDDINGS)
 
@@ -212,14 +214,12 @@ object TfmHelper {
 				setLr(lr). // Learning Rate
 				setPo(po). // Learning rate decay coefficient. Real Learning Rage = lr / (1 + po * epoch)
 				setDropout(dropout). // Dropout coefficient
-				setGraphFolder(tfGraphDirectory).
 
 				// VALIDACIONES
 				// setValidationSplit(validationSplit). //Choose the proportion of training dataset to be validated against the model on each Epoch. The value should be between 0.0 and 1.0 and by default it is 0.0 and off.
-				setIncludeConfidence(true). // whether to include confidence scores in annotation metadata
+				setValidationSplit(validationSplit). //Si no hay conjunto de test, divide el de entrenamiento
 				// setTestDataset("tmvar.test"). // Path to test dataset. If set used to calculate statistic on it during training.
 				//setTestDataset("/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/tmp/" + testDataSet).
-				setValidationSplit(validationSplit). //Si no hay conjunto de test, divide el de entrenamiento
 
 				// MEDIDAS
 				setEnableOutputLogs(true). // Whether to output to annotators log folder
@@ -234,6 +234,7 @@ object TfmHelper {
 				setOutputCol(TfmType.NAMED_ENTITY).
 				setLabelColumn(TfmType.LABEL) // Column with label per each token
 
+		if (tfGraphDirectory != null) nerTagger.setGraphFolder(tfGraphDirectory)
 		if (testDataset != null) nerTagger.setTestDataset(testDataset)
 
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareNerDL")
@@ -322,8 +323,9 @@ object TfmHelper {
 			nerModelDirectory: String,
 			maxSentenceLength: Integer = 512,
 			bertDimension: Integer = 768,
+			bertBatchSize: Integer = 32,
 			bertCaseSensitive: Boolean = false,
-			bertBatchSize: Integer = 32) = {
+			bertPoolingLayer: Integer = -1) = {
 
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN productionPipelineStages ")
 
@@ -340,10 +342,11 @@ object TfmHelper {
 						bertModelDirectory,
 						maxSentenceLength,
 						bertDimension,
+						bertBatchSize,
 						bertCaseSensitive,
-						bertBatchSize),
+						bertPoolingLayer),
 				prepareNer(
-				nerModelDirectory),
+				    nerModelDirectory),
 				prepareNerConverter(),
 				prepareProductionFinisher())
 
@@ -387,8 +390,9 @@ object TfmHelper {
 			nerTfGraphDirectory: String,
 			bertMaxSentenceLength: Integer = 512,
 			bertDimension: Integer = 768,
-			bertCaseSensitive: Boolean = false,
 			bertBatchSize: Integer = 32,
+			bertCaseSensitive: Boolean = false,
+			bertPoolingLayer: Integer = -1,
 			nerTfMinEpochs: Int = 1,
 			nerTfMaxEpochs: Int = 1,
 			nerTfLr: Float = 1e-3f,
@@ -406,8 +410,9 @@ object TfmHelper {
 					bertModelDirectory,
 					bertMaxSentenceLength,
 					bertDimension,
+					bertBatchSize,
 					bertCaseSensitive,
-					bertBatchSize)
+					bertPoolingLayer)
 
 			var trainData: Dataset[_] = d.
 					listFiles.

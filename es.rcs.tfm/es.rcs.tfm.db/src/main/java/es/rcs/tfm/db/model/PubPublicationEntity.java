@@ -91,6 +91,7 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	public static final String RES_IDENTIFIERS				= "identifiers";
 	public static final String RES_ARTICLE_IDS				= "articleIds";
 	public static final String RES_ARTICLES					= "articles";
+	public static final String RES_COLLECTION_TITLE			= "collectionTitle";
 	public static final String RES_REPORT					= "report";
 	public static final String RES_SERIE					= "serie";
 	public static final String RES_SERIE_TITLE				= "serieTitle";
@@ -116,6 +117,7 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	public static final String DB_REPORT					= "bok_rep_txt";
 	public static final String DB_SERIE						= "bok_ser_txt";
 	public static final String DB_SERIE_TITLE				= "bok_ser_tit";
+	public static final String DB_COLLECTION_TITLE			= "bok_col_tit";
 	public static final String DB_VOLUME					= "bok_vol_txt";
 	public static final String DB_VOLUME_TITLE				= "bok_vol_tit";
 	public static final String DB_EDITION_EDITOR			= "bok_edi_txt";
@@ -320,7 +322,7 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 			length = 256)
 	@Size(
 			max = 256, 
-			message = "La ciudad de edición no puede sobrepasar los {max} caracteres.")
+			message = "La ciudad de ediciï¿½n no puede sobrepasar los {max} caracteres.")
 	private String editionCity;
 
 	

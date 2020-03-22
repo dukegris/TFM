@@ -22,7 +22,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.sax.SAXSource;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ncbi.pubmed.Abstract;
 import org.ncbi.pubmed.AbstractText;
@@ -62,7 +61,6 @@ import org.ncbi.pubmed.Isbn;
 import org.ncbi.pubmed.ItemList;
 import org.ncbi.pubmed.Journal;
 import org.ncbi.pubmed.JournalIssue;
-import org.ncbi.pubmed.Keyword;
 import org.ncbi.pubmed.KeywordList;
 import org.ncbi.pubmed.Language;
 import org.ncbi.pubmed.LastName;
@@ -89,8 +87,6 @@ import org.ncbi.pubmed.PubmedBookData;
 import org.ncbi.pubmed.PubmedData;
 import org.ncbi.pubmed.ReferenceList;
 import org.ncbi.pubmed.Season;
-import org.ncbi.pubmed.Section;
-import org.ncbi.pubmed.Sections;
 import org.ncbi.pubmed.SpaceFlightMission;
 import org.ncbi.pubmed.StartPage;
 import org.ncbi.pubmed.Suffix;
@@ -111,11 +107,11 @@ import es.rcs.tfm.srv.model.Localizacion;
 import es.rcs.tfm.srv.model.Permiso;
 import es.rcs.tfm.srv.model.Referencia;
 import es.rcs.tfm.srv.model.Revista;
-import es.rcs.tfm.srv.model.Seccion;
 import es.rcs.tfm.srv.model.Termino;
+import es.rcs.tfm.srv.model.Termino.DescType;
+import es.rcs.tfm.srv.model.Termino.TermType;
 import es.rcs.tfm.srv.model.Titulo;
 
-@SuppressWarnings({ "unused", "deprecation" })
 public class PubmedXmlProcessor extends ArticleProcessor {
 
 	private static final String YES 					= "Y";
@@ -130,7 +126,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	//private List<PMID> deletedPmidToIterate = null;
 	//private boolean deletedSuccess = false;
 
-	private List<Object> items = null;
+	private List<?> items = null;
 	private boolean allOk = false;
 	private int index = 0;
 	private Fichero fichero = null;
@@ -182,8 +178,9 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			try {
 				JAXBContext jaxbContext = JAXBContext.newInstance(PubmedArticleSet.class);
 				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			    PubmedArticleSet pubmedArticleSet = (PubmedArticleSet)jaxbUnmarshaller.unmarshal(source);
-			    if (pubmedArticleSet != null) {
+			    Object articleSet = jaxbUnmarshaller.unmarshal(source);
+			    if ((articleSet != null) && (articleSet instanceof PubmedArticleSet)) {
+			    	PubmedArticleSet pubmedArticleSet = (PubmedArticleSet)articleSet;
 			    	List<Object> pubSet = pubmedArticleSet.getPubmedArticleOrPubmedBookArticle();
 			    	if ((pubSet != null) && (!pubSet.isEmpty())) {
 			    		items = pubSet;
@@ -239,7 +236,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Obtiene un artículo a partir de un artículo de una revista
+	 * Obtiene un artï¿½culo a partir de un artï¿½culo de una revista
 	 * @see <a href="https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html">MEDLINE</a>
 	 * @param pubmedArticle
 	 * @return
@@ -335,7 +332,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		// TODO
 		medlineCitation.getCoiStatement(); // conflict of interest
 		// TODO
-		medlineCitation.getCommentsCorrectionsList(); // Correciones invocadas por otros artículos
+		medlineCitation.getCommentsCorrectionsList(); // Correciones invocadas por otros artï¿½culos
 		
 		return articulo;
 
@@ -982,7 +979,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 	
 	/**
-	 * Obtiene la fecha de finalización
+	 * Obtiene la fecha de finalizaciï¿½n
 	 * @param date
 	 * @return
 	 */
@@ -1010,7 +1007,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Obtiene la fecha de revisión
+	 * Obtiene la fecha de revisiï¿½n
 	 * @param date
 	 * @return
 	 */
@@ -1038,7 +1035,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Obtiene la fecha de edición
+	 * Obtiene la fecha de ediciï¿½n
 	 * @param date
 	 * @return
 	 */
@@ -1455,7 +1452,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Crea una localización de un documento paginado
+	 * Crea una localizaciï¿½n de un documento paginado
 	 * @param pagination
 	 * @return
 	 */
@@ -1626,7 +1623,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Construye los datos del fascículo
+	 * Construye los datos del fascï¿½culo
 	 * @param journalIssue
 	 * @return
 	 */
@@ -1645,7 +1642,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Conjuntos de datos utilizados por el artículo
+	 * Conjuntos de datos utilizados por el artï¿½culo
 	 * @param dataBankList
 	 * @return
 	 */
@@ -1701,7 +1698,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Permisos de reproducción (pais, agencia y permiso
+	 * Permisos de reproducciï¿½n (pais, agencia y permiso
 	 * @param grantList
 	 * @return
 	 */
@@ -1731,7 +1728,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Obtiene la lista de objetos que extienden el artículo
+	 * Obtiene la lista de objetos que extienden el artï¿½culo
 	 * @param objects
 	 * @return
 	 */
@@ -1890,22 +1887,23 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(p.getQualifierName() != null) &&
 							(!p.getQualifierName().isEmpty())).
 			map(instance -> {
-				Map<String, String> items = instance.getQualifierName().
+				List<Termino> items = instance.getQualifierName().
 					stream().
 					filter(p ->	(p != null)  &&
 								(StringUtils.isNotBlank(p.getUI())) &&
 								(StringUtils.isNotBlank(p.getvalue())) ).
 					map(item -> {
-						return new SimpleEntry<String, String>(
+						return new Termino(
+								TermType.QUALIFIER,
+								DescType.NONE,
 								item.getUI(),
 								item.getvalue());
 					}).
 					filter(p -> 	(p != null)).
-					collect(Collectors.toMap(
-							p -> p.getKey(), 
-							p -> p.getValue(),
-							(o1, o2) -> o1 + ", " + o2 ));
+					collect(Collectors.toList());
 				return new Termino(
+						TermType.DESCRIPTOR,
+						DescType.NONE,
 						instance.getDescriptorName().getUI(),
 						instance.getDescriptorName().getvalue(),
 						items);			
@@ -1937,7 +1935,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getNameOfSubstance().getvalue()))).
 			map(instance -> {
 				return new Termino(
-						Termino.FARMACO,
+						TermType.SUPPLEMENTAL,
+						DescType.CHEMICAL,
 						instance.getNameOfSubstance().getUI(),
 						instance.getNameOfSubstance().getvalue(),
 						instance.getRegistryNumber());			
@@ -1951,7 +1950,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Establece términos de clase 2, 3 y 4 protocolos, dolencias y organismos
+	 * Establece tï¿½rminos de clase 2, 3 y 4 protocolos, dolencias y organismos
 	 * @param supplMeshList
 	 * @return
 	 */
@@ -1968,7 +1967,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getvalue()))).
 			map(instance -> {
 				return new Termino(
-						instance.getType(),
+						TermType.SUPPLEMENTAL,
+						Termino.getSupplementalType(instance.getType()),
 						instance.getUI(),
 						instance.getvalue());			
 			}).
@@ -2012,7 +2012,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getvalue()))).
 			map(instance -> {
 				return new Termino(
-						Termino.PUBLICACION,
+						TermType.DESCRIPTOR,
+						DescType.PUBLICATION,
 						instance.getUI(),
 						instance.getvalue());			
 			}).

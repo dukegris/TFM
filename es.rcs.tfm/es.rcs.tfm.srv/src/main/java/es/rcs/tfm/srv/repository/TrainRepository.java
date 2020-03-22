@@ -1,7 +1,6 @@
 package es.rcs.tfm.srv.repository;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -36,27 +34,29 @@ import es.rcs.tfm.srv.setup.ArticleProcessor;
 public class TrainRepository {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TrainRepository.class);
-	//private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-hhmmss");
 	private static final String SIMPLE_DATE_FORMAT = "yyyyMMdd-hhmmss";
-	private static final String HADOOP_FILE_PREFIX = "file:///";
+	private static final String HADOOP_FILE_PREFIX = "file://";
 	
 	private static Map<Integer, NerPipeline> PIPELINES = new HashMap<Integer, NerPipeline>();
-	//private static Map<Integer, NerTrain> TRAINERS = new HashMap<Integer, NerTrain>();
-	
+
 	private static Integer getHash(
-			String posModelDirectory,
-			String bertModelDirectory,
-			Integer maxSentence,
-			Integer dimension,
-			Integer batchSize,
-			Boolean caseSensitive) {
+			File posModelDirectory,
+			File bertModelDirectory,
+			File nerModelDirectory,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer) {
 		int hash = 17;
         hash = hash * 23 + ((posModelDirectory == null) ? 0 : posModelDirectory.hashCode());
         hash = hash * 23 + ((bertModelDirectory == null) ? 0 : bertModelDirectory.hashCode());
-        hash = hash * 23 + ((maxSentence == null) ? 0 : maxSentence.hashCode());
-        hash = hash * 23 + ((dimension == null) ? 0 : dimension.hashCode());
-        hash = hash * 23 + ((batchSize == null) ? 0 : batchSize.hashCode());
-        hash = hash * 23 + ((caseSensitive == null) ? 0 : caseSensitive.hashCode());
+        hash = hash * 23 + ((nerModelDirectory == null) ? 0 : nerModelDirectory.hashCode());
+        hash = hash * 23 + ((bertMaxSentenceLength == null) ? 0 : bertMaxSentenceLength.hashCode());
+        hash = hash * 23 + ((bertDimension == null) ? 0 : bertDimension.hashCode());
+        hash = hash * 23 + ((bertBatchSize == null) ? 0 : bertBatchSize.hashCode());
+        hash = hash * 23 + ((bertCaseSensitive == null) ? 0 : bertCaseSensitive.hashCode());
+        hash = hash * 23 + ((bertPoolingLayer == null) ? 0 : bertPoolingLayer.hashCode());
         return hash;
 	}
 
@@ -133,191 +133,55 @@ public class TrainRepository {
 	}
 	
 	/**
-	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
-	 * @param trainFilename
-	 * @param testFilename
-	 * @param resultsFilename
-	 * @param resultsDirectory
-	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
-	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
-	 * @param tensorflowModelDirectory Directorio de grafos de TensorFlow
-	 * @param targetModelDirectory Directorio de salida de los fichero CONLL
-	 * @param maxSentence Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
-	 * @param dimension Maximo nï¿½mero de dimensiones (defecto 1024, suele ser 768)
-	 * @return
-	 */
-	public static final boolean trainFromConll(
-			SparkSession spark,
-			String trainFilename,
-			String testFilename,
-			String resultsFilename,
-			String resultsDirectory,
-			String posModelDirectory,
-			String bertModelDirectory,
-			String tensorflowModelDirectory,
-			String targetModelDirectory,
-			Integer maxSentence,
-			Integer dimension,
-			Integer batchSize,
-			Boolean caseSensitive) {
-
-		if (spark == null) return false;
-		if (StringUtils.isBlank(resultsDirectory)) return false;
-		if (StringUtils.isBlank(resultsFilename)) return false;
-		if (StringUtils.isBlank(targetModelDirectory)) return false;
-		if (StringUtils.isBlank(trainFilename)) return false;
-		if (StringUtils.isBlank(testFilename)) return false;
-		if (StringUtils.isBlank(posModelDirectory)) return false;
-		if (StringUtils.isBlank(bertModelDirectory)) return false;
-		if (StringUtils.isBlank(tensorflowModelDirectory)) return false;
-
-		Path results = Paths.get(resultsDirectory);
-		if (results.toFile() == null) return false;
-		if (results.toFile().exists() && (!results.toFile().isDirectory())) return false;
-
-		//Path target = Paths.get(targetModelDirectory);
-
-		Path posModel = Paths.get(posModelDirectory);
-		if (posModel.toFile() == null) return false;
-		if (!posModel.toFile().exists()) return false;
-		if (!posModel.toFile().isDirectory()) return false;
-
-		Path bertModel = Paths.get(bertModelDirectory);
-		if (bertModel.toFile() == null) return false;
-		if (!bertModel.toFile().exists()) return false;
-		if (!bertModel.toFile().isDirectory()) return false;
-
-		Path tensorflowModel = Paths.get(tensorflowModelDirectory);
-		if (tensorflowModel.toFile() == null) return false;
-		if (!tensorflowModel.toFile().exists()) return false;
-		if (!tensorflowModel.toFile().isDirectory()) return false;
-
-		Path train = Paths.get(trainFilename);
-		if (train.toFile() == null) return false;
-		if (!train.toFile().exists()) return false;
-		if (!train.toFile().isFile()) return false;
-
-		Path test = Paths.get(testFilename);
-		if (test.toFile() == null) return false;
-		if (!test.toFile().exists()) return false;
-		if (!test.toFile().isFile()) return false;
-
-		if (maxSentence == null) maxSentence = 512;
-		if (dimension == null) dimension = 1024;
-		if (batchSize == null) batchSize = 32;
-		if (caseSensitive == null) caseSensitive = false;
-		
-		boolean resultado = true;
-		try {
-			
-			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
-			
-			String[] entities = {};
-			NerTrain nerTrainer = new NerTrain(
-					spark.sparkContext(),
-					spark,
-					HADOOP_FILE_PREFIX + posModelDirectory,
-					HADOOP_FILE_PREFIX + bertModelDirectory,
-					tensorflowModelDirectory,
-					maxSentence,
-					dimension,
-					batchSize,
-					caseSensitive,
-					ArticleProcessor.MUTATIONS_NORMALIZE.values().toArray(entities));
-
-			// TODO
-			nerTrainer.train(
-					trainFilename,
-					testFilename,
-					resultsDirectory,
-					resultsDirectory,
-					resultsFilename);
-/*			
-			nerTrainer.
-				saveNerModel (
-					nerTrainer.
-						measureNerTraining(
-							trainFilename,
-							testFilename,
-							resultsFilename,
-							resultsDirectory),
-						HADOOP_FILE_PREFIX + targetModelDirectory);
-*/			
-			LOG.info(
-					"\r\nTRAIN TIME for [" + trainFilename + "] "  +
-					"\r\n\tINI:" + ini +
- 					"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
-
-		} catch (Exception ex) {
-			resultado = false;
-			LOG.warn("TRAIN FAIL " + ex.toString());
-		}
-
-		return resultado;
-		
-	}
-
-	/**
 	 * Construye un fichero conll en un directorio parquet con el conjunto de documentos de entrenamiento
 	 * aplicandoles la localizaciï¿½n de entidades del modelo 
 	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
 	 * @param processor Generador de anotaciones
-	 * @param resultsDirectory Directorio donde se deja el modelo con los resultados
 	 * @param posModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
 	 * @param nerModelDirectory Directorio con el modelo NER utilizado para la localizaciï¿½n de entidades genï¿½ricas
-	 * @param targetFilename Directorio parquet de salida de la preparaciï¿½n de datos
-	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genérico de NER
-	 * @param maxSentence Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
-	 * @param dimension Maximo nï¿½mero de dimensiones (defecto 1024, suele ser 768)
+	 * @param outFile Directorio parquet de salida de la preparaciï¿½n de datos
+	 * @param mantainNerFromGenericModel Mantener los IOB obtenidos del modelo genï¿½rico de NER
+	 * @param bertMaxSentenceLength Maximo tamaï¿½o de una frase (defecto 512, suele ser 128)
+	 * @param bertDimension Maximo nï¿½mero de bertDimensiones (defecto 1024, suele ser 768)
 	 * @return
 	 */
 	public static final boolean getConllFrom(
 			SparkSession spark,
 			ArticleProcessor processor,
-			String resultsDirectory,
-			String posModelDirectory,
-			String bertModelDirectory,
-			String nerModelDirectory,
-			String targetFilename,
+			File inFile,
+			File posModelDirectory,
+			File bertModelDirectory,
+			File nerModelDirectory,
+			File outFile,
 			Boolean mantainNerFromGenericModel,
-			Integer maxSentence,
-			Integer dimension,
-			Integer batchSize,
-			Boolean caseSensitive) {
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer) {
 
 		if (spark == null) return false;
 		if (processor == null) return false;
-		if (StringUtils.isBlank(resultsDirectory)) return false;
-		if (StringUtils.isBlank(targetFilename)) return false;
-		if (StringUtils.isBlank(posModelDirectory)) return false;
-		if (StringUtils.isBlank(bertModelDirectory)) return false;
-		if (StringUtils.isBlank(nerModelDirectory)) return false;
 
-		Path posModel = Paths.get(posModelDirectory);
-		if (posModel.toFile() == null) return false;
-		if (!posModel.toFile().exists()) return false;
-		if (!posModel.toFile().isDirectory()) return false;
+		if (outFile == null) return false;
 
-		Path bertModel = Paths.get(bertModelDirectory);
-		if (bertModel.toFile() == null) return false;
-		if (!bertModel.toFile().exists()) return false;
-		if (!bertModel.toFile().isDirectory()) return false;
+		if (posModelDirectory == null) return false;
+		if (!posModelDirectory.exists()) return false;
+		if (!posModelDirectory.isDirectory()) return false;
 
-		Path nerBertModel = Paths.get(bertModelDirectory);
-		if (nerBertModel.toFile() == null) return false;
-		if (!nerBertModel.toFile().exists()) return false;
-		if (!nerBertModel.toFile().isDirectory()) return false;
+		if (bertModelDirectory == null) return false;
+		if (!bertModelDirectory.exists()) return false;
+		if (!bertModelDirectory.isDirectory()) return false;
 
-		Path target = Paths.get(targetFilename);
-		if (target.toFile() == null) return false;
-		//if (!target.toFile().exists()) return false;
-		//if (!target.toFile().isFile()) return false;
+		if (nerModelDirectory == null) return false;
+		if (!nerModelDirectory.exists()) return false;
+		if (!nerModelDirectory.isDirectory()) return false;
 
-		if (maxSentence == null) maxSentence = 512;
-		if (dimension == null) dimension = 1024;
-		if (batchSize == null) batchSize = 32;
-		if (caseSensitive == null) caseSensitive = false;
+		if (bertMaxSentenceLength == null) bertMaxSentenceLength = 512;
+		if (bertDimension == null) bertDimension = 1024;
+		if (bertBatchSize == null) bertBatchSize = 32;
+		if (bertCaseSensitive == null) bertCaseSensitive = false;
 		
 		boolean resultado = true;
 		try {
@@ -347,22 +211,26 @@ public class TrainRepository {
 				NerPipeline pipeline = null;
 				Integer key = getHash(
 						posModelDirectory, 
-						bertModelDirectory, 
-						maxSentence, 
-						dimension, 
-						batchSize, 
-						caseSensitive);
+						bertModelDirectory,
+						nerModelDirectory,
+						bertMaxSentenceLength, 
+						bertDimension, 
+						bertBatchSize,
+						bertCaseSensitive,
+						bertPoolingLayer);
+				
 				if (!PIPELINES.containsKey(key)) {
 					pipeline = new NerPipeline(
-							spark.sparkContext(),
-							spark,
-							HADOOP_FILE_PREFIX + posModelDirectory,
-							HADOOP_FILE_PREFIX + bertModelDirectory,
-							HADOOP_FILE_PREFIX + nerModelDirectory,
-							maxSentence,
-							dimension,
-							batchSize,
-							caseSensitive);
+						spark.sparkContext(),
+						spark,
+						HADOOP_FILE_PREFIX + posModelDirectory.getAbsolutePath(),
+						HADOOP_FILE_PREFIX + bertModelDirectory.getAbsolutePath(),
+						HADOOP_FILE_PREFIX + nerModelDirectory.getAbsolutePath(),
+						bertMaxSentenceLength,
+						bertDimension,
+						bertBatchSize,
+						bertCaseSensitive,
+						bertPoolingLayer);
 					PIPELINES.put(key, pipeline);
 				} else {
 					pipeline = PIPELINES.get(key);
@@ -376,7 +244,7 @@ public class TrainRepository {
 						execute(
 								rows, 
 								structType, 
-								HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(resultsDirectory));
+								HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(outFile.getAbsolutePath()+"_ALL"));
 				
 				@SuppressWarnings("unchecked")
 				Dataset<Row> conllDs = generator.
@@ -387,7 +255,7 @@ public class TrainRepository {
 				double tasa = generator.
 						save(
 								conllDs, 
-								targetFilename);
+								outFile.getAbsolutePath());
 
 				LOG.info(
 						"\r\nCONLL2003 TIME for [" + rows.size() + "] documents. PRECISSION = " + tasa * 100 +
@@ -405,5 +273,205 @@ public class TrainRepository {
 		return resultado;
 		
 	}
-	    
+
+	/**
+	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
+	 * @param conllTrainDirectory
+	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
+	 * @param bertMaxSentenceLength
+	 * @param bertDimension
+	 * @param bertBatchSize
+	 * @param bertCaseSensitive
+	 * @param nerModelDirectory Directorio de salida del modelo NER entrenado
+	 * @param nerTensorFlowGraphDirectory Directorio de grafos de TensorFlow
+	 * @param nerTfMinEpochs
+	 * @param nerTfMaxEpochs
+	 * @param nerTfLr
+	 * @param nerTfPo
+	 * @param nerTfDropOut
+	 * @param nerTfValidationSplit
+	 * @param nerTfBatchSize
+	 * @param pipelineModelDirectory
+	 * @return
+	 */
+	public static boolean trainModelFromConll(
+			SparkSession spark, 
+			File conllTrainDirectory,
+			File bertModelDirectory,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer,
+			File nerModelDirectory,
+			File nerTensorFlowGraphDirectory,
+			Integer nerTfMinEpochs,
+			Integer nerTfMaxEpochs,
+			Float nerTfLr, 
+			Float nerTfPo,
+			Float nerTfDropOut,
+			Float nerTfValidationSplit,
+			Integer nerTfBatchSize) {
+		
+		if (spark == null) return false;
+		
+		if (conllTrainDirectory == null) return false;
+		if (!conllTrainDirectory.exists()) return false;
+		if (!conllTrainDirectory.isDirectory()) return false;
+		
+		if (bertModelDirectory == null) return false;
+		if (!bertModelDirectory.exists()) return false;
+		if (!bertModelDirectory.isDirectory()) return false;
+		
+		if (nerTensorFlowGraphDirectory == null) return false;
+		if (!nerTensorFlowGraphDirectory.exists()) return false;
+		if (!nerTensorFlowGraphDirectory.isDirectory()) return false;
+
+		if (nerModelDirectory == null) return false;
+		if (nerModelDirectory.exists() && !nerModelDirectory.isDirectory()) return false;
+
+		boolean resultado = true;
+		try {
+			
+			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
+			
+			NerTrain nerTrainer = new NerTrain(
+					spark.sparkContext(),
+					spark,
+					bertModelDirectory.getAbsolutePath(),
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
+			
+			nerTrainer.train(
+					conllTrainDirectory.getAbsolutePath(),
+					nerModelDirectory.getAbsolutePath(),
+					nerTensorFlowGraphDirectory.getAbsolutePath(),
+					nerTfMinEpochs,
+					nerTfMaxEpochs,
+					nerTfLr,
+					nerTfPo,
+					nerTfDropOut,
+					nerTfValidationSplit,
+					nerTfBatchSize);
+			
+			LOG.info(
+					"\r\nTRAIN TIME for [" + conllTrainDirectory.getAbsolutePath() + "] "  +
+					"\r\n\tINI:" + ini +
+ 					"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
+
+		} catch (Exception ex) {
+			resultado = false;
+			LOG.warn("TRAIN FAIL " + ex.toString());
+		}
+
+		return resultado;
+		
+	}
+
+	/**
+	 * @param spark Sesion de Spark donde se ejecutarï¿½ la preparaciï¿½n de datos
+	 * @param trainFile
+	 * @param testFile
+	 * @param bertModelDirectory Directorio con el modelo utilizado para el marcado de palabras
+	 * @param bertMaxSentenceLength
+	 * @param bertDimension
+	 * @param bertBatchSize
+	 * @param bertCaseSensitive
+	 * @param nerModelDirectory Directorio de salida del modelo NER entrenado
+	 * @param nerTensorFlowGraphDirectory Directorio de grafos de TensorFlow
+	 * @param nerTfMinEpochs
+	 * @param nerTfMaxEpochs
+	 * @param nerTfLr
+	 * @param nerTfPo
+	 * @param nerTfDropOut
+	 * @param nerTfValidationSplit
+	 * @param nerTfBatchSize
+	 * @param pipelineModelDirectory
+	 * @return
+	 */
+	public static boolean trainModelFromConll(
+			SparkSession spark, 
+			File trainFile,
+			File testFile,
+			File bertModelDirectory,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer,
+			File nerModelDirectory,
+			File nerTensorFlowGraphDirectory,
+			Integer nerTfMinEpochs,
+			Integer nerTfMaxEpochs,
+			Float nerTfLr, Float nerTfPo,
+			Float nerTfDropOut,
+			Float nerTfValidationSplit,
+			Integer nerTfBatchSize) {
+		
+		if (spark == null) return false;
+		
+		if (trainFile == null) return false;
+		if (!trainFile.exists()) return false;
+		if (!trainFile.isFile()) return false;
+		
+		if (testFile == null) return false;
+		if (!testFile.exists()) return false;
+		if (!testFile.isFile()) return false;
+		
+		if (bertModelDirectory == null) return false;
+		if (!bertModelDirectory.exists()) return false;
+		if (!bertModelDirectory.isDirectory()) return false;
+		
+		if (nerTensorFlowGraphDirectory == null) return false;
+		if (!nerTensorFlowGraphDirectory.exists()) return false;
+		if (!nerTensorFlowGraphDirectory.isDirectory()) return false;
+
+		if (nerModelDirectory == null) return false;
+		if (nerModelDirectory.exists() && !nerModelDirectory.isDirectory()) return false;
+
+		boolean resultado = true;
+		try {
+			
+			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
+			
+			NerTrain nerTrainer = new NerTrain(
+					spark.sparkContext(),
+					spark,
+					bertModelDirectory.getAbsolutePath(),
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
+			
+			nerTrainer.trainTest(
+					trainFile.getAbsolutePath(),
+					testFile.getAbsolutePath(),
+					nerModelDirectory.getAbsolutePath(),
+					nerTensorFlowGraphDirectory.getAbsolutePath(),
+					nerTfMinEpochs,
+					nerTfMaxEpochs,
+					nerTfLr,
+					nerTfPo,
+					nerTfDropOut,
+					nerTfValidationSplit,
+					nerTfBatchSize);
+			
+			LOG.info(
+					"\r\nTRAIN TIME for [" + trainFile.getAbsolutePath() + "] "  +
+					"\r\n\tINI:" + ini +
+ 					"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
+
+		} catch (Exception ex) {
+			resultado = false;
+			LOG.warn("TRAIN FAIL " + ex.toString());
+		}
+
+		return resultado;
+		
+	}
+
 }
