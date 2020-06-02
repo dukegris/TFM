@@ -32,4 +32,5 @@ object TfmType {
 	val PRETRAINED_BERT = "bert_uncased"
 	val PRETRAINED_NER_BERT = "ner_dl_bert"
  */
+	
 }

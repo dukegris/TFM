@@ -17,6 +17,7 @@ import es.rcs.tfm.db.model.PubFileEntity;
 import es.rcs.tfm.solr.model.PubArticleIdx;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.BloqueAnotado;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.repository.CorpusRepository;
 import es.rcs.tfm.srv.repository.DatabaseRepository;
@@ -264,8 +265,8 @@ public class CorpusService {
 	 * @return Articulo actualizado con las operaciones de actualizacion del indice
 	 */
 //	@Transactional(
-//	transactionManager = DbNames.DB_TX,
-//	propagation = Propagation.REQUIRED)
+//			transactionManager = DbNames.DB_TX,
+//			propagation = Propagation.REQUIRED)
 	public Articulo updateIdx(Articulo obj) {
 		
 		if (obj == null) return null;
@@ -273,6 +274,16 @@ public class CorpusService {
 		
 	}
 
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// BLOQUES
+	public BloqueAnotado updateDb(BloqueAnotado obj) {
+
+		if (obj == null) return null;
+		return databaseRepository.updateDB(obj);
+		
+	}
+	
 	@Autowired
 	@Qualifier( value = SrvNames.DATABASE_REP )
 	DatabaseRepository databaseRepository;

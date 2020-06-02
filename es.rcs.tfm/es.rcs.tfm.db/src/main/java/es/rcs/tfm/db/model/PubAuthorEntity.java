@@ -143,9 +143,9 @@ public class PubAuthorEntity extends AuditedBaseEntity {
 			name = DB_SUFFIX, 
 			unique = false,
 			nullable = true, 
-			length = 16)
+			length = 32)
 	@Size(
-			max = 16, 
+			max = 32, 
 			message = "El sufijo no puede sobrepasar los {max} caracteres.")
 	public String suffix;
 
@@ -157,9 +157,9 @@ public class PubAuthorEntity extends AuditedBaseEntity {
 			name = DB_NAME, 
 			unique = false,
 			nullable = true, 
-			length = 256)
+			length = 512)
 	@Size(
-			max = 256, 
+			max = 512, 
 			message = "El nombre no puede sobrepasar los {max} caracteres.")
 	public String name;
 

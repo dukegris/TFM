@@ -7,7 +7,7 @@ import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, NerDLApproach}
 import com.johnsnowlabs.nlp.annotators.ner.crf.{NerCrfModel, NerCrfApproach}
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
-import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings}
+import com.johnsnowlabs.nlp.embeddings.{BertEmbeddings, AlbertEmbeddings}
 import com.johnsnowlabs.nlp.training.CoNLL
 import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs, ResourceHelper}
 
@@ -132,6 +132,32 @@ object TfmHelper {
 				setOutputCol(TfmType.WORD_EMBEDDINGS)
 
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareBert " + modelDirectory)
+
+		embeddings
+
+	}
+
+
+	def prepareAlbert (
+			modelDirectory: String,
+			maxSentenceLength: Integer = 512,
+			dimension: Integer = 768,
+			batchSize: Integer = 32,
+			caseSensitive: Boolean = false,
+			poolingLayer: Integer = -1): AlbertEmbeddings = {
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: BEGIN prepareAlbert " + modelDirectory)
+
+		val embeddings = AlbertEmbeddings.
+				load(modelDirectory).
+				setDimension(dimension).
+				setMaxSentenceLength(maxSentenceLength).
+				setBatchSize(batchSize).
+				setCaseSensitive(caseSensitive).
+				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN)).
+				setOutputCol(TfmType.WORD_EMBEDDINGS)
+
+		if (DEBUG) println(java.time.LocalTime.now + ": TFM-HELPER: END   prepareAlbert " + modelDirectory)
 
 		embeddings
 

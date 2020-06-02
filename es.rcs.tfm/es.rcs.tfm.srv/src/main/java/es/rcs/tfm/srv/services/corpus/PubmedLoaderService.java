@@ -1,7 +1,9 @@
 package es.rcs.tfm.srv.services.corpus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.regex.Pattern;
@@ -10,6 +12,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.BloqueAnotado;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.repository.DatabaseRepository;
 import es.rcs.tfm.srv.repository.FtpRepository;
+import es.rcs.tfm.srv.services.train.TrainService;
 import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 
 @Service(value = SrvNames.PUBMED_LOADER_SRVC)
@@ -74,41 +79,73 @@ public class PubmedLoaderService {
 		}
 		
 		// MODELO DE FICHEROS 
-		Stream<Fichero> ficherosStream = Arrays.
-			stream(ftpFiles).//.parallel()
+		//Stream<Fichero> ficherosStream = Arrays.
+		Stream<Articulo> articulosStream = Arrays.		
+			stream(ftpFiles).
 			//TODO
+			limit(1).
 			parallel().
 			// Solo ficheros validos
 			filter(f ->
 					f.isValid() &&
 					f.isFile() &&
+					!f.isSymbolicLink() &&
 					!f.isDirectory() &&
 					!f.isUnknown() &&
 					SOLO_GZIP_PTRN.matcher(f.getName()).find()).
 			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
 			map(f -> 
-					/*
-					f.getGroup();
-					f.getHardLinkCount();
-					f.getLink();
-					f.getName();
-					f.getRawListing();
-					f.getSize();
-					f.getType();
-					f.getTimestamp();
-					f.getUser();
-					f.isDirectory();
-					f.isFile();
-					f.isSymbolicLink();
-					f.isUnknown();
-					f.isValid();
-					*/
 					Fichero.getInstance(
 							f.getName(),
 							f.getTimestamp(),
 							f.getSize()) ).
-			peek (f-> procesaFichero(f, FTP_DIRECTORY));
+			// Descarga ficheros y actualiza la Base de Datos
+			peek (f-> procesaFichero(f, FTP_DIRECTORY)).
+			filter(f -> !f.isProcesoArticulosCompletado()).
+			flatMap(f -> {
 
+				PubmedXmlProcessor processor = new PubmedXmlProcessor(
+						f,
+						CORPUS_PUBMED_XML_DIRECTORY);
+				
+				return StreamSupport.
+						stream(
+								Spliterators.spliteratorUnknownSize(
+										processor, 
+										Spliterator.DISTINCT), 
+								false);
+				
+			}).
+			peek(a -> procesaArticulo(a));
+		
+		// Procesar en lotes 
+		Spliterator<Articulo> split = articulosStream.spliterator();
+		int chunkSize = 10;
+		
+		
+//		List<Map<Fichero, Long>> numArticulos = new ArrayList<>();
+		while(true) {
+		    List<Articulo> chunk = new ArrayList<>(chunkSize);
+		    for (int i = 0; i < chunkSize && split.tryAdvance(chunk::add); i++){};
+		    if (chunk.isEmpty()) break;
+		    //Map<Fichero, Long> result = 
+		    List<BloqueAnotado> result = train.
+		    	process(spark, chunk).
+		    	stream().
+		    	parallel().
+				peek(b -> procesaBloque(b)).
+				collect(Collectors.toList());
+		    	/*
+				// reduce bloque to f, numarticles o groupby f
+		    	collect(Collectors.groupingBy(
+		    				b -> b.get,
+		    				Collectors.counting()
+		    			));^
+		    	*/
+		    //bloques.addAll(chunkBlock);
+		}					
+
+		/*
 		// Puede ser null
 		if (ficherosStream != null) {
 			ficherosStream.forEach(f -> {
@@ -129,22 +166,42 @@ public class PubmedLoaderService {
 							parallel().
 							peek(a -> procesaArticulo(a));
 
-					List<Articulo> articulos = articulosStream.collect(Collectors.toList());
+					//List<Articulo> articulos = articulosStream.
+					//		collect(Collectors.toList());
+					
+					int articulosSize = 0;
+					
+					Spliterator<Articulo> split = articulosStream.spliterator();
+					int chunkSize = 10;
+					
+					List<BloqueAnotado> bloques = new ArrayList<BloqueAnotado>();
+					while(true) {
+					    List<Articulo> chunk = new ArrayList<>(chunkSize);
+					    for (int i = 0; i < chunkSize && split.tryAdvance(chunk::add); i++){};
+					    articulosSize += chunk.size();
+					    if (chunk.isEmpty()) break;
+					    List<BloqueAnotado> chunkBlock = train.
+					    	process(spark, chunk).
+					    	stream().
+					    	parallel().
+							peek(b -> procesaBloque(b)).
+							// reduce bloque to f, numarticles o groupby f
+					    	collect(Collectors.toList());
+					    bloques.addAll(chunkBlock);
+					}					
 					
 					DatabaseRepository.saveStats(1);
 					
-					// TODO trainModel.process(articulos);
-					// TODO update bloques de los articulos
-					
-					f.setProcesoArticulosCompletado(processor.getItemsSize()*0.9 <= articulos.size());
+					f.setProcesoArticulosCompletado(processor.getItemsSize()*0.9 <= articulosSize);
+					f.setNumArticlesProcessed(f.getNumArticlesProcessed() + articulosSize);
 					f.setNumArticlesTotal(processor.getItemsSize());
-					f.setNumArticlesProcessed(articulos.size());
 					corpusSrvc.updateDb(f);
 
 				} 
 //				}
 			});
 		}
+		*/
 	}
 
 	@Transactional(
@@ -185,16 +242,35 @@ public class PubmedLoaderService {
 		// Comprobar si se requiere descargar
 		a = corpusSrvc.calculateIfTheProcessIsNeeded(a);
 		// Actualizar datos de los ficheros en DB
-		if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);
+		if (a.isHayCambiosEnBD()) a = corpusSrvc.updateDb(a);
 		// Actualizar datos de los ficheros en el indice
-		if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);
+		if (a.isHayCambiosEnIDX()) a = corpusSrvc.updateIdx(a);
 
 		return a;
 
 	}
 
+	@Transactional(
+			transactionManager = DbNames.DB_TX,
+			propagation = Propagation.REQUIRES_NEW)
+	private BloqueAnotado procesaBloque(BloqueAnotado b) {
+
+		b = corpusSrvc.updateDb(b);
+		
+		return b;
+		
+	}
+
 	@Autowired
 	@Qualifier( value = SrvNames.CORPUS_SRVC )
 	CorpusService corpusSrvc;
+
+	@Autowired
+	@Qualifier( value = SrvNames.SPARK_SESSION_TRAIN )
+	public SparkSession spark;
+	
+	@Autowired
+	@Qualifier(value = SrvNames.TRAINING_SRVC)
+	private TrainService train;
 
 }

@@ -58,9 +58,9 @@ public class PubPermissionSubentity {
 			name = DB_AGENCY, 
 			unique = false,
 			nullable = true, 
-			length = 256)
+			length = 1024)
 	@Size(
-			max = 256, 
+			max = 1024, 
 			message = "La agencia no puede sobrepasar los {max} caracteres.")
 	private String agency;
 

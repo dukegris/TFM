@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -28,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import es.rcs.tfm.nlp.service.CoNLL2003Generator;
 import es.rcs.tfm.nlp.service.NerPipeline;
 import es.rcs.tfm.nlp.service.NerTrain;
+import es.rcs.tfm.nlp.service.TextProcesor;
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.BloqueAnotado;
 import es.rcs.tfm.srv.setup.ArticleProcessor;
 
 public class TrainRepository {
@@ -36,7 +39,17 @@ public class TrainRepository {
 	private static final Logger LOG = LoggerFactory.getLogger(TrainRepository.class);
 	private static final String SIMPLE_DATE_FORMAT = "yyyyMMdd-hhmmss";
 	private static final String HADOOP_FILE_PREFIX = "file://";
-	
+
+	private static final String ID = "id";
+	private static final String TEXT = "text";
+	private static final String NOTES = "notes";
+
+	private static final String ARTICLE_ID = "art_id";
+	private static final String BLOCK_TYPE = "blk_type";
+	private static final String BLOCK_TEXT = "text";
+
+	private static final String TYPE = "type";
+
 	private static Map<Integer, NerPipeline> PIPELINES = new HashMap<Integer, NerPipeline>();
 
 	private static Integer getHash(
@@ -65,7 +78,7 @@ public class TrainRepository {
 	 * @param list lista de beans del modelo con los documentos de entrenamiento
 	 * @return lista de filas con los documentos de entrenamiento
 	 */
-	public static final List<Row> generateDS(List<Articulo> list) {
+	public static final List<Row> generateConllRows(List<Articulo> list) {
 		
 		if ((list == null) || (list.isEmpty())) return null;
 
@@ -119,19 +132,72 @@ public class TrainRepository {
 	 * Genera una estructura compatible para Spark del conjunto de entrenamiento
 	 * @return La estructura para el Dataset
 	 */
-	public static final StructType  generateStructType() {
+	private static List<Row> generateBlockRows(List<Articulo> list) {
+		
+		if ((list == null) || (list.isEmpty())) return null;
+		
+		List<Row> result = null;
+		try {
+
+			result = list. 
+	    		stream().
+	    		flatMap(a -> a.
+	    				generateBlocks().
+	    				stream().
+	    				filter(b -> (b != null) ).
+	    				map(b -> RowFactory.create(
+								UUID.randomUUID(),
+								((a.getEntidad() != null) && (a.getEntidad().getId() != null))
+										? a.getEntidad().getId().toString() 
+										: "",
+								b.getType(), 
+								b.getText()))).
+		    	collect(Collectors.toList());
+				
+		} catch (Exception ex) {
+			LOG.warn("generateDS FAIL " + ex.toString());
+		}
+		
+		if ((result == null) || (result.isEmpty())) return null;
+		return result;
+
+	}
+
+	/**
+	 * Genera una estructura compatible para Spark del conjunto de entrenamiento
+	 * @return La estructura para el Dataset
+	 */
+	public static final StructType  generateConllStructType() {
 		
 	    StructField[] structFields = new StructField[]{
-	            new StructField("id", DataTypes.StringType, true, Metadata.empty()),
-	            new StructField("type", DataTypes.StringType, true, Metadata.empty()),
-	            new StructField("text", DataTypes.StringType, true, Metadata.empty()),
-	            new StructField("notes", DataTypes.createArrayType(DataTypes.StringType, true), true, Metadata.empty())
+	            new StructField(ID, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(TYPE, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(TEXT, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(NOTES, DataTypes.createArrayType(DataTypes.StringType, true), true, Metadata.empty())
 	    };
 
 	    return new StructType(structFields);
 
 	}
-	
+
+	/**
+	 * Construye un dataset a partir de los textos
+	 * @param list lista de bloques con los textos a procesar
+	 * @return lista de filas con los textos a procesar
+	 */
+	private static StructType generateBlockStructType() {
+		
+	    StructField[] structFields = new StructField[]{
+	            new StructField(ID, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(ARTICLE_ID, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(BLOCK_TYPE, DataTypes.StringType, true, Metadata.empty()),
+	            new StructField(BLOCK_TEXT, DataTypes.StringType, true, Metadata.empty()),
+	    };
+
+	    return new StructType(structFields);
+
+	}
+
 	/**
 	 * Construye un fichero conll en un directorio parquet con el conjunto de documentos de entrenamiento
 	 * aplicandoles la localizaci�n de entidades del modelo 
@@ -203,8 +269,8 @@ public class TrainRepository {
 				
 			} else {
 
-				List<Row> rows = TrainRepository.generateDS(data);
-				StructType structType = TrainRepository.generateStructType();
+				List<Row> rows = TrainRepository.generateConllRows(data);
+				StructType structType = TrainRepository.generateConllStructType();
 				
 				String build = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 
@@ -238,13 +304,13 @@ public class TrainRepository {
 
 				String prepare = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
 
-				CoNLL2003Generator generator = new CoNLL2003Generator(spark);
-				
 				Dataset<Row> ds = pipeline.
 						execute(
 								rows, 
 								structType, 
 								HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(outFile.getAbsolutePath()+"_ALL"));
+				
+				CoNLL2003Generator generator = new CoNLL2003Generator(spark);
 				
 				@SuppressWarnings("unchecked")
 				Dataset<Row> conllDs = generator.
@@ -472,6 +538,114 @@ public class TrainRepository {
 
 		return resultado;
 		
+	}
+
+	public static List<BloqueAnotado> getProcessedBlocks(
+			SparkSession spark,
+			List<Articulo> articles,
+			File posModelDirectory,
+			File bertModelDirectory,
+			File nerModelDirectory,
+			File outPipelineDirectory,
+			Integer bertMaxSentenceLength,
+			Integer bertDimension,
+			Integer bertBatchSize,
+			Boolean bertCaseSensitive,
+			Integer bertPoolingLayer) {
+
+		if (spark == null) return null;
+		if ((articles == null) || (articles.isEmpty())) return null;
+	
+		if (posModelDirectory == null) return null;
+		if (!posModelDirectory.exists()) return null;
+		if (!posModelDirectory.isDirectory()) return null;
+	
+		if (bertModelDirectory == null) return null;
+		if (!bertModelDirectory.exists()) return null;
+		if (!bertModelDirectory.isDirectory()) return null;
+	
+		if (nerModelDirectory == null) return null;
+		if (!nerModelDirectory.exists()) return null;
+		if (!nerModelDirectory.isDirectory()) return null;
+	
+		if (bertMaxSentenceLength == null) bertMaxSentenceLength = 512;
+		if (bertDimension == null) bertDimension = 1024;
+		if (bertBatchSize == null) bertBatchSize = 32;
+		if (bertCaseSensitive == null) bertCaseSensitive = false;
+		
+		List<BloqueAnotado> resultado = null;
+		try {
+	
+			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
+	
+			List<Row> rows = TrainRepository.generateBlockRows(articles);
+			StructType structType = TrainRepository.generateBlockStructType();
+			
+			String build = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
+
+			NerPipeline pipeline = null;
+			Integer key = getHash(
+					posModelDirectory, 
+					bertModelDirectory,
+					nerModelDirectory,
+					bertMaxSentenceLength, 
+					bertDimension, 
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
+			
+			if (!PIPELINES.containsKey(key)) {
+				pipeline = new NerPipeline(
+					spark.sparkContext(),
+					spark,
+					HADOOP_FILE_PREFIX + posModelDirectory.getAbsolutePath(),
+					HADOOP_FILE_PREFIX + bertModelDirectory.getAbsolutePath(),
+					HADOOP_FILE_PREFIX + nerModelDirectory.getAbsolutePath(),
+					bertMaxSentenceLength,
+					bertDimension,
+					bertBatchSize,
+					bertCaseSensitive,
+					bertPoolingLayer);
+				PIPELINES.put(key, pipeline);
+			} else {
+				pipeline = PIPELINES.get(key);
+			}
+
+			String prepare = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
+			
+			Dataset<Row> ds = pipeline.
+					execute(
+							rows, 
+							structType, 
+							HADOOP_FILE_PREFIX + FilenameUtils.separatorsToUnix(outPipelineDirectory.getAbsolutePath()));
+			
+			TextProcesor generator = new TextProcesor(spark);
+
+			/*
+			@SuppressWarnings("unchecked")
+			Dataset<Row> conllDs = generator.
+					generate(ds);
+			
+			double tasa = generator.
+					save(
+							conllDs, 
+							outFile.getAbsolutePath());
+
+			LOG.info(
+					"\r\nPROCESS TIME for [" + rows.size() + "] documents. PRECISSION = " + tasa * 100 +
+					"\r\n\tINI:" + ini +
+					"\r\n\tDAT:" + build +
+					"\r\n\tPRE:" + prepare +
+					"\r\n\tEND:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT)) );
+			 */
+
+		} catch (Exception ex) {
+			resultado = null;
+			LOG.warn("PROCESS FAIL " + ex.toString());
+		}
+	
+		return resultado;
+
 	}
 
 }

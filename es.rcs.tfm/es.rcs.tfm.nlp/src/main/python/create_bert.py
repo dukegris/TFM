@@ -4,10 +4,11 @@
 # ms-python.python added
 import os
 try:
-	os.chdir(os.path.join(os.getcwd(), '/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.nlp/src/main/python'))
+	os.chdir(os.path.join(os.getcwd(), 'D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.nlp/src/main/python'))
 	print(os.getcwd())
 except:
 	pass
+print(sys.path)
 
 # %%
 import sys
@@ -22,11 +23,10 @@ import time
 import zipfile
 
 # %%
-print(tf.__version__)
-print(tf.keras.__version__)
+print("Tensorflow: " + tf.__version__)
+print("Keras: " + tf.keras.__version__)
 sys.path.append('./tflow/ner/')
 sys.path.append('./tflow/lib/ner/')
-print(sys.path)
 
 # %%
 from sparknlp.annotator import *
@@ -35,9 +35,11 @@ from sparknlp.base import *
 from sparknlp.embeddings import *
 import sparknlp 
 
+print("SparkNLP: " + sparknlp.version())
+
+# %%
 from embeddings_resolver import BertEmbeddingsResolver
 from ner_model_saver import NerModelSaver
-
 
 # %%
 CORPUS_PATH="/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/"

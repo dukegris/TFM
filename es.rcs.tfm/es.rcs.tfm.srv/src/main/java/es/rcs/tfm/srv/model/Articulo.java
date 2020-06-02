@@ -1,5 +1,6 @@
 package es.rcs.tfm.srv.model;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import es.rcs.tfm.db.model.PubArticleEntity;
 import es.rcs.tfm.solr.model.PubArticleIdx;
@@ -22,6 +24,8 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = false)
 public class Articulo {
+
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	public static final String SEPARATOR = ";";
 	
@@ -140,6 +144,99 @@ public class Articulo {
 			}
 		}
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<BloqueAnotado> generateBlocks() {
+		
+		List<BloqueAnotado> result = new ArrayList<>();
+		if (this.getBlocks() != null) result.addAll(this.getBlocks());
+
+		int offset = 0;
+		String str = null;
+		str = this.generateTitle();
+		if (StringUtils.isNotEmpty(str)) {
+			BloqueAnotado block = new BloqueAnotado();
+			block.setType(BloqueAnotado.PASSAGE_TYPE_TITLE);
+			block.setOffset(offset);
+			block.setText(str);
+			offset += str.length();
+			this.getBlocks().add(block);
+		}
+		
+		if ((this.getResumen() != null) && !this.getResumen().isEmpty()) {
+			for (Map<String, Object>sumary: this.getResumen()) {
+				if ( (sumary != null) && (!sumary.isEmpty())) {
+					String type = (String) sumary.get(Articulo.CONTENT_TYPE);
+					if (Articulo.ABSTRACT_TYPE.equals(type)) {
+						type = BloqueAnotado.PASSAGE_TYPE_ABSTRACT;
+					} else if (Articulo.ABSTRACT_TYPE.equals(type)) {
+						type = BloqueAnotado.PASSAGE_TYPE_OTHER_ABSTRACT;
+					}
+					List<HashMap<String, String>> others = null;
+					others = (List<HashMap<String, String>>) sumary.get(Articulo.CONTENT);
+					if ( (others != null) && (!others.isEmpty())) {
+						for (HashMap<String, String> other: others) {
+							if ( (other != null) && (!other.isEmpty())) {
+								String text = other.get(Articulo.TEXT);
+								if (StringUtils.isNotEmpty(str)) {
+									BloqueAnotado block = new BloqueAnotado();
+									block.setType(type);
+									block.setOffset(offset);
+									block.setText(text);
+									offset += text.length();
+									result.add(block);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+		
+	}
+
+	public final String generateTitle() {
+		
+		if (this.getTitulo() != null) {
+			if (StringUtils.isNotEmpty(this.getTitulo().getLibroId())) { 
+				System.out.print(" L-" + this.getTitulo().getLibroId());
+			}
+			if (StringUtils.isNotEmpty(this.getTitulo().getParteId())) { 
+				System.out.print(" P-" + this.getTitulo().getParteId());
+			}
+			if (StringUtils.isNotEmpty(this.getTitulo().getSeccionId())) { 
+				System.out.print(" S-" + this.getTitulo().getSeccionId());
+			}
+			if (StringUtils.isNotEmpty(this.getTitulo().getTitulo())) { 
+				System.out.println(" T(" +  this.getPmid() + ") ]" + this.getTitulo().getTitulo() + "[");
+			}
+		} 
+		
+		String result = "";
+		if (this.getTitulo() != null) result = this.getTitulo().getTitulo();
+		if (StringUtils.isEmpty(result)) result = this.getTituloOriginal();
+		if (StringUtils.isEmpty(result)) result = "";
+		
+		return result;
+		
+	}
+	
+	public String generateResumen() {
+		
+		String str = "";
+		try {
+			str = MAPPER.
+					writeValueAsString(this.resumen);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (StringUtils.isEmpty(str)) return null;
+		
+		return str;
+		
 	}
 
 	public void addIds(Map<String, String> items) {

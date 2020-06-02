@@ -13,7 +13,7 @@ import es.rcs.tfm.nlp.util.TfmSave
 /**
  * Clase encargada de mezclar en un fichero CONLL2003 el resultado de un
  * procesado generico de extraccion de entidades con las entidades detectadas
- * por procesos externos 8generalmente procedentes de papers
+ * por procesos externos generalmente procedentes de papers
  *
  * @author raul
  *

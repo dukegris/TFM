@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +40,13 @@ import es.rcs.tfm.db.model.PubBlockSubentity;
 import es.rcs.tfm.db.model.PubCenterEntity;
 import es.rcs.tfm.db.model.PubDateSubentity;
 import es.rcs.tfm.db.model.PubFileEntity;
-import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.model.PubKeywordSubentity;
 import es.rcs.tfm.db.model.PubPermissionSubentity;
 import es.rcs.tfm.db.model.PubPropertySubentity;
 import es.rcs.tfm.db.model.PubPublicationEntity;
 import es.rcs.tfm.db.model.PubReferenceSubentity;
 import es.rcs.tfm.db.model.PubTermEntity;
+import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.repository.PubArticleAuthorRepository;
 import es.rcs.tfm.db.repository.PubArticleFileRepository;
 import es.rcs.tfm.db.repository.PubArticlePublicationRepository;
@@ -98,7 +96,7 @@ public class DatabaseRepository {
 	private static final Map<String, String> DATE = new HashMap<>();
 	private static final Map<String, String> CATEGORY= new HashMap<>();
 
-	public static final Map<ProviderType, String> TERM_PROVIDER = new HashMap<>();
+	public static final Map<ProviderType, String> TERM_PRVDR = new HashMap<>();
 	public static final Map<TermType, String> TERM_TERM = new HashMap<>();
 	public static final Map<DescType, String> TERM_DESC = new HashMap<>();
 	static {
@@ -108,73 +106,72 @@ public class DatabaseRepository {
 	private List<Autor> autores = new ArrayList<Autor>(); // 	investigators | authors | editors
 		 */
 		// https://dtd.nlm.nih.gov/ncbi/pubmed/att-PubStatus.html
-		STATUS.put(		"RECEIVED", 		"RECIBIDO");
-		STATUS.put(		"ACCEPTED", 		"ACEPTADO");
-		STATUS.put(		"REVISED", 			"REVISADO");
-		STATUS.put(		"RETRACTED", 		"RETIRADO");
+		STATUS.put(		"RECEIVED",				"RECIBIDO");
+		STATUS.put(		"ACCEPTED", 			"ACEPTADO");
+		STATUS.put(		"REVISED", 				"REVISADO");
+		STATUS.put(		"RETRACTED", 			"RETIRADO");
 
-		STATUS.put(		"PPUBLISH",			"EN ELECTRONICO");
-		STATUS.put(		"AHEADOFPRINT", 	"DISPONIBLE");
+		STATUS.put(		"PPUBLISH",				"EN ELECTRONICO");
+		STATUS.put(		"AHEADOFPRINT", 		"DISPONIBLE");
 
-		STATUS.put(		"ECOLLECTION", 		"ECOLLECTION");
-		STATUS.put(		"EPUBLISH", 		"EN PAPEL");
+		STATUS.put(		"ECOLLECTION", 			"ECOLLECTION");
+		STATUS.put(		"EPUBLISH", 			"EN PAPEL");
 		
-		STATUS.put(		"PMC", 				"PMC");
-		STATUS.put(		"PMCR", 			"PMCR");
-		STATUS.put(		"PMC-RELEASE", 		"PMC-RELEASE");
+		STATUS.put(		"PMC", 					"PMC");
+		STATUS.put(		"PMCR", 				"PMCR");
+		STATUS.put(		"PMC-RELEASE", 			"PMC-RELEASE");
+			
+		STATUS.put(		"PUBMED", 				"PUBMED");
+		STATUS.put(		"PUBMEDR", 				"PUBMEDR");
 		
-		STATUS.put(		"PUBMED", 			"PUBMED");
-		STATUS.put(		"PUBMEDR", 			"PUBMEDR");
+		STATUS.put(		"PREMEDLINE", 			"PREMEDLINE");
+		STATUS.put(		"MEDLINE", 				"MEDLINE");
+		STATUS.put(		"MEDLINER", 			"MEDLINER");
 		
-		STATUS.put(		"PREMEDLINE", 		"PREMEDLINE");
-		STATUS.put(		"MEDLINE", 			"MEDLINE");
-		STATUS.put(		"MEDLINER", 		"MEDLINER");
+		STATUS.put(		"ENTREZ", 				"ENTREZ");
 		
-		STATUS.put(		"ENTREZ", 			"ENTREZ");
-		
-		MEDIA.put(		"INTERNET",					"INTERNET");
-		MEDIA.put(		"PRINT",					"PAPEL");
-		MEDIA.put(		"PRINT-ELECTRONIC",			"PAPEL Y ELECTRONICO");
-		MEDIA.put(		"ELECTRONIC",				"ELECTRONICO");
-		MEDIA.put(		"ELECTRONIC-PRINT",			"IMPRESO DE ELECTRONICO");
+		MEDIA.put(		"INTERNET",				"INTERNET");
+		MEDIA.put(		"PRINT",				"PAPEL");
+		MEDIA.put(		"PRINT-ELECTRONIC",		"PAPEL Y ELECTRONICO");
+		MEDIA.put(		"ELECTRONIC",			"ELECTRONICO");
+		MEDIA.put(		"ELECTRONIC-PRINT",		"IMPRESO DE ELECTRONICO");
 		MEDIA.put(		"ELECTRONIC-ECOLLECTION",	"COLECCION ELECTRONICA");
 		
 		// https://www.loc.gov/marc/languages/language_code.html
-		LANGUAGE.put(	"ENG", 			"en");
+		LANGUAGE.put(	"ENG",					"en");
 		
-		DATE.put(		"ACCEPTED", 	"ACEPTADO");
-		DATE.put(		"REVISED", 		"REVISADO");
-		DATE.put(		"RECEIVED", 	"RECIBIDO");
-		DATE.put(		"PUBMED", 		"EN PUBMED");
-		DATE.put(		"MEDLINE", 		"EN MEDLINE");
-		DATE.put(		"ENTREZ", 		"EN ENTREZ");
+		DATE.put(		"ACCEPTED",				"ACEPTADO");
+		DATE.put(		"REVISED",				"REVISADO");
+		DATE.put(		"RECEIVED",				"RECIBIDO");
+		DATE.put(		"PUBMED",				"EN PUBMED");
+		DATE.put(		"MEDLINE",				"EN MEDLINE");
+		DATE.put(		"ENTREZ",				"EN ENTREZ");
 
 		// 	En abstract: NlmCategory (BACKGROUND|OBJECTIVE|METHODS|RESULTS|CONCLUSIONS|UNASSIGNED) #IMPLIED
-		CATEGORY.put(	"BACKGROUND", 	"BACKGROUND");
-		CATEGORY.put(	"OBJECTIVE", 	"OBJECTIVE");
-		CATEGORY.put(	"METHODS", 		"METHODS");
-		CATEGORY.put(	"RESULTS", 		"RESULTS");
-		CATEGORY.put(	"CONCLUSIONS", 	"CONCLUSIONS");
-		CATEGORY.put(	"UNASSIGNED", 	"UNASSIGNED");
+		CATEGORY.put(	"BACKGROUND",			"BACKGROUND");
+		CATEGORY.put(	"OBJECTIVE",			"OBJECTIVE");
+		CATEGORY.put(	"METHODS",				"METHODS");
+		CATEGORY.put(	"RESULTS",				"RESULTS");
+		CATEGORY.put(	"CONCLUSIONS",			"CONCLUSIONS");
+		CATEGORY.put(	"UNASSIGNED", 			"UNASSIGNED");
 
-		TERM_PROVIDER.put(	ProviderType.MESH, 		"MESH");
+		TERM_PRVDR.put(	ProviderType.MESH, 		"MESH");
 
-		TERM_TERM.put(		TermType.DESCRIPTOR, 	"DESCRIPTOR");
-		TERM_TERM.put(		TermType.QUALIFIER, 	"QUALIFIER");
-		TERM_TERM.put(		TermType.SUPPLEMENTAL, 	"SUPPLEMENTAL");
-		TERM_TERM.put(		TermType.PHARMALOGICAL, "PHARMALOGICAL");
+		TERM_TERM.put(	TermType.DESCRIPTOR, 	"DESCRIPTOR");
+		TERM_TERM.put(	TermType.QUALIFIER, 	"QUALIFIER");
+		TERM_TERM.put(	TermType.SUPPLEMENTAL, 	"SUPPLEMENTAL");
+		TERM_TERM.put(	TermType.PHARMALOGICAL, "PHARMALOGICAL");
 
-		TERM_DESC.put(		DescType.NONE,			"NONE");
-		TERM_DESC.put(		DescType.PROTOCOL,		"PROTOCOL");
-		TERM_DESC.put(		DescType.ORGANISM,		"ORGANISM");
-		TERM_DESC.put(		DescType.DISEASE,		"DISEASE");
-		TERM_DESC.put(		DescType.CHEMICAL,		"CHEMICAL");
-		TERM_DESC.put(		DescType.PUBLICATION,	"PUBLICATION");
-		TERM_DESC.put(		DescType.ECIN,			"ECIN");
-		TERM_DESC.put(		DescType.ECOUT,			"ECOUT");
+		TERM_DESC.put(	DescType.NONE,			"NONE");
+		TERM_DESC.put(	DescType.PROTOCOL,		"PROTOCOL");
+		TERM_DESC.put(	DescType.ORGANISM,		"ORGANISM");
+		TERM_DESC.put(	DescType.DISEASE,		"DISEASE");
+		TERM_DESC.put(	DescType.CHEMICAL,		"CHEMICAL");
+		TERM_DESC.put(	DescType.PUBLICATION,	"PUBLICATION");
+		TERM_DESC.put(	DescType.ECIN,			"ECIN");
+		TERM_DESC.put(	DescType.ECOUT,			"ECOUT");
 		
 	}
-	private static ObjectMapper mapper = new ObjectMapper();
 	private static final String get(Map<String, String> map, String key) {
 		if (StringUtils.isBlank(key)) return null;
 		String value = map.get(key.toUpperCase());
@@ -204,30 +201,6 @@ public class DatabaseRepository {
 	private static final String getStatusField(String key) {
 		return get(STATUS, key);
 	}
-
-	private static final String getTitle(Articulo obj) {
-		
-		if (obj.getTitulo() != null) {
-			if (StringUtils.isNotEmpty(obj.getTitulo().getLibroId())) { 
-				System.out.print(" L-" + obj.getTitulo().getLibroId());
-			}
-			if (StringUtils.isNotEmpty(obj.getTitulo().getParteId())) { 
-				System.out.print(" P-" + obj.getTitulo().getParteId());
-			}
-			if (StringUtils.isNotEmpty(obj.getTitulo().getSeccionId())) { 
-				System.out.print(" S-" + obj.getTitulo().getSeccionId());
-			}
-			if (StringUtils.isNotEmpty(obj.getTitulo().getTitulo())) { 
-				System.out.println(" T(" +  obj.getPmid() + ") ]" + obj.getTitulo().getTitulo() + "[");
-			}
-		} 
-		
-		String result = "";
-		if (obj.getTitulo() != null) result = obj.getTitulo().getTitulo();
-		if (StringUtils.isEmpty(result)) result = obj.getTituloOriginal();
-		if (StringUtils.isEmpty(result)) result = "";
-		return result;
-	}
 	
 	public static void saveStats(int FILE_ID) {
 		PrintWriter out = null;
@@ -242,73 +215,6 @@ public class DatabaseRepository {
 		} finally {
 			if (out != null) out.close();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<BloqueAnotado> generateBlocks(Articulo obj) {
-
-		if (obj == null) return null;
-		
-		List<BloqueAnotado> result = new ArrayList<>();
-		if (obj.getBlocks() != null) result.addAll(obj.getBlocks());
-
-		int offset = 0;
-		String str = null;
-		str = getTitle(obj);
-		if (StringUtils.isNotEmpty(str)) {
-			BloqueAnotado block = new BloqueAnotado();
-			block.setType(BloqueAnotado.PASSAGE_TYPE_TITLE);
-			block.setOffset(offset);
-			block.setText(str);
-			offset += str.length();
-			obj.getBlocks().add(block);
-		}
-		
-		if ((obj.getResumen() != null) && !obj.getResumen().isEmpty()) {
-			for (Map<String, Object>sumary: obj.getResumen()) {
-				if ( (sumary != null) && (!sumary.isEmpty())) {
-					String type = (String) sumary.get(Articulo.CONTENT_TYPE);
-					if (Articulo.ABSTRACT_TYPE.equals(type)) {
-						type = BloqueAnotado.PASSAGE_TYPE_ABSTRACT;
-					} else if (Articulo.ABSTRACT_TYPE.equals(type)) {
-						type = BloqueAnotado.PASSAGE_TYPE_OTHER_ABSTRACT;
-					}
-					List<HashMap<String, String>> others = null;
-					others = (List<HashMap<String, String>>) sumary.get(Articulo.CONTENT);
-					if ( (others != null) && (!others.isEmpty())) {
-						for (HashMap<String, String> other: others) {
-							if ( (other != null) && (!other.isEmpty())) {
-								String text = other.get(Articulo.TEXT);
-								if (StringUtils.isNotEmpty(str)) {
-									BloqueAnotado block = new BloqueAnotado();
-									block.setType(type);
-									block.setOffset(offset);
-									block.setText(text);
-									offset += text.length();
-									result.add(block);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-		
-	}
-	
-	public String getResumen(List<Map<String, Object>> list) {
-		String str = "";
-		try {
-			str = mapper.
-//					writerWithDefaultPrettyPrinter().
-					writeValueAsString(list);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (StringUtils.isEmpty(str)) return null;
-		return str;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,8 +233,8 @@ public class DatabaseRepository {
 		if (!result && !StringUtils.equals(getLanguageField(source.getIdioma()),destination.getLanguage())) result = true;
 		if (!result && !StringUtils.equals(getStatusField(source.getEstado()), destination.getStatus())) result = true;
 		if (!result && !StringUtils.equals(getMediaField(source.getMedio()), destination.getMediaType())) result = true;
-		if (!result && !StringUtils.equals(getResumen(source.getResumen()), destination.getSummary())) result = true;
-		if (!result && !StringUtils.equals(getTitle(source), destination.getTitle())) result = true;
+		if (!result && !StringUtils.equals(source.generateResumen(), destination.getSummary())) result = true;
+		if (!result && !StringUtils.equals(source.generateTitle(), destination.getTitle())) result = true;
 
 		return result;
 		
@@ -492,7 +398,7 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && (source.getProvider() != null) && (!TERM_PROVIDER.get(source.getProvider()).equals(destination.getProvider()))) result = true;
+		if (!result && (source.getProvider() != null) && (!TERM_PRVDR.get(source.getProvider()).equals(destination.getProvider()))) result = true;
 		if (!result && (source.getTermtype() != null) && (!TERM_TERM.get(source.getTermtype()).equals(destination.getTermtype()))) result = true;
 		if (!result && (source.getDesctype() != null) && (!TERM_DESC.get(source.getDesctype()).equals(destination.getDesctype()))) result = true;
 		if (!result && !StringUtils.equals(source.getCode(), destination.getCode())) result = true;
@@ -517,9 +423,9 @@ public class DatabaseRepository {
 		if (StringUtils.isNotBlank(source.getMedio())) destination.setMediaType(getMediaField(source.getMedio()));
 
 		String str = null;
-		str = getResumen(source.getResumen());
+		str = source.generateResumen();
 		if (StringUtils.isNotBlank(str)) destination.setSummary(str);
-		str = getTitle(source);
+		str = source.generateTitle();
 		if (StringUtils.isNotBlank(str)) destination.setTitle(str);
 		
 		return destination;
@@ -690,7 +596,7 @@ public class DatabaseRepository {
 		if (	(source == null) || 
 				(destination == null)) return null;
 		
-		if (source.getProvider() != null) destination.setProvider(TERM_PROVIDER.get(source.getProvider()));
+		if (source.getProvider() != null) destination.setProvider(TERM_PRVDR.get(source.getProvider()));
 		if (source.getTermtype() != null) destination.setTermtype(TERM_TERM.get(source.getTermtype()));
 		if (source.getDesctype() != null) destination.setDesctype(TERM_DESC.get(source.getDesctype()));
 		if (StringUtils.isNotBlank(source.getCode())) destination.setCode(source.getCode());
@@ -894,7 +800,7 @@ public class DatabaseRepository {
 				(obj.getBlocks().isEmpty())) return false;
 
 		if (articleDB.getId() != null) {
-			System.out.println ("DEBUG");
+			System.out.println ("DEBUG articulo encontrado. Debiera cambiar la version");
 		}
 		// METODO 1: Al ser 1aN en LAZY debemos actualizar aquí
 		Set<PubBlockSubentity> items =  obj.
@@ -1032,7 +938,7 @@ public class DatabaseRepository {
 				(obj.getReferencias().isEmpty())) return false;
 
 		if (articleDB.getId() != null) {
-			System.out.println ("DEBUG");
+			System.out.println ("DEBUG articulo encontrado. Debiera cambiar la version");
 		}
 
 		// METODO 2: Hacemos un merge por ser 1aN EAGER
@@ -1515,8 +1421,8 @@ public class DatabaseRepository {
 
 		try {
 			
-			searchedDB = termRep.findByProviderAndDesctypeAndCode(
-					TERM_PROVIDER.get(ProviderType.MESH), 
+			searchedDB = termRep.findByProviderAndTermtypeAndCode(
+					TERM_PRVDR.get(ProviderType.MESH), 
 					TERM_TERM.get(obj.getTermtype()), 
 					obj.getCode());
 			
@@ -1773,7 +1679,7 @@ public class DatabaseRepository {
 			}
 			
 			if (articleDB.getTitle().length()<10) {
-				System.out.println("DEBUG");
+				System.out.println("DEBUG titulo corto");
 			}
 
 			obj.setHayCambiosEnBD(false);
@@ -2216,7 +2122,12 @@ public class DatabaseRepository {
 		return db;
 		
 	}
-	
+
+	public BloqueAnotado updateDB(BloqueAnotado obj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// REPOSITORIOS
 

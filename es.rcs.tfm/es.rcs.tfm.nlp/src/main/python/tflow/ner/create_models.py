@@ -7,7 +7,7 @@ import argparse
 
 
 def create_graph(output_path, number_of_tags, embeddings_dimension, number_of_chars, lstm_size=128):
-    if sys.version_info[0] != 3 or sys.version_info[1] > 7:
+    if sys.version_info[0] != 3 or sys.version_info[1] > 8:
         raise Exception('Python 3.7 or above not supported by TensorFlow')
     if tf.__version__ != '1.15.0':
         raise Exception('Spark NLP is compiled with TensorFlow 1.15.0. Please use such version.')

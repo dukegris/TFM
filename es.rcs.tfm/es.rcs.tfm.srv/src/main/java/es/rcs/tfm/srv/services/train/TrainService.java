@@ -2,6 +2,7 @@ package es.rcs.tfm.srv.services.train;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import es.rcs.tfm.srv.SrvNames;
+import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.BloqueAnotado;
 import es.rcs.tfm.srv.repository.TrainRepository;
 import es.rcs.tfm.srv.setup.TmBiocXmlProcessor;
 import es.rcs.tfm.srv.setup.TmVarTxtProcessor;
@@ -43,6 +46,9 @@ public class TrainService {
 
 	@Value("${tfm.dataset.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets}")
 	private String DATASET_DIRECTORY = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets";
+
+	@Value("${tfm.pipeline.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training}")
+	private String OUT_PIPELINE_DIRECTORY = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training";
 	
 	@Value("${tfm.conll2003.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll}")		
 	String CONLL_DIRECTORY =         "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll";
@@ -561,6 +567,47 @@ public class TrainService {
 			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
 		}
 		
+	}
+
+	public List<BloqueAnotado> process(
+			SparkSession spark, 
+			List<Articulo> articles) {
+
+		if (	(articles == null) ||
+				(articles.isEmpty())) return null;
+
+		List<BloqueAnotado>resultado = null;
+		try {
+			
+			File posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
+			File bertModelDirectory = Paths.get(FilenameUtils.concat(BERT_DIRECTORY, CONLL2003_IN_BERT_MODEL)).toFile();
+			File nerModelDirectory = Paths.get(FilenameUtils.concat(NER_DIRECTORY, TRAIN_NER_MODEL)).toFile();
+			File outPipelineDirectory = Paths.get(OUT_PIPELINE_DIRECTORY).toFile();
+
+			resultado = TrainRepository.getProcessedBlocks(
+					spark, 
+					articles,
+					posModelDirectory,
+					bertModelDirectory,
+					nerModelDirectory,
+					outPipelineDirectory,
+					CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT,
+					CONLL2003_IN_BERT_DIMENSION,
+					CONLL2003_IN_BERT_BATCH_SIZE,
+					CONLL2003_IN_BERT_CASE_SENSITIVE,
+					CONLL2003_IN_BERT_POOLING_LAYER);
+
+			if ((resultado == null) || (resultado.isEmpty())) {
+				LOG.info("PROCESS SERVICE: OK");
+			} else {
+				LOG.info("PROCESS SERVICE: FAIL");
+			}
+		} catch (Exception ex) {
+			LOG.warn("PROCESS SERVICE: FAIL - ex:" + ex.toString());
+		}
+
+		return resultado;
+
 	}	
 
 }

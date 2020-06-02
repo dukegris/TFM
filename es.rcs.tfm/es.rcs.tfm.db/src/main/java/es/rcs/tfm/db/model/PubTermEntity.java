@@ -63,15 +63,12 @@ import lombok.ToString;
 					columnNames = { PubTermEntity.DB_UID }),
 			@UniqueConstraint(
 					name = PubTermEntity.DB_NAME_UK, 
-					columnNames = { PubTermEntity.DB_PROVIDER, PubTermEntity.DB_DESCTYPE, PubTermEntity.DB_CODE })  })
+					columnNames = { PubTermEntity.DB_PROVIDER, PubTermEntity.DB_TERMTYPE, PubTermEntity.DB_CODE })  })
 @Entity
 @Audited
 @EntityListeners(
 		value = AuditingEntityListener.class)
 public class PubTermEntity extends AuditedBaseEntity {
-
-	public static final String DESCRIPTOR			= "DESCRIPTOR";
-	public static final String CUALIFICADOR			= "CUALIFICADOR";
 
 	@Transient
 	private static final Logger LOG = LoggerFactory.getLogger(PubFileEntity.class);
@@ -80,8 +77,8 @@ public class PubTermEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE				= "Term";
 
 	public static final String RES_PROVIDER			= "provider";
-	public static final String RES_DESCTYPE			= "descType";
 	public static final String RES_TERMTYPE			= "termType";
+	public static final String RES_DESCTYPE			= "descType";
 	public static final String RES_CODE				= "code";
 	public static final String RES_VALUE			= "value";
 	public static final String RES_PARENT_ID		= "parentId";
@@ -97,9 +94,9 @@ public class PubTermEntity extends AuditedBaseEntity {
 	public static final String DB_NAME_UK			= "pub_ter_txt_uk";
 	public static final String DB_PARENT_ID_FK		= "pub_ter_id_fk";
 
-	public static final String DB_DESCTYPE			= "ter_des";
+	public static final String DB_PROVIDER			= "ter_prv";
 	public static final String DB_TERMTYPE			= "ter_typ";
-	public static final String DB_PROVIDER			= "ter_abr";
+	public static final String DB_DESCTYPE			= "ter_des";
 	public static final String DB_CODE				= "ter_cod";
 	public static final String DB_VALUE				= "ter_val";
 	public static final String DB_PARENT_ID			= "ter_id";
@@ -129,33 +126,33 @@ public class PubTermEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_DESCTYPE,
-			required = true)
-	@Column(
-			name = DB_DESCTYPE, 
-			unique = false,
-			nullable = false, 
-			length = 16)
-	@NotNull(
-			message = "El tipo descriptor/cualificador no puede ser nulo")
-	@Size(
-			max = 16, 
-			message = "El tipo descriptor/cualificador no puede sobrepasar los {max} caracteres.")
-	public String desctype;
-
-	
-	@JsonProperty(
 			value = RES_TERMTYPE,
-			required = false)
+			required = true)
 	@Column(
 			name = DB_TERMTYPE, 
 			unique = false,
-			nullable = true, 
+			nullable = false, 
 			length = 32)
+	@NotNull(
+			message = "El tipo descriptor/cualificador no puede ser nulo")
 	@Size(
 			max = 32, 
 			message = "El tipo de termino no puede sobrepasar los {max} caracteres.")
 	public String termtype;
+
+	
+	@JsonProperty(
+			value = RES_DESCTYPE,
+			required = false)
+	@Column(
+			name = DB_DESCTYPE, 
+			unique = false,
+			nullable = true, 
+			length = 16)
+	@Size(
+			max = 16, 
+			message = "El tipo suplementario no puede sobrepasar los {max} caracteres.")
+	public String desctype;
 
 	
 	@JsonProperty(

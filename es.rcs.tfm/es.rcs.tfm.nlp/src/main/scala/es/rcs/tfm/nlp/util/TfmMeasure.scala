@@ -25,9 +25,9 @@ object TfmMeasure {
 
 		// prec = (predicted & correct) / predicted
 		// rec = (predicted & correct) / correct
-		val prec = predictedCorrect.toFloat / predicted
-		val rec = predictedCorrect.toFloat / correct
-		val f1 = 2 * prec * rec / (prec + rec)
+		val prec = if (predicted != 0) predictedCorrect.toFloat / predicted else 0
+		val rec = if (correct != 0) predictedCorrect.toFloat / correct else 0
+		val f1 = if ((prec + rec) != 0) 2 * prec * rec / (prec + rec) else 0
 
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-MEASURE: END   calcStat")
 
@@ -72,7 +72,8 @@ object TfmMeasure {
 		println("CHARS: " + chars.length)
 
 		val nerTF = nerTagger.getModelIfNotSet
-		nerTF.measure(instances, (s: String) => System.out.println(s), extended, errorsToPrint)
+		//nerTF.measure(instances, (s: String) => System.out.println(s), extended, errorsToPrint)
+		nerTF.measure(instances, extended, includeConfidence = true, enableOutputLogs = false, outputLogsPath = "d:/measure.log")//, uuid = uuid)
 
 		println(java.time.LocalTime.now + ": TFM-MEASURE: END   measureDL")
 
@@ -86,7 +87,8 @@ object TfmMeasure {
 
 		println(java.time.LocalTime.now + ": TFM-MEASURE: BEGIN measureTagsDL")
 
-		val nerTransform = nerTagger.transform(data)
+		val nerTransform = nerTagger.
+		    transform(data)
 		val nerTagsConverted = TfmHelper.
 				prepareNerConverter().
 				transform(nerTransform)
@@ -111,6 +113,8 @@ object TfmMeasure {
 				select(TfmType.CONVERTER_NAMED_ENTITY, TfmType.CONVERTER_LABEL).
 				collect()
 
+		val falsePositivePredicted = mutable.Map[String, Int]()
+		val falseNegativePredicted = mutable.Map[String, Int]()
 		val correctPredicted = mutable.Map[String, Int]()
 		val predicted = mutable.Map[String, Int]()
 		val correct = mutable.Map[String, Int]()
@@ -135,21 +139,51 @@ object TfmMeasure {
 				val tag = a.metadata("entity")
 				correctPredicted(tag) = correctPredicted.getOrElse(tag, 0) + 1
 			}
+			
+			val falsePositivePredictions = labels.toSet.diff(predictions.toSet)
+			for (fp <- falsePositivePredictions) {
+				val tag = fp.metadata("entity")
+				falsePositivePredicted(tag) = falsePositivePredicted.getOrElse(tag, 0) + 1
+			}
+			
+			val falseNegativePredictions = predictions.toSet.diff(labels.toSet)
+			for (fn <- falseNegativePredictions) {
+				val tag = fn.metadata("entity")
+				falseNegativePredicted(tag) = falseNegativePredicted.getOrElse(tag, 0) + 1
+			}
 
 			if (toPrintErrors > 0) {
 
-				var errors = toPrintErrors
+			  System.out.println("PREDICTIONS")
+				var errors = toPrintErrors * 3
 				for (p <- predictions) {
 					if (errors > 0 && !correctPredictions.contains(p)) {
-						System.out.println(s"Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
+						System.out.println(s"Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
+						errors -= 1
+					}
+					if (errors > 0 && !falsePositivePredictions.contains(p)) {
+						System.out.println(s"False Positive Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
+						errors -= 1
+					}
+					if (errors > 0 && !falseNegativePredictions.contains(p)) {
+						System.out.println(s"False Negative Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
 						errors -= 1
 					}
 				}
 
-				errors = toPrintErrors
+			  System.out.println("LABELS")
+				errors = toPrintErrors * 3
 				for (p <- labels) {
 					if (errors > 0 && !correctPredictions.contains(p)) {
-						System.out.println(s"Correct\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata("text")}")
+						System.out.println(s"Correct\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
+						errors -= 1
+					}
+					if (errors > 0 && !falsePositivePredictions.contains(p)) {
+						System.out.println(s"False Positive Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
+						errors -= 1
+					}
+					if (errors > 0 && !falseNegativePredictions.contains(p)) {
+						System.out.println(s"False Negative Predicted\t${p.result}\t${p.begin}\t${p.end}\t${p.metadata.getOrElse("entity", "_text_")}")
 						errors -= 1
 					}
 				}

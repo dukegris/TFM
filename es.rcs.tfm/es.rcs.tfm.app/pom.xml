@@ -78,7 +78,7 @@
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
-			<artifactId>RCS-Xml-MESH_Descriptors</artifactId>
+			<artifactId>RCS-Xml-MESH</artifactId>
 			<version>${tfm.version}</version>
 			<scope>compile</scope>
 		</dependency>

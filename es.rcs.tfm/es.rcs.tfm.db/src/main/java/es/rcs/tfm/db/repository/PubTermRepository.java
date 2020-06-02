@@ -40,9 +40,9 @@ public interface PubTermRepository extends
 
 	}
 
-	Optional<PubTermEntity> findByProviderAndDesctypeAndCode(
+	Optional<PubTermEntity> findByProviderAndTermtypeAndCode(
 			@Param("provider") String provider, 
-			@Param("desctype") String desctype, 
+			@Param("termtype") String termtype, 
 			@Param("code") String code);
 
 	

@@ -535,7 +535,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		}
 		
 		if (StringUtils.isEmpty(resultado.getTitulo())) {
-			System.out.println("DEBUG");
+			System.out.println("DEBUG - titulo vacio");
 		}
 
 		return resultado;
