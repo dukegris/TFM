@@ -1,0 +1,54 @@
+FROM ubuntu:20.04
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+RUN apt-get update &&\
+    apt-get install -y --no-install-recommends gnupg2 locales apt-utils
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen &&\
+    locale-gen
+ENV TZ=Europe/Madrid \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime &&\
+    echo $TZ > /etc/timezone
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update &&\
+    apt-get install -y --no-install-recommends lsof wget openjdk-11-jdk
+
+ARG SOLR_VERSION="8.5.2"
+ARG SOLR_SHA512="02b9b90468f399701dba26695c9af6cd205f47916a06e26838613fe238594e9902de6ef3b42ec8257d195e37589adf8427d9b7962557731e91949fbef06bb544"
+ARG SOLR_KEYS="86EDB9C33B8517228E88A8F93E48C0C6EF362B9E"
+ARG SOLR_DOWNLOAD_SERVER
+ENV SOLR_USER="solr" \
+    SOLR_UID="8983" \
+    SOLR_GROUP="solr" \
+    SOLR_GID="8983" \
+    SOLR_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz&action=download" \
+    SOLR_DIST_URL="https://www.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz" \
+    SOLR_ARCHIVE_URL="https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz" \
+    SOLR_ENV=/etc/default/solr.in.sh \
+    SOLR_BIN=/usr/lib \
+    SOLR_DIR=/var/lib/solr \
+    SOLR_DATA_DIR=$SOLR_DIR/data \
+    SOLR_PID_DIR=$SOLR_DIR \
+    SOLR_LOGS_DIR=$SOLR_DIR/logs \
+    LOG4J_PROPS=$SOLR_DIR/log4j2.xml  \
+    PATH="$SOLR_BIN/solr/bin:$PATH"
+
+RUN wget $SOLR_ARCHIVE_URL -q &&\
+    tar xzf solr-$SOLR_VERSION.tgz solr-$SOLR_VERSION/bin/install_solr_service.sh --strip-components=2 &&\
+    bash ./install_solr_service.sh solr-$SOLR_VERSION.tgz -i $SOLR_BIN -d $SOLR_DIR -u $SOLR_USER -p 8983 &&\
+    chmod 755 /etc/init.d/solr
+
+#RUN echo "SOLR_IP_WHITELIST='*'" >> $SOLR_ENV
+
+USER $SOLR_USER
+RUN $SOLR_BIN/solr/bin/solr start &&\
+    $SOLR_BIN/solr/bin/solr create -c article_core -n data_driven_schema_configs -p 8983
+
+EXPOSE 8983
+VOLUME  ["$SOLR_LOGS_DIR", "$SOLR_DATA_DIR"]
+CMD ["/usr/lib/solr/bin/solr", "-f", "-p", "8983"]

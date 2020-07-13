@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  postgresql:
+    image: dukegris/tfm_postgresql:1.0.1
+    networks: 
+      backend:
+    volumes:
+      - type: volume
+        source: pg_metadata
+        target: /var/lib/postgresql
+        volume:
+          nocopy: false
+      - type: volume
+        source: pg_data
+        target: /var/lib/tfm
+        volume:
+          nocopy: false
+      - type: volume
+        source: pg_logs
+        target: /var/log/postgresql
+        volume:
+          nocopy: false
+    ports:
+      - 5432:5432
+  solr:
+    image: dukegris/tfm_solr:1.0.1
+    networks: 
+      backend:
+    volumes:
+      - type: volume
+        source: solr_metadata
+        target: /var/lib/solr
+        volume:
+          nocopy: false
+      - type: volume
+        source: solr_data
+        target: /var/lib/tfm
+        volume:
+          nocopy: false
+      - type: volume
+        source: solr_logs
+        target: /var/log/solr
+        volume:
+          nocopy: false
+    ports:
+      - 8983:8983
+  spark_master:
+    image: dukegris/tfm_spark:1.0.1
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    hostname: master
+    networks: 
+      spark:
+    volumes:
+      - type: volume
+        source: spark_master_logs
+        target: /var/log/spark
+        volume:
+          nocopy: false
+    ports:
+      - 8080:8080
+      - 7077:7077
+  spark_worker:
+    image: dukegris/tfm_spark:1.0.1
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+    networks: 
+      spark:
+    depends_on:
+      - spark_master
+    volumes:
+      - type: volume
+        source: spark_worker_logs
+        target: /var/log/spark
+        volume:
+          nocopy: false
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark_master:7077
+    ports:
+      - 8081-8089:8080
+
+networks:
+  backend:
+  spark:
+            
+volumes:
+  pg_metadata:
+    external: false
+    name: pg-metadata
+  pg_data:
+    external: false
+    name: pg-data
+  pg_logs:
+    external: false
+    name: pg-logs
+  solr_metadata:
+    external: false
+    name: solr-metadata
+  solr_data:
+    external: false
+    name: solr-data
+  solr_logs:
+    external: false
+    name: solr-logs
+  spark_master_logs:
+    external: false
+    name: spark_master-logs
+  spark_worker_logs:
+    external: false
+    name: spark_worker-logs

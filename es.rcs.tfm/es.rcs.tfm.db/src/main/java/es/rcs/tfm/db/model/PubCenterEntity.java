@@ -105,6 +105,7 @@ public class PubCenterEntity extends AuditedBaseEntity {
 
 	public static final String DB_CENTRE_ID					= "cen_id";
 
+	public static final String ATT_NAME						= "name";
 	public static final String ATT_IDENTIFIERS_IDS			= "identifierIds";
 	public static final String ATT_IDENTIFIERS				= "identifiers";
 	public static final String ATT_AUTHOR_BOOK_CENTRE_IDS	= "authorBookCentreIds";

@@ -145,9 +145,9 @@ public class DatabaseConfig {
 		*/
 		
 		Properties xaProperties = new Properties();
-		xaProperties.setProperty ("user", dbUsername);
-		xaProperties.setProperty ("password", dbPassword);
-		xaProperties.setProperty ("URL", dbUrl);
+		xaProperties.setProperty("user", dbUsername);
+		xaProperties.setProperty("password", dbPassword);
+		xaProperties.setProperty("URL", dbUrl);
 
 		AtomikosDataSourceBean bean = new AtomikosDataSourceBean();
 		bean.setUniqueResourceName("TFM_DB"); 
@@ -167,7 +167,7 @@ public class DatabaseConfig {
 
 		Properties jpaProperties = new Properties();
 
-		jpaProperties.put("hibernate.show_sql", "false");
+		jpaProperties.put("hibernate.show_sql", "true");
 		// jpaProperties.put("hibernate.format_sql", "false");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "create-drop");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "create");
@@ -225,6 +225,8 @@ public class DatabaseConfig {
 		config.setProperty("com.atomikos.icatch.log_base_name",				"UserTransactionServiceImpLog");
 		config.setProperty("com.atomikos.icatch.log_base_dir",				jtaLogger);
 
+		config.setProperty("com.atomikos.icatch.enable_logging",			"false");
+
 		UserTransactionService bean = new UserTransactionServiceImp(config);
 		
 		return bean;
@@ -239,7 +241,7 @@ public class DatabaseConfig {
 
 		TransactionManager bean = new UserTransactionManager();
 		try {
-			bean.setTransactionTimeout(1000);
+			bean.setTransactionTimeout(60);
 		} catch (SystemException e) {
 			e.printStackTrace();
 		}
@@ -253,11 +255,14 @@ public class DatabaseConfig {
 	public UserTransaction getUserTransaction() {
 
 		UserTransaction bean = new UserTransactionImp();
+		
+		/*
 		try {
 			bean.setTransactionTimeout(1000);
 		} catch (SystemException e) {
 			e.printStackTrace();
 		}
+		*/
 		
 		return bean;
 
@@ -268,7 +273,8 @@ public class DatabaseConfig {
 	public PlatformTransactionManager getTransactionManager() {
 
 		JtaTransactionManager bean = new JtaTransactionManager();
-		UserTransaction userTransaction = new UserTransactionImp();
+		//UserTransaction userTransaction = new UserTransactionImp();
+		UserTransaction userTransaction = getUserTransaction();
 		try {
 			userTransaction.setTransactionTimeout(10);
 			bean.setTransactionManager(getUserTransactionManager());

@@ -1,0 +1,114 @@
+FROM clearlinux:latest AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+ARG swupd_args
+
+# Move to latest Clear Linux release to ensure
+# that the swupd command line arguments are
+# correct
+RUN swupd clean
+RUN swupd update --no-boot-update $swupd_args
+
+# Grab os-release info from the minimal base image so
+# that the new content matches the exact OS version
+COPY --from=clearlinux/os-core:latest /usr/lib/os-release /
+
+# Install clean os-core bundle in target directory 'install-root'
+# using the new os version
+RUN source /os-release && \
+	mkdir /install-root && \
+	swupd os-install \
+	-V ${VERSION_ID} \
+	--debug \
+	--no-progress \
+	--path /install-root \
+	--statedir /swupd-state \
+	--no-boot-update \
+	--bundles=os-core,locales,postgresql
+
+# For some Host OS configuration with redirect_dir on,
+# extra data are saved on the upper layer when the same
+# file exists on different layers. To minimize docker
+# image size, remove the overlapped files before copy.
+RUN mkdir /os-core-install
+COPY --from=clearlinux/os-core:latest / /os-core-install/
+RUN cd / && \
+	find os-core-install | \
+	sed -e 's/os-core-install/install-root/' | \
+	xargs rm -d &> /dev/null || true
+
+# Copy the updated lastest version on the target system to the root,
+# Forgot the base and execute a cleaned flaten image
+FROM clearlinux/os-core:latest
+COPY --from=tfm_os_builder /install-root /
+
+ENV TZ=Europe/Madrid \
+	LANGUAGE=en_US:en \
+	LC_ALL=en_US.UTF-8 \
+	LANG=en_US.UTF-8
+	
+ENV TFM_USER="postgresql" \
+	TFM_GROUP="postgresql" \
+	TFM_BIN_DIR="/usr/bin" \
+	TFM_RUN_DIR="/run/postgresql" \
+	TFM_ETC_DIR="/var/lib/postgresql" \
+	TFM_LOGS_DIR="/var/log/postgresql" \
+	TFM_METADATA_DIR="/var/lib/postgresql" \
+	TFM_DATA_DIR="/var/lib/tfm"
+
+RUN groupadd -r $TFM_GROUP &&\
+	useradd --no-log-init -r -g $TFM_GROUP $TFM_USER
+
+RUN mkdir -p $TFM_LOGS_DIR &&\
+	mkdir -p $TFM_RUN_DIR &&\
+	mkdir -p $TFM_METADATA_DIR &&\
+	mkdir -p $TFM_DATA_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_LOGS_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_RUN_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_METADATA_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_DATA_DIR &&\
+	chmod 700 "$TFM_LOGS_DIR" &&\
+	chmod 700 "$TFM_RUN_DIR" &&\
+	chmod 700 "$TFM_METADATA_DIR" &&\
+	chmod 700 "$TFM_DATA_DIR"
+
+USER $TFM_USER
+# createuser TfmUser --login --superuser --createdb &&\
+# tfm_user: TfmPassword
+# tfm_query: TfmQuery
+#RUN initdb --pgdata=$PG_DATA_DIR --username="$TFM_USER" --auth-local=trust --auth-host=trust --encoding=UTF-8 --locale=en_US.UTF-8 --text-search-config="english" &&\
+RUN initdb --pgdata=$TFM_METADATA_DIR --username="$TFM_USER" --encoding=UTF-8 --locale=en_US.UTF-8 --text-search-config="english" &&\
+	sed -i "s|#listen_addresses.*|listen_addresses = '*'|" $TFM_ETC_DIR/postgresql.conf &&\
+	sed -i "s|#port.*|port = 5432|" $TFM_ETC_DIR/postgresql.conf &&\
+	sed -i "s|#default_tablespace.*|default_tablespace = 'tfm_tbl'|" $TFM_ETC_DIR/postgresql.conf &&\
+	sed -i "s|#search_path.*|search_path = '\"$user\",tfm'|" $TFM_ETC_DIR/postgresql.conf &&\
+	sed -i "s|host[ tab]\+all[ tab]\+all[ tab]\+127.*|host  all  all  0.0.0.0/0  md5|" $TFM_ETC_DIR/pg_hba.conf &&\
+	sed -i "s|host[ tab]\+all[ tab]\+all[ tab]\+\:.*|#host  all  all  ::1/128  trust|" $TFM_ETC_DIR/pg_hba.conf &&\
+	sed -i "s|local.*|local  all  all  trust|" $TFM_ETC_DIR/pg_hba.conf
+
+#RUN	pg_ctl --pgdata=$TFM_METADATA_DIR -o "-c listen_addresses=''" -w start &&\
+RUN	set PGDATA=${TFM_METADATA_DIR} &&\
+	pg_ctl --pgdata=$TFM_METADATA_DIR -w start &&\
+	psql -d postgres --command "CREATE ROLE tfm_admin SUPERUSER;" &&\
+	psql -d postgres --command "CREATE TABLESPACE tfm_tbl OWNER tfm_admin LOCATION '$TFM_DATA_DIR';" &&\
+	psql -d postgres --command "CREATE DATABASE tfm_db OWNER tfm_admin TABLESPACE tfm_tbl;" &&\
+	psql -d postgres --dbname tfm_db --command "CREATE SCHEMA tfm AUTHORIZATION tfm_admin;"  &&\
+	psql -d postgres --command "CREATE USER tfm_user INHERIT PASSWORD 'md52484a0b9e891fd2a0a73586d30e4a3da';" &&\
+	psql -d postgres --command "GRANT CONNECT ON DATABASE tfm_db TO tfm_user;" &&\
+	psql -d postgres --dbname tfm_db --command "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA tfm TO tfm_user;" &&\
+	psql -d postgres --dbname tfm_db --command "GRANT USAGE ON SCHEMA tfm TO tfm_user;" &&\
+	psql -d postgres --command "CREATE USER tfm_query INHERIT PASSWORD 'md58f4e7cdaf566f0766dfc67fe15f7348c';" &&\
+	psql -d postgres --dbname tfm_db --command "GRANT SELECT ON ALL TABLES IN SCHEMA tfm TO tfm_query;"
+
+# RUN echo "host all  all    0.0.0.0/0  md5" >> $TFM_ETC_DIR/pg_hba.conf
+# RUN echo "listen_addresses = '*'" >> $TFM_ETC_DIR/postgresql.conf
+# RUN echo "default_tablespace = 'tfm_tbl'" >> $TFM_ETC_DIR/postgresql.conf
+# RUN echo "search_path = '\"$user\",tfm'" >> $TFM_ETC_DIR/postgresql.conf
+
+EXPOSE 5432
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
+CMD ["/usr/bin/postgres", "-D", "/var/lib/postgresql", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
+
+#CMD ["/bin/bash"]

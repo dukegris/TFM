@@ -3,6 +3,8 @@ package es.rcs.tfm.srv.repository;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -180,13 +182,15 @@ public class DatabaseRepository {
 	}
 	
 	/**
-	 * Debido al tamaño desproporcionado de algunos centros se debe recortar su nombre
+	 * Debido al tamaï¿½o desproporcionado de algunos centros se debe recortar su nombre
 	 * @param str Cadena a recortar
 	 * @return Cadena recortada
 	 */
 	private static String getCentreName(String str) {
 		if (StringUtils.isBlank(str)) return str;
-		return StringUtils.abbreviate(str, 2046);
+		ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(str);
+		String result = StringUtils.abbreviate(byteBuffer.toString(), 2046);
+		return result;
 	}
 	private static final String getDateTypeField(String key) {
 		return get(DATE, key);
@@ -336,7 +340,7 @@ public class DatabaseRepository {
 		if (!result && (source.getGzInstante() != null) && source.getGzInstante().equals(destination.getGzTimeStamp())) result = true;
 		if (!result && (source.getNumArticlesProcessed() != destination.getNumArticlesProcessed())) result = true;
 		if (!result && (source.getNumArticlesTotal() != destination.getNumArticlesTotal())) result = true;
-		if (!result && source.isProcesoArticulosCompletado() && !PubFileEntity.PROCESSED.equals(destination.getNumArticlesTotal())) result = true;
+		if (!result && source.isProcesoArticulosCompletado() && !PubFileEntity.PROCESSED.equals(destination.getStatus())) result = true;
 
 		return result;
 		
@@ -447,32 +451,32 @@ public class DatabaseRepository {
 
 		if (source.getTitulo() != null) {
 			//TODO
-			if (StringUtils.isNotEmpty(source.getTitulo().getLibroId())) { 
+			if (StringUtils.isNotBlank(source.getTitulo().getLibroId())) { 
 				System.out.print(" LB-" + source.getTitulo().getLibroId());
 			}
-			if (StringUtils.isNotEmpty(source.getTitulo().getParteId())) { 
+			if (StringUtils.isNotBlank(source.getTitulo().getParteId())) { 
 				System.out.print(" PB-" + source.getTitulo().getParteId());
 			}
-			if (StringUtils.isNotEmpty(source.getTitulo().getSeccionId())) { 
+			if (StringUtils.isNotBlank(source.getTitulo().getSeccionId())) { 
 				System.out.print(" SB-" + source.getTitulo().getSeccionId());
 			}
-			if (StringUtils.isNotEmpty(source.getTitulo().getTitulo())) { 
+			if (StringUtils.isNotBlank(source.getTitulo().getTitulo())) { 
 				System.out.println(" TB-" + source.getTitulo().getTitulo());
 			}
 		}
 		
 		if (source.getTituloColeccion() != null) {
 			//TODO
-			if (StringUtils.isNotEmpty(source.getTituloColeccion().getLibroId())) { 
+			if (StringUtils.isNotBlank(source.getTituloColeccion().getLibroId())) { 
 				System.out.print(" LC-" + source.getTituloColeccion().getLibroId());
 			}
-			if (StringUtils.isNotEmpty(source.getTituloColeccion().getParteId())) { 
+			if (StringUtils.isNotBlank(source.getTituloColeccion().getParteId())) { 
 				System.out.print(" PC-" + source.getTituloColeccion().getParteId());
 			}
-			if (StringUtils.isNotEmpty(source.getTituloColeccion().getSeccionId())) { 
+			if (StringUtils.isNotBlank(source.getTituloColeccion().getSeccionId())) { 
 				System.out.print(" SC-" + source.getTituloColeccion().getSeccionId());
 			}
-			if (StringUtils.isNotEmpty(source.getTituloColeccion().getTitulo())) { 
+			if (StringUtils.isNotBlank(source.getTituloColeccion().getTitulo())) { 
 				System.out.println(" TC-" + source.getTituloColeccion().getTitulo());
 			}
 		}
@@ -802,7 +806,7 @@ public class DatabaseRepository {
 		if (articleDB.getId() != null) {
 			System.out.println ("DEBUG articulo encontrado. Debiera cambiar la version");
 		}
-		// METODO 1: Al ser 1aN en LAZY debemos actualizar aquí
+		// METODO 1: Al ser 1aN en LAZY debemos actualizar aquï¿½
 		Set<PubBlockSubentity> items =  obj.
 				getBlocks().
 				stream().
@@ -823,6 +827,7 @@ public class DatabaseRepository {
 
 				if (searchedDB.isPresent()) {
 					PubBlockSubentity olddb = searchedDB.get();
+					if (db.getId() == null) db.setId(olddb.getId());
 					update = anyDifferences(olddb, db);
 				} else {
 					update = true;
@@ -850,7 +855,7 @@ public class DatabaseRepository {
 				(obj.getFicheroPubmed().getEntidad() == null) ||
 				(obj.getFicheroPubmed().getEntidad().getId() == null)) return false;
 		
-		// METODO 1: Hacemos la búsqueda de ficheros por ser NaN. No toca articulos por eso devuelve siempre false
+		// METODO 1: Hacemos la bï¿½squeda de ficheros por ser NaN. No toca articulos por eso devuelve siempre false
 		boolean result = false;
 		
 		Optional<PubArticleFileEntity> searchedDB = searchArticleFileInDB (
@@ -909,6 +914,7 @@ public class DatabaseRepository {
 
 				if (searchedDB.isPresent()) {
 					PubArticleAuthorEntity olddb = searchedDB.get();
+					if (db.getId() == null) db.setId(olddb.getId());
 					update = anyDifferences(olddb, db);
 				} else {
 					update = true;
@@ -925,7 +931,7 @@ public class DatabaseRepository {
 				
 		});
 
-		// No se requiere actualizar el articulo al ser una relación NaN
+		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
 		return result;
 		
 	}
@@ -978,7 +984,7 @@ public class DatabaseRepository {
 				(obj.getTerminos() == null) || 
 				(obj.getTerminos().isEmpty())) return false;
 
-		// Hacemos la búsqueda de terminos por ser NaN
+		// Hacemos la bï¿½squeda de terminos por ser NaN
 		Set<PubArticleTermEntity> articuloTerminos = new HashSet<PubArticleTermEntity>();
 		for (Termino termino: obj.getTerminos()) {
 			
@@ -986,7 +992,7 @@ public class DatabaseRepository {
 			if ((termDB != null) && (articleDB != null)) {
 				PubArticleTermEntity artTermDB = buildRelation (termino, articleDB, termDB, new PubArticleTermEntity());
 				articuloTerminos.add(artTermDB);
-				if (StringUtils.isNotEmpty(termino.getData())) {
+				if (StringUtils.isNotBlank(termino.getData())) {
 					artTermDB.setData(termino.getData());
 				}
 				articuloTerminos.add(artTermDB);
@@ -1024,7 +1030,7 @@ public class DatabaseRepository {
 			
 		});
 
-		// No se requiere actualizar el articulo al ser una relación NaN
+		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
 		return result;
 		
 	}
@@ -1049,7 +1055,7 @@ public class DatabaseRepository {
 		try {
 			
 			if (	(!searchedDB.isPresent()) && 
-					(StringUtils.isNotEmpty(obj.getPmid()))) {
+					(StringUtils.isNotBlank(obj.getPmid()))) {
 				searchedDB = articleRep.findByPmid(obj.getPmid());
 			}
 	
@@ -1089,13 +1095,11 @@ public class DatabaseRepository {
 
 		try {
 		
-			PubArticleAuthorKey id = new PubArticleAuthorKey(
+			searchedDB = articleAuthorRep.findByKeyWithNulls(
 					articleId, 
 					authorId,
 					centreId,
 					publicationId);
-		
-			searchedDB = articleAuthorRep.findByKey(id);
 
 		} catch (Exception ex) {
 			LOG.warn("searchArticleAuthorInDB" + 
@@ -1234,7 +1238,7 @@ public class DatabaseRepository {
 
 		try {
 			
-			if (StringUtils.isNotEmpty(obj.getNombre())) {
+			if (StringUtils.isNotBlank(obj.getNombre())) {
 				searchedDB = centreRep.findByName(getCentreName(obj.getNombre()));
 			}
 	
@@ -1303,7 +1307,7 @@ public class DatabaseRepository {
 
 		try {
 			
-//			if (StringUtils.isNotEmpty(obj.getTitle())) {
+//			if (StringUtils.isNotBlank(obj.getTitle())) {
 //				searchedDB = publicationRep.findByName(obj.getTitle());
 //			}
 	
@@ -1381,7 +1385,7 @@ public class DatabaseRepository {
 
 		try {
 			
-			if (StringUtils.isNotEmpty(obj.getNombre())) {
+			if (StringUtils.isNotBlank(obj.getNombre())) {
 				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.JOURNAL_TYPE, obj.getNombre());
 			}
 	
@@ -1471,7 +1475,7 @@ public class DatabaseRepository {
 		}
 
 		// VERSION
-		if (StringUtils.isNotEmpty(obj.getVersion())) {
+		if (StringUtils.isNotBlank(obj.getVersion())) {
 			try {
 				Integer versionId = Integer.parseInt(obj.getVersion());
 				if ((articleDB.getVersionId() != null) && (versionId < articleDB.getVersionId())) {
@@ -1614,7 +1618,7 @@ public class DatabaseRepository {
 				update |= articleDB.mergeDates(items);
 			}
 
-			// TODO ¿Pertenecen al artículo o son del libro?
+			// TODO ï¿½Pertenecen al artï¿½culo o son del libro?
 			// FECHAS
 			if ((obj.getLibro()!= null) && (obj.getLibro().getFechas() != null) && !obj.getLibro().getFechas().isEmpty()) {
 				Set<PubDateSubentity> items = obj.
@@ -1726,7 +1730,7 @@ public class DatabaseRepository {
 						"\r\n\t" + ex.getMessage());
 			db = null;
 		}
-		// No se requiere actualizar el articulo al ser una relación NaN
+		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
 		// result = true;
 		
 		return db;

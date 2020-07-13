@@ -39,15 +39,15 @@ public class IndexRepository {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (StringUtils.isEmpty(str)) return null;
+		if (StringUtils.isBlank(str)) return null;
 		return str;
 	}
 
 	private static final String getTitle(Articulo obj) {
 		String result = "";
 		if (obj.getTitulo() != null)			result = obj.getTitulo().getTitulo();
-		if (StringUtils.isEmpty(result))		result = obj.getTituloOriginal();
-		if (StringUtils.isEmpty(result))		result = "";
+		if (StringUtils.isBlank(result))		result = obj.getTituloOriginal();
+		if (StringUtils.isBlank(result))		result = "";
 		return result;
 	}
 
@@ -204,7 +204,7 @@ public class IndexRepository {
 		try {
 			
 			if (	(!searchedIDX.isPresent()) && 
-					(StringUtils.isNotEmpty(obj.getPmid()))) {
+					(StringUtils.isNotBlank(obj.getPmid()))) {
 
 				List<PubArticleIdx> idxs = articleIdxRep.findByPmid(obj.getPmid());
 				if ((idxs != null) && (!idxs.isEmpty())) {

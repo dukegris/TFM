@@ -39,6 +39,6 @@ public interface SecGroupRepository extends
 	}
 
 	public SecGroupEntity findByCode(
-			@Param("code") String code);
+			@Param(SecGroupEntity.ATT_CODE) String code);
 
 }

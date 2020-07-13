@@ -3,9 +3,10 @@ package es.rcs.tfm.srv.services.corpus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,7 +64,100 @@ public class PubmedLoaderService {
 		doLoadData(FTP_UPDATE);
 	}
 
+	private final static Lock loadPubmedNewDataLock = new ReentrantLock();
 	public void doLoadData(String FTP_DIRECTORY) {
+		if (!loadPubmedNewDataLock.tryLock()) return;
+		try {
+			doLoadDataLocked(FTP_DIRECTORY);
+		} catch (Exception ex) {
+			LOG.error(ex.toString());
+			ex.printStackTrace();
+		} finally {
+			loadPubmedNewDataLock.unlock();
+		}
+	}
+	
+	public void doLoadDataLocked(String FTP_DIRECTORY) {
+
+		// DESCARGAR FICHEROS DE FTP
+		FTPFile[] ftpFiles = FtpRepository.getFiles(
+				FPT_HOST, FTP_PORT, 
+				FTP_USERNAME, FTP_PASSWORD, 
+				FTP_DIRECTORY);
+		
+		if ((ftpFiles != null) && (ftpFiles.length>0)) {
+			LOG.info("PROCESSING " + ftpFiles.length + " FILES");
+		} else {
+			LOG.warn("PROCESSING NO FILES");
+			return;
+		}
+		
+		// MODELO DE FICHEROS 
+		Stream<Fichero> ficherosStream = Arrays.
+			stream(ftpFiles).
+			//TODO
+			//limit(10).
+			//parallel().
+			// Solo ficheros validos
+			filter(f ->
+					f.isValid() &&
+					f.isFile() &&
+					!f.isSymbolicLink() &&
+					!f.isDirectory() &&
+					!f.isUnknown() &&
+					SOLO_GZIP_PTRN.matcher(f.getName()).find()).
+			// Transformar ficheros fisicos del FTP en Ficheros del modelo junto a su base de datos
+			map(f -> 
+					Fichero.getInstance(
+							f.getName(),
+							f.getTimestamp(),
+							f.getSize()) ).
+			// Descarga ficheros y actualiza la Base de Datos
+			peek(f-> 
+					procesaFichero(f, FTP_DIRECTORY)).
+			filter(f -> 
+					!f.isProcesoArticulosCompletado()).
+			peek( f -> {
+				
+				PubmedXmlProcessor processor = new PubmedXmlProcessor(
+						f,
+						CORPUS_PUBMED_XML_DIRECTORY);
+				
+				Stream<Articulo> articulosStream = StreamSupport.
+						stream(
+								Spliterators.spliteratorUnknownSize(
+										processor, 
+										Spliterator.DISTINCT), 
+								false).
+						//TODO
+						limit(16).
+						//parallel().
+						peek(a -> procesaArticulo(a));
+
+				List<Articulo> articulos = articulosStream.
+						collect(Collectors.toList());
+				
+				DatabaseRepository.saveStats(1);
+				
+				int articulosSize = articulos.size();
+				f.setProcesoArticulosCompletado(processor.getItemsSize()*0.9 <= articulosSize);
+				f.setNumArticlesProcessed(f.getNumArticlesProcessed() + articulosSize);
+				f.setNumArticlesTotal(processor.getItemsSize());
+				corpusSrvc.updateDb(f);
+				
+			});
+
+		// Puede ser null
+		if (ficherosStream != null) {
+			// Tirar del Streams
+			List<Fichero> items = ficherosStream.collect(Collectors.toList());
+		}
+		
+		
+
+	}
+
+	public void doLoadDataEnBloques(String FTP_DIRECTORY) {
 
 		// DESCARGAR FICHEROS DE FTP
 		FTPFile[] ftpFiles = FtpRepository.getFiles(

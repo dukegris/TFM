@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.StringPath;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.QSecAuthorityEntity;
+import es.rcs.tfm.db.model.SecApplicationEntity;
 import es.rcs.tfm.db.model.SecAuthorityEntity;
 
 @Repository(DbNames.DB_AUT_REP)
@@ -39,6 +40,10 @@ public interface SecAuthorityRepository extends
 	}
 
 	public SecAuthorityEntity findByCode(
-			@Param("code") String code);
+			@Param(SecAuthorityEntity.ATT_CODE) String code);
+
+	public SecAuthorityEntity findByApplicationAndCode(
+			@Param(SecAuthorityEntity.ATT_APPLICATION_ID) SecApplicationEntity application,
+			@Param(SecAuthorityEntity.ATT_CODE) String code);
 
 }

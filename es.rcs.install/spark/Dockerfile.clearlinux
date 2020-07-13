@@ -1,0 +1,139 @@
+FROM clearlinux:latest AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+ARG swupd_args
+
+# Move to latest Clear Linux release to ensure
+# that the swupd command line arguments are
+# correct
+RUN swupd clean
+RUN swupd update --no-boot-update $swupd_args
+
+# Grab os-release info from the minimal base image so
+# that the new content matches the exact OS version
+COPY --from=clearlinux/os-core:latest /usr/lib/os-release /
+
+# Install clean os-core bundle in target directory 'install-root'
+# using the new os version
+RUN source /os-release && \
+	mkdir /install-root && \
+	swupd os-install \
+	-V ${VERSION_ID} \
+	--debug \
+	--no-progress \
+	--path /install-root \
+	--statedir /swupd-state \
+	--no-boot-update \
+	--bundles=os-core,os-core-plus,locales,curl,which,java13-runtime
+
+# For some Host OS configuration with redirect_dir on,
+# extra data are saved on the upper layer when the same
+# file exists on different layers. To minimize docker
+# image size, remove the overlapped files before copy.
+RUN mkdir /os-core-install
+COPY --from=clearlinux/os-core:latest / /os-core-install/
+RUN cd / && \
+	find os-core-install | \
+	sed -e 's/os-core-install/install-root/' | \
+	xargs rm -d &> /dev/null || true
+
+# Download SCALA and install the necesary files in target directory 'install-root', 
+# using the new os version
+ARG SCALA_VERSION="2.11.12"
+ENV SCALA_URL="https://downloads.lightbend.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz"
+RUN /install-root/usr/bin/curl "$SCALA_URL" --insecure --output scala.tgz
+RUN tar xf scala.tgz --directory /install-root/usr/local &&\
+	mv /install-root/usr/local/scala-$SCALA_VERSION /install-root/usr/local/scala
+
+
+# Download HADOOP and install the necesary files in target directory 'install-root', 
+# using the new os version
+ARG HADOOP_VERSION="2.7.7"
+ENV HADOOP_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz&action=download" \
+	HADOOP_DIST_URL="https://www.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz" \
+	HADOOP_ARCHIVE_URL="https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
+RUN /install-root/usr/bin/curl "$HADOOP_ARCHIVE_URL" --insecure --output hadoop.tgz
+RUN tar xf hadoop.tgz --directory /install-root/usr/local &&\
+	mv /install-root/usr/local/hadoop-$HADOOP_VERSION /install-root/usr/local/hadoop
+
+# Download SPARK and install the necesary files in target directory 'install-root', 
+# using the new os version
+ARG SPARK_VERSION="2.4.6"
+ENV SPARK_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz&action=download" \
+	SPARK_DIST_URL="https://www.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz" \
+	SPARK_ARCHIVE_URL="https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz"
+RUN /install-root/usr/bin/curl "$SPARK_ARCHIVE_URL" --insecure --output spark.tgz
+RUN tar xf spark.tgz --directory /install-root/usr/local &&\
+	mv /install-root/usr/local/spark-$SPARK_VERSION-bin-without-hadoop /install-root/usr/local/spark
+
+# Copy the updated lastest version on the target system to the root,
+# Forgot the base and execute a cleaned flaten image
+FROM clearlinux/os-core:latest
+COPY --from=tfm_os_builder /install-root /
+
+# OS LOCALES
+ENV TZ=Europe/Madrid \
+	LANGUAGE=en_US:en \
+	LC_ALL=en_US.UTF-8 \
+	LANG=en_US.UTF-8
+
+# SPARK
+RUN mv /usr/local/spark/conf/spark-env.sh.template /usr/local/spark/conf/spark-env.sh &&\
+	echo "export SPARK_DIST_CLASSPATH=\$(hadoop classpath)" >> /usr/local/spark/conf/spark-env.sh
+
+ENV TFM_USER="spark" \
+	TFM_GROUP="spark" \
+	TFM_BIN_DIR="/usr/local/spark" \
+	TFM_RUN_DIR="/run/spark" \
+	TFM_ETC_DIR="/var/etc/spark" \
+	TFM_LOGS_DIR="/var/log/spark" \
+	TFM_METADATA_DIR="/var/lib/spark" \
+	TFM_DATA_DIR="/var/lib/tfm"
+	
+RUN groupadd -r $TFM_GROUP &&\
+	useradd --no-log-init -r -g $TFM_GROUP $TFM_USER
+
+RUN mkdir -p $TFM_LOGS_DIR &&\
+	mkdir -p $TFM_RUN_DIR &&\
+	mkdir -p $TFM_METADATA_DIR &&\
+	mkdir -p $TFM_DATA_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_BIN_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_LOGS_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_RUN_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_METADATA_DIR &&\
+	chown -R $TFM_USER:$TFM_GROUP $TFM_DATA_DIR &&\
+	chmod 700 "$TFM_LOGS_DIR" &&\
+	chmod 700 "$TFM_RUN_DIR" &&\
+	chmod 700 "$TFM_METADATA_DIR" &&\
+	chmod 700 "$TFM_DATA_DIR"
+
+USER $TFM_USER
+
+ARG TFM_MASTER_URL="spark://spark_master:7077"
+
+ENV JAVA_HOME=/usr/lib/jvm/java-1.13.0-openjdk \
+	SCALA_HOME=/usr/local/scala \
+	HADOOP_HOME=/usr/local/hadoop \
+	HADOOP_CONF_DIR=/usr/local/hadoop/etc \
+	HADOOP_LIBEXEC_DIR=/usr/local/hadoop/libexec \
+	SPARK_HOME=/usr/local/spark \
+	SPARK_CONF_DIR=/usr/local/spark/conf \
+	SPARK_PID_DIR=/run/spark \
+	SPARK_LOG_DIR=/var/log/spark \
+	SPARK_MASTER_PORT=7077 \
+	SPARK_MASTER_WEBUI_PORT=8080 \
+	SPARK_WORKER_PORT=7077 \
+	SPARK_WORKER_WEBUI_PORT=8080 \
+	SPARK_WORKER_DIR=/var/lib/spark \
+	SPARK_MASTER_URL=$TFM_MASTER_URL
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HADOOP_HOME/lib/native \
+	PATH=/usr/lib/jvm/java-1.13.0-openjdk/bin:$SCALA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/sbin:$SPARK_HOME/bin:$PATH
+
+EXPOSE 8080 7077
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
+CMD ["/bin/bash"]
+
+

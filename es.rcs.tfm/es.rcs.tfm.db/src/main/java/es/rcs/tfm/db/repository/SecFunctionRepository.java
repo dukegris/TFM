@@ -39,6 +39,6 @@ public interface SecFunctionRepository extends
 	}
 
 	public SecFunctionEntity findByCode(
-			@Param("code") String code);
+			@Param(SecFunctionEntity.ATT_CODE) String code);
 
 }

@@ -8,7 +8,7 @@ public class AppNames {
 
 	// -------------------------------------------------------------------------------------
 	// APP: CONFIG
-	public static final String APP_NAME 						= "TCS TFM Web App";
+	public static final String APP_NAME 						= "RCS TFM Web App";
 	public static final String APP_CONFIG 						= "taoConfig";
 	public static final String APP_CONFIG_PKG 					= "es.rcs.tfm.main.config";
 	public static final String APP_COMPONENTS_PKG 				= "es.rcs.tfm.main.components";

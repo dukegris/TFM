@@ -541,6 +541,14 @@
 			<artifactId>postgresql</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
+		<!-- SQL SERVER -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
 
 		<!-- =====================================
 			 NLP

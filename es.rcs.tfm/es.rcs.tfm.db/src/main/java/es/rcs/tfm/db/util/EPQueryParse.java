@@ -84,7 +84,7 @@ public class EPQueryParse {
 					String[] strs = expr.split("\\s*\\,\\s*");
 					for (String str: strs) {
 						
-						if (StringUtils.isNotEmpty(str)) {
+						if (StringUtils.isNotBlank(str)) {
 				            BooleanBuilder predicate = new BooleanBuilder();
 				            StringPath strPath = (StringPath)path;
 				            predicate.or(strPath.startsWithIgnoreCase(str));
@@ -100,7 +100,7 @@ public class EPQueryParse {
 					String[] strs = expr.split("\\s*\\,\\s*");
 					for (String str: strs) {
 						
-						if (StringUtils.isNotEmpty(str)) {
+						if (StringUtils.isNotBlank(str)) {
 				            BooleanBuilder predicate = new BooleanBuilder();
 				            StringPath strPath = (StringPath)path;
 				            predicate.or(strPath.endsWithIgnoreCase(str));

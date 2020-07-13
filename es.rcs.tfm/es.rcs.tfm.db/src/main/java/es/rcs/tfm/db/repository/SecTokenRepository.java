@@ -53,6 +53,6 @@ public interface SecTokenRepository extends
 			"  FROM SecUserEntity u " + 
 			"  WHERE " + 
 			"   u.name = ?1)")
-	void deleteByUsername(String name);
+	void deleteByUsername(String username);
 
 }

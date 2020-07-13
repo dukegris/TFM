@@ -3,9 +3,5 @@
 		{
 			"path": "."
 		}
-	],
-	"settings": {
-		"java.configuration.updateBuildConfiguration": "automatic",
-		"python.pythonPath": "C:\\Java\\python-3.7.7\\python.exe"
-	}
+	]
 }

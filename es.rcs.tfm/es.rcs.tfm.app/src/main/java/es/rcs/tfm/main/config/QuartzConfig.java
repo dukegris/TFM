@@ -37,6 +37,7 @@ public class QuartzConfig {
 //		pubmedLoader.doLoadNewData();
 	}
 
+
 	@Profile( AppNames.APP_DEVELOPMENT )
 	@Scheduled(
 			cron = "*/10 * * * * SUN-SAT") // Cada diez segundos

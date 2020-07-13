@@ -39,6 +39,6 @@ public interface SecRoleRepository extends
 	}
 
 	public SecRoleEntity findByCode(
-			@Param("code") String code);
+			@Param(SecRoleEntity.ATT_CODE) String code);
 
 }

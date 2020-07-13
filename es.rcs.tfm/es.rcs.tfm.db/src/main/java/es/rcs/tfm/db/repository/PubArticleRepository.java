@@ -51,7 +51,9 @@ public interface PubArticleRepository extends
 	 */
 	@Query(
 			"SELECT a" + 
-			" FROM PubArticleEntity a JOIN a.identifiers i" +
+			" FROM " + 
+			"  PubArticleEntity a JOIN " + 
+			"  a.identifiers i" +
 			" WHERE" +
 			" i.type = :type AND i.value = :value")
 	List<PubArticleEntity> findByIdentifier(

@@ -6,6 +6,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.core.CoreContainer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,12 +41,16 @@ public class SolrConfig {
 	
     @Bean( name = IndexNames.IDX_CLIENT )
     public SolrClient solrClient() throws ParserConfigurationException, IOException, SAXException {
-
- 		CoreContainer container = new CoreContainer(solrHome);
-		container.load();
-    	EmbeddedSolrServer server = new EmbeddedSolrServer(container, PubArticleIdx.IDX_CORE);
-    	return server;
     	
+    	SolrClient server = null;
+		if (solrEmbedded) {
+			CoreContainer container = new CoreContainer(solrHome);
+			container.load();
+			server = new EmbeddedSolrServer(container, PubArticleIdx.IDX_CORE);
+		} else {
+			server = new HttpSolrClient.Builder(solrHost).build();
+		}
+    	return server;
     }
  
     @Bean( name = IndexNames.IDX_TEMPLATE )

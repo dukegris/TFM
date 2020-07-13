@@ -64,8 +64,8 @@ import lombok.ToString;
 						name = SecUserEntity.DB_EMAIL_UK, 
 						columnNames = { SecUserEntity.DB_EMAIL }),
 				@UniqueConstraint(
-						name = SecUserEntity.DB_NAME_UK, 
-						columnNames = { SecUserEntity.DB_NAME }) })
+						name = SecUserEntity.DB_USERNAME_UK, 
+						columnNames = { SecUserEntity.DB_USERNAME }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -78,7 +78,7 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String RES_ACTION			= "users";
 	public static final String RES_TYPE				= "User";
 
-	public static final String RES_NAME				= "name";
+	public static final String RES_USERNAME			= "name";
 	public static final String RES_USR_ENABLED		= "enabled";
 	public static final String RES_USR_EXPIRED		= "expired";
 	public static final String RES_USR_LOCKED		= "locked";
@@ -99,10 +99,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE 			= "sec_users";
 	public static final String DB_ID_PK 			= "sec_usr_pk";
 	public static final String DB_UID_UK			= "sec_usr_uid_uk";
-	public static final String DB_NAME_UK			= "sec_usr_usr_uk";
+	public static final String DB_USERNAME_UK		= "sec_usr_usr_uk";
 	public static final String DB_EMAIL_UK			= "sec_usr_ema_uk";
 
-	public static final String DB_NAME				= "usr_txt";
+	public static final String DB_USERNAME			= "usr_txt";
 	public static final String DB_USR_ENABLED		= "usr_ena";
 	public static final String DB_USR_EXPIRED		= "usr_exp";
 	public static final String DB_USR_LOCKED		= "usr_lck";
@@ -129,6 +129,15 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String DB_AUTH_ID			= "aut_id";
 	public static final String DB_GROUP_ID			= "grp_id";
 	
+	public static final String ATT_USERNAME				= "name";
+	public static final String ATT_USR_ENABLED		= "enabled";
+	public static final String ATT_USR_EXPIRED		= "expired";
+	public static final String ATT_USR_LOCKED		= "locked";
+	public static final String ATT_USR_TWOFACTOR	= "seguridadDobleFactor";
+	public static final String ATT_PASSWORD			= "password";
+	public static final String ATT_PWD_EXPIRED		= "expiredPassword";
+	public static final String ATT_EMAIL			= "email";
+	public static final String ATT_EMA_CONFIRMED	= "emailConfirmed";
 	public static final String ATT_AUTHORITIES		= "authorities";
 	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
 	public static final String ATT_GROUPS			= "groups";
@@ -139,10 +148,10 @@ public class SecUserEntity extends AuditedBaseEntity {
 	public static final String ATT_TOKEN_IDS		= "tokenIds";
 	
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_USERNAME,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_USERNAME, 
 			unique = true,
 			nullable = false, 
 			length = 64)

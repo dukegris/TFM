@@ -58,7 +58,7 @@ public class SparkConfig {
         		set("spark.ui.port", sparkUiPort).
         		set("spark.local.dir", sparkHome + "/tmp").
         		set("spark.kryoserializer.buffer.max", "500m").
-        		set("spark.jars.packages", "JohnSnowLabs:spark-nlp:2.4.1");
+        		set("spark.jars.packages", "JohnSnowLabs:spark-nlp:2.5.2");
         return bean;
     }
 

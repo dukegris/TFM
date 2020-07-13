@@ -77,10 +77,14 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Bean ( name = AppNames.WEB_JACKSON_MAPPER )
 	public ObjectMapper getObjectMapper() {
+		
 		ObjectMapper bean = new ObjectMapper();
+		
 		bean.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		bean.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, true);
+		
 		return bean;
+		
 	}
 
 }

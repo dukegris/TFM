@@ -30,11 +30,11 @@ import scala.util.matching.Regex
 import es.rcs.tfm.nlp.model.TfmType
 import es.rcs.tfm.nlp.util.{TfmHelper, TfmSave, TfmMeasure}
 
-//val CORPUS_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
-val CORPUS_DIR = "/D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
+val CORPUS_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
+//val CORPUS_DIR = "/D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
 
 val embeddings = TfmHelper.prepareBert(
-	"file://" + CORPUS_DIR + "/models/bert/biobert_pmc_base_cased_en_2.5.0_2.4_1590489029151")
+//	"file://" + CORPUS_DIR + "/models/bert/biobert_pmc_base_cased_en_2.5.0_2.4_1590489029151")
 //	"file://" + CORPUS_DIR + "/models/bert/biobert_pubmed_pmc_base_cased_en_2.5.0_2.4_1590489367180")
 //	"file://" + CORPUS_DIR + "/models/bert/biobert_pubmed_base_cased_en_2.5.0_2.4_1590487367971")
 //	"file://" + CORPUS_DIR + "/models/bert/biobert_pubmed_large_cased_en_2.5.0_2.4_1590487739645")
@@ -53,14 +53,14 @@ val testDS=embeddings.transform(PubTator.readDataset(
 testDS.
 	write.
 	mode("overwrite").
-	parquet("file://" + CORPUS_DIR + "/training/tmp/ner_txt_test.pubtator.parquet")
+	parquet("file://" + CORPUS_DIR + "/training/tmp/ner_txt_test.pubtatPubTatoror.parquet")
 
 val trainDS=embeddings.transform(PubTator.readDataset(
 	spark,
 	"file://" + CORPUS_DIR + "/datasets/tmVar/tmVarCorpus/train.PubTator.txt"))
 
 val nerApproach = new NerDLApproach().
-	setTestDataset("file://" + CORPUS_DIR + "/training/tmp/ner_txt_test.pubtator.parquet").
+	setTestDataset("file://" + CORPUS_DIR + "/training/tmp/ner_txt_test.PubTator.parquet").
 	setGraphFolder(CORPUS_DIR + "/models/tensorflow").
 	setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
 	setOutputCol(TfmType.NAMED_ENTITY).

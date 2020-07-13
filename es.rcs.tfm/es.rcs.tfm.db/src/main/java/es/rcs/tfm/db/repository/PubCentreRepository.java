@@ -15,6 +15,7 @@ import com.querydsl.core.types.dsl.StringPath;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.PubCenterEntity;
+import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.model.QPubCenterEntity;
 
 @Repository(DbNames.DB_CENTRE_REP)
@@ -55,9 +56,10 @@ public interface PubCentreRepository extends
 			" WHERE" +
 			" i.type = :type AND i.value = :value")
 	List<PubCenterEntity> findByIdentifier(
-			@Param("type") String type, 
-			@Param("value") String value);
+			@Param(PubValuesSubentity.ATT_TYPE) String type, 
+			@Param(PubValuesSubentity.ATT_VALUE) String value);
 
-	public Optional<PubCenterEntity> findByName(String name);
+	public Optional<PubCenterEntity> findByName(
+			@Param(PubCenterEntity.ATT_NAME) String name);
 	
 }

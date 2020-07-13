@@ -30,10 +30,10 @@ import es.rcs.tfm.srv.model.BloqueAnotado;
 import es.rcs.tfm.srv.model.Posicion;
 
 /**
- * tmBioC es una especificación basada en BioC para el intercambio de documentos
+ * tmBioC es una especificaciï¿½n basada en BioC para el intercambio de documentos
  * con marcaciones. BioC es una DtD que requiere un fichero key donde se explica
  * el correcto uso de determinado elementos, especialmente los denominados infon
- * No utiliza el componente sentence, por lo que en esta implementación se obvia
+ * No utiliza el componente sentence, por lo que en esta implementaciï¿½n se obvia
  * @author dukegris
  *
  */
@@ -225,7 +225,7 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 					// sentence.getAnntotation();
 					// sentence.getRelation();
 					if (	(sentence.getText() != null) &&
-							(StringUtils.isNotEmpty(sentence.getText().getvalue())) ) {
+							(StringUtils.isNotBlank(sentence.getText().getvalue())) ) {
 						str = sentence.getText().getvalue();
 					}
 				} else if (instance instanceof Text) {
@@ -288,8 +288,8 @@ public class TmBiocXmlProcessor extends ArticleProcessor {
 		
 		Map<String, String> resultado = infon.stream().
 			filter(p ->		(p != null) &&
-							(StringUtils.isNotEmpty(p.getKey())) &&
-							(StringUtils.isNotEmpty(p.getvalue())) ).
+							(StringUtils.isNotBlank(p.getKey())) &&
+							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> {
 				return new SimpleEntry<String, String>(
 						instance.getKey(),

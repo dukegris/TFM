@@ -1,0 +1,48 @@
+docker build --pull --rm -f "es.rcs.install/postgresql/Dockerfile.clearlinux" -t dukegris/tfm_postgresql:1.0.1 "es.rcs.install/postgresql"
+docker pull dukegris/tfm_postgresql:1.0.1
+docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.1 "es.rcs.install/spark"
+docker build --pull --rm -f "es.rcs.install/solr/Dockerfile.clearlinux" -t dukegris/tfm_solr:1.0.1 "es.rcs.install/solr"
+docker pull dukegris/tfm_solr:1.0.1
+docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.1 "es.rcs.install/spark"
+docker pull dukegris/tfm_spark:1.0.1
+
+
+
+
+docker run --rm -it  dukegris/tfm_postgresql:1.0.1
+docker run --rm -it  dukegris/tfm_solr:1.0.1
+docker run --rm -it  dukegris/tfm_spark:1.0.1
+
+
+
+
+
+docker run --rm -it  -p 5432:5432/tcp dukegris/tfm_postgresql:1.0.1
+docker run --rm -it  -p 8983:8983/tcp dukegris/tfm_solr:1.0.1
+docker run --rm -it  -p 8080,7077:8080,7077/tcp dukegris/tfm_solr:1.0.1
+
+
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build --scale spark_worker=3
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" down
+
+
+
+docker volume create --name=pg-data
+docker volume create --name=pg-log
+docker volume create --name=pg-tfm
+
+docker network create \
+	-d bridge \
+	--opt com.docker.network.bridge.name=tfm-bridge \
+	--subnet=192.168.5.0/24 \
+	--ip-range=192.168.5.0/24 \
+	--gateway=192.168.5.254 \
+	tfm-network
+
+docker-compose up \
+	-d \
+	-f "es.rcs.install/tfm/docker-compose.yml" \
+	--net=my_bridge \
+	--build
+
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build

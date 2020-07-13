@@ -155,7 +155,7 @@ public class Articulo {
 		int offset = 0;
 		String str = null;
 		str = this.generateTitle();
-		if (StringUtils.isNotEmpty(str)) {
+		if (StringUtils.isNotBlank(str)) {
 			BloqueAnotado block = new BloqueAnotado();
 			block.setType(BloqueAnotado.PASSAGE_TYPE_TITLE);
 			block.setOffset(offset);
@@ -179,7 +179,7 @@ public class Articulo {
 						for (HashMap<String, String> other: others) {
 							if ( (other != null) && (!other.isEmpty())) {
 								String text = other.get(Articulo.TEXT);
-								if (StringUtils.isNotEmpty(str)) {
+								if (StringUtils.isNotBlank(str)) {
 									BloqueAnotado block = new BloqueAnotado();
 									block.setType(type);
 									block.setOffset(offset);
@@ -201,24 +201,24 @@ public class Articulo {
 	public final String generateTitle() {
 		
 		if (this.getTitulo() != null) {
-			if (StringUtils.isNotEmpty(this.getTitulo().getLibroId())) { 
+			if (StringUtils.isNotBlank(this.getTitulo().getLibroId())) { 
 				System.out.print(" L-" + this.getTitulo().getLibroId());
 			}
-			if (StringUtils.isNotEmpty(this.getTitulo().getParteId())) { 
+			if (StringUtils.isNotBlank(this.getTitulo().getParteId())) { 
 				System.out.print(" P-" + this.getTitulo().getParteId());
 			}
-			if (StringUtils.isNotEmpty(this.getTitulo().getSeccionId())) { 
+			if (StringUtils.isNotBlank(this.getTitulo().getSeccionId())) { 
 				System.out.print(" S-" + this.getTitulo().getSeccionId());
 			}
-			if (StringUtils.isNotEmpty(this.getTitulo().getTitulo())) { 
+			if (StringUtils.isNotBlank(this.getTitulo().getTitulo())) { 
 				System.out.println(" T(" +  this.getPmid() + ") ]" + this.getTitulo().getTitulo() + "[");
 			}
 		} 
 		
 		String result = "";
 		if (this.getTitulo() != null) result = this.getTitulo().getTitulo();
-		if (StringUtils.isEmpty(result)) result = this.getTituloOriginal();
-		if (StringUtils.isEmpty(result)) result = "";
+		if (StringUtils.isBlank(result)) result = this.getTituloOriginal();
+		if (StringUtils.isBlank(result)) result = "";
 		
 		return result;
 		
@@ -233,7 +233,7 @@ public class Articulo {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (StringUtils.isEmpty(str)) return null;
+		if (StringUtils.isBlank(str)) return null;
 		
 		return str;
 		
@@ -242,7 +242,7 @@ public class Articulo {
 	public void addIds(Map<String, String> items) {
 		if ((items!= null) && (!items.isEmpty())) this.ids.putAll(items);
 		String str = this.ids.get(PUBMED_ID_NAME);
-		if (StringUtils.isNotEmpty(str)) this.pmid = str;
+		if (StringUtils.isNotBlank(str)) this.pmid = str;
 	}
 
 	public void addIds(Entry<String, String> item) {
@@ -256,7 +256,7 @@ public class Articulo {
 			});
 		}
 		String str = this.ids.get(PUBMED_ID_NAME);
-		if (StringUtils.isNotEmpty(str)) this.pmid = str;
+		if (StringUtils.isNotBlank(str)) this.pmid = str;
 	}
 
 	public void addAutores(List<Autor> items) {
@@ -339,7 +339,7 @@ public class Articulo {
 
 	public void addObservaciones(String instance) {
 		
-		if (StringUtils.isNotEmpty(instance)) {
+		if (StringUtils.isNotBlank(instance)) {
 			if (this.observaciones == null) {
 				this.observaciones = instance;
 			} else {
@@ -360,11 +360,11 @@ public class Articulo {
 			this.setRevista(revista);
 		} else {
 			Revista old = this.getRevista();
-			if (StringUtils.isNotEmpty(revista.getAbreviatura()))			old.setAbreviatura(revista.getAbreviatura());
-			if (StringUtils.isNotEmpty(revista.getMedio()))					old.setMedio(revista.getMedio());
-			if (StringUtils.isNotEmpty(revista.getNombre()))				old.setNombre(revista.getNombre());
-			if (StringUtils.isNotEmpty(revista.getPais()))					old.setPais(revista.getPais());
-			if (StringUtils.isNotEmpty(revista.getTipo()))					old.setTipo(revista.getTipo());
+			if (StringUtils.isNotBlank(revista.getAbreviatura()))			old.setAbreviatura(revista.getAbreviatura());
+			if (StringUtils.isNotBlank(revista.getMedio()))					old.setMedio(revista.getMedio());
+			if (StringUtils.isNotBlank(revista.getNombre()))				old.setNombre(revista.getNombre());
+			if (StringUtils.isNotBlank(revista.getPais()))					old.setPais(revista.getPais());
+			if (StringUtils.isNotBlank(revista.getTipo()))					old.setTipo(revista.getTipo());
 			if ((revista.getIds() != null) && !revista.getIds().isEmpty())	old.addIds(revista.getIds());
 		}
 		
@@ -378,9 +378,9 @@ public class Articulo {
 		} else {
 			Fasciculo old = this.getFasciculo();
 			if (fasciculo.getFecha() != null)								old.setFecha(fasciculo.getFecha());
-			if (StringUtils.isNotEmpty(fasciculo.getMedio()))				old.setMedio(fasciculo.getMedio());
-			if (StringUtils.isNotEmpty(fasciculo.getNumero()))				old.setNumero(fasciculo.getNumero());
-			if (StringUtils.isNotEmpty(fasciculo.getTipo()))				old.setTipo(fasciculo.getTipo());
+			if (StringUtils.isNotBlank(fasciculo.getMedio()))				old.setMedio(fasciculo.getMedio());
+			if (StringUtils.isNotBlank(fasciculo.getNumero()))				old.setNumero(fasciculo.getNumero());
+			if (StringUtils.isNotBlank(fasciculo.getTipo()))				old.setTipo(fasciculo.getTipo());
 		}
 	}
 

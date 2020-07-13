@@ -431,10 +431,10 @@ abstract class EPBase<P extends Path> implements EP<P, Object> {
 			this.value = ov.getValue();
 			Validate.notNull(this.operator, "EPOperator must not be null");
 			if (EPOperator.NOT.equals(this.operator)) {
-				Validate.isTrue(StringUtils.isNotEmpty(this.value), "Sub-operation must be available with NOT operator");
+				Validate.isTrue(StringUtils.isNotBlank(this.value), "Sub-operation must be available with NOT operator");
 				this.next = new SingleValueExpressionBuilder(path, ov.getValue(), this);
 			} else if (EPOperator.CASE_IGNORE.equals(this.operator)) {
-				Validate.isTrue(StringUtils.isNotEmpty(this.value),
+				Validate.isTrue(StringUtils.isNotBlank(this.value),
 						"Sub-operation must be available with CASE_IGNORE operator");
 				this.next = new SingleValueExpressionBuilder(path, ov.getValue(), this);
 				this.next.setIgnoreCase(true);

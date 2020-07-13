@@ -63,8 +63,8 @@ import lombok.ToString;
 					name = SecModuleEntity.DB_CODE_UK, 
 					columnNames = { SecModuleEntity.DB_CODE }),
 			@UniqueConstraint(
-					name = SecModuleEntity.DB_NAME_UK, 
-					columnNames = { SecModuleEntity.DB_NAME}) })
+					name = SecModuleEntity.DB_MODULE_UK, 
+					columnNames = { SecModuleEntity.DB_MODULE}) })
 @Entity
 @Audited
 @EntityListeners(
@@ -78,7 +78,7 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE				= "Module";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_NAME				= "name";
+	public static final String RES_MODULE			= "name";
 	public static final String RES_URL				= "url";
 	public static final String RES_APPLICATION_ID	= "applicationId";
 	public static final String RES_APPLICATION		= "application";
@@ -89,14 +89,17 @@ public class SecModuleEntity extends AuditedBaseEntity {
 	public static final String DB_ID_PK 			= "sec_mod_pk";
 	public static final String DB_UID_UK			= "sec_mod_uid_uk";
 	public static final String DB_CODE_UK			= "sec_mod_cod_uk";
-	public static final String DB_NAME_UK			= "sec_mod_txt_uk";
+	public static final String DB_MODULE_UK			= "sec_mod_txt_uk";
 	public static final String DB_APPLICATION_ID_FK	= "sec_mod_app_fk";
 
 	public static final String DB_CODE				= "mod_cod";
-	public static final String DB_NAME				= "mod_txt";
+	public static final String DB_MODULE			= "mod_txt";
 	public static final String DB_URL				= "mod_url";
 	public static final String DB_APPLICATION_ID	= "app_id";
 
+	public static final String ATT_CODE				= "code";
+	public static final String ATT_MODULE			= "name";
+	public static final String ATT_URL				= "url";
 	public static final String ATT_APPLICATION		= "application";
 	public static final String ATT_APPLICATION_ID	= "applicationId";
 	public static final String ATT_FUNCTIONS		= "functions";
@@ -120,10 +123,10 @@ public class SecModuleEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_MODULE,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_MODULE, 
 			unique = true,
 			nullable = false, 
 			length = 64)

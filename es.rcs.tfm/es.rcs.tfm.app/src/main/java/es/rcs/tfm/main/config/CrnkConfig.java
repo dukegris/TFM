@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -96,6 +97,8 @@ import io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration;
 		prePostEnabled = true, 
 		securedEnabled = true, 
 		jsr250Enabled = true)
+@DependsOn({
+		AppNames.WEB_JACKSON_MAPPER})
 public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBootConfigurer {
 
 	public static final String CRNK_API_ACTION = "/api/data";

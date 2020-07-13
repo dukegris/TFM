@@ -26,6 +26,11 @@ public class PubArticleAuthorKey implements Serializable {
 	public static final String DB_ARTICLE_ID			= "art_id";
 	public static final String DB_PUBLICATION_ID		= "pub_id";
 
+	public static final String ATT_AUTHOR_ID			= "authorId";
+	public static final String ATT_CENTRE_ID			= "centreId";
+	public static final String ATT_ARTICLE_ID			= "articleId";
+	public static final String ATT_PUBLICATION_ID		= "publicationId";
+
 	@Column(
 			name = DB_AUTHOR_ID, 
 			unique = false,

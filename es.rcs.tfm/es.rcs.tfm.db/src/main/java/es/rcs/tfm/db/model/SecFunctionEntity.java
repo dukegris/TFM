@@ -58,8 +58,8 @@ import lombok.ToString;
 					name = SecFunctionEntity.DB_CODE_UK, 
 					columnNames = { SecFunctionEntity.DB_CODE }),
 			@UniqueConstraint(
-					name = SecFunctionEntity.DB_NAME_UK, 
-					columnNames = { SecFunctionEntity.DB_NAME}) })
+					name = SecFunctionEntity.DB_FUNCTION_UK, 
+					columnNames = { SecFunctionEntity.DB_FUNCTION}) })
 @Entity
 @Audited
 @EntityListeners(
@@ -73,25 +73,26 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE			= "Function";
 
 	public static final String RES_CODE			= "code";
-	public static final String RES_NAME			= "name";
+	public static final String RES_FUNCTION		= "name";
 	public static final String RES_URL			= "url";
-
 	public static final String RES_MODULE_ID	= "moduleId";
 	public static final String RES_MODULE		= "module";
 	
 	public static final String DB_TABLE 		= "sec_function";
-	
 	public static final String DB_ID_PK 		= "sec_fun_pk";
 	public static final String DB_UID_UK		= "sec_fun_uid_uk";
 	public static final String DB_CODE_UK		= "sec_fun_cod_uk";
-	public static final String DB_NAME_UK		= "sec_fun_txt_uk";
+	public static final String DB_FUNCTION_UK	= "sec_fun_txt_uk";
 	public static final String DB_MODULE_ID_FK	= "sec_fun_mod_fk";
 
 	public static final String DB_CODE			= "fun_cod";
-	public static final String DB_NAME			= "fun_txt";
+	public static final String DB_FUNCTION		= "fun_txt";
 	public static final String DB_URL			= "fun_url";
 	public static final String DB_MODULE_ID		= "mod_id";
 
+	public static final String ATT_CODE			= "code";
+	public static final String ATT_FUNCTION		= "name";
+	public static final String ATT_URL			= "url";
 	public static final String ATT_MODULE_ID	= "moduleId";
 	public static final String ATT_MODULE		= "module";
 
@@ -113,10 +114,10 @@ public class SecFunctionEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_FUNCTION,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_FUNCTION, 
 			unique = false,
 			nullable = false, 
 			length = 64)

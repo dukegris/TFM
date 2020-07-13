@@ -51,8 +51,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		if (request.getMethod().equals(HttpMethod.POST.toString())) {
 			
 			// Funciona con POST de parametros en HEADER
-			if (	StringUtils.isNotEmpty(request.getHeader(SPRING_SECURITY_FORM_USERNAME_KEY)) &&
-					StringUtils.isNotEmpty(request.getHeader(SPRING_SECURITY_FORM_PASSWORD_KEY)) ) {
+			if (	StringUtils.isNotBlank(request.getHeader(SPRING_SECURITY_FORM_USERNAME_KEY)) &&
+					StringUtils.isNotBlank(request.getHeader(SPRING_SECURITY_FORM_PASSWORD_KEY)) ) {
 				
 				credenciales = new Usuario(
 					request.getHeader(SPRING_SECURITY_FORM_USERNAME_KEY),
@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			}
 			
 			if (	(credenciales == null) &&
-					(StringUtils.isNotEmpty(request.getHeader(AppNames.JWT_HEADER_AUTHORIZATION))) && 
+					(StringUtils.isNotBlank(request.getHeader(AppNames.JWT_HEADER_AUTHORIZATION))) && 
 					(request.getHeader(AppNames.JWT_HEADER_AUTHORIZATION).startsWith(AppNames.JWT_BASIC_TOKEN_PREFIX)) ) {
 				
 		        String token = request.getHeader(AppNames.JWT_HEADER_AUTHORIZATION);

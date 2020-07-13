@@ -424,7 +424,7 @@ public class PubArticleEntity extends AuditedBaseEntity {
 			uniqueConstraints = {
 					@UniqueConstraint(
 							name = DB_TABLE_KEY_PK, 
-							columnNames = { DB_ARTICLE_ID, PubKeywordSubentity.DB_VALUE, PubKeywordSubentity.DB_KEY }) },
+							columnNames = { DB_ARTICLE_ID, PubKeywordSubentity.DB_VALUE, PubKeywordSubentity.DB_PROVIDER, PubKeywordSubentity.DB_KEY }) },
 			indexes = {
 					@Index(
 							unique = false,
@@ -488,7 +488,7 @@ public class PubArticleEntity extends AuditedBaseEntity {
 			required = false)
 	@OneToMany(
 			mappedBy = PubReferenceSubentity.ATT_ARTICLE,
-			fetch = FetchType.LAZY,
+			fetch = FetchType.EAGER,
 			cascade = { CascadeType.ALL })
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude

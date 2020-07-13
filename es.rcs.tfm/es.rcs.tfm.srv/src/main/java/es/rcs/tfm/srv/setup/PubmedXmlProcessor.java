@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.validation.Schema;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -178,6 +180,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			try {
 				JAXBContext jaxbContext = JAXBContext.newInstance(PubmedArticleSet.class);
 				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				Schema schema = null;
+				jaxbUnmarshaller.setSchema(schema);
 			    Object articleSet = jaxbUnmarshaller.unmarshal(source);
 			    if ((articleSet != null) && (articleSet instanceof PubmedArticleSet)) {
 			    	PubmedArticleSet pubmedArticleSet = (PubmedArticleSet)articleSet;
@@ -206,6 +210,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 	@Override
 	public boolean hasNext() {
+		if (items == null) return false;
 		return (index < items.size()-1);
 	}
 
@@ -534,7 +539,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			resultado.setLibroId(articleTitle.getSec().trim());
 		}
 		
-		if (StringUtils.isEmpty(resultado.getTitulo())) {
+		if (StringUtils.isBlank(resultado.getTitulo())) {
 			System.out.println("DEBUG - titulo vacio");
 		}
 
@@ -1097,6 +1102,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	 * @param date
 	 * @return
 	 */
+	//2019 Jan-Mar
+	private Pattern MEDLINE_DATE_PTR = Pattern.compile("(\\d{4})\\s+(\\w{3})");
 	private Fecha makeFecha(PubDate date) {
 		
 		if (	(date == null) || 
@@ -1137,7 +1144,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
-		if (localdate != null) {
+		if ((localdate != null) && (localdate.getYear()>=2)) {
 			resultado = new Fecha(Articulo.FECHA_PUBLICACION, localdate);
 		}
 		
@@ -1152,13 +1159,32 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (StringUtils.isNotBlank(fecha)) {
 			if (resultado == null) {
 				resultado = new Fecha(Articulo.FECHA_PUBLICACION);
+			}
+			if (StringUtils.isBlank(resultado.getAnio())) {
+				if (anio != null) {
 				resultado.setAnio(anio);
+				} else {
+					Matcher m = MEDLINE_DATE_PTR.matcher(fecha);
+					if (m.find()) {
+						try {
+							year = Integer.parseInt(m.group(1));
+							month = getMonthFrom(m.group(2));
+							dayOfMonth = 1;
+							localdate = LocalDate.of(year, month, dayOfMonth);
+							if (localdate != null) {
+								resultado = new Fecha(Articulo.FECHA_PUBLICACION, localdate);
+							}
+						} catch (Exception ex) {
+							System.out.println("DEBUG- makeFecha: " + fecha);
+						}
+					}
+				}
 			}
 			StringBuffer sb = new StringBuffer();
-			sb.append(resultado.getSesion());
+			if (StringUtils.isNotBlank(resultado.getSesion())) sb.append(resultado.getSesion());
 			sb.append("(");
 			sb.append(fecha);
-			sb.append("(");
+			sb.append(")");
 			resultado.setSesion(sb.toString());
 		}
 

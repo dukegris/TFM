@@ -1,0 +1,48 @@
+FROM clearlinux:latest AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+ARG swupd_args
+
+# Move to latest Clear Linux release to ensure
+# that the swupd command line arguments are
+# correct
+RUN swupd clean
+RUN swupd update --no-boot-update $swupd_args
+
+# Grab os-release info from the minimal base image so
+# that the new content matches the exact OS version
+COPY --from=clearlinux/os-core:latest /usr/lib/os-release /
+
+# Install clean os-core bundle in target directory 'install-root'
+# using the new os version
+RUN source /os-release && \
+	mkdir /install-root && \
+	swupd os-install \
+	-V ${VERSION_ID} \
+	--debug \
+	--no-progress \
+	--path /install-root \
+	--statedir /swupd-state \
+	--bundles=os-core,java13-runtime
+
+# For some Host OS configuration with redirect_dir on,
+# extra data are saved on the upper layer when the same
+# file exists on different layers. To minimize docker
+# image size, remove the overlapped files before copy.
+RUN mkdir /os-core-install
+COPY --from=clearlinux/os-core:latest / /os-core-install/
+RUN cd / && \
+	find os-core-install | \
+	sed -e 's/os-core-install/install-root/' | \
+	xargs rm -d &> /dev/null || true
+
+# Copy the updated lastest version on the target system to the root,
+# Forgot the base and execute a cleaned flaten image
+FROM scratch
+COPY --from=tfm_os_builder /install-root /
+
+ENV PATH=/usr/lib/jvm/java-1.13.0-openjdk/bin:$PATH
+
+CMD ["java"]

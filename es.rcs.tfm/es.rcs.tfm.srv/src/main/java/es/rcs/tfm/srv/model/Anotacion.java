@@ -53,7 +53,7 @@ public class Anotacion {
 			
 			// Buscamos el infon type
 			String type = items.get(BloqueAnotado.PASSAGE_TYPE);
-			if (StringUtils.isNotEmpty(type)) {
+			if (StringUtils.isNotBlank(type)) {
 				// Buscamos el tipo que utilizaremos en los procesos NER. Si no lo hay lo a�adimos
 				String ner = ArticleProcessor.MUTATIONS_NORMALIZE.get(type);
 				if (StringUtils.isBlank(ner)) {

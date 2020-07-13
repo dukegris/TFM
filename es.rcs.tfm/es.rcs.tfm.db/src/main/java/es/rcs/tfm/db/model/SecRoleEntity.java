@@ -63,8 +63,8 @@ import lombok.ToString;
 					name = SecRoleEntity.DB_CODE_UK, 
 					columnNames = { SecRoleEntity.DB_CODE }),
 			@UniqueConstraint(
-					name = SecRoleEntity.DB_NAME_UK, 
-					columnNames = { SecRoleEntity.DB_NAME })})
+					name = SecRoleEntity.DB_ROLE_UK, 
+					columnNames = { SecRoleEntity.DB_ROLE })})
 @Entity
 @Audited
 @EntityListeners(
@@ -78,7 +78,7 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE				= "Role";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_NAME				= "name";
+	public static final String RES_ROLE				= "name";
 
 	public static final String RES_APPLICATION_ID	= "applicationId";
 	public static final String RES_APPLICATION		= "application";
@@ -91,10 +91,10 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	public static final String DB_ID_PK 			= "sec_rol_pk";
 	public static final String DB_UID_UK			= "sec_rol_uid_uk";
 	public static final String DB_CODE_UK			= "sec_rol_cod_uk";
-	public static final String DB_NAME_UK			= "sec_rol_rol_uk";
+	public static final String DB_ROLE_UK			= "sec_rol_rol_uk";
 	
 	public static final String DB_CODE				= "rol_cod";
-	public static final String DB_NAME				= "rol_txt";
+	public static final String DB_ROLE				= "rol_txt";
 
 	public static final String DB_TABLA_ROLE_AUTH	= "sec_role_authorities";
 	public static final String DB_ROLEAUTHS_FK		= "sec_rol_aut_fk";
@@ -105,6 +105,8 @@ public class SecRoleEntity extends AuditedBaseEntity {
 	public static final String DB_AUTH_ID			= "aut_id";
 	public static final String DB_APPLICATION_ID	= "app_id";
 
+	public static final String ATT_CODE				= "code";
+	public static final String ATT_ROLE				= "name";
 	public static final String ATT_APPLICATION		= "application";
 	public static final String ATT_APPLICATION_ID	= "applicationId";
 	public static final String ATT_AUTHORITIES		= "authorities";
@@ -130,10 +132,10 @@ public class SecRoleEntity extends AuditedBaseEntity {
 
 
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_ROLE,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_ROLE, 
 			unique = true,
 			nullable = false, 
 			length = 64)

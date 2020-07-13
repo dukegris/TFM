@@ -88,13 +88,13 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 			}
 			
 			if (!exit && this.allOk) {
-				if (StringUtils.isNotEmpty(text)) {
+				if (StringUtils.isNotBlank(text)) {
 				
 					readedSize += text.length() + 2;
 					Matcher m = LINE_PUBTATOR_PTRN.matcher(text);
 					if (m.find()) {
 						String str = m.group(1);
-						if (StringUtils.isNotEmpty(str)) {
+						if (StringUtils.isNotBlank(str)) {
 							if (StringUtils.isBlank(pmc)) {
 								pmc = str;
 							}
@@ -118,7 +118,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 					result = process(this.nextItem.toString());
 				}
 				this.nextItem = new StringBuffer();
-				if (StringUtils.isNotEmpty(text)) {
+				if (StringUtils.isNotBlank(text)) {
 					this.nextItem.append(text);	
 					this.nextItem.append("\r\n");
 				}
@@ -153,7 +153,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 				// ID ARTICLE
 				String pmid = m.group(1);
 				if (	(StringUtils.isBlank(result.getPmid())) &&
-						(StringUtils.isNotEmpty(pmid))) {
+						(StringUtils.isNotBlank(pmid))) {
 					result.setPmid(pmid);
 				}
 
@@ -161,7 +161,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 
 				// TITLE/ABSTRACT
 				String type = m.group(2);
-				if (	(StringUtils.isNotEmpty(type))) {
+				if (	(StringUtils.isNotBlank(type))) {
 					boolean found = false;
 					if (ArticleProcessor.BLOCKS_NORMALIZE.containsKey(type)) {
 						if (result.containsBlockOfType(ArticleProcessor.BLOCKS_NORMALIZE.get(type))) {
@@ -193,7 +193,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 				// ID ARTICLE
 				String pmid = m.group(1);
 				if (	(StringUtils.isBlank(result.getPmid())) &&
-						(StringUtils.isNotEmpty(pmid))) {
+						(StringUtils.isNotBlank(pmid))) {
 					result.setPmid(pmid);
 				}
 
@@ -202,7 +202,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 
 				// TOKEN
 				String text = m.group(4);
-				if (StringUtils.isNotEmpty(text)) note.setText(text);
+				if (StringUtils.isNotBlank(text)) note.setText(text);
 				
 				// TYPE
 				String type = m.group(5);
@@ -214,10 +214,10 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 				
 				// STD IDENTIFIER
 				String value = m.group(6);
-				if (StringUtils.isNotEmpty(text)) note.setValue(value);
+				if (StringUtils.isNotBlank(text)) note.setValue(value);
 				
 				if (	(title != null) &&
-						(StringUtils.isNotEmpty(title.getText())) &&
+						(StringUtils.isNotBlank(title.getText())) &&
 						(summary != null)) {
 					
 					// POSITION
@@ -238,7 +238,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 						summary.setOffset((title.getText() != null) ? title.getText().length() : 0);
 						
 						// El offset del abstract incluye los parrafos anteriores + 1 caracter por parrafo
-						// en tmVar solo hay un titulo, por lo que hay que restar al offset el tamaño del título y uno
+						// en tmVar solo hay un titulo, por lo que hay que restar al offset el tamaï¿½o del tï¿½tulo y uno
 						/*
 						String fortest = title.text + " " + summary.text;
 						System.out.println(

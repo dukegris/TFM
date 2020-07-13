@@ -250,11 +250,12 @@ object TfmHelper {
 				// MEDIDAS
 				setEnableOutputLogs(true). // Whether to output to annotators log folder
 				setEvaluationLogExtended(true). // Whether logs for validation to be extended: it displays time and evaluation of each label. Default is false.
-				setIncludeConfidence(true). // whether to include confidence scores in annotation metadata"
+				// TODO Ponemos a false por un BUG https://github.com/JohnSnowLabs/spark-nlp/issues/918
+				setIncludeConfidence(false). // whether to include confidence scores in annotation metadata"
 
 				// CONFIGURACION NERDLMODEL
 				// setUseContrib(false) // whether to use contrib LSTM Cells. Not compatible with Windows
-				setVerbose(Verbose.All). // Level of verbosity during training
+				setVerbose(Verbose.PerStep). // Level of verbosity during training
 				//setEntities(Array("MUT-DNA", "MUT-PRO", "MUT_SNP")). // Entities to recognize
 				setInputCols(Array(TfmType.SENTENCES, TfmType.TOKEN, TfmType.WORD_EMBEDDINGS)).
 				setOutputCol(TfmType.NAMED_ENTITY).

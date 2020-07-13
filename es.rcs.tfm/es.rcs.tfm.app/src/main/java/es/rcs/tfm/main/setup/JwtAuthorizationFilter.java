@@ -61,7 +61,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
     	
         String token = request.getHeader(AppNames.JWT_HEADER_AUTHORIZATION);
-        if (StringUtils.isNotEmpty(token) && token.startsWith(AppNames.JWT_BEARER_TOKEN_PREFIX)) {
+        if (StringUtils.isNotBlank(token) && token.startsWith(AppNames.JWT_BEARER_TOKEN_PREFIX)) {
             try {
             	
                 byte[] signingKey = AppNames.JWT_SECRET.getBytes();
@@ -83,7 +83,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 		                    .map(authority -> new SimpleGrantedAuthority((String) authority))
 		                    .collect(Collectors.toList());
 
-                if (StringUtils.isNotEmpty(username)) {
+                if (StringUtils.isNotBlank(username)) {
                     return new UsernamePasswordAuthenticationToken(
                     		username, 
                     		null, 

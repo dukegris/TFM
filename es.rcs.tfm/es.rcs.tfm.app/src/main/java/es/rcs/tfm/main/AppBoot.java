@@ -17,6 +17,7 @@ import es.rcs.tfm.xml.XmlNames;
 
 @ComponentScan(basePackages = {
 		AppNames.APP_CONFIG_PKG,
+		AppNames.APP_SERVICES_PKG,
 		XmlNames.XML_CONFIG_PKG,
 		DbNames.DB_CONFIG_PKG,
 		IndexNames.IDX_CONFIG_PKG,

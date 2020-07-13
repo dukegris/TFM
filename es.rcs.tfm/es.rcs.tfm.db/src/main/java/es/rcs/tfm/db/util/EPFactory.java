@@ -99,7 +99,7 @@ public final class EPFactory {
      * @param alias String alias value for supplied path
      */
     public static void registerAlias(Path path, String alias) {
-        if (path != null && StringUtils.isNotEmpty(alias)) {
+        if (path != null && StringUtils.isNotBlank(alias)) {
             path_alias_registry.put(path, alias);
         }
     }

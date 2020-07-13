@@ -1,25 +1,32 @@
-// spark-shell --packages com.johnsnowlabs.nlp:spark-nlp_2.11:2.5.1,org.slf4j:slf4j-log4j12:1.7.28 --jars es.rcs.tfm.nlp/target/RCS-Nlp-0.0.4-SNAPSHOT.jar --executor-memory=32g --executor-cores=6 --driver-memory=24g --conf "spark.executor.extraJavaOptions='-Dlog4j.configuration=/opt/spark/conf/log4j.properties'" --conf "spark.driver.maxResultSize=8g" > dl_bert_conll_eng.log
+// spark-shell --packages com.johnsnowlabs.nlp:spark-nlp_2.11:2.5.1,com.johnsnowlabs.nlp:spark-nlp-gpu_2.11:2.5.1,org.slf4j:slf4j-log4j12:1.7.28 --jars es.rcs.tfm.nlp/target/RCS-Nlp-0.0.4-SNAPSHOT.jar --executor-memory=32g --executor-cores=6 --driver-memory=24g --conf "spark.executor.extraJavaOptions='-Dlog4j.configuration=/opt/spark/conf/log4j.properties'" --conf "spark.driver.maxResultSize=8g" > dl_bert_conll_eng.log
+// spark-shell --packages com.johnsnowlabs.nlp:spark-nlp-gpu_2.11:2.5.1,org.slf4j:slf4j-log4j12:1.7.28 --jars es.rcs.tfm.nlp/target/RCS-Nlp-0.0.4-SNAPSHOT.jar --executor-memory=32g --executor-cores=6 --driver-memory=24g --conf "spark.executor.extraJavaOptions='-Dlog4j.configuration=/home/rcuesta/opt/spark/conf/log4j.properties'" --conf "spark.driver.maxResultSize=8g" > dl_bert_conll_eng.log
 // scp -r . rcuesta@10.160.1.215:/" + CORPUS_DIR + "/models
 /*
 
-Epoch\s+(\d+)/(?:\d+)\s+started,\s+lr:\s+([\d\.]*)(?:.*(?:\r\n)*)+?
-Epoch\s+(?:\d+)/(?:\d+)\s+-\s+([\d\.,]*)s\s+-\s+loss:\s+([\d\.]*)\s+-\s+batches:\s+([\d\.]*)(?:.*(?:\r\n)*)+?
-Quality on validation(?:.*(?:\r\n)*)+?
-tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+).*\r\n
-Macro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?
-Micro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?
-Quality on test(?:.*(?:\r\n)*)+?
-tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+).*\r\n
-Macro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?
-Micro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)
+Epoch\s+(\d+)/(?:\d+)\s+started,\s+lr:\s+([E\d\.\-]*)(?:.*[\r\n]*)+?
+Epoch\s+(?:\d+)/(?:\d+)\s+-\s+([\d\.,]*)s\s+-\s+loss:\s+([E\d\.\-]*)\s+-\s+batches:\s+([E\d\.\-]*)(?:.*[\r\n])+?
+Quality on validation(?:.*[\r\n])+?
+tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+)(?:.*[\r\n])+?
+Macro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?
+Micro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?
+Quality on test(?:.*[\r\n])+?
+tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+)(?:.*[\r\n])+?
+Macro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?
+Micro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)
 
 
-Epoch\s+(\d+)/(?:\d+)\s+started,\s+lr:\s+([\d\.]*)(?:.*(?:\r\n)*)+?Epoch\s+(?:\d+)/(?:\d+)\s+-\s+([\d\.,]*)s\s+-\s+loss:\s+([\d\.]*)\s+-\s+batches:\s+([\d\.]*)(?:.*(?:\r\n)*)+?Quality on validation(?:.*(?:\r\n)*)+?tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+).*\r\nMacro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?Micro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?Quality on test(?:.*(?:\r\n)*)+?tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+).*\r\nMacro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)(?:.*(?:\r\n)*)+?Micro-average\s+prec:\s+([\d\.]*),\s+rec:\s+([\d\.]*),\s+f1:\s+([\d\.]*)
+Epoch\s+(\d+)/(?:\d+)\s+started,\s+lr:\s+([E\d\.\-]*)(?:.*[\r\n])+?Epoch\s+(?:\d+)/(?:\d+)\s+-\s+([\d\.,]*)s\s+-\s+loss:\s+([E\d\.\-]*)\s+-\s+batches:\s+([E\d\.\-]*)(?:.*[\r\n])+?Quality on validation(?:.*[\r\n])+?tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+)(?:.*[\r\n])+?Macro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?Micro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?Quality on test(?:.*[\r\n])+?tp:\s+(\d+)\s+fp:\s+(\d+)\s+fn:\s+(\d+)(?:.*[\r\n])+?Macro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)(?:.*[\r\n])+?Micro-average\s+prec:\s+([E\d\.\-]*),\s+rec:\s+([E\d\.\-]*),\s+f1:\s+([E\d\.\-]*)
 
 $1\t$2\t$3\t$4\t$5\t$6\t$7\t$8\t$9\t$10\t$11\t$12\t$13\t$14\t$15\t$16\t$17\t$18\t$19\t$20\t$21\t$22\t$23
 
+
+TRAIN:\s+(.*)(?:.*[\r\n]*)+?TEST:\s+.*(?:.*[\r\n]*)+?BERT:\s+(.*)(?:.*[\r\n]*)+?NER:\s+(DL\d+_+LR_(\d+_\d+)_+PO_(\d+)(?:,(\d+))+_+?DROP_(\d+_\d*))
+
+$1\t$2\t$3\t$4\t$5_$6\t$7
+
  */
 sc.setLogLevel("WARN")
+sparknlp.start(gpu=True)
 
 import com.johnsnowlabs.nlp.{Annotation, SparkNLP, DocumentAssembler, Finisher, AnnotatorType}
 import com.johnsnowlabs.nlp.{RecursivePipeline, LightPipeline}
@@ -50,8 +57,8 @@ import scala.util.matching.Regex
 import es.rcs.tfm.nlp.model.TfmType
 import es.rcs.tfm.nlp.util.{TfmHelper, TfmSave, TfmMeasure}
 
-//val CORPUS_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
-val CORPUS_DIR = "/D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
+val CORPUS_DIR = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
+//val CORPUS_DIR = "/D:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus"
 
 val embeddings = TfmHelper.prepareBert(
 //	"file://" + CORPUS_DIR + "/models/bert/biobert_pmc_base_cased_en_2.5.0_2.4_1590489029151")
@@ -95,13 +102,13 @@ val nerApproach = new NerDLApproach().
 	setOutputCol(TfmType.NAMED_ENTITY).
 	setLabelColumn(TfmType.LABEL).
 	setEnableOutputLogs(true).
-	setIncludeConfidence(true).
+	setIncludeConfidence(false).
 	setEvaluationLogExtended(true).
-	setMinEpochs(20).
-	setMaxEpochs(150).
-	setLr(0.1f).
-	setPo(0.05f).
-	setDropout(0.5f).
+	setMinEpochs(2).
+	setMaxEpochs(10).
+	setLr(0.02f).
+	setPo(0.000f).
+	setDropout(0.68f).
 	setValidationSplit(0.20f).
 	setVerbose(Verbose.PerStep)
 

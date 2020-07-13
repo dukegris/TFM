@@ -1,0 +1,56 @@
+FROM ubuntu:20.04
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+RUN apt-get update &&\
+	apt-get install -y --no-install-recommends gnupg2 locales apt-utils
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen &&\
+	locale-gen
+ENV TZ=Europe/Madrid \
+	LANGUAGE=en_US:en \
+	LC_ALL=en_US.UTF-8 \
+	LANG=en_US.UTF-8
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime &&\
+	echo $TZ > /etc/timezone
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN apt-get update &&\
+	apt-get install -y --no-install-recommends software-properties-common && \
+	apt-get install -y --no-install-recommends postgresql-12 postgresql-client-12 postgresql-contrib-12
+
+# createuser TfmUser --login --superuser --createdb &&\
+# tfm_user: TfmPassword
+# tfm_query: TfmQuery
+ENV PG_USER="postgres" \
+	PG_BIN_DIR="/usr/lib/postgresql/12" \
+	PG_DATA_DIR="/var/lib/postgresql/12/main" \
+	PG_ETC_DIR="/etc/postgresql/12/main" \
+	PG_LOGS_DIR="/var/log/postgresql" \
+	TFM_DIR="/var/lib/postgresql/tfm" \
+	PATH="$PG_BIN_DIR/bin:$PATH"
+
+RUN echo "host all  all    0.0.0.0/0  md5" >> $PG_ETC_DIR/pg_hba.conf
+RUN echo "listen_addresses = '*'" >> $PG_ETC_DIR/postgresql.conf
+RUN echo "default_tablespace = 'tfm_tbl'" >> $PG_ETC_DIR/postgresql.conf
+RUN echo "search_path = '\"$user\",tfm'" >> $PG_ETC_DIR/postgresql.conf
+
+USER $PG_USER
+RUN mkdir $TFM_DIR &&\
+	/etc/init.d/postgresql start &&\
+	psql --command "CREATE ROLE tfm_admin SUPERUSER;" &&\
+	psql --command "CREATE TABLESPACE tfm_tbl OWNER tfm_admin LOCATION '$TFM_DIR';" &&\
+	psql --command "CREATE DATABASE tfm_db OWNER tfm_admin TABLESPACE tfm_tbl;" &&\
+	psql --dbname tfm_db --command "CREATE SCHEMA tfm AUTHORIZATION tfm_admin;"  &&\
+	psql --command "CREATE USER tfm_user INHERIT PASSWORD 'md52484a0b9e891fd2a0a73586d30e4a3da';" &&\
+	psql --command "GRANT CONNECT ON DATABASE tfm_db TO tfm_user;" &&\
+	psql --dbname tfm_db --command "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA tfm TO tfm_user;" &&\
+	psql --dbname tfm_db --command "GRANT USAGE ON SCHEMA tfm TO tfm_user;" &&\
+	psql --command "CREATE USER tfm_query INHERIT PASSWORD 'md58f4e7cdaf566f0766dfc67fe15f7348c';" &&\
+	psql --dbname tfm_db --command "GRANT SELECT ON ALL TABLES IN SCHEMA tfm TO tfm_query;"
+
+EXPOSE 5432
+VOLUME  ["$PG_ETC_DIR", "$PG_LOGS_DIR", "$PG_DATA_DIR", "$TFM_DIR"]
+CMD ["/usr/lib/postgresql/12/bin/postgres", "-D", "/var/lib/postgresql/12/main", "-c", "config_file=/etc/postgresql/12/main/postgresql.conf"]

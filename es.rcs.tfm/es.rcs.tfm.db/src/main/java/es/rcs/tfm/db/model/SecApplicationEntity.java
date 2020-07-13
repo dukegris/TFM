@@ -93,6 +93,9 @@ public class SecApplicationEntity extends AuditedBaseEntity {
 	public static final String DB_APPLICATION		= "app_txt";
 	public static final String DB_URL				= "app_url";
 
+	public static final String ATT_CODE				= "code";
+	public static final String ATT_APPLICATION		= "name";
+	public static final String ATT_URL				= "url";
 	public static final String ATT_MODULE_IDS		= "moduleIds";
 	public static final String ATT_MODULES			= "modules";
 	public static final String ATT_AUTHORITY_IDS	= "authorityIds";

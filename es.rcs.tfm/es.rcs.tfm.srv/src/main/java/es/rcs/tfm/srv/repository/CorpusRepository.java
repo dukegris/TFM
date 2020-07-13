@@ -27,7 +27,7 @@ public class CorpusRepository {
 	 * es necesaria la descarga y procesado
 	 * @param directory Directorio donde se almacena el fichero indice
 	 * @param obj Nombre del fichero indice
-	 * @param size Tamaño del fichero a comprobar
+	 * @param size Tamaï¿½o del fichero a comprobar
 	 * @return Si el fichero local es el mismo
 	 */
 	public static Boolean checkDownloadNeeded(
@@ -45,7 +45,7 @@ public class CorpusRepository {
 
 	/**
 	 * @param file Path completo a un fichero en local
-	 * @param size Tamaño del fichero a comprobar
+	 * @param size Tamaï¿½o del fichero a comprobar
 	 * @return coincide el fichero y el tamanio
 	 */
 	public static boolean checkFileAndSize(
@@ -111,7 +111,7 @@ public class CorpusRepository {
 		
 		if (result) {
 			
-			if (StringUtils.isNotEmpty(md5loaded)) {
+			if (StringUtils.isNotBlank(md5loaded)) {
 				if (!md5loaded.equals(md5Calculated)) {
 					result = false;
 				}
@@ -131,7 +131,7 @@ public class CorpusRepository {
 	 * @param sourceFilename Fichero a descomprimir
 	 * @param targetDirectory Directorio donde depositar el XML
 	 * @param targetFilename Fichero descomprimido
-	 * @return Resultado correcto de la operación
+	 * @return Resultado correcto de la operaciï¿½n
 	 */
 	public static boolean uncompress(
 			String sourceDirectory,

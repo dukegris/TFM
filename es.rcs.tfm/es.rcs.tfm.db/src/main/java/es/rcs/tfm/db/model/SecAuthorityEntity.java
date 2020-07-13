@@ -62,8 +62,8 @@ import lombok.ToString;
 						name = SecAuthorityEntity.DB_CODE_UK, 
 						columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_CODE }) ,
 				@UniqueConstraint(
-						name = SecAuthorityEntity.DB_NAME_UK, 
-						columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_NAME }) })
+						name = SecAuthorityEntity.DB_AUTHORITY_UK, 
+						columnNames = { SecAuthorityEntity.DB_APPLICATION_ID, SecAuthorityEntity.DB_AUTHORITY }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -77,7 +77,7 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE				= "Authority";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_NAME				= "name";
+	public static final String RES_AUTHORITY		= "name";
 
 	public static final String RES_APPLICATION_ID	= "applicationId";
 	public static final String RES_APPLICATION		= "application";
@@ -94,14 +94,16 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE 			= "sec_authority";
 	public static final String DB_ID_PK 			= "sec_aut_pk";
 	public static final String DB_UID_UK			= "sec_aut_uid_uk";
-	public static final String DB_NAME_UK			= "sec_aut_aut_uk";
+	public static final String DB_AUTHORITY_UK		= "sec_aut_aut_uk";
 	public static final String DB_CODE_UK			= "sec_aut_cod_uk";
 	public static final String DB_APPLICATION_ID_FK	= "sec_aut_app_fk";
 
 	public static final String DB_CODE				= "aut_cod";
-	public static final String DB_NAME				= "aut_txt";
+	public static final String DB_AUTHORITY			= "aut_txt";
 	public static final String DB_APPLICATION_ID	= "app_id";
 
+	public static final String ATT_CODE				= "code";
+	public static final String ATT_AUTHORITY		= "name";
 	public static final String ATT_APPLICATION		= "application";
 	public static final String ATT_APPLICATION_ID	= "applicationId";
 	public static final String ATT_ROLES			= "roles";
@@ -129,10 +131,10 @@ public class SecAuthorityEntity extends AuditedBaseEntity {
 
 
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_AUTHORITY,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_AUTHORITY, 
 			unique = true,
 			nullable = false, 
 			length = 64)

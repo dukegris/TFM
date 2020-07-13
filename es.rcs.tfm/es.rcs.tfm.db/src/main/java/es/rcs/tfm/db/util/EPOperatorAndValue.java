@@ -43,7 +43,7 @@ public class EPOperatorAndValue {
      */
     public EPOperatorAndValue(final String input, final Collection<EPOperator> in_operators,
                             final EPOperator defaultOperator) {
-        Validate.isTrue(StringUtils.isNotEmpty(input), "Input string cannot be blank");
+        Validate.isTrue(StringUtils.isNotBlank(input), "Input string cannot be blank");
         Validate.isTrue(CollectionUtils.isNotEmpty(in_operators), "Input operators must not be empty");
         this.operator = null;
         this.value = StringUtils.trim(input);

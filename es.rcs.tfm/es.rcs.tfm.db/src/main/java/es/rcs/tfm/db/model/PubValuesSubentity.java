@@ -33,6 +33,9 @@ public class PubValuesSubentity {
 	public static final String DB_TYPE		= "ids_typ";
 	public static final String DB_VALUE		= "ids_val";
 
+	public static final String ATT_TYPE		= "type";
+	public static final String ATT_VALUE	= "value";
+
 	
 	@JsonProperty(
 			value = RES_TYPE,

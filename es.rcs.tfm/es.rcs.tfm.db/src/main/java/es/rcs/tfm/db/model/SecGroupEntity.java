@@ -59,8 +59,8 @@ import lombok.ToString;
 				name = SecGroupEntity.DB_CODE_UK, 
 				columnNames = { SecGroupEntity.DB_CODE }),
 		@UniqueConstraint(
-				name = SecGroupEntity.DB_NAME_UK, 
-				columnNames = { SecGroupEntity.DB_NAME }) })
+				name = SecGroupEntity.DB_GROUPNAME_UK, 
+				columnNames = { SecGroupEntity.DB_GROUPNAME }) })
 @Entity
 @Audited
 @EntityListeners(
@@ -74,7 +74,7 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	public static final String RES_TYPE				= "Group";
 
 	public static final String RES_CODE				= "code";
-	public static final String RES_NAME				= "name";
+	public static final String RES_GROUPNAME		= "name";
 	public static final String RES_USER_IDS			= "userIds";
 	public static final String RES_USERS			= "users";
 	public static final String RES_AUTHORITY_IDS	= "authorityIds";
@@ -84,10 +84,10 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	public static final String DB_ID_PK 			= "sec_grp_pk";
 	public static final String DB_UID_UK			= "sec_grp_uid_uk";
 	public static final String DB_CODE_UK			= "sec_grp_cod_uk";
-	public static final String DB_NAME_UK			= "sec_grp_grp_uk";
+	public static final String DB_GROUPNAME_UK		= "sec_grp_grp_uk";
 	
 	public static final String DB_CODE				= "grp_cod";
-	public static final String DB_NAME				= "grp_txt";
+	public static final String DB_GROUPNAME			= "grp_txt";
 
 	public static final String DB_TABLE_GROUP_AUTH	= "sec_group_authorities";
 	public static final String DB_AUTHGROUPS_FK		= "sec_aut_grp_fk";
@@ -96,6 +96,8 @@ public class SecGroupEntity extends AuditedBaseEntity {
 	public static final String DB_GROUP_ID			= "grp_id";
 	public static final String DB_AUTH_ID			= "aut_id";
 	
+	public static final String ATT_CODE				= "code";
+	public static final String ATT_GROUPNAME		= "name";
 	public static final String ATT_AUTHORITIES		= "authorities";
 	public static final String ATT_AUTHORITY_IDS	= "authorityIds";
 	public static final String ATT_USERS			= "users";
@@ -119,10 +121,10 @@ public class SecGroupEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_NAME,
+			value = RES_GROUPNAME,
 			required = true)
 	@Column(
-			name = DB_NAME, 
+			name = DB_GROUPNAME, 
 			unique = true,
 			nullable = false, 
 			length = 256)
