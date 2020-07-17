@@ -7,12 +7,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -112,6 +112,7 @@ import es.rcs.tfm.srv.model.Revista;
 import es.rcs.tfm.srv.model.Termino;
 import es.rcs.tfm.srv.model.Termino.DescType;
 import es.rcs.tfm.srv.model.Termino.TermType;
+import es.rcs.tfm.srv.model.Texto;
 import es.rcs.tfm.srv.model.Titulo;
 
 public class PubmedXmlProcessor extends ArticleProcessor {
@@ -305,7 +306,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 		// Generalmente afectan a ampliaciones como el abstract
 		articulo.addIds(			makeIdsOther(medlineCitation.getOtherID())); 
-		articulo.addResumen(		makeResumen(medlineCitation.getOtherAbstract()));
+		articulo.addTextos(			makeTextos(medlineCitation.getOtherAbstract()));
 
 		articulo.addFecha(			makeFecha(medlineCitation.getDateCompleted()));
 		articulo.addFecha(			makeFecha(medlineCitation.getDateRevised()));
@@ -324,7 +325,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		articulo.addGenes(			makeGenes(medlineCitation.getGeneSymbolList())); // Solo en citas desde 1991 a 1995	
 		articulo.addVuelos(			makeData(medlineCitation.getSpaceFlightMission()));
 		articulo.addNotas(			makeNotes(medlineCitation.getGeneralNote()));
-		//articulo.addObservaciones(	makeObservaciones(medlineCitation.getGeneralNote()));
+		articulo.addTextos(			makeTextosNotas(medlineCitation.getGeneralNote()));
 		
 		articulo.mergeRevista(		makeRevista(medlineCitation.getMedlineJournalInfo()));
 		
@@ -356,8 +357,12 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (articulo == null) articulo = new Articulo();
 		
 		articulo.setTitulo(			makeTitulo(article.getArticleTitle()));
-		articulo.setTituloOriginal(	article.getVernacularTitle());
-		articulo.addResumen(		makeResumen(article.getAbstract()));
+		articulo.addTexto(			makeTexto(article.getArticleTitle()));
+		articulo.addTexto(			makeTexto(
+										Articulo.VERNACULAR_TITLE,
+										Articulo.VERNACULAR_TITLE_START, 
+										article.getVernacularTitle()));
+		articulo.addTextos(			makeTextos(article.getAbstract()));
 		articulo.setIdioma(			makeIdioma(article.getLanguage()));
 		articulo.setMedio(			article.getPubModel()); 
 		//articulo.addIds(			makeIdsELocationIDS(article.getPaginationOrELocationID()) );
@@ -381,8 +386,12 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 		if (articulo == null) articulo = new Articulo();
 		articulo.setTitulo(			makeTitulo(bookDocument.getArticleTitle()));
-		articulo.setTituloOriginal(	bookDocument.getVernacularTitle());
-		articulo.addResumen(		makeResumen(bookDocument.getAbstract()));
+		articulo.addTexto(			makeTexto(bookDocument.getArticleTitle()));
+		articulo.addTexto(			makeTexto(
+										Articulo.VERNACULAR_TITLE, 
+										Articulo.VERNACULAR_TITLE_START, 
+										bookDocument.getVernacularTitle()));		
+		articulo.addTextos(			makeTextos(bookDocument.getAbstract()));
 		articulo.setIdioma(			makeIdioma(bookDocument.getLanguage()));
 		articulo.addIds(			makeIds(bookDocument.getArticleIdList()));
 		articulo.addIds(			makeId(bookDocument.getPMID()));
@@ -590,48 +599,60 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	// -------------------------------------------------------------------------------
 	// RESUMEN
 
-	private HashMap<String, Object> makeResumen(Abstract articleAbstract) {
+	private List<Texto> makeTextosNotas(List<GeneralNote> generalNote) {
+		
+		if (	(generalNote == null) ||
+				(generalNote.isEmpty())) return null;
+
+		String type = Articulo.OBSERVATIONS;
+		int order = Articulo.OBSERVATIONS_START;
+		
+		AtomicInteger atomicorder = new AtomicInteger(order);
+		List<Texto> result = generalNote.
+				stream().
+				filter(	p -> p!= null).
+				map(p -> makeTexto(type, atomicorder.getAndAdd(1), p.getvalue())).
+				collect(Collectors.toList());
+		
+		if (result.isEmpty()) result = null;
+		return result;
+
+	}
+
+	private List<Texto> makeTextos(Abstract articleAbstract) {
 		
 		if (articleAbstract == null) return null;
 
-		HashMap<String, Object> result = new HashMap<>();
-		result.put(Articulo.CONTENT_TYPE, Articulo.ABSTRACT_TYPE);
+		String type = Articulo.ABSTRACT;
+		int order = Articulo.ABSTRACT_START;
+		String subtype = null;
+		String language = "en";
+		String copyright = articleAbstract.getCopyrightInformation();
 		
-		if (StringUtils.isNotBlank(articleAbstract.getCopyrightInformation())) {
-				result.put(Articulo.COPYRIGHT,		articleAbstract.getCopyrightInformation());
-		}
-		
-		if ((articleAbstract.getAbstractText() != null) && (!articleAbstract.getAbstractText().isEmpty())) {
-			List<Map<String, String>> others = makeResumenOriginal(articleAbstract.getAbstractText());
-			if ((others != null) && (!others.isEmpty())) {			
-				result.put(Articulo.CONTENT,		others);
-			}
-		}
+		List<Texto> result = makeTextos(type, subtype, language, copyright, order, articleAbstract.getAbstractText());
 		
 		if (result.isEmpty()) result = null;
 		return result;
 		
 	}
 
-	private List<Map<String, Object>> makeResumen(List<OtherAbstract> otherAbstract) {
+	private List<Texto> makeTextos(List<OtherAbstract> otherAbstract) {
 
 		if (	(otherAbstract == null) ||
 				(otherAbstract.isEmpty())) return null;
 		
-		List<Map<String, Object>> result = otherAbstract.
+		String type = Articulo.OTHER_ABSTRACT;
+		int order = Articulo.OTHER_ABSTRACT_START;
+		List<Texto> result = otherAbstract.
 			stream().
-			filter(p -> p!= null).
-			map(p -> {
-				Map<String, Object> item = new HashMap<>();
-				item.put(Articulo.CONTENT_TYPE, Articulo.OTHER_TYPE);
-				if (StringUtils.isNotBlank(p.getType()))					item.put(Articulo.TYPE,			p.getType());
-				if (StringUtils.isNotBlank(p.getLanguage()))				item.put(Articulo.LANGUAGE,		p.getLanguage());
-				if (StringUtils.isNotBlank(p.getCopyrightInformation()))	item.put(Articulo.COPYRIGHT,	p.getCopyrightInformation());
-				if ((p.getAbstractText() != null) && (!p.getAbstractText().isEmpty())) {
-					List<Map<String, String>> others = makeResumenOriginal(p.getAbstractText());
-					if ((others != null) && (!others.isEmpty()))			item.put(Articulo.CONTENT,		others);
-				}
-				return item;
+			filter(	p -> p!= null &&
+					p.getAbstractText() != null && 
+					!p.getAbstractText().isEmpty()).
+			flatMap(p -> {
+				String subtype = p.getType();
+				String language = p.getLanguage();
+				String copyright = p.getCopyrightInformation();
+				return makeTextos(type, subtype, language, copyright, order, p.getAbstractText()).stream();
 			}).
 			collect(Collectors.toList());
 
@@ -639,28 +660,92 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		return result;
 
 	}
-
-	private List<Map<String, String>> makeResumenOriginal(List<AbstractText> abstractText) {
+	
+	private List<Texto> makeTextos(
+			String type,
+			String subtype,
+			String language,
+			String copyright,
+			int order,
+			List<AbstractText> abstractText) {
 		
 		if (	(abstractText == null) ||
 				(abstractText.isEmpty())) return null;
 
-		List<Map<String, String>> result = abstractText.
+		AtomicInteger atomicorder = new AtomicInteger(order);
+		List<Texto> result = abstractText.
 			stream().
 			filter(p -> p!= null).
-			map(p -> {
-				Map<String, String> item = new HashMap<>();
-				if (StringUtils.isNotBlank(p.getLabel()))		item.put(Articulo.LABEL,	p.getLabel());
-				if (StringUtils.isNotBlank(p.getNlmCategory()))	item.put(Articulo.CATEGORY,	p.getNlmCategory());
-				if (StringUtils.isNotBlank(p.getvalue()))		item.put(Articulo.TEXT,		p.getvalue());
-				if (item.isEmpty()) item = null;
-				return item;
-			}).
+			map(p -> new Texto(
+						type, 
+						subtype, 
+						language, 
+						copyright, 
+						atomicorder.getAndAdd(1), 
+						p.getLabel(),
+						p.getNlmCategory(),
+						p.getNlmCategory())).
 			collect(Collectors.toList());
 
 		if (result.isEmpty()) result = null;
 		return result;
 
+	}
+
+	private Texto makeTexto(ArticleTitle articleTitle) {
+		
+		if (	(articleTitle == null) ||
+				(StringUtils.isBlank(articleTitle.getvalue()))) return null;
+	
+		String type = Articulo.TITLE;
+		int order = Articulo.TITLE_START;
+		String subtype = null;
+		String language = null;
+		String copyright = null;
+		String label = null;
+		String category = null;
+		String text = articleTitle.getvalue().trim();
+
+		return new Texto(
+				type, 
+				subtype, 
+				language, 
+				copyright, 
+				order, 
+				label, 
+				category, 
+				text);
+		/*
+		if (StringUtils.isNotBlank(articleTitle.getBook())) {
+			resultado.setLibroId(articleTitle.getBook().trim());
+		}
+		if (StringUtils.isNotBlank(articleTitle.getPart())) {
+			resultado.setLibroId(articleTitle.getPart().trim());
+		}
+		if (StringUtils.isNotBlank(articleTitle.getSec())) {
+			resultado.setLibroId(articleTitle.getSec().trim());
+		}
+		
+		if (StringUtils.isBlank(resultado.getTitulo())) {
+			System.out.println("DEBUG - titulo vacio");
+		}
+		*/
+		
+	}
+	
+	private Texto makeTexto(
+			String type,
+			int order,
+			String text) {
+		return new Texto(
+				type,
+				null,
+				null,
+				null,
+				order,
+				null,
+				null,
+				text);
 	}
 
 	// -------------------------------------------------------------------------------
@@ -785,7 +870,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 	}
 
-	private Map<String, String> makeIdsELocationIDS(List<Object> paginationOrELocationID) {
+	protected Map<String, String> makeIdsELocationIDS(List<Object> paginationOrELocationID) {
 		
 		if (	(paginationOrELocationID == null) ||
 				(paginationOrELocationID.isEmpty()) ) return null;
@@ -1162,7 +1247,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			}
 			if (StringUtils.isBlank(resultado.getAnio())) {
 				if (anio != null) {
-				resultado.setAnio(anio);
+					resultado.setAnio(anio);
 				} else {
 					Matcher m = MEDLINE_DATE_PTR.matcher(fecha);
 					if (m.find()) {
@@ -1804,27 +1889,6 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 					}));
 						
 		if (resultado.isEmpty()) resultado = null;
-		return resultado;
-		
-	}
-	
-	/**
-	 * Observaciones de diversas fuentas
-	 * @param generalNote
-	 * @return
-	 */
-	private String makeObservaciones(List<GeneralNote> generalNote) {
-		
-		if (	(generalNote == null) || 
-				(generalNote.isEmpty())) return null;
-		
-		StringBuffer sb = new StringBuffer();
-		generalNote.forEach(p -> {
-			if (StringUtils.isNotBlank(p.getvalue())) sb.append(String.format("%s:\t%s\r\n", p.getOwner(), p.getvalue()));
-		});
-
-		String resultado = sb.toString();
-		if (StringUtils.isBlank(resultado)) resultado = null;
 		return resultado;
 		
 	}

@@ -1,6 +1,7 @@
 package es.rcs.tfm.db.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,23 +44,30 @@ public interface PubCentreRepository extends
 
 	}
 
-	/*
+
+	public Optional<PubCenterEntity> findByName(
+			@Param(PubCenterEntity.ATT_NAME) String name);
+
 	@Query(
 			"SELECT a" + 
-			" FROM PubArticleEntity a" +
+			" FROM " + 
+			"  PubCenterEntity a JOIN " + 
+			"  a.identifiers i" +
 			" WHERE" +
-			" KEY(a.identifiers) = :type AND VALUE(a.identifiers) = :value")
-			*/
-	@Query(
-			"SELECT a" + 
-			" FROM PubCenterEntity a JOIN a.identifiers i" +
-			" WHERE" +
-			" i.type = :type AND i.value = :value")
+			"  i.type = :type AND i.value = :value")
 	List<PubCenterEntity> findByIdentifier(
 			@Param(PubValuesSubentity.ATT_TYPE) String type, 
 			@Param(PubValuesSubentity.ATT_VALUE) String value);
 
-	public Optional<PubCenterEntity> findByName(
-			@Param(PubCenterEntity.ATT_NAME) String name);
+	@Query(
+			"SELECT " + 
+			"  a" + 
+			" FROM " + 
+			"  PubCenterEntity a JOIN " + 
+			"  a.identifiers i" +
+			" WHERE" +
+			"  (i.type, i.value) IN (:ids)")
+	List<PubCenterEntity> findByIdentifiers(
+			@Param("ids") Map<String, String> ids);
 	
 }

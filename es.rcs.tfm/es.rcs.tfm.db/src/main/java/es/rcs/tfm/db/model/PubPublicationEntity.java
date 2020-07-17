@@ -103,6 +103,8 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	public static final String RES_ARTICLE_AUTHOR_IDS		= "articleAuthorIds";
 	public static final String RES_ARTICLE_AUTHORS			= "articleAuthors";
 
+	public static final String DB_SEARCH_IDENTIFIERS 		= "publication.searchByIdentifiers";
+
 	public static final String DB_TABLE 					= "pub_publications";
 	public static final String DB_ID_PK 					= "pub_pub_pk";
 	public static final String DB_UID_UK					= "pub_pub_uid_uk";
@@ -132,6 +134,9 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	
 	public static final String DB_PUBLICATION_ID			= "pub_id";
 	
+	public static final String ATT_PUBLICATIONTYPE			= "type";
+	public static final String ATT_SUBTYPE					= "subtype";
+	public static final String ATT_TITLE					= "title";
 	public static final String ATT_ARTICLE_IDS				= "articleIds";
 	public static final String ATT_ARTICLES					= "articles";
 	public static final String ATT_ARTICLE_AUTHOR_IDS		= "articleAuthorIds";

@@ -62,26 +62,27 @@
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Spa</artifactId>
 			<version>${tfm.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Xml-BioC</artifactId>
 			<version>${tfm.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Xml-PubMed</artifactId>
 			<version>${tfm.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>es.rcs.tfm</groupId>
 			<artifactId>RCS-Xml-MESH</artifactId>
 			<version>${tfm.version}</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
+		
 
 		<!-- =====================================
 			 J2EE
@@ -101,11 +102,6 @@
 			<artifactId>javax.transaction-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		
 		<!-- =====================================
 			 APACHE COMMONS
@@ -118,14 +114,14 @@
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
+		
 		<!-- =====================================
 			 SPRING
 			 ===================================== -->
@@ -191,16 +187,6 @@
 			<artifactId>spring-data-solr</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-rest-core</artifactId>
-			<scope>compile</scope>
-		</dependency>			
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-rest-webmvc</artifactId>
-			<scope>runtime</scope>
-		</dependency>			
 		<!-- SHELL -->
 		<dependency>
 			<groupId>org.springframework.shell</groupId>
@@ -232,70 +218,51 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-json</artifactId>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
 			<scope>compile</scope>
 		</dependency>
+
+		<!-- RUNTIME SPECIFIC -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-solr</artifactId>
-			<scope>compile</scope>
+			<groupId>net.minidev</groupId>
+			<artifactId>json-smart</artifactId>
+			<version>2.3</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- =====================================
-			 HIBERNATE
+			 XML
 			 ===================================== -->
+		<!-- JACKSON -->
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<scope>runtime</scope>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<!-- <version>${jackson.version}</version> -->
+			<!-- <version>2.9.9.1</version> -->
+			<scope>compile</scope>
+		</dependency>
+		<!-- JJWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- =====================================
 			 UTILITIES
 			 ===================================== -->
-		<!-- ANTLR para compatibilidad con spark -->
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr4-runtime</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- HIKARI -->
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-		    <artifactId>HikariCP</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 		<!-- ATOMIKOS JTA -->
 		<dependency>
 			<groupId>com.atomikos</groupId>
-			<artifactId>atomikos-util</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.atomikos</groupId>
-			<artifactId>transactions</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -313,93 +280,6 @@
 			<artifactId>transactions-hibernate4</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
-		<!-- WRAPPER -->
-		<dependency>
-			<groupId>tanukisoft</groupId>
-			<artifactId>wrapper</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<!-- =====================================
-			 XML
-			 ===================================== -->
-		<!-- JACKSON -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<!-- <version>${jackson.version}</version> -->
-			<!-- <version>2.9.9.1</version> -->
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-smile</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jdk8</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-paranamer</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-parameter-names</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-scala_${scala.main}</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<!-- JJWT -->
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-impl</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-jackson</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-
-		<!-- =====================================
-			 UTILITIES
-			 ===================================== -->
-		<!-- LOMBOK -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
-
-		</dependency>
 		<!-- CRNK -->
 		<dependency>
 			<groupId>io.crnk</groupId>
@@ -408,51 +288,9 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-format</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-format-plain-json</artifactId>
-			<scope>runtime</scope>
-		</dependency>		
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-home</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-meta</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
 			<artifactId>crnk-security</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-monitor</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-operations</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-validation</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-data</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		 -->
 		<dependency>
 			<groupId>io.crnk</groupId>
 			<artifactId>crnk-data-jpa</artifactId>
@@ -460,28 +298,8 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-jpa</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-setup</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-servlet</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-setup-servlet</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
 			<artifactId>crnk-spring</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
@@ -493,11 +311,40 @@
 			<artifactId>crnk-setup-spring-boot2</artifactId>
 			<scope>compile</scope>
 		</dependency>
-   	
+		<!-- DSL -->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-core</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- LOMBOK -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- WRAPPER -->
+		<dependency>
+			<groupId>tanukisoft</groupId>
+			<artifactId>wrapper</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- =====================================
 			 SERVERS
-			 ===================================== -->
-			 
+			 ===================================== -->			 
+		<!-- H2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- JETTY -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -521,25 +368,12 @@
 			<artifactId>solr-solrj</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.minidev</groupId>
-			<artifactId>json-smart</artifactId>
-			<version>2.1.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		
-		<!-- H2 -->
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>compile</scope>
-		</dependency>
 
 		<!-- POSTGRESQL -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		
 		<!-- SQL SERVER -->
@@ -565,11 +399,6 @@
 			<artifactId>hadoop-common</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-hdfs</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		
 		<!-- SPARK -->
 		<dependency>
@@ -579,43 +408,43 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_${scala.main}</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		
-		<!-- NLP -->
+		<!-- SPARKNLP -->
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
 			<artifactId>spark-nlp_${scala.main}</artifactId>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
 			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
 			<version>2.2.2</version>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
-
+		
+		<!-- RUNTIME SPECIFIC -->
 		<dependency>
 			<groupId>org.apache.parquet</groupId>
 			<artifactId>parquet-hadoop</artifactId>
 			<version>1.11.0</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.databricks</groupId>
 			<artifactId>spark-xml_${scala.main}</artifactId>
 			<version>0.7.0</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.databricks</groupId>
 			<artifactId>spark-csv_${scala.main}</artifactId>
 			<version>1.5.0</version>
+			<scope>runtime</scope>
 		</dependency>
+		
 
 		<!-- =====================================
 			 LOGGER
@@ -629,8 +458,9 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<scope>compile</scope>
+			<scope>runtime</scope>
 		</dependency>
+		
 		
 		<!-- =====================================
 			 TEST

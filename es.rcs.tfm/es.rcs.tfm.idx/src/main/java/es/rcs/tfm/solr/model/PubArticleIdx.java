@@ -25,7 +25,7 @@ public class PubArticleIdx {
 	public static final String IDX_ID 						= "id";
 	public static final String IDX_PMID						= "pmid";
 	public static final String IDX_TITLE					= "title";
-	public static final String IDX_SUMMARY					= "summary";
+	public static final String IDX_TEXTS					= "texts";
 	public static final String IDX_GRANTS					= "grants";
 	public static final String IDX_AUTHORS					= "authors";
 	public static final String IDX_PUBLICATION_TYPE			= "publicationType";
@@ -64,9 +64,9 @@ public class PubArticleIdx {
     private String title;
     
     @Indexed(
-    		name = IDX_SUMMARY, 
+    		name = IDX_TEXTS, 
     		type = "string")
-    private String summary;
+    private List<String> texts;
     
     @Indexed(
     		name = IDX_AUTHORS, 

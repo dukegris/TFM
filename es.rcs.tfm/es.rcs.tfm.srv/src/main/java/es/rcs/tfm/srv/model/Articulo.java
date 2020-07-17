@@ -1,6 +1,5 @@
 package es.rcs.tfm.srv.model;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import es.rcs.tfm.db.model.PubArticleEntity;
 import es.rcs.tfm.solr.model.PubArticleIdx;
@@ -24,8 +22,6 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = false)
 public class Articulo {
-
-	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	public static final String SEPARATOR = ";";
 	
@@ -54,27 +50,38 @@ public class Articulo {
 	public static final String REVISTA = "REVISTA";
 	public static final String LIBRO = "LIBRO";
 
+	public static final String TITLE = "title";
+	public static final String VERNACULAR_TITLE = "vernacular";
+	public static final String ABSTRACT = "abstract";
+	public static final String OTHER_ABSTRACT = "other";
+	public static final String OBSERVATIONS = "observations";
+
+	public static final Integer TITLE_START = 1;
+	public static final Integer VERNACULAR_TITLE_START = 6;
+	public static final Integer OBSERVATIONS_START = 10;
+	public static final Integer ABSTRACT_START = 20;
+	public static final Integer OTHER_ABSTRACT_START = 60;
+
+	/*
+	public static final String COPYRIGHT = "copyright";
+	public static final String LANGUAGE = "language";
+	public static final String LABEL = "label";
+	public static final String CATEGORY = "category";
 	public static final String CONTENT_TYPE = "contentType";
 	public static final String ABSTRACT_TYPE = "abstract";
 	public static final Object OTHER_TYPE = "other";
 
 	public static final String CONTENT = "content";
-	public static final String TYPE = "type";
-	public static final String LABEL = "label";
-	public static final String CATEGORY = "category";
-	public static final String LANGUAGE = "language";
 	public static final String TEXT = "text";
-	public static final String COPYRIGHT = "copyright";
+	*/
 
 	private String pmid = new String();
 	private Titulo titulo;
 	private String propietario;
-	private String tituloOriginal;
 	
 	private String idioma;
 	private String version;
 	private LocalDate versionFecha;
-	private String observaciones;
 	private String medio; // Print | Print-Electronic | Electronic | Electronic-Print | Electronic-eCollection
 	private String estado; // Completed | In-Process | PubMed-not-MEDLINE | In-Data-Review | Publisher | MEDLINE | OLDMEDLINE
 	private Revista revista;
@@ -91,6 +98,7 @@ public class Articulo {
 	private List<Permiso> permisos = new ArrayList<>();
 	private List<Referencia> referencias = new ArrayList<>();
 	private List<Termino> terminos = new ArrayList<>();
+	private List<Texto> textos = new ArrayList<>();
 	private List<BloqueAnotado> blocks = new ArrayList<>();
 	private List<Descriptor> datos = new ArrayList<>();
 	private List<Descriptor> items = new ArrayList<>();
@@ -98,7 +106,6 @@ public class Articulo {
 	private List<Descriptor> genes = new ArrayList<>();
 	private List<Descriptor> notas = new ArrayList<>();
 	private List<Descriptor> vuelos = new ArrayList<>();
-	private List<Map<String, Object>> resumen = new ArrayList<>();
 
 	private boolean hayCambiosEnBD = false;
 	private boolean hayCambiosEnIDX = false;
@@ -146,7 +153,6 @@ public class Articulo {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<BloqueAnotado> generateBlocks() {
 		
 		List<BloqueAnotado> result = new ArrayList<>();
@@ -154,42 +160,24 @@ public class Articulo {
 
 		int offset = 0;
 		String str = null;
-		str = this.generateTitle();
-		if (StringUtils.isNotBlank(str)) {
-			BloqueAnotado block = new BloqueAnotado();
-			block.setType(BloqueAnotado.PASSAGE_TYPE_TITLE);
-			block.setOffset(offset);
-			block.setText(str);
-			offset += str.length();
-			this.getBlocks().add(block);
-		}
-		
-		if ((this.getResumen() != null) && !this.getResumen().isEmpty()) {
-			for (Map<String, Object>sumary: this.getResumen()) {
-				if ( (sumary != null) && (!sumary.isEmpty())) {
-					String type = (String) sumary.get(Articulo.CONTENT_TYPE);
-					if (Articulo.ABSTRACT_TYPE.equals(type)) {
-						type = BloqueAnotado.PASSAGE_TYPE_ABSTRACT;
-					} else if (Articulo.ABSTRACT_TYPE.equals(type)) {
-						type = BloqueAnotado.PASSAGE_TYPE_OTHER_ABSTRACT;
-					}
-					List<HashMap<String, String>> others = null;
-					others = (List<HashMap<String, String>>) sumary.get(Articulo.CONTENT);
-					if ( (others != null) && (!others.isEmpty())) {
-						for (HashMap<String, String> other: others) {
-							if ( (other != null) && (!other.isEmpty())) {
-								String text = other.get(Articulo.TEXT);
-								if (StringUtils.isNotBlank(str)) {
-									BloqueAnotado block = new BloqueAnotado();
-									block.setType(type);
-									block.setOffset(offset);
-									block.setText(text);
-									offset += text.length();
-									result.add(block);
-								}
-							}
-						}
-					}
+		if ((this.getTextos() != null) && !this.getTextos().isEmpty()) {
+			for (Texto texto: this.getTextos()) {
+				String type = texto.getTipo();
+				if (Articulo.TITLE.equals(type)) {
+					type = BloqueAnotado.PASSAGE_TYPE_TITLE;
+				} else if (Articulo.ABSTRACT.equals(type)) {
+					type = BloqueAnotado.PASSAGE_TYPE_ABSTRACT;
+				} else if (Articulo.OTHER_ABSTRACT.equals(type)) {
+					type = BloqueAnotado.PASSAGE_TYPE_OTHER_ABSTRACT;
+				}
+				String text = texto.getTexto();
+				if (StringUtils.isNotBlank(str)) {
+					BloqueAnotado block = new BloqueAnotado();
+					block.setType(type);
+					block.setOffset(offset);
+					block.setText(text);
+					offset += text.length();
+					result.add(block);
 				}
 			}
 		}
@@ -217,25 +205,9 @@ public class Articulo {
 		
 		String result = "";
 		if (this.getTitulo() != null) result = this.getTitulo().getTitulo();
-		if (StringUtils.isBlank(result)) result = this.getTituloOriginal();
 		if (StringUtils.isBlank(result)) result = "";
 		
 		return result;
-		
-	}
-	
-	public String generateResumen() {
-		
-		String str = "";
-		try {
-			str = MAPPER.
-					writeValueAsString(this.resumen);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (StringUtils.isBlank(str)) return null;
-		
-		return str;
 		
 	}
 
@@ -319,37 +291,18 @@ public class Articulo {
 		if ((items!= null) && (!items.isEmpty())) this.genes.addAll(items);
 	}
 
-	public void addResumen(Map<String, Object> summary) {
-		if ((summary != null) && !summary.isEmpty()) {
-			resumen.add(summary);
-		}
-	}
-
-	public void addResumen(List<Map<String, Object>> items) {
-		if ((items != null) && !items.isEmpty()) {
-			resumen.addAll(items);
-		}
-	}
-
 	public void addPropiedades(Map<String, Map<String, String>> items) {
 		if ((items != null) && !items.isEmpty()) {
 			properties.putAll(items);
 		}
 	}
 
-	public void addObservaciones(String instance) {
-		
-		if (StringUtils.isNotBlank(instance)) {
-			if (this.observaciones == null) {
-				this.observaciones = instance;
-			} else {
-				StringBuffer sb = new StringBuffer();
-				sb.append(this.observaciones);
-				sb.append(instance);
-				this.observaciones = sb.toString();
-			}
-		}
-		
+	public void addTexto(Texto item) {
+		if ((item!= null)) this.textos.add(item);
+	}
+
+	public void addTextos(List<Texto> items) {
+		if ((items!= null) && (!items.isEmpty())) this.textos.addAll(items);
 	}
 
 	public void mergeRevista(Revista revista) {

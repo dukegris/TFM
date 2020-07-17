@@ -2,80 +2,80 @@ version: '3.8'
 
 services:
   postgresql:
-    image: dukegris/tfm_postgresql:1.0.1
+    image: dukegris/tfm_postgresql:1.0.2
     networks: 
       backend:
     volumes:
       - type: volume
-        source: pg_metadata
+        source: pg-metadata
         target: /var/lib/postgresql
         volume:
           nocopy: false
       - type: volume
-        source: pg_data
+        source: pg-data
         target: /var/lib/tfm
         volume:
           nocopy: false
       - type: volume
-        source: pg_logs
+        source: pg-logs
         target: /var/log/postgresql
         volume:
           nocopy: false
     ports:
       - 5432:5432
   solr:
-    image: dukegris/tfm_solr:1.0.1
+    image: dukegris/tfm_solr:1.0.2
     networks: 
       backend:
     volumes:
       - type: volume
-        source: solr_metadata
+        source: solr-metadata
         target: /var/lib/solr
         volume:
           nocopy: false
       - type: volume
-        source: solr_data
+        source: solr-data
         target: /var/lib/tfm
         volume:
           nocopy: false
       - type: volume
-        source: solr_logs
+        source: solr-logs
         target: /var/log/solr
         volume:
           nocopy: false
     ports:
       - 8983:8983
-  spark_master:
-    image: dukegris/tfm_spark:1.0.1
+  spark-master:
+    image: dukegris/tfm_spark:1.0.2
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master
     hostname: master
     networks: 
       spark:
     volumes:
       - type: volume
-        source: spark_master_logs
+        source: spark-master-logs
         target: /var/log/spark
         volume:
           nocopy: false
     ports:
       - 8080:8080
       - 7077:7077
-  spark_worker:
-    image: dukegris/tfm_spark:1.0.1
-    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+  spark-worker:
+    image: dukegris/tfm_spark:1.0.2
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks: 
       spark:
     depends_on:
-      - spark_master
+      - spark-master
     volumes:
       - type: volume
-        source: spark_worker_logs
+        source: spark-worker-logs
         target: /var/log/spark
         volume:
           nocopy: false
     environment:
       SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark_master:7077
+      SPARK_MASTER_URL: spark://spark-master:7077
     ports:
       - 8081-8089:8080
 
@@ -84,27 +84,27 @@ networks:
   spark:
             
 volumes:
-  pg_metadata:
+  pg-metadata:
     external: false
     name: pg-metadata
-  pg_data:
+  pg-data:
     external: false
     name: pg-data
-  pg_logs:
+  pg-logs:
     external: false
     name: pg-logs
-  solr_metadata:
+  solr-metadata:
     external: false
     name: solr-metadata
-  solr_data:
+  solr-data:
     external: false
     name: solr-data
-  solr_logs:
+  solr-logs:
     external: false
     name: solr-logs
-  spark_master_logs:
+  spark-master-logs:
     external: false
-    name: spark_master-logs
-  spark_worker_logs:
+    name: spark-master-logs
+  spark-worker-logs:
     external: false
-    name: spark_worker-logs
+    name: spark-worker-logs

@@ -19,43 +19,6 @@
 	</parent>
 
 	<dependencies>
-		
-<dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.9</version>
-	<scope>compile</scope>
-</dependency>
-<dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.11</version>
-	<scope>compile</scope>
-</dependency>
-<dependency>
-    <groupId>com.google.code.findbugs</groupId>
-    <artifactId>jsr305</artifactId>
-    <version>3.0.1</version>
-	<scope>compile</scope>
-</dependency>
-<dependency>
-    <groupId>com.google.protobuf</groupId>
-    <artifactId>protobuf-java</artifactId>
-    <version>3.0.0-beta-3</version>
-	<scope>compile</scope>
-</dependency>
-<dependency>
-    <groupId>com.google.code.gson</groupId>
-    <artifactId>gson</artifactId>
-    <version>2.3</version>
-	<scope>compile</scope>
-</dependency>
-<dependency>
-    <groupId>joda-time</groupId>
-    <artifactId>joda-time</artifactId>
-    <scope>compile</scope>
-</dependency>
-
 
 		<!-- =====================================
 			 SPRING
@@ -75,23 +38,6 @@
 		<!-- =====================================
 			 NLP
 			 ===================================== -->
-		<!-- SCALA -->
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<!-- HADOOP -->
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-hdfs</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		<!-- SPARK -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
@@ -112,11 +58,6 @@
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
 			<artifactId>spark-nlp_${scala.main}</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.johnsnowlabs.nlp</groupId>
-			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -147,6 +88,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>java-compile-last</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>			
 		</plugins>
 		
 	</build>

@@ -88,6 +88,8 @@ public class PubCenterEntity extends AuditedBaseEntity {
 	public static final String RES_ARTICLE_IDS				= "articleIds";
 	public static final String RES_ARTICLES					= "articles";
 	 */
+
+	public static final String DB_SEARCH_IDENTIFIERS 		= "centre.searchByIdentifiers";
 	
 	public static final String DB_TABLE 					= "pub_centres";
 	public static final String DB_ID_PK 					= "pub_cen_pk";
@@ -101,7 +103,7 @@ public class PubCenterEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE_IDS_PK				= "pub_cen_ids_pk";
 	public static final String DB_TABLE_IDS_FK				= "pub_cen_ids_fk";
 	public static final String DB_TABLE_IDS_UK				= "pub_cen_ids_uk";
-	public static final String DB_TABLE_IDS_IDX			= "pub_cen_ids_id_idx";
+	public static final String DB_TABLE_IDS_IDX				= "pub_cen_ids_id_idx";
 
 	public static final String DB_CENTRE_ID					= "cen_id";
 

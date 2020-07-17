@@ -24,11 +24,6 @@
 			 J2EE
 			 ===================================== -->
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>javax.persistence-api</artifactId>
 			<scope>compile</scope>
@@ -55,11 +50,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-validator</groupId>
-			<artifactId>commons-validator</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -108,23 +98,11 @@
 			<artifactId>hibernate-envers</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-annotations</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		 -->
 
 		<!-- =====================================
 			 XML
 			 ===================================== -->
 		<!-- JACKSON -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
@@ -134,10 +112,10 @@
 		<!-- =====================================
 			 UTILIDADES
 			 ===================================== -->
-		<!-- LOMBOK -->
+		<!-- CRNK -->
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<!-- DSL -->
@@ -146,33 +124,16 @@
 			<artifactId>querydsl-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.querydsl</groupId>
-			<artifactId>querydsl-jpa</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<!-- CRNK -->
+		<!-- LOMBOK -->
 		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-data</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		 -->
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-data-jpa</artifactId>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 			<scope>compile</scope>
 		</dependency>
 

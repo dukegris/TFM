@@ -18,7 +18,11 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.PubArticleAuthorEntity;
-import es.rcs.tfm.db.model.PubArticleAuthorKey;
 import es.rcs.tfm.db.model.PubArticleEntity;
 import es.rcs.tfm.db.model.PubArticleFileEntity;
 import es.rcs.tfm.db.model.PubArticleFileKey;
@@ -48,6 +51,7 @@ import es.rcs.tfm.db.model.PubPropertySubentity;
 import es.rcs.tfm.db.model.PubPublicationEntity;
 import es.rcs.tfm.db.model.PubReferenceSubentity;
 import es.rcs.tfm.db.model.PubTermEntity;
+import es.rcs.tfm.db.model.PubTextSubentity;
 import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.repository.PubArticleAuthorRepository;
 import es.rcs.tfm.db.repository.PubArticleFileRepository;
@@ -182,7 +186,7 @@ public class DatabaseRepository {
 	}
 	
 	/**
-	 * Debido al tamaï¿½o desproporcionado de algunos centros se debe recortar su nombre
+	 * Debido al tamaño desproporcionado de algunos centros se debe recortar su nombre
 	 * @param str Cadena a recortar
 	 * @return Cadena recortada
 	 */
@@ -233,11 +237,9 @@ public class DatabaseRepository {
 		if (destination.getId() == null) result = true;
 		if (!result && !StringUtils.equals(source.getPropietario(), destination.getOwner())) result = true;
 		if (!result && !StringUtils.equals(source.getPmid(), destination.getPmid())) result = true;
-		if (!result && !StringUtils.equals(source.getTituloOriginal(), destination.getVernacularTitle())) result = true;
 		if (!result && !StringUtils.equals(getLanguageField(source.getIdioma()),destination.getLanguage())) result = true;
 		if (!result && !StringUtils.equals(getStatusField(source.getEstado()), destination.getStatus())) result = true;
 		if (!result && !StringUtils.equals(getMediaField(source.getMedio()), destination.getMediaType())) result = true;
-		if (!result && !StringUtils.equals(source.generateResumen(), destination.getSummary())) result = true;
 		if (!result && !StringUtils.equals(source.generateTitle(), destination.getTitle())) result = true;
 
 		return result;
@@ -365,7 +367,8 @@ public class DatabaseRepository {
 		
 	}
 	
-	private boolean anyDifferences(PubReferenceSubentity source, PubReferenceSubentity destination) {
+	// No requerido
+	protected boolean anyDifferences(PubReferenceSubentity source, PubReferenceSubentity destination) {
 
 		if (source == null) return false;
 		if (destination == null) return true;
@@ -420,16 +423,12 @@ public class DatabaseRepository {
 				(destination == null)) return null;
 		
 		if (StringUtils.isNotBlank(source.getPropietario())) destination.setOwner(source.getPropietario());
-		if (StringUtils.isNotBlank(source.getTituloOriginal())) destination.setVernacularTitle(source.getTituloOriginal());
 		if (StringUtils.isNotBlank(source.getPmid())) destination.setPmid(source.getPmid());
 		if (StringUtils.isNotBlank(source.getEstado())) destination.setStatus(getStatusField(source.getEstado()));
 		if (StringUtils.isNotBlank(source.getIdioma())) destination.setLanguage(getLanguageField(source.getIdioma()));
 		if (StringUtils.isNotBlank(source.getMedio())) destination.setMediaType(getMediaField(source.getMedio()));
 
-		String str = null;
-		str = source.generateResumen();
-		if (StringUtils.isNotBlank(str)) destination.setSummary(str);
-		str = source.generateTitle();
+		String str = source.generateTitle();
 		if (StringUtils.isNotBlank(str)) destination.setTitle(str);
 		
 		return destination;
@@ -806,7 +805,7 @@ public class DatabaseRepository {
 		if (articleDB.getId() != null) {
 			System.out.println ("DEBUG articulo encontrado. Debiera cambiar la version");
 		}
-		// METODO 1: Al ser 1aN en LAZY debemos actualizar aquï¿½
+		// METODO 1: Al ser 1aN en LAZY debemos actualizar aquí
 		Set<PubBlockSubentity> items =  obj.
 				getBlocks().
 				stream().
@@ -825,6 +824,7 @@ public class DatabaseRepository {
 			boolean update = false;
 			try {
 
+				// TODO MAL
 				if (searchedDB.isPresent()) {
 					PubBlockSubentity olddb = searchedDB.get();
 					if (db.getId() == null) db.setId(olddb.getId());
@@ -855,7 +855,7 @@ public class DatabaseRepository {
 				(obj.getFicheroPubmed().getEntidad() == null) ||
 				(obj.getFicheroPubmed().getEntidad().getId() == null)) return false;
 		
-		// METODO 1: Hacemos la bï¿½squeda de ficheros por ser NaN. No toca articulos por eso devuelve siempre false
+		// METODO 1: Hacemos la búsqueda de ficheros por ser NaN. No toca articulos por eso devuelve siempre false
 		boolean result = false;
 		
 		Optional<PubArticleFileEntity> searchedDB = searchArticleFileInDB (
@@ -912,6 +912,7 @@ public class DatabaseRepository {
 			boolean update = false;
 			try {
 
+				// TODO MAL
 				if (searchedDB.isPresent()) {
 					PubArticleAuthorEntity olddb = searchedDB.get();
 					if (db.getId() == null) db.setId(olddb.getId());
@@ -931,7 +932,7 @@ public class DatabaseRepository {
 				
 		});
 
-		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
+		// No se requiere actualizar el articulo al ser una relación NaN
 		return result;
 		
 	}
@@ -984,7 +985,7 @@ public class DatabaseRepository {
 				(obj.getTerminos() == null) || 
 				(obj.getTerminos().isEmpty())) return false;
 
-		// Hacemos la bï¿½squeda de terminos por ser NaN
+		// Hacemos la búsqueda de terminos por ser NaN
 		Set<PubArticleTermEntity> articuloTerminos = new HashSet<PubArticleTermEntity>();
 		for (Termino termino: obj.getTerminos()) {
 			
@@ -1030,7 +1031,7 @@ public class DatabaseRepository {
 			
 		});
 
-		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
+		// No se requiere actualizar el articulo al ser una relación NaN
 		return result;
 		
 	}
@@ -1062,6 +1063,17 @@ public class DatabaseRepository {
 			if (	(!searchedDB.isPresent()) && 
 					(obj.getIds() != null) && 
 					(!obj.getIds().isEmpty())) {
+
+				/*
+				Session session = entityManager.unwrap(Session.class);
+				Query<PubArticleEntity> query = session.createNamedQuery(PubArticleEntity.DB_SEARCH_IDENTIFIERS, PubArticleEntity.class);
+				query.setParameterList("ids", obj.getIds());
+				searchedDB = query.getSingleResult();
+				List<PubArticleEntity> find = articleRep.findByIdentifiers(obj.getIds());
+				if ((find != null) && (!find.isEmpty())) {
+					searchedDB = Optional.ofNullable(find.get(0));
+				}
+				*/
 				for (Entry<String, String> id: obj.getIds().entrySet()) {
 					// TODO Hay articulos con mismos identificadores en otras BBDD. Por ejemplo un articulo con un doi
 					// PubMed lo ha convertido en dos, generalmente ocurre en conferencias. En la carga igual hay que quitarlo y solo
@@ -1069,8 +1081,10 @@ public class DatabaseRepository {
 					List<PubArticleEntity> find = articleRep.findByIdentifier(id.getKey(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
+						break;
 					}
 				}
+				
 			}
 			
 		} catch (Exception ex) {
@@ -1204,10 +1218,21 @@ public class DatabaseRepository {
 
 		try {
 	
+			/*
+			Session session = entityManager.unwrap(Session.class);
+			Query<PubAuthorEntity> query = session.getNamedQuery(PubAuthorEntity.DB_SEARCH_IDENTIFIERS);
+			query.setParameterList("ids", obj.getIds());
+			searchedDB = query.getSingleResult();
+			List<PubAuthorEntity> find = authorRep.findByIdentifiers(obj.getIds());
+			if ((find != null) && (!find.isEmpty())) {
+				searchedDB = Optional.ofNullable(find.get(0));
+			}
+			*/
 			for (Entry<String, String> id: obj.getIds().entrySet()) {
 				List<PubAuthorEntity> find = authorRep.findByIdentifier(id.getKey(), id.getValue());
 				if ((find != null) && (!find.isEmpty())) {
 					searchedDB = Optional.ofNullable(find.get(0));
+					break;
 				}
 			}
 			
@@ -1229,6 +1254,9 @@ public class DatabaseRepository {
 	 */
 	private Optional<PubCenterEntity> searchCentreInDB(Centro obj) {
 		
+		if ("Molecular Biology Division, Bhabha Atomic Research Centre, Mumbai 400".indexOf(obj.getNombre())>-1 ) {
+			System.out.println("DEBUG");
+		}
 		if (	(obj == null) || ((
 				(obj.getIds() == null) ||
 				(obj.getIds().isEmpty())) &&
@@ -1245,10 +1273,22 @@ public class DatabaseRepository {
 			if (	(!searchedDB.isPresent()) && 
 					(obj.getIds() != null) && 
 					(!obj.getIds().isEmpty())) {
+				
+				/*
+				Session session = entityManager.unwrap(Session.class);
+				Query<PubCenterEntity> query = session.getNamedQuery(PubCenterEntity.DB_SEARCH_IDENTIFIERS);
+				query.setParameterList("ids", obj.getIds());
+				searchedDB = query.getSingleResult();
+				List<PubCenterEntity> find = centreRep.findByIdentifiers(obj.getIds());
+				if ((find != null) && (!find.isEmpty())) {
+					searchedDB = Optional.ofNullable(find.get(0));
+				}
+				*/
 				for (Entry<String, String> id: obj.getIds().entrySet()) {
 					List<PubCenterEntity> find = centreRep.findByIdentifier(id.getKey(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
+						break;
 					}
 				}
 			}
@@ -1310,16 +1350,33 @@ public class DatabaseRepository {
 //			if (StringUtils.isNotBlank(obj.getTitle())) {
 //				searchedDB = publicationRep.findByName(obj.getTitle());
 //			}
+			
+			if ((obj.getTitulo() != null) && StringUtils.isNotBlank(obj.getTitulo().getTitulo())) {
+				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.BOOK_TYPE, obj.getTitulo().getTitulo());
+			}
 	
 			if (	(!searchedDB.isPresent()) && 
 					(obj.getIds() != null) && 
 					(!obj.getIds().isEmpty())) {
+
+				/*
+				Session session = entityManager.unwrap(Session.class);
+				Query<PubPublicationEntity> query = session.getNamedQuery(PubPublicationEntity.DB_SEARCH_IDENTIFIERS);
+				query.setParameterList("ids", obj.getIds());
+				searchedDB = query.getSingleResult();
+				List<PubPublicationEntity> find = publicationRep.findByIdentifiers(obj.getIds());
+				if ((find != null) && (!find.isEmpty())) {
+					searchedDB = Optional.ofNullable(find.get(0));
+				}
+				 */
 				for (Entry<String, String> id: obj.getIds().entrySet()) {
 					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
+						break;
 					}
 				}
+
 			}
 			
 		} catch (Exception ex) {
@@ -1392,12 +1449,25 @@ public class DatabaseRepository {
 			if (	(!searchedDB.isPresent()) && 
 					(obj.getIds() != null) && 
 					(!obj.getIds().isEmpty())) {
+
+				/*
+				Session session = entityManager.unwrap(Session.class);
+				Query<PubPublicationEntity> query = session.getNamedQuery(PubPublicationEntity.DB_SEARCH_IDENTIFIERS);
+				query.setParameterList("ids", obj.getIds());
+				searchedDB = query.getSingleResult();
+				List<PubPublicationEntity> find = publicationRep.findByIdentifiers(obj.getIds());
+				if ((find != null) && (!find.isEmpty())) {
+					searchedDB = Optional.ofNullable(find.get(0));
+				}
+				*/
 				for (Entry<String, String> id: obj.getIds().entrySet()) {
 					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
+						break;
 					}
 				}
+				
 			}
 			
 		} catch (Exception ex) {
@@ -1543,6 +1613,52 @@ public class DatabaseRepository {
 				update |= articleDB.mergeKeywords(items);
 			}
 			
+			// TEXTOS
+			if ((obj.getTextos() != null) && !obj.getTextos().isEmpty()) {
+				Set<PubTextSubentity> items = obj.
+						getTextos().
+						stream().
+						map(item -> new PubTextSubentity(
+								item.getTipo(),
+								item.getSubtipo(),
+								item.getIdioma(),
+								item.getCopyright(),
+								item.getOrder(),
+								item.getEtiqueta(),
+								item.getCategoria(),
+								item.getTexto())).
+						distinct().
+						collect(Collectors.toSet());
+				update |= articleDB.mergeTextos(items);
+			}
+		
+			/*
+			Articulo.CONTENT_TYPE = Articulo.ABSTRACT_TYPE
+			Articulo.COPYRIGHT
+			Articulo.CONTENT
+
+			Articulo.CONTENT_TYPE = Articulo.OTHER_TYPE
+			Articulo.TYPE
+			Articulo.LANGUAGE
+			Articulo.COPYRIGHT
+			Articulo.CONTENT
+				Articulo.LABEL
+				Articulo.CATEGORY
+				Articulo.TEXT
+			if ((obj.getNotas() != null) && !obj.getNotas().isEmpty()) {
+				Set<PubKeywordSubentity> items = obj.
+						getNotas().
+						stream().
+						map(item -> new PubKeywordSubentity(
+								NOTE,
+								item.getPropietario(),
+								item.getDescriptor())).
+						distinct().
+						collect(Collectors.toSet());
+				update |= articleDB.mergeKeywords(items);
+			}
+			*/
+			
 			// NOTAS embedded
 			if ((obj.getNotas() != null) && !obj.getNotas().isEmpty()) {
 				Set<PubKeywordSubentity> items = obj.
@@ -1573,6 +1689,7 @@ public class DatabaseRepository {
 
 			// PALABRAS CLAVES embedded
 			if ((obj.getKeywords() != null) && !obj.getKeywords().isEmpty()) {
+
 				Set<PubKeywordSubentity> items = obj.
 						getKeywords().
 						stream().
@@ -1618,7 +1735,7 @@ public class DatabaseRepository {
 				update |= articleDB.mergeDates(items);
 			}
 
-			// TODO ï¿½Pertenecen al artï¿½culo o son del libro?
+			// TODO ¿Pertenecen al artículo o son del libro?
 			// FECHAS
 			if ((obj.getLibro()!= null) && (obj.getLibro().getFechas() != null) && !obj.getLibro().getFechas().isEmpty()) {
 				Set<PubDateSubentity> items = obj.
@@ -1730,7 +1847,7 @@ public class DatabaseRepository {
 						"\r\n\t" + ex.getMessage());
 			db = null;
 		}
-		// No se requiere actualizar el articulo al ser una relaciï¿½n NaN
+		// No se requiere actualizar el articulo al ser una relación NaN
 		// result = true;
 		
 		return db;
@@ -1827,7 +1944,7 @@ public class DatabaseRepository {
 	}
 
 	// No requerido
-	private PubBlockSubentity updateDB(BloqueAnotado obj, PubArticleEntity articleDB) {
+	protected PubBlockSubentity updateDB(BloqueAnotado obj, PubArticleEntity articleDB) {
 
 		if (obj == null) return null;
 
@@ -1994,7 +2111,7 @@ public class DatabaseRepository {
 	
 	// No requerido
 	// 
-	private PubReferenceSubentity updateDB(Referencia obj, PubArticleEntity articleDB) {
+	protected PubReferenceSubentity updateDB(Referencia obj, PubArticleEntity articleDB) {
 
 		if (obj == null) return null;
 
@@ -2180,7 +2297,10 @@ public class DatabaseRepository {
 	PubArticleTermRepository articleTermRep;
 
 	@Autowired
-	@Qualifier( value = DbNames.DB_ARTICLE_PUBLICATION_REP )
+	@Qualifier( value = DbNames.DB_ARTICLE_PUBLI_REP )
 	PubArticlePublicationRepository articlePublicationRep;
+
+	@Autowired
+	EntityManager entityManager;
 
 }

@@ -90,6 +90,8 @@ public class PubAuthorEntity extends AuditedBaseEntity {
 	public static final String RES_CENTRES					= "centres";
 	*/
 
+	public static final String DB_SEARCH_IDENTIFIERS 		= "author.searchByIdentifiers";
+
 	public static final String DB_TABLE 					= "pub_authors";
 	public static final String DB_ID_PK 					= "pub_aut_pk";
 	public static final String DB_UID_UK					= "pub_aut_uid_uk";

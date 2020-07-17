@@ -17,17 +17,17 @@
 		<artifactId>RCS-TFM</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
 	</parent>
-	
+				
 	<modules>
 		<module>es.rcs.tfm.xml.pubmed</module>
 		<module>es.rcs.tfm.xml.bioc</module>
 		<module>es.rcs.tfm.xml.mesh</module>
-		<!-- 
+<!-- 
 		<module>es.rcs.tfm.xml.mesh.descriptors</module>
 		<module>es.rcs.tfm.xml.mesh.qualifiers</module>
 		<module>es.rcs.tfm.xml.mesh.supplemental</module>
 		<module>es.rcs.tfm.xml.mesh.pharmalogical</module>
-		 -->
+ -->
 	</modules>
 
 </project>

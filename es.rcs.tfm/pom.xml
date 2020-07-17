@@ -143,13 +143,15 @@
 		<spring-boot.version>2.1.5.RELEASE</spring-boot.version>
 		
 		<!-- HIBERNATE -->
-		<hibernate-core.version>5.4.3.Final</hibernate-core.version>
-		<hibernate-commons-annotations.version>5.1.0.Final</hibernate-commons-annotations.version>
-		<hibernate-envers.version>5.4.3.Final</hibernate-envers.version>
-		<hibernate-ehcache.version>5.4.2.Final</hibernate-ehcache.version>
+		<hibernate-core.version>5.4.18.Final</hibernate-core.version>
+		<hibernate-entitymanager.version>5.4.18.Final</hibernate-entitymanager.version>
+		<hibernate-envers.version>5.4.18.Final</hibernate-envers.version>
+		<hibernate-ehcache.version>5.4.18.Final</hibernate-ehcache.version>
 		<hibernate-jcache.version>5.4.2.Final</hibernate-jcache.version>
-		<hibernate-validator.version>6.0.15.Final</hibernate-validator.version>
+		<hibernate-validator.version>6.1.5.Final</hibernate-validator.version>
 		<hibernate-annotations.version>3.5.6-Final</hibernate-annotations.version>
+
+		<hibernate-commons-annotations.version>5.1.0.Final</hibernate-commons-annotations.version>
 
 		<!-- XML -->
 		<jackson.version>2.10.2</jackson.version>
@@ -180,8 +182,7 @@
 		<solr.version>8.1.1</solr.version>
 		<h2.version>1.4.199</h2.version>
 		<postgresql.version>42.2.6</postgresql.version>
-	
-<oracle.version>12.1.0.1-atlassian-hosted</oracle.version>
+		<oracle.version>12.1.0.1-atlassian-hosted</oracle.version>
 		<!-- 
 		<sqlserver.version>7.2.2.jre8</sqlserver.version>
 		 -->
@@ -572,15 +573,15 @@
 			 HIBERNATE
 			 ===================================== -->
 		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>${hibernate-validator.version}</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate-core.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>${hibernate-core.version}</version>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate-entitymanager.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -609,16 +610,29 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>org.hibernate.common</groupId>
-			<artifactId>hibernate-commons-annotations</artifactId>
-			<version>${hibernate-commons-annotations.version}</version>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate-validator.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		
 <!-- 
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
 			<version>${hibernate-annotations.version}</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate.javax.persistence</groupId>
+					<artifactId>hibernate-jpa-2.0-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.common</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+			<version>${hibernate-commons-annotations.version}</version>
 			<scope>runtime</scope>
 		</dependency>
  -->
@@ -725,90 +739,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- LOMBOK -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- JODATIME -->
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>${jodatime.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- DSL -->
-		<dependency>
-			<groupId>com.querydsl</groupId>
-			<artifactId>querydsl-core</artifactId>
-			<version>${querydsl.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.querydsl</groupId>
-			<artifactId>querydsl-jpa</artifactId>
-			<version>${querydsl.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- JAVERS -->
-		<dependency>
-			<groupId>org.javers</groupId>
-			<artifactId>javers-core</artifactId>
-			<version>${javers.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javers</groupId>
-			<artifactId>javers-persistence-sql</artifactId>
-			<version>${javers.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javers</groupId>
-			<artifactId>javers-persistence-jpa</artifactId>
-			<version>${javers.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javers</groupId>
-			<artifactId>javers-spring</artifactId>
-			<version>${javers.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javers</groupId>
-			<artifactId>javers-spring-boot-starter-sql</artifactId>
-			<version>${javers.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- GOOGLE -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${google-guava.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>${google-collections.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- HIKARI -->
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-		    <artifactId>HikariCP</artifactId>
-		    <version>${hikari.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- ATOMIKOS JTA -->
 		<dependency>
 			<groupId>com.atomikos</groupId>
@@ -844,23 +774,6 @@
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-hibernate4</artifactId>
 			<version>${atomikos.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- WRAPPER -->
-		<dependency>
-			<!-- this must match with the actual JSW runtime distribution, the scope must set as provided since this plugin already add wrapper.jar into the classpath -->
-			<groupId>tanukisoft</groupId>
-			<artifactId>wrapper</artifactId>
-			<version>${wrapper.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		
-		<!-- SFM CSV -->
-		<dependency>
-			<groupId>org.simpleflatmapper</groupId>
-			<artifactId>sfm-csv</artifactId>
-			<version>${sfm-csv.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -976,9 +889,118 @@
 			<scope>runtime</scope>
 		</dependency>
 		
+		<!-- DSL -->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-core</artifactId>
+			<version>${querydsl.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+			<version>${querydsl.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- GOOGLE -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${google-guava.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>${google-collections.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- HIKARI -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+		    <version>${hikari.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JAVERS -->
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-core</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-persistence-sql</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-persistence-jpa</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-spring</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javers</groupId>
+			<artifactId>javers-spring-boot-starter-sql</artifactId>
+			<version>${javers.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JODATIME -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${jodatime.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- LOMBOK -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+	
+		<!-- SFM CSV -->
+		<dependency>
+			<groupId>org.simpleflatmapper</groupId>
+			<artifactId>sfm-csv</artifactId>
+			<version>${sfm-csv.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- WRAPPER -->
+		<dependency>
+			<!-- this must match with the actual JSW runtime distribution, the scope must set as provided since this plugin already add wrapper.jar into the classpath -->
+			<groupId>tanukisoft</groupId>
+			<artifactId>wrapper</artifactId>
+			<version>${wrapper.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+	
 		<!-- =====================================
 			 SERVERS
 			 ===================================== -->
+		<!-- H2 -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- JETTY -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -993,28 +1015,6 @@
 			<scope>runtime</scope>
 		</dependency>
 		
-		<!-- SOLR -->
-		<dependency>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solr-core</artifactId>
-			<version>${solr.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solr-solrj</artifactId>
-			<version>${solr.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		
-		<!-- H2 -->
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>${h2.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- ORACLE -->
 		<!-- 
 		<dependency>
@@ -1033,8 +1033,21 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		
-<!-- SQL SERVER -->
+		<!-- SOLR -->
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-core</artifactId>
+			<version>${solr.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>${solr.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- SQL SERVER -->
 		<!-- 
 		<dependency>
 			<groupId>net.sourceforge.jtds</groupId>
@@ -1123,7 +1136,7 @@
 			<version>${spark.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- NLP -->
+		<!-- SPARKNLP -->
 		<dependency>
 			<groupId>com.johnsnowlabs.nlp</groupId>
 			<artifactId>spark-nlp_${scala.main}</artifactId>
@@ -1223,10 +1236,11 @@
 		<pluginManagement>
 				
 			<plugins>
+			
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1250,6 +1264,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
@@ -1261,37 +1280,35 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M4</version>
+					<version>3.0.0-M5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.2.3</version>
+					<version>3.3.1</version>
 				</plugin>
+				
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.0</version>
 				</plugin>
-
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>4.3.1</version>
+					<version>4.4.0</version>
 				</plugin>
-				
 				<plugin>
 					<groupId>org.jvnet.jaxb2.maven2</groupId>
 					<artifactId>maven-jaxb2-plugin</artifactId>
 					<version>0.14.0</version>
 				</plugin>
-				
 			</plugins>
-			
+											
 		</pluginManagement>
-		
+											
 		<plugins>
-		
+							
 			<!-- Default compiler
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1322,6 +1339,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			
 			<!-- Default resources
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

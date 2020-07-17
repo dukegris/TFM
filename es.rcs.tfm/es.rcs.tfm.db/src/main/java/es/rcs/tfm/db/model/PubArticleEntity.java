@@ -18,7 +18,6 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -82,9 +81,6 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	public static final String RES_PMID						= "pmid";
 	public static final String RES_OWNER					= "owner";
 	public static final String RES_TITLE					= "title";
-	public static final String RES_VERNACULARTITLE			= "vernacularTitle";
-	public static final String RES_SUMMARY					= "summary";
-	public static final String RES_TEXT						= "text";
 	public static final String RES_LANGUAGE					= "language";
 	public static final String RES_MEDIA_TYPE				= "mediaType";
 	public static final String RES_MD5_FILE					= "md5name";
@@ -92,6 +88,7 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	public static final String RES_VERSION_ID				= "versionId";
 	public static final String RES_VERSION_DATE				= "versionDate";
 	public static final String RES_IDENTIFIERS				= "identifiers";
+	public static final String RES_TEXTS					= "texts";
 	public static final String RES_KEYWORDS					= "keywords";
 	public static final String RES_PERMISSIONS				= "permissions";
 	public static final String RES_DATES					= "dates";
@@ -119,6 +116,8 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	public static final String ATT_CENTRES					= "centres";
 	*/
 
+	public static final String DB_SEARCH_IDENTIFIERS 		= "article.searchByIdentifiers";
+	
 	public static final String DB_TABLE 					= "pub_articles";
 	public static final String DB_ID_PK 					= "pub_art_pk";
 	public static final String DB_UID_UK					= "pub_art_uid_uk";
@@ -128,9 +127,6 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	public static final String DB_PMID						= "art_pmd";
 	public static final String DB_OWNER						= "art_own";
 	public static final String DB_TITLE						= "art_tit";
-	public static final String DB_VERNACULARTITLE			= "art_ori";
-	public static final String DB_SUMMARY					= "art_sum";
-	public static final String DB_TEXT						= "art_txt";
 	public static final String DB_LANGUAGE					= "art_lan";
 	public static final String DB_MEDIA_TYPE				= "art_med";
 	public static final String DB_VERSION_ID				= "art_ver_id";
@@ -141,6 +137,12 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	public static final String DB_TABLE_IDS_FK				= "pub_art_ids_fk";
 	public static final String DB_TABLE_IDS_UK				= "pub_art_ids_uk";
 	public static final String DB_TABLE_IDS_IDX				= "pub_art_ids_idx";
+
+	public static final String DB_TABLE_TXT 				= "pub_article_texts";
+	public static final String DB_TABLE_TXT_PK				= "pub_art_txt_pk";
+	public static final String DB_TABLE_TXT_FK				= "pub_art_txt_fk";
+	public static final String DB_TABLE_TXT_UK				= "pub_art_txt_uk";
+	public static final String DB_TABLE_TXT_IDX				= "pub_art_txt_idx";
 
 	public static final String DB_TABLE_PERM 				= "pub_article_permissions";
 	public static final String DB_TABLE_PERM_PK				= "pub_art_per_pk";
@@ -225,49 +227,6 @@ public class PubArticleEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_VERNACULARTITLE,
-			required = false)
-	@Column(
-			name = DB_VERNACULARTITLE, 
-			unique = false,
-			nullable = true, 
-			length = 1024)
-	@Size(
-			max = 1024, 
-			message = "El titulo en su idioma original no puede sobrepasar los {max} caracteres.")
-	public String vernacularTitle;
-
-	
-	@JsonProperty(
-			value = RES_SUMMARY,
-			required = false)
-	@Column(
-			name = DB_SUMMARY, 
-			unique = false,
-			nullable = true, 
-			length = 16384)
-	@Size(
-			max = 16384, 
-			message = "El sumario no puede sobrepasar los {max} caracteres.")
-	public String summary;
-
-	
-	@JsonProperty(
-			value = RES_TEXT,
-			required = false)
-	@Lob
-	@Column(
-			name = DB_TEXT, 
-			unique = false,
-			nullable = true, 
-			length = 65536)
-	@Size(
-			max = 65536, 
-			message = "El texto no puede sobrepasar los {max} caracteres.")
-	public String text;
-
-	
-	@JsonProperty(
 			value = RES_LANGUAGE,
 			required = false)
 	@Column(
@@ -347,6 +306,40 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
 	private Set<PubValuesSubentity> identifiers;
+
+
+	@JsonApiRelation(
+			serialize = SerializeType.EAGER,
+			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+	@JsonProperty(
+			value = RES_TEXTS,
+			required = false)
+	@CollectionTable(
+			name = DB_TABLE_TXT, 
+			joinColumns = @JoinColumn(
+					name = DB_ARTICLE_ID,
+					referencedColumnName = DB_ID,
+					foreignKey = @ForeignKey(
+							value = ConstraintMode.NO_CONSTRAINT,
+							name = DB_TABLE_TXT_FK)),
+			uniqueConstraints = {
+					@UniqueConstraint(
+							name = DB_TABLE_TXT_PK, 
+							columnNames = { DB_ARTICLE_ID, PubTextSubentity.DB_TYPE }),
+					@UniqueConstraint(
+							name = DB_TABLE_TXT_UK, 
+							columnNames = { DB_ARTICLE_ID, PubTextSubentity.DB_TYPE, PubTextSubentity.DB_TEXT }) },
+			indexes = {
+					@Index(
+							unique = false,
+							name = DB_TABLE_TXT_IDX,
+							columnList = DB_ARTICLE_ID + ", " + PubTextSubentity.DB_TYPE + ", " + PubTextSubentity.DB_TEXT) })
+	@ElementCollection(
+			fetch = FetchType.EAGER)
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private Set<PubTextSubentity> texts;
 
 
 	@JsonApiRelation(
@@ -853,6 +846,27 @@ public class PubArticleEntity extends AuditedBaseEntity {
 			});
 		} else {
 			this.properties = items;
+		}
+
+		return result.get();
+
+	}
+
+	public boolean mergeTextos(Set<PubTextSubentity> items) {
+
+		if (	(items == null) ||
+				(items.isEmpty())) return false;
+
+		AtomicBoolean result = new AtomicBoolean(false);
+		if ((this.texts != null) && (!this.texts.isEmpty())) {
+			items.forEach( item -> {
+				if (!this.texts.contains(item)) {
+					result.set(true);
+					this.texts.add(item);
+				}
+			});
+		} else {
+			this.texts = items;
 		}
 
 		return result.get();

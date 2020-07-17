@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pg-metadata-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pg-data-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pg-log-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-metadata-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-data-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-log-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spark-master-log-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spark-worker-log-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi

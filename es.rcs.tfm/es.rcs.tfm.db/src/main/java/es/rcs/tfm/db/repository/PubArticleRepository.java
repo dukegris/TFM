@@ -1,6 +1,7 @@
 package es.rcs.tfm.db.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,7 @@ import com.querydsl.core.types.dsl.StringPath;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.PubArticleEntity;
+import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.model.QPubArticleEntity;
 
 @Repository(DbNames.DB_ARTICLE_REP)
@@ -41,26 +43,29 @@ public interface PubArticleRepository extends
 				root.modifiedBy);
 	
 	}
-	
-	/*
-	@Query(
-			"SELECT a" + 
-			" FROM PubArticleEntity a" +
-			" WHERE" +
-			" KEY(a.identifiers) = :type AND VALUE(a.identifiers) = :value")
-	 */
+
+	Optional<PubArticleEntity> findByPmid(String pmid);
 	@Query(
 			"SELECT a" + 
 			" FROM " + 
 			"  PubArticleEntity a JOIN " + 
 			"  a.identifiers i" +
 			" WHERE" +
-			" i.type = :type AND i.value = :value")
+			"  i.type = :type AND i.value = :value")
 	List<PubArticleEntity> findByIdentifier(
-			@Param("type") String type, 
-			@Param("value") String value);
-	
-	Optional<PubArticleEntity> findByPmid(String pmid);
+			@Param(PubValuesSubentity.ATT_TYPE) String type, 
+			@Param(PubValuesSubentity.ATT_VALUE) String value);
+
+	@Query(
+			"SELECT " + 
+			"  a" + 
+			" FROM " + 
+			"  PubArticleEntity a JOIN " + 
+			"  a.identifiers i" +
+			" WHERE" +
+			"  (i.type, i.value) IN (:ids)")
+	List<PubArticleEntity> findByIdentifiers(
+			@Param("ids") Map<String, String> ids);
 
 }
 

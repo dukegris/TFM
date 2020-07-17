@@ -1,32 +1,30 @@
-docker build --pull --rm -f "es.rcs.install/postgresql/Dockerfile.clearlinux" -t dukegris/tfm_postgresql:1.0.1 "es.rcs.install/postgresql"
-docker pull dukegris/tfm_postgresql:1.0.1
-docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.1 "es.rcs.install/spark"
-docker build --pull --rm -f "es.rcs.install/solr/Dockerfile.clearlinux" -t dukegris/tfm_solr:1.0.1 "es.rcs.install/solr"
-docker pull dukegris/tfm_solr:1.0.1
-docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.1 "es.rcs.install/spark"
-docker pull dukegris/tfm_spark:1.0.1
+# CONTAINERS
+docker build --pull --rm -f "es.rcs.install/os/Dockerfile.clearlinux" -t dukegris/tfm_os:1.0.2 "es.rcs.install/os"
+docker pull dukegris/tfm_os:1.0.2
+docker build --pull --rm -f "es.rcs.install/jdk/Dockerfile.clearlinux" -t dukegris/tfm_java:1.0.2 "es.rcs.install/jdk"
+docker pull dukegris/tfm_java:1.0.2
+docker build --pull --rm -f "es.rcs.install/postgresql/Dockerfile.clearlinux" -t dukegris/tfm_postgresql:1.0.2 "es.rcs.install/postgresql"
+docker pull dukegris/tfm_postgresql:1.0.2
+docker build --pull --rm -f "es.rcs.install/solr/Dockerfile.clearlinux" -t dukegris/tfm_solr:1.0.2 "es.rcs.install/solr"
+docker pull dukegris/tfm_solr:1.0.2
+docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.2 "es.rcs.install/spark"
+docker pull dukegris/tfm_spark:1.0.2
 
 
 
 
-docker run --rm -it  dukegris/tfm_postgresql:1.0.1
-docker run --rm -it  dukegris/tfm_solr:1.0.1
-docker run --rm -it  dukegris/tfm_spark:1.0.1
+# RUN CONTAINERS
+docker run --rm -it  dukegris/tfm_postgresql:1.0.2
+docker run --rm -it  dukegris/tfm_solr:1.0.2
+docker run --rm -it  dukegris/tfm_spark:1.0.2
+docker run --rm -it  -p 5432:5432/tcp dukegris/tfm_postgresql:1.0.2
+docker run --rm -it  -p 8983:8983/tcp dukegris/tfm_solr:1.0.2
+docker run --rm -it  -p 8080,7077:8080,7077/tcp dukegris/tfm_solr:1.0.2
 
 
 
 
-
-docker run --rm -it  -p 5432:5432/tcp dukegris/tfm_postgresql:1.0.1
-docker run --rm -it  -p 8983:8983/tcp dukegris/tfm_solr:1.0.1
-docker run --rm -it  -p 8080,7077:8080,7077/tcp dukegris/tfm_solr:1.0.1
-
-
-docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build --scale spark_worker=3
-docker-compose -f "es.rcs.install/tfm/docker-compose.yml" down
-
-
-
+# RUN UTILS
 docker volume create --name=pg-data
 docker volume create --name=pg-log
 docker volume create --name=pg-tfm
@@ -39,10 +37,58 @@ docker network create \
 	--gateway=192.168.5.254 \
 	tfm-network
 
-docker-compose up \
-	-d \
-	-f "es.rcs.install/tfm/docker-compose.yml" \
-	--net=my_bridge \
-	--build
+
+
+
+# DOCKER COMPOSE
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build --scale spark-worker=3
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" down
 
 docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build
+docker-compose -f "es.rcs.install/tfm/docker-compose.yml" up -d --build --scale spark-worker=3 --net=tfm-network
+
+
+
+
+# KUBERNETES
+kubectl create -f es.rcs.install/tfm/namespaces/ns-tfm.yaml  
+kubectl get ns
+kubectl apply -f es.rcs.install/tfm/storage/pv-5G.yaml
+kubectl apply -f es.rcs.install/tfm/storage/pv-128M.yaml
+kubectl get pv
+kubectl apply -f es.rcs.install/tfm/storage/pvc-tfm.yaml
+kubectl get pvc
+kubectl apply -f es.rcs.install/tfm/deployments/dep-postgresql.yaml
+kubectl apply -f es.rcs.install/tfm/deployments/dep-solr.yaml
+kubectl apply -f es.rcs.install/tfm/deployments/dep-spark-master.yaml
+kubectl apply -f es.rcs.install/tfm/deployments/dep-spark-worker.yaml
+kubectl get deploy
+kubectl apply -f es.rcs.install/tfm/services/svc-tfm.yaml
+kubectl get svc
+kubectl get po
+
+
+
+
+# KUBERNETES DESTROY
+kubectl delete -f es.rcs.install/tfm/services/svc-tfm.yaml
+kubectl delete -f es.rcs.install/tfm/deployments/dep-postgresql.yaml
+kubectl delete -f es.rcs.install/tfm/deployments/dep-solr.yaml
+kubectl delete -f es.rcs.install/tfm/deployments/dep-spark-master.yaml
+kubectl delete -f es.rcs.install/tfm/deployments/dep-spark-worker.yaml
+kubectl delete -f es.rcs.install/tfm/storage/pvc-tfm.yaml
+kubectl delete -f es.rcs.install/tfm/storage/pv-5G.yaml
+kubectl delete -f es.rcs.install/tfm/storage/pv-128M.yaml
+
+
+
+
+# KUBERNETES UTILS
+kubectl cluster-info
+kubectl get apiservices
+
+kubectl create namespace tfm
+kubectl delete svc --namespace=tfm --all
+kubectl delete pvc --namespace=tfm --all
+kubectl delete pv --namespace=tfm --all
+kubectl delete namespace tfm

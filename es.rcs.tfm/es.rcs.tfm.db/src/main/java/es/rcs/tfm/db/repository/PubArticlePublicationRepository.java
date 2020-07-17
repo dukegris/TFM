@@ -13,7 +13,7 @@ import es.rcs.tfm.db.model.PubArticlePublicationEntity;
 import es.rcs.tfm.db.model.PubArticlePublicationKey;
 import es.rcs.tfm.db.model.QPubArticlePublicationEntity;
 
-@Repository(DbNames.DB_ARTICLE_PUBLICATION_REP)
+@Repository(DbNames.DB_ARTICLE_PUBLI_REP)
 public interface PubArticlePublicationRepository extends 
 		JpaRepository<PubArticlePublicationEntity, PubArticlePublicationKey>,
 		QuerydslPredicateExecutor<PubArticlePublicationEntity>, 

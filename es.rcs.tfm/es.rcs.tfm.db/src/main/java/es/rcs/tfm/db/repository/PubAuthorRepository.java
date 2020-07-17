@@ -1,6 +1,7 @@
 package es.rcs.tfm.db.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ import com.querydsl.core.types.dsl.StringPath;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.PubAuthorEntity;
+import es.rcs.tfm.db.model.PubValuesSubentity;
 import es.rcs.tfm.db.model.QPubAuthorEntity;
 
 @Repository(DbNames.DB_AUTHOR_REP)
@@ -41,21 +43,25 @@ public interface PubAuthorRepository extends
 
 	}
 
-	/*
 	@Query(
 			"SELECT a" + 
-			" FROM PubArticleEntity a" +
+			" FROM " + 
+			"  PubAuthorEntity a JOIN " + 
+			"  a.identifiers i" +
 			" WHERE" +
-			" KEY(a.identifiers) = :type AND VALUE(a.identifiers) = :value")
-			*/
-	@Query(
-			"SELECT a" + 
-			" FROM PubAuthorEntity a JOIN a.identifiers i" +
-			" WHERE" +
-			" i.type = :type AND i.value = :value")
+			"  i.type = :type AND i.value = :value")
 	List<PubAuthorEntity> findByIdentifier(
-			@Param("type") String type, 
-			@Param("value") String value);
+			@Param(PubValuesSubentity.ATT_TYPE) String type, 
+			@Param(PubValuesSubentity.ATT_VALUE) String value);
+
+	@Query(
+			"SELECT a" + 
+			" FROM PubAuthorEntity a JOIN " + 
+			"  a.identifiers i" +
+			" WHERE" +
+			"  (i.type, i.value) IN (:ids)")
+	List<PubAuthorEntity> findByIdentifiers(
+			@Param("ids") Map<String, String> ids);
 
 	
 }

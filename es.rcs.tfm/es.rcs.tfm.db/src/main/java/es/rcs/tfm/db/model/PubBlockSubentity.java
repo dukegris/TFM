@@ -133,9 +133,9 @@ public class PubBlockSubentity extends AuditedBaseEntity {
 			name = DB_TEXT, 
 			unique = false,
 			nullable = true, 
-			length = 16384)
+			length = 8000)
 	@Size(
-			max = 16384, 
+			max = 8000, 
 			message = "El texto no puede sobrepasar los {max} caracteres.")
 	public String text;
 

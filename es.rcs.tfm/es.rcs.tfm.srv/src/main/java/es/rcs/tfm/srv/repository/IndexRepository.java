@@ -46,7 +46,6 @@ public class IndexRepository {
 	private static final String getTitle(Articulo obj) {
 		String result = "";
 		if (obj.getTitulo() != null)			result = obj.getTitulo().getTitulo();
-		if (StringUtils.isBlank(result))		result = obj.getTituloOriginal();
 		if (StringUtils.isBlank(result))		result = "";
 		return result;
 	}
@@ -62,7 +61,6 @@ public class IndexRepository {
 		boolean result = false;
 		if (destination.getId() == null)																		result = true;
 		if (!result && !StringUtils.equals(source.getPmid(),					destination.getPmid()))			result = true;
-		if (!result && !StringUtils.equals(getResumen(source.getResumen()),		destination.getSummary()))		result = true;
 		if (!result && !StringUtils.equals(getTitle(source),					destination.getTitle()))		result = true;
 		return result;
 	}
@@ -90,6 +88,7 @@ public class IndexRepository {
 				destination.setPublicationIdentifiers(list);
 			}
 		}
+		
 		if (source.getFasciculo() != null) {
 			if (StringUtils.isNotBlank(source.getFasciculo().getMedio())) destination.setPublicationMedia(source.getFasciculo().getMedio());
 			if (StringUtils.isNotBlank(source.getFasciculo().getTipo())) destination.setPublicationMedia(source.getFasciculo().getTipo());
@@ -149,16 +148,16 @@ public class IndexRepository {
 			}
 		}
 		
-
-		String str = null;
-		str = getResumen(source.getResumen());
-		if (StringUtils.isNotBlank(str)) destination.setSummary(str);
-		str = getTitle(source);
+		String str = getTitle(source);
 		if (StringUtils.isNotBlank(str)) destination.setTitle(str);
 		
 		if ((source.getAutores() != null) && !source.getAutores().isEmpty()) {
 			List<String> list = source.getAutores().stream().map(item -> String.format("%s: %s %s %s", item.getTipo(), item.getNombre(), item.getSufijo(), item.getApellidos())).collect(Collectors.toList());
 			destination.setAuhors(list);
+		}
+		if ((source.getTextos() != null) && !source.getTextos().isEmpty()) {
+			List<String> list = source.getTextos().stream().map(item -> String.format("%s: %s %s %s", item.getTipo(), item.getEtiqueta(), item.getCategoria(), item.getTexto() )).collect(Collectors.toList());
+			destination.setTexts(list);
 		}
 		if ((source.getIds() != null) && !source.getIds().isEmpty()) {
 			List<String> list = source.getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());

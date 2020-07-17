@@ -66,6 +66,11 @@
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>javax.persistence-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
@@ -80,7 +85,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -109,12 +114,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
+			<artifactId>spring-context</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<artifactId>spring-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -143,6 +148,15 @@
 			<artifactId>spring-data-solr</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
+		<!-- =====================================
+			 HIBERNATE
+			 ===================================== -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 NLP
@@ -161,24 +175,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_${scala.main}</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_${scala.main}</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<!-- NLP -->
-		<dependency>
-			<groupId>com.johnsnowlabs.nlp</groupId>
-			<artifactId>spark-nlp_${scala.main}</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.johnsnowlabs.nlp</groupId>
-			<artifactId>spark-nlp-eval_${scala.main}</artifactId>
-			<version>2.2.2</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -189,17 +186,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<!-- DSL -->
-		<dependency>
-			<groupId>com.querydsl</groupId>
-			<artifactId>querydsl-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.querydsl</groupId>
-			<artifactId>querydsl-jpa</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<!-- SFM CSV -->
@@ -216,22 +202,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
-		</dependency>
-
-		<!-- =====================================
-			 TEST
-			 ===================================== -->
-		<!-- SPRING -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- JUNIT -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
