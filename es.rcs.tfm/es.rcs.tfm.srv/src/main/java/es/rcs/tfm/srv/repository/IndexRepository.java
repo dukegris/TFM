@@ -22,6 +22,9 @@ import es.rcs.tfm.solr.repository.PubArticleIdxRepository;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
 import es.rcs.tfm.srv.model.Localizacion;
+import es.rcs.tfm.srv.model.Localizacion.LocalizationType;
+import es.rcs.tfm.srv.model.Articulo.MediumType;
+import es.rcs.tfm.srv.model.Articulo.PublicationType;
 
 @Repository(
 		value = SrvNames.INDEX_REP)
@@ -45,7 +48,7 @@ public class IndexRepository {
 
 	private static final String getTitle(Articulo obj) {
 		String result = "";
-		if (obj.getTitulo() != null)			result = obj.getTitulo().getTitulo();
+		if (obj.getTitle() != null)			result = obj.getTitle().getTitle();
 		if (StringUtils.isBlank(result))		result = "";
 		return result;
 	}
@@ -74,75 +77,74 @@ public class IndexRepository {
 				(destination == null)) return null;
 
 		if (StringUtils.isNotBlank(source.getPmid())) destination.setPmid(source.getPmid());
-		if (StringUtils.isNotBlank(source.getPmid())) destination.setPublicationLanguage(source.getIdioma());
+		if (StringUtils.isNotBlank(source.getPmid())) destination.setPublicationLanguage(source.getLanguage());
 
-		if (source.getRevista() != null) {
+		if (source.getJournal() != null) {
 			destination.setPublicationType(PubArticleIdx.JOURNAL_TYPE);
-			if (StringUtils.isNotBlank(source.getRevista().getAbreviatura())) destination.setPublicationAbbreviation(source.getRevista().getAbreviatura());
-			if (StringUtils.isNotBlank(source.getRevista().getMedio())) destination.setPublicationMedia(source.getRevista().getMedio());
-			if (StringUtils.isNotBlank(source.getRevista().getNombre())) destination.setPublicationTitle(source.getRevista().getNombre());
-			if (StringUtils.isNotBlank(source.getRevista().getTipo())) destination.setPublicationType(source.getRevista().getTipo());
-			if (StringUtils.isNotBlank(source.getRevista().getPais())) destination.setPublicationCountry(source.getRevista().getPais());
-			if ((source.getRevista().getIds() != null) && !source.getRevista().getIds().isEmpty()) {
-				List<String> list = source.getRevista().getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());
+			if (StringUtils.isNotBlank(source.getJournal().getAbbreviation())) destination.setPublicationAbbreviation(source.getJournal().getAbbreviation());
+			if (StringUtils.isNotBlank(source.getJournal().getName())) destination.setPublicationTitle(source.getJournal().getName());
+			if (StringUtils.isNotBlank(source.getJournal().getCountry())) destination.setPublicationCountry(source.getJournal().getCountry());
+			if ((source.getJournal().getType() != null) && !(PublicationType.NONE.equals(source.getJournal().getType()))) destination.setPublicationType(source.getJournal().getType().toString());
+			if ((source.getJournal().getMedium() != null) && !(MediumType.NONE.equals(source.getJournal().getMedium()))) destination.setPublicationMedia(source.getJournal().getMedium().toString());
+			if ((source.getJournal().getIds() != null) && !source.getJournal().getIds().isEmpty()) {
+				List<String> list = source.getJournal().getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());
 				destination.setPublicationIdentifiers(list);
 			}
 		}
 		
-		if (source.getFasciculo() != null) {
-			if (StringUtils.isNotBlank(source.getFasciculo().getMedio())) destination.setPublicationMedia(source.getFasciculo().getMedio());
-			if (StringUtils.isNotBlank(source.getFasciculo().getTipo())) destination.setPublicationMedia(source.getFasciculo().getTipo());
-			if (StringUtils.isNotBlank(source.getFasciculo().getNumero())) destination.setPublicationNumber(source.getFasciculo().getNumero());
-			if (StringUtils.isNotBlank(source.getFasciculo().getVolumen())) destination.setVolumeTitle(source.getFasciculo().getVolumen());
-			if (source.getFasciculo().getFecha() != null) {
+		if (source.getIssue() != null) {
+			if (StringUtils.isNotBlank(source.getIssue().getNumber())) destination.setPublicationNumber(source.getIssue().getNumber());
+			if (StringUtils.isNotBlank(source.getIssue().getVolume())) destination.setVolumeTitle(source.getIssue().getVolume());
+			if ((source.getIssue().getMedium() != null) && !(MediumType.NONE.equals(source.getIssue().getMedium()))) destination.setPublicationMedia(source.getIssue().getMedium().toString());
+			if (source.getIssue().getDate() != null) {
 				String str = null;
-				if (source.getFasciculo().getFecha().getFecha() != null) {
-					str = source.getFasciculo().getFecha().getFecha().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL));
+				if (source.getIssue().getDate().getDate() != null) {
+					str = source.getIssue().getDate().getDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL));
 				} else {
-					str = String.format("%s %s", source.getFasciculo().getFecha().getSesion(), source.getFasciculo().getFecha().getAnio());
+					str = String.format("%s %s", source.getIssue().getDate().getSession(), source.getIssue().getDate().getYear());
 				}
 				if (StringUtils.isNotBlank(str)) {
-					str = String.format("%s: %s", source.getFasciculo().getFecha().getTipo(), str);
+					str = String.format("%s: %s", source.getIssue().getDate().getType(), str);
 					destination.setPublicationDate(str);
 				}
 			}
 		}
-		if (source.getLibro() != null) {
+		if (source.getBook() != null) {
 			
 			destination.setPublicationType(PubArticleIdx.BOOK_TYPE);
-			if (StringUtils.isNotBlank(source.getLibro().getMedio())) destination.setPublicationMedia(source.getLibro().getMedio());
-			if (StringUtils.isNotBlank(source.getLibro().getVolumen())) destination.setVolumeNumber(source.getLibro().getVolumen());
-			if (StringUtils.isNotBlank(source.getLibro().getTituloVolumen())) destination.setVolumeTitle(source.getLibro().getTituloVolumen());
-			if (StringUtils.isNotBlank(source.getLibro().getCiudad())) destination.setEditionCity(source.getLibro().getCiudad());
-			if (StringUtils.isNotBlank(source.getLibro().getEditor())) destination.setEditionEditor(source.getLibro().getEditor());
-			if (StringUtils.isNotBlank(source.getLibro().getEdicion())) destination.setEditionTitle(source.getLibro().getEdicion());
-			if ((source.getLibro().getIds() != null) && !source.getLibro().getIds().isEmpty()) {
-				List<String> list = source.getLibro().getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());
+			if (StringUtils.isNotBlank(source.getBook().getVolume())) destination.setVolumeNumber(source.getBook().getVolume());
+			if (StringUtils.isNotBlank(source.getBook().getVolumeTitle())) destination.setVolumeTitle(source.getBook().getVolumeTitle());
+			if (StringUtils.isNotBlank(source.getBook().getCity())) destination.setEditionCity(source.getBook().getCity());
+			if (StringUtils.isNotBlank(source.getBook().getEditor())) destination.setEditionEditor(source.getBook().getEditor());
+			if (StringUtils.isNotBlank(source.getBook().getEdition())) destination.setEditionTitle(source.getBook().getEdition());
+			if ((source.getBook().getMedium() != null) && !(MediumType.NONE.equals(source.getBook().getMedium()))) destination.setPublicationMedia(source.getBook().getMedium().toString());
+			if ((source.getBook().getIds() != null) && !source.getBook().getIds().isEmpty()) {
+				List<String> list = source.getBook().getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());
 				destination.setPublicationIdentifiers(list);
 			}
-			if ((source.getLibro().getAutores() != null) && !source.getLibro().getAutores().isEmpty()) {
-				List<String> list = source.getLibro().getAutores().stream().map(item -> String.format("%s: %s %s %s", item.getTipo(), item.getNombre(), item.getSufijo(), item.getApellidos())).collect(Collectors.toList());
+			if ((source.getBook().getAuthors() != null) && !source.getBook().getAuthors().isEmpty()) {
+				List<String> list = source.getBook().getAuthors().stream().map(item -> String.format("%s: %s %s %s", item.getType(), item.getGivenName(), item.getSuffix(), item.getFamilyName())).collect(Collectors.toList());
 				destination.setAuhors(list);
 			}
-			String str = (source.getLibro().getTitulo() != null) ? source.getLibro().getTitulo().getTitulo() : "";
+			String str = (source.getBook().getTitle() != null) ? source.getBook().getTitle().getTitle() : "";
 			if (StringUtils.isNotBlank(str)) destination.setPublicationTitle(str);
 
-			str = (source.getLibro().getTituloColeccion() != null) ? source.getLibro().getTituloColeccion().getTitulo() : "";
+			str = (source.getBook().getCollectionTitle() != null) ? source.getBook().getCollectionTitle().getTitle() : "";
 			if (StringUtils.isNotBlank(str)) destination.setSerieTitle(str);
 
 			/*
 			if (StringUtils.isNotBlank(source.getPmid())) destination.setSerieNumber(source.getPmid());
-			source.getLibro().getFechas();
-			source.getLibro().getInforme();
+			source.getBook().getFechas();
+			source.getBook().getInforme();
 			*/
 			
-			if (source.getLibro().getLocalizacion() != null) {
-				Localizacion loc = source.getLibro().getLocalizacion();
-				if (Localizacion.PAGINA.equals(loc.getTipo())) {
+			if (source.getBook().getLocalization() != null) {
+				Localizacion loc = source.getBook().getLocalization();
+				if (LocalizationType.PAGE.equals(loc.getType())) {
 					StringBuffer sb = new StringBuffer();
-					if (StringUtils.isNotBlank(loc.getPaginaInicial())) sb.append(loc.getPaginaInicial() + " - ");
-					if (StringUtils.isNotBlank(loc.getPaginaFinal())) sb.append(loc.getPaginaFinal());
-					if (StringUtils.isNotBlank(loc.getReferencia())) sb.append("(" + loc.getReferencia() + ")");
+					if (StringUtils.isNotBlank(loc.getInitialPage())) sb.append(loc.getInitialPage() + " - ");
+					if (StringUtils.isNotBlank(loc.getEndPage())) sb.append(loc.getEndPage());
+					if (StringUtils.isNotBlank(loc.getReference())) sb.append("(" + loc.getReference() + ")");
 					if (StringUtils.isNotBlank(sb.toString())) destination.setPublicationPages(sb.toString());
 				}
 			}
@@ -151,30 +153,30 @@ public class IndexRepository {
 		String str = getTitle(source);
 		if (StringUtils.isNotBlank(str)) destination.setTitle(str);
 		
-		if ((source.getAutores() != null) && !source.getAutores().isEmpty()) {
-			List<String> list = source.getAutores().stream().map(item -> String.format("%s: %s %s %s", item.getTipo(), item.getNombre(), item.getSufijo(), item.getApellidos())).collect(Collectors.toList());
+		if ((source.getAuthors() != null) && !source.getAuthors().isEmpty()) {
+			List<String> list = source.getAuthors().stream().map(item -> String.format("%s: %s %s %s", item.getType(), item.getGivenName(), item.getSuffix(), item.getFamilyName())).collect(Collectors.toList());
 			destination.setAuhors(list);
 		}
-		if ((source.getTextos() != null) && !source.getTextos().isEmpty()) {
-			List<String> list = source.getTextos().stream().map(item -> String.format("%s: %s %s %s", item.getTipo(), item.getEtiqueta(), item.getCategoria(), item.getTexto() )).collect(Collectors.toList());
+		if ((source.getTexts() != null) && !source.getTexts().isEmpty()) {
+			List<String> list = source.getTexts().stream().map(item -> String.format("%s: %s %s %s", item.getType(), item.getLabel(), item.getCategory(), item.getText() )).collect(Collectors.toList());
 			destination.setTexts(list);
 		}
 		if ((source.getIds() != null) && !source.getIds().isEmpty()) {
 			List<String> list = source.getIds().entrySet().stream().map(item -> String.format("%s: %s", item.getKey(), item.getValue())).collect(Collectors.toList());
 			destination.setIdentifiers(list);
 		}
-		if ((source.getPermisos() != null) && !source.getPermisos().isEmpty()) {
-			List<String> list = source.getPermisos().stream().map(item -> String.format("%s: %s, %s (%s)", item.getCodigo(), item.getPermiso(), item.getAgencia(), item.getPais())).collect(Collectors.toList());
+		if ((source.getGrants() != null) && !source.getGrants().isEmpty()) {
+			List<String> list = source.getGrants().stream().map(item -> String.format("%s: %s, %s (%s)", item.getCode(), item.getGrant(), item.getAgency(), item.getCountry())).collect(Collectors.toList());
 			destination.setGrants(list);
 		}
-		if ((source.getLocalizaciones() != null) && !source.getLocalizaciones().isEmpty()) {
-			for (Localizacion loc: source.getLocalizaciones()) {
+		if ((source.getLocalizations() != null) && !source.getLocalizations().isEmpty()) {
+			for (Localizacion loc: source.getLocalizations()) {
 				if (loc != null) {
-					if (Localizacion.PAGINA.equals(loc.getTipo())) {
+					if (LocalizationType.PAGE.equals(loc.getType())) {
 						StringBuffer sb = new StringBuffer();
-						if (StringUtils.isNotBlank(loc.getPaginaInicial())) sb.append(loc.getPaginaInicial() + " - ");
-						if (StringUtils.isNotBlank(loc.getPaginaFinal())) sb.append(loc.getPaginaFinal());
-						if (StringUtils.isNotBlank(loc.getReferencia())) sb.append("(" + loc.getReferencia() + ")");
+						if (StringUtils.isNotBlank(loc.getInitialPage())) sb.append(loc.getInitialPage() + " - ");
+						if (StringUtils.isNotBlank(loc.getEndPage())) sb.append(loc.getEndPage());
+						if (StringUtils.isNotBlank(loc.getReference())) sb.append("(" + loc.getReference() + ")");
 						if (StringUtils.isNotBlank(sb.toString())) destination.setPublicationPages(sb.toString());
 					}
 				}
@@ -198,7 +200,7 @@ public class IndexRepository {
 
 		if (	(obj == null) ) return Optional.empty();
 
-		Optional<PubArticleIdx> searchedIDX = Optional.ofNullable(obj.getIndice());
+		Optional<PubArticleIdx> searchedIDX = Optional.ofNullable(obj.getIndex());
 
 		try {
 			
@@ -249,17 +251,17 @@ public class IndexRepository {
 				idx = articleIdxRep.save(idx);
 			}
 			
-			obj.setHayCambiosEnIDX(false);
+			obj.setChangesInIdx(false);
 
 		} catch (Exception ex) {
 			LOG.warn("updateIdx-ARTICLE"  + 
 					"\r\n\t" + obj + 
 					"\r\n\t" + ex.getMessage());
 			idx = null;
-			obj.setHayCambiosEnIDX(true);
+			obj.setChangesInIdx(true);
 		}
 
-		obj.setIndice(idx);
+		obj.setIndex(idx);
 
 		return obj;
 		

@@ -178,6 +178,11 @@
 			<artifactId>spark-sql_${scala.main}</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-catalyst_${scala.main}</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- =====================================
 			 UTILIDADES

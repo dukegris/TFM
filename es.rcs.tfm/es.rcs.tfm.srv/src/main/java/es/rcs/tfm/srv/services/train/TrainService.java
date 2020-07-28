@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.ArticuloBloque;
 import es.rcs.tfm.srv.repository.TrainRepository;
-import es.rcs.tfm.srv.setup.TmBiocXmlProcessor;
-import es.rcs.tfm.srv.setup.TmVarTxtProcessor;
+import es.rcs.tfm.srv.setup.TmVarBiocProcessor;
+import es.rcs.tfm.srv.setup.TmVarPubtatorProcessor;
 import es.rcs.tfm.xml.XmlNames;
 
 @Service(value = SrvNames.TRAINING_SRVC)
@@ -32,32 +32,32 @@ public class TrainService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrainService.class);
 
-	@Value("${tfm.model.pos.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos}")				
-	private String POS_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
+	@Value("${tfm.model.pos.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos}")				
+	private String POS_DIRECTORY =   "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/pos";
 	
-	@Value("${tfm.model.bert.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert}")
-	String BERT_DIRECTORY =           "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
+	@Value("${tfm.model.bert.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert}")
+	String BERT_DIRECTORY =           "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/bert";
 	
-	@Value("${tfm.model.ner.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner}")
-	private String NER_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
+	@Value("${tfm.model.ner.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner}")
+	private String NER_DIRECTORY =   "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/ner";
 
-	@Value("${tfm.model.tensorflow.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow}")
-	private String TENSORFLOW_DIRECTORY =   "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow";
+	@Value("${tfm.model.tensorflow.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow}")
+	private String TENSORFLOW_DIRECTORY =   "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/models/tensorflow";
 
-	@Value("${tfm.dataset.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets}")
-	private String DATASET_DIRECTORY = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets";
+	@Value("${tfm.dataset.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets}")
+	private String DATASET_DIRECTORY = "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets";
 
-	@Value("${tfm.pipeline.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training}")
-	private String OUT_PIPELINE_DIRECTORY = "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training";
+	@Value("${tfm.pipeline.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training}")
+	private String OUT_PIPELINE_DIRECTORY = "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training";
 	
-	@Value("${tfm.conll2003.directory:/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll}")		
-	String CONLL_DIRECTORY =         "/home/rcuesta/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll";
+	@Value("${tfm.conll2003.directory:J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll}")		
+	String CONLL_DIRECTORY =         "J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/training/conll";
 	
 	@Value("${tfm.conll2003.in.model.pos:pos_anc_en_2.0.2_2.4_1556659930154}")				
 	private String CONLL2003_IN_POS_MODEL = "pos_anc_en_2.0.2_2.4_1556659930154";
 
-	@Value("${tfm.conll2003.in.model.bert:bert_large_cased_en_2.4.0_2.4_1580580251298}")			
-	private String CONLL2003_IN_BERT_MODEL = "bert_large_cased_en_2.4.0_2.4_1580580251298";
+	@Value("${tfm.conll2003.in.model.bert:bert_base_uncased_en_2.4.0_2.4_1580579889322}")			
+	private String CONLL2003_IN_BERT_MODEL = "bert_base_uncased_en_2.4.0_2.4_1580579889322";
 	
 	@Value("${tfm.conll2003.in.model.bert.MaxSentenceLength:512}")				
 	private Integer CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT = 512;
@@ -181,7 +181,7 @@ public class TrainService {
 						!inFile.exists() || 
 						!inFile.isFile()) {
 					
-					LOG.warn("PREPARE DATA SERVICE: bioc FAIL - IN FILE NOT EXITS");
+					LOG.warn("PREPARE DATA SERVICE: bioc FAIL - IN FILE MUST EXITS");
 					return;
 					
 				}
@@ -189,7 +189,7 @@ public class TrainService {
 
 			File outFile = Paths.get(FilenameUtils.concat(CONLL_DIRECTORY, outFileName)).toFile();
 			if (	StringUtils.isBlank(outFileName))  {
-				LOG.warn("PREPARE DATA SERVICE: bioc FAIL - OUT FILE NOT EXITS");
+				LOG.warn("PREPARE DATA SERVICE: bioc FAIL - OUT FILENAME CAN'T BE BLANK");
 				return;
 			}
 			
@@ -228,7 +228,7 @@ public class TrainService {
 
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new TmBiocXmlProcessor(inFile.toPath()), 
+					new TmVarBiocProcessor(inFile.toPath()), 
 					inFile,
 					posModelDirectory,
 					bertModelDirectory, 
@@ -243,11 +243,11 @@ public class TrainService {
 			if (result) {
 				LOG.info("PREPARE DATA SERVICE: bioc OK");
 			} else {
-				LOG.info("PREPARE DATA SERVICE: bioc FAIL");
+				LOG.warn("PREPARE DATA SERVICE: bioc FAIL");
 			}
 			
 		} catch (Exception ex) {
-			LOG.warn("PREPARE DATA SERVICE: bioc FAIL - ex:" + ex.toString());
+			LOG.error("PREPARE DATA SERVICE: bioc FAIL - ex:" + ex.toString());
 		}
 		
 	}
@@ -283,7 +283,7 @@ public class TrainService {
 						!inFile.exists() || 
 						!inFile.isFile()) {
 
-					LOG.warn("PREPARE DATA SERVICE: txt FAIL - IN FILE NOT EXITS");
+					LOG.warn("PREPARE DATA SERVICE: txt FAIL - IN FILE MUST EXITS");
 					return;
 
 				}
@@ -291,7 +291,7 @@ public class TrainService {
 
 			File outFile = Paths.get(FilenameUtils.concat(CONLL_DIRECTORY, outFileName)).toFile();
 			if (	StringUtils.isBlank(outFileName))  {
-				LOG.warn("PREPARE DATA SERVICE: txt FAIL - OUT FILE NOT EXITS");
+				LOG.warn("PREPARE DATA SERVICE: txt FAIL - OUT FILE  CAN'T BE BLANK");
 				return;
 			}
 
@@ -302,6 +302,7 @@ public class TrainService {
 					!posModelDirectory.isDirectory()) 
 				posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();
 
+			// https://github.com/JohnSnowLabs/spark-nlp/issues/570#issuecomment-524286943
 			Integer bertMaxSentenceLength = CONLL2003_IN_BERT_MAX_SENTENCE_LENGHT;
 			Integer bertDimension = CONLL2003_IN_BERT_DIMENSION;
 			Integer bertBatchSize = CONLL2003_IN_BERT_BATCH_SIZE;
@@ -330,7 +331,7 @@ public class TrainService {
 	
 			boolean result = TrainRepository.getConllFrom(
 					spark, 
-					new TmVarTxtProcessor(inFile.toPath()), 
+					new TmVarPubtatorProcessor(inFile.toPath()), 
 					inFile,
 					posModelDirectory,
 					bertModelDirectory, 
@@ -461,10 +462,10 @@ public class TrainService {
 			if (result) {
 				LOG.info("TRAIN SERVICE: OK");
 			} else {
-				LOG.info("TRAIN SERVICE: FAIL");
+				LOG.warn("TRAIN SERVICE: FAIL");
 			}
 		} catch (Exception ex) {
-			LOG.warn("TRAIN SERVICE: FAIL - ex:" + ex.toString());
+			LOG.error("TRAIN SERVICE: FAIL - ex:" + ex.toString());
 		}
 		
 	}	
@@ -569,14 +570,14 @@ public class TrainService {
 		
 	}
 
-	public List<BloqueAnotado> process(
+	public List<ArticuloBloque> process(
 			SparkSession spark, 
 			List<Articulo> articles) {
 
 		if (	(articles == null) ||
 				(articles.isEmpty())) return null;
 
-		List<BloqueAnotado>resultado = null;
+		List<ArticuloBloque>resultado = null;
 		try {
 			
 			File posModelDirectory = Paths.get(FilenameUtils.concat(POS_DIRECTORY, CONLL2003_IN_POS_MODEL)).toFile();

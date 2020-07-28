@@ -93,8 +93,8 @@ public class OspmcLoaderService {
 							f)).
 			// Descargar ficheros
 			peek(f -> {
-					if (	SOLO_GZIP_PTRN.matcher(f.getGzFichero()).find() &&
-							f.isHayCambiosEnDisco()) CorpusService.download(
+					if (	SOLO_GZIP_PTRN.matcher(f.getGzFilename()).find() &&
+							f.isChangesInDisk()) CorpusService.download(
 						FPT_HOST, FTP_PORT, 
 						FTP_USERNAME, FTP_PASSWORD, 
 						FTP_BASELINE, 
@@ -104,27 +104,27 @@ public class OspmcLoaderService {
 					}).
 			// Actualizar datos de los ficheros en DB
 			peek(f -> {
-					if (	f.isHayCambiosEnBD()) corpusSrvc.updateDb(f); })
+					if (	f.isChangesInDb()) corpusSrvc.updateDb(f); })
 			;
 
 		Stream<Articulo> articulosStream = ficherosStream.
 			filter(f -> 
-					f.isHayCambiosEnDisco() && 
-					(f.getArticulos() != null) &&
-					(!f.getArticulos().isEmpty())
+					f.isChangesInDisk() && 
+					(f.getArticles() != null) &&
+					(!f.getArticles().isEmpty())
 			).
 			// Procesar XML con articulos
 			flatMap(f -> 
-					f.getArticulos().stream()).
+					f.getArticles().stream()).
 			//Comprobar si se requiere descargar
 			map (a->
 					corpusSrvc.calculateIfTheProcessIsNeeded(a)).
 			// Actualizar datos de los ficheros en DB
 			peek(a -> {
-					if (a.isHayCambiosEnBD()) corpusSrvc.updateDb(a);}).
+					if (a.isChangesInDb()) corpusSrvc.updateDb(a);}).
 			// Actualizar datos de los ficheros en el indice
 			peek(a -> {
-					if (a.isHayCambiosEnIDX()) corpusSrvc.updateIdx(a);})
+					if (a.isChangesInIdx()) corpusSrvc.updateIdx(a);})
 			;
 
 //		List<Fichero> f = ficherosStream.collect(Collectors.toList());

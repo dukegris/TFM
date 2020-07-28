@@ -31,14 +31,14 @@ import es.rcs.tfm.nlp.service.NerPipeline;
 import es.rcs.tfm.nlp.service.NerTrain;
 import es.rcs.tfm.nlp.service.TextProcesor;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.ArticuloBloque;
 import es.rcs.tfm.srv.setup.ArticleProcessor;
 
 public class TrainRepository {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TrainRepository.class);
 	private static final String SIMPLE_DATE_FORMAT = "yyyyMMdd-hhmmss";
-	private static final String HADOOP_FILE_PREFIX = "file://";
+	private static final String HADOOP_FILE_PREFIX = "file:///"; // Por setup windows J: le falta / y /root le sobraria. 
 
 	private static final String ID = "id";
 	private static final String TEXT = "text";
@@ -111,12 +111,12 @@ public class TrainRepository {
 														p.getOffset(), 
 														p.getEnd(), 
 														n.getText(), 
-														n.getType());
+														n.getType().toString());
 											}))
 									.collect(Collectors.toList());
 						}
 						if (notes == null) notes = new ArrayList<String>();
-						result.add(RowFactory.create(doc.getPmid(), b.getType(), b.getText(), notes));
+						result.add(RowFactory.create(doc.getPmid(), b.getType().toString(), b.getText(), notes));
 					});
 				}
 			});
@@ -147,8 +147,8 @@ public class TrainRepository {
 	    				filter(b -> (b != null) ).
 	    				map(b -> RowFactory.create(
 								UUID.randomUUID(),
-								((a.getEntidad() != null) && (a.getEntidad().getId() != null))
-										? a.getEntidad().getId().toString() 
+								((a.getEntity() != null) && (a.getEntity().getId() != null))
+										? a.getEntity().getId().toString() 
 										: "",
 								b.getType(), 
 								b.getText()))).
@@ -333,7 +333,7 @@ public class TrainRepository {
 			}
 		} catch (Exception ex) {
 			resultado = false;
-			LOG.warn("CONLL2003 FAIL " + ex.toString());
+			LOG.error("CONLL2003 FAIL " + ex.toString());
 		}
 
 		return resultado;
@@ -430,7 +430,7 @@ public class TrainRepository {
 
 		} catch (Exception ex) {
 			resultado = false;
-			LOG.warn("TRAIN FAIL " + ex.toString());
+			LOG.error("TRAIN FAIL " + ex.toString());
 		}
 
 		return resultado;
@@ -533,14 +533,14 @@ public class TrainRepository {
 
 		} catch (Exception ex) {
 			resultado = false;
-			LOG.warn("TRAIN FAIL " + ex.toString());
+			LOG.error("TRAIN FAIL " + ex.toString());
 		}
 
 		return resultado;
 		
 	}
 
-	public static List<BloqueAnotado> getProcessedBlocks(
+	public static List<ArticuloBloque> getProcessedBlocks(
 			SparkSession spark,
 			List<Articulo> articles,
 			File posModelDirectory,
@@ -573,7 +573,7 @@ public class TrainRepository {
 		if (bertBatchSize == null) bertBatchSize = 32;
 		if (bertCaseSensitive == null) bertCaseSensitive = false;
 		
-		List<BloqueAnotado> resultado = null;
+		List<ArticuloBloque> resultado = null;
 		try {
 	
 			String ini = LocalDateTime.now().format(DateTimeFormatter.ofPattern(SIMPLE_DATE_FORMAT));
@@ -641,7 +641,7 @@ public class TrainRepository {
 
 		} catch (Exception ex) {
 			resultado = null;
-			LOG.warn("PROCESS FAIL " + ex.toString());
+			LOG.error("PROCESS FAIL " + ex.toString());
 		}
 	
 		return resultado;

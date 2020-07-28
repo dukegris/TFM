@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.ArticuloBloque;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.repository.DatabaseRepository;
 import es.rcs.tfm.srv.repository.FtpRepository;
@@ -116,7 +116,7 @@ public class PubmedLoaderService {
 			peek(f-> 
 					procesaFichero(f, FTP_DIRECTORY)).
 			filter(f -> 
-					!f.isProcesoArticulosCompletado()).
+					!f.isProcessCompleted()).
 			peek( f -> {
 				
 				PubmedXmlProcessor processor = new PubmedXmlProcessor(
@@ -140,7 +140,7 @@ public class PubmedLoaderService {
 				DatabaseRepository.saveStats(1);
 				
 				int articulosSize = articulos.size();
-				f.setProcesoArticulosCompletado(processor.getItemsSize()*0.9 <= articulosSize);
+				f.setProcessCompleted(processor.getItemsSize()*0.9 <= articulosSize);
 				f.setNumArticlesProcessed(f.getNumArticlesProcessed() + articulosSize);
 				f.setNumArticlesTotal(processor.getItemsSize());
 				corpusSrvc.updateDb(f);
@@ -150,7 +150,8 @@ public class PubmedLoaderService {
 		// Puede ser null
 		if (ficherosStream != null) {
 			// Tirar del Streams
-			List<Fichero> items = ficherosStream.collect(Collectors.toList());
+			// List<Fichero> items = 
+			ficherosStream.collect(Collectors.toList());
 		}
 		
 		
@@ -195,7 +196,7 @@ public class PubmedLoaderService {
 							f.getSize()) ).
 			// Descarga ficheros y actualiza la Base de Datos
 			peek (f-> procesaFichero(f, FTP_DIRECTORY)).
-			filter(f -> !f.isProcesoArticulosCompletado()).
+			filter(f -> !f.isProcessCompleted()).
 			flatMap(f -> {
 
 				PubmedXmlProcessor processor = new PubmedXmlProcessor(
@@ -222,8 +223,9 @@ public class PubmedLoaderService {
 		    List<Articulo> chunk = new ArrayList<>(chunkSize);
 		    for (int i = 0; i < chunkSize && split.tryAdvance(chunk::add); i++){};
 		    if (chunk.isEmpty()) break;
-		    //Map<Fichero, Long> result = 
-		    List<BloqueAnotado> result = train.
+		    // Map<Fichero, Long> result = 
+		    // List<ArticuloBloque> result = 
+		    train.
 		    	process(spark, chunk).
 		    	stream().
 		    	parallel().
@@ -309,7 +311,7 @@ public class PubmedLoaderService {
 				f);
 		
 		// Descargar ficheros
-		if (f.isHayCambiosEnDisco()) {
+		if (f.isChangesInDisk()) {
 				CorpusService.download(
 						FPT_HOST, FTP_PORT, 
 						FTP_USERNAME, FTP_PASSWORD, 
@@ -320,7 +322,7 @@ public class PubmedLoaderService {
 		}
 		
 		// Actualizar datos de los ficheros en DB
-		if (f.isHayCambiosEnBD()) {
+		if (f.isChangesInDb()) {
 			f = corpusSrvc.updateDb(f);
 		}
 		
@@ -336,9 +338,9 @@ public class PubmedLoaderService {
 		// Comprobar si se requiere descargar
 		a = corpusSrvc.calculateIfTheProcessIsNeeded(a);
 		// Actualizar datos de los ficheros en DB
-		if (a.isHayCambiosEnBD()) a = corpusSrvc.updateDb(a);
+		if (a.isChangesInDb()) a = corpusSrvc.updateDb(a);
 		// Actualizar datos de los ficheros en el indice
-		if (a.isHayCambiosEnIDX()) a = corpusSrvc.updateIdx(a);
+		if (a.isChangesInIdx()) a = corpusSrvc.updateIdx(a);
 
 		return a;
 
@@ -347,7 +349,7 @@ public class PubmedLoaderService {
 	@Transactional(
 			transactionManager = DbNames.DB_TX,
 			propagation = Propagation.REQUIRES_NEW)
-	private BloqueAnotado procesaBloque(BloqueAnotado b) {
+	private ArticuloBloque procesaBloque(ArticuloBloque b) {
 
 		b = corpusSrvc.updateDb(b);
 		

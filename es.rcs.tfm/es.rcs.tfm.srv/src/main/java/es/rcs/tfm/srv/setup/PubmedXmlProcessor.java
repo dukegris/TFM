@@ -98,14 +98,21 @@ import org.ncbi.pubmed.Year;
 import es.rcs.tfm.srv.SrvException;
 import es.rcs.tfm.srv.SrvException.SrvViolation;
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.Articulo.IdType;
+import es.rcs.tfm.srv.model.Articulo.MediumType;
+import es.rcs.tfm.srv.model.Articulo.OwnerType;
+import es.rcs.tfm.srv.model.Articulo.StatusType;
 import es.rcs.tfm.srv.model.Autor;
+import es.rcs.tfm.srv.model.Autor.AuthorType;
 import es.rcs.tfm.srv.model.Centro;
 import es.rcs.tfm.srv.model.Descriptor;
 import es.rcs.tfm.srv.model.Fasciculo;
 import es.rcs.tfm.srv.model.Fecha;
+import es.rcs.tfm.srv.model.Fecha.DateType;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.model.Libro;
 import es.rcs.tfm.srv.model.Localizacion;
+import es.rcs.tfm.srv.model.Localizacion.LocalizationType;
 import es.rcs.tfm.srv.model.Permiso;
 import es.rcs.tfm.srv.model.Referencia;
 import es.rcs.tfm.srv.model.Revista;
@@ -113,6 +120,7 @@ import es.rcs.tfm.srv.model.Termino;
 import es.rcs.tfm.srv.model.Termino.DescType;
 import es.rcs.tfm.srv.model.Termino.TermType;
 import es.rcs.tfm.srv.model.Texto;
+import es.rcs.tfm.srv.model.Texto.TextType;
 import es.rcs.tfm.srv.model.Titulo;
 
 public class PubmedXmlProcessor extends ArticleProcessor {
@@ -170,7 +178,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Path path = Paths.get(
 				FilenameUtils.concat(
 						directory, 
-						fichero.getUncompressFichero()));
+						fichero.getUncompressFilename()));
 		
 		if (!path.toFile().exists()) return;
 		
@@ -256,7 +264,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		PubmedData pubmedData = pubmedArticle.getPubmedData();
 		articulo = getArticuloInfo(articulo, medlineCitation);
 		articulo = getArticuloData(articulo, pubmedData);
-		articulo.setFicheroPubmed(this.fichero);
+		articulo.setPubmedFile(this.fichero);
 		
 		return articulo;
 		
@@ -298,36 +306,36 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (articulo == null) articulo = new Articulo();
 		
 		articulo = getArticuloInfo(articulo, medlineCitation.getArticle());
-		articulo.setPropietario(	medlineCitation.getOwner());
-		articulo.setEstado(			medlineCitation.getStatus());
-		articulo.setVersion(		medlineCitation.getVersionID());
-		articulo.setVersionFecha(	makeDate(medlineCitation.getVersionDate()));
+		articulo.setOwner(			Articulo.OWNERS_TYPES.get(medlineCitation.getOwner(), OwnerType.NLM));
+		articulo.setStatus(			Articulo.STATUS_TYPES.get(medlineCitation.getStatus(), StatusType.NONE));
+		articulo.setVersionId(		medlineCitation.getVersionID());
+		articulo.setVersionDate(	makeDate(medlineCitation.getVersionDate()));
 		articulo.addIds(			makeId(medlineCitation.getPMID()));
 		
 		// Generalmente afectan a ampliaciones como el abstract
 		articulo.addIds(			makeIdsOther(medlineCitation.getOtherID())); 
-		articulo.addTextos(			makeTextos(medlineCitation.getOtherAbstract()));
+		articulo.addTexts(			makeTextos(medlineCitation.getOtherAbstract()));
 
-		articulo.addFecha(			makeFecha(medlineCitation.getDateCompleted()));
-		articulo.addFecha(			makeFecha(medlineCitation.getDateRevised()));
+		articulo.addDate(			makeFecha(medlineCitation.getDateCompleted()));
+		articulo.addDate(			makeFecha(medlineCitation.getDateRevised()));
 
-		articulo.addAutores(		makeAutores(medlineCitation.getPersonalNameSubjectList()));
-		articulo.addAutores(		makeAutores(medlineCitation.getInvestigatorList()));
+		articulo.addAuthors(		makeAutores(medlineCitation.getPersonalNameSubjectList()));
+		articulo.addAuthors(		makeAutores(medlineCitation.getInvestigatorList()));
 		
 		// Class 1 (chemical and drug)
 		//articulo.addFarmacos(		makeFarmacos(medlineCitation.getChemicalList())); 
-		articulo.addTerminos(		makeTerminos(medlineCitation.getChemicalList())); 
+		articulo.addTerms(			makeTerminos(medlineCitation.getChemicalList())); 
 		// Class 2 (protocol) y Class 3 (disease) y Class 4 (organism)
-		articulo.addTerminos(		makeTerminos(medlineCitation.getSupplMeshList())); 
-		articulo.addTerminos(		makeTerminos(medlineCitation.getMeshHeadingList()));
+		articulo.addTerms(			makeTerminos(medlineCitation.getSupplMeshList())); 
+		articulo.addTerms(			makeTerminos(medlineCitation.getMeshHeadingList()));
 
 		articulo.addKeywords(		makeDescriptores(medlineCitation.getKeywordList()));
 		articulo.addGenes(			makeGenes(medlineCitation.getGeneSymbolList())); // Solo en citas desde 1991 a 1995	
-		articulo.addVuelos(			makeData(medlineCitation.getSpaceFlightMission()));
-		articulo.addNotas(			makeNotes(medlineCitation.getGeneralNote()));
-		articulo.addTextos(			makeTextosNotas(medlineCitation.getGeneralNote()));
+		articulo.addFlights(		makeData(medlineCitation.getSpaceFlightMission()));
+		articulo.addNotes(			makeNotes(medlineCitation.getGeneralNote()));
+		articulo.addTexts(			makeTextosNotas(medlineCitation.getGeneralNote()));
 		
-		articulo.mergeRevista(		makeRevista(medlineCitation.getMedlineJournalInfo()));
+		articulo.mergeJournal(		makeRevista(medlineCitation.getMedlineJournalInfo()));
 		
 		// TODO
 		medlineCitation.getNumberOfReferences(); // No utilizado desde 2010
@@ -356,25 +364,25 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 		if (articulo == null) articulo = new Articulo();
 		
-		articulo.setTitulo(			makeTitulo(article.getArticleTitle()));
-		articulo.addTexto(			makeTexto(article.getArticleTitle()));
-		articulo.addTexto(			makeTexto(
-										Articulo.VERNACULAR_TITLE,
-										Articulo.VERNACULAR_TITLE_START, 
+		articulo.setTitle(			makeTitulo(article.getArticleTitle()));
+		articulo.addText(			makeTexto(article.getArticleTitle()));
+		articulo.addText(			makeTexto(
+										TextType.VERNACULAR_TITLE, 
+										Texto.ORDER_VERNACULAR_TITLE,  
 										article.getVernacularTitle()));
-		articulo.addTextos(			makeTextos(article.getAbstract()));
-		articulo.setIdioma(			makeIdioma(article.getLanguage()));
-		articulo.setMedio(			article.getPubModel()); 
+		articulo.addTexts(			makeTextos(article.getAbstract()));
+		articulo.setLanguage(		makeIdioma(article.getLanguage()));
+		articulo.setMedium(			Articulo.MEDIUM_TYPES.get(article.getPubModel(), MediumType.NONE)); 
 		//articulo.addIds(			makeIdsELocationIDS(article.getPaginationOrELocationID()) );
-		articulo.addFechas(			makeFechas(article.getArticleDate()));
-		articulo.addAutores(		makeAutores(article.getAuthorList()));
-		articulo.addLocalizaciones(	makeLocalizacion(article.getPaginationOrELocationID()));
-		articulo.addPermisos(		makePermisos(article.getGrantList()));
-		articulo.addDatos(			makeData(article.getDataBankList()));
-		articulo.addTerminos(		makeTerminos(article.getPublicationTypeList()));
+		articulo.addDates(			makeFechas(article.getArticleDate()));
+		articulo.addAuthors(		makeAutores(article.getAuthorList()));
+		articulo.addLocalizations(	makeLocalizacion(article.getPaginationOrELocationID()));
+		articulo.addGrants(			makePermisos(article.getGrantList()));
+		articulo.addData(			makeData(article.getDataBankList()));
+		articulo.addTerms(			makeTerminos(article.getPublicationTypeList()));
 
-		articulo.mergeRevista(		makeRevista(article.getJournal()));
-		articulo.mergeFasciculo(	makeFasciculo(article.getJournal()));
+		articulo.mergeJournal(		makeRevista(article.getJournal()));
+		articulo.mergeIssue(		makeFasciculo(article.getJournal()));
 
 		return articulo;
 
@@ -385,25 +393,25 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (bookDocument == null) return articulo;
 
 		if (articulo == null) articulo = new Articulo();
-		articulo.setTitulo(			makeTitulo(bookDocument.getArticleTitle()));
-		articulo.addTexto(			makeTexto(bookDocument.getArticleTitle()));
-		articulo.addTexto(			makeTexto(
-										Articulo.VERNACULAR_TITLE, 
-										Articulo.VERNACULAR_TITLE_START, 
+		articulo.setTitle(			makeTitulo(bookDocument.getArticleTitle()));
+		articulo.addText(			makeTexto(bookDocument.getArticleTitle()));
+		articulo.addText(			makeTexto(
+										TextType.VERNACULAR_TITLE, 
+										Texto.ORDER_VERNACULAR_TITLE, 
 										bookDocument.getVernacularTitle()));		
-		articulo.addTextos(			makeTextos(bookDocument.getAbstract()));
-		articulo.setIdioma(			makeIdioma(bookDocument.getLanguage()));
+		articulo.addTexts(			makeTextos(bookDocument.getAbstract()));
+		articulo.setLanguage(		makeIdioma(bookDocument.getLanguage()));
 		articulo.addIds(			makeIds(bookDocument.getArticleIdList()));
 		articulo.addIds(			makeId(bookDocument.getPMID()));
-		articulo.addFecha(			makeFecha(bookDocument.getDateRevised()));
-		articulo.addFecha(			makeFecha(bookDocument.getContributionDate()));
-		articulo.addAutores(		makeAutores(bookDocument.getAuthorList()));
-		articulo.addAutores(		makeAutores(bookDocument.getInvestigatorList()));
-		articulo.setLibro(			makeLibro(bookDocument.getBook()));
-		articulo.addPermisos(		makePermisos(bookDocument.getGrantList()));
-		articulo.addReferencias(	makeReferencias(bookDocument.getReferenceList()));
-		articulo.addTerminos(		makeTerminos(bookDocument.getPublicationType()));
-		articulo.addLocalizacion(	makeLocalizacion(bookDocument.getPagination()) );
+		articulo.addDate(			makeFecha(bookDocument.getDateRevised()));
+		articulo.addDate(			makeFecha(bookDocument.getContributionDate()));
+		articulo.addAuthors(		makeAutores(bookDocument.getAuthorList()));
+		articulo.addAuthors(		makeAutores(bookDocument.getInvestigatorList()));
+		articulo.setBook(			makeLibro(bookDocument.getBook()));
+		articulo.addGrants(			makePermisos(bookDocument.getGrantList()));
+		articulo.addReferences(		makeReferencias(bookDocument.getReferenceList()));
+		articulo.addTerms(			makeTerminos(bookDocument.getPublicationType()));
+		articulo.addLocalization(	makeLocalizacion(bookDocument.getPagination()) );
 		articulo.addKeywords(		makeDescriptores(bookDocument.getKeywordList()));
 		articulo.addItems(			makeItems(bookDocument.getItemList()));
 		
@@ -428,11 +436,11 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (pubmedData == null) return null;
 
 		if (articulo == null) articulo = new Articulo();
-		articulo.setEstado(			pubmedData.getPublicationStatus());
+		articulo.setStatus(			Articulo.STATUS_TYPES.get(pubmedData.getPublicationStatus(), StatusType.NONE));
 		articulo.addIds(			makeIds(pubmedData.getArticleIdList()));
-		articulo.addFechas(			makeFechas(pubmedData.getHistory()));
-		articulo.addReferencias(	makeReferencias(pubmedData.getReferenceList()));
-		articulo.addPropiedades(	makePropiedades(pubmedData.getObjectList()));
+		articulo.addDates(			makeFechas(pubmedData.getHistory()));
+		articulo.addReferences(	makeReferencias(pubmedData.getReferenceList()));
+		articulo.addProperties(	makePropiedades(pubmedData.getObjectList()));
 
 		return articulo;
 		
@@ -443,10 +451,10 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (pubmedBookData == null) return articulo;
 
 		if (articulo == null) articulo = new Articulo();
-		articulo.setEstado(			pubmedBookData.getPublicationStatus());
+		articulo.setStatus(			Articulo.STATUS_TYPES.get(pubmedBookData.getPublicationStatus(), StatusType.NONE));
 		articulo.addIds(			makeIds(pubmedBookData.getArticleIdList()));
-		articulo.addFechas(			makeFechas(pubmedBookData.getHistory()));
-		articulo.addPropiedades(	makePropiedades(pubmedBookData.getObjectList()));
+		articulo.addDates(			makeFechas(pubmedBookData.getHistory()));
+		articulo.addProperties(	makePropiedades(pubmedBookData.getObjectList()));
 
 		return articulo;
 
@@ -463,23 +471,23 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 		Libro libro = new Libro();
 		
-		libro.setTitulo(			makeTitulo(book.getBookTitle()));
-		libro.setTituloColeccion(	makeTitulo(book.getCollectionTitle()));
-		libro.setVolumen(			book.getVolume()); // Sin uso
-		libro.setTituloVolumen(		book.getVolumeTitle()); // Sin uso
-		libro.setMedio(				book.getMedium());
+		libro.setTitle(				makeTitulo(book.getBookTitle()));
+		libro.setCollectionTitle(	makeTitulo(book.getCollectionTitle()));
+		libro.setVolume(			book.getVolume()); // Sin uso
+		libro.setVolumeTitle(		book.getVolumeTitle()); // Sin uso
+		libro.setMedium(			Articulo.MEDIUM_TYPES.get(book.getMedium(), MediumType.OTHER));
 		libro.addIds(				makeIdsIsbn(book.getIsbn()));
 		libro.addIds(				makeIdsELocation(book.getELocationID()));
-		libro.addFecha(				makeFecha(book.getPubDate()));
-		libro.addFecha(				makeFecha(book.getBeginningDate()));
-		libro.addFecha(				makeFecha(book.getEndingDate()));
-		libro.addAutores(			makeAutores(book.getAuthorList()));
-		libro.addAutores(			makeAutores(book.getInvestigatorList()));
+		libro.addDate(				makeFecha(book.getPubDate()));
+		libro.addDate(				makeFecha(book.getBeginningDate()));
+		libro.addDate(				makeFecha(book.getEndingDate()));
+		libro.addAuthors(			makeAutores(book.getAuthorList()));
+		libro.addAuthors(			makeAutores(book.getInvestigatorList()));
 
-		libro.setInforme(			book.getReportNumber());
-		libro.setEdicion(			book.getEdition());
+		libro.setReport(			book.getReportNumber());
+		libro.setEdition(			book.getEdition());
 		libro.setEditor(			(book.getPublisher() != null) ? book.getPublisher().getPublisherName() : null);
-		libro.setCiudad(			(book.getPublisher() != null) ? book.getPublisher().getPublisherLocation() : null);
+		libro.setCity(				(book.getPublisher() != null) ? book.getPublisher().getPublisherLocation() : null);
 
 		return libro;
 
@@ -539,16 +547,16 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 		Titulo resultado = new Titulo(articleTitle.getvalue().trim());
 		if (StringUtils.isNotBlank(articleTitle.getBook())) {
-			resultado.setLibroId(articleTitle.getBook().trim());
+			resultado.setBookId(articleTitle.getBook().trim());
 		}
 		if (StringUtils.isNotBlank(articleTitle.getPart())) {
-			resultado.setLibroId(articleTitle.getPart().trim());
+			resultado.setBookId(articleTitle.getPart().trim());
 		}
 		if (StringUtils.isNotBlank(articleTitle.getSec())) {
-			resultado.setLibroId(articleTitle.getSec().trim());
+			resultado.setBookId(articleTitle.getSec().trim());
 		}
 		
-		if (StringUtils.isBlank(resultado.getTitulo())) {
+		if (StringUtils.isBlank(resultado.getTitle())) {
 			System.out.println("DEBUG - titulo vacio");
 		}
 
@@ -563,13 +571,13 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 		Titulo resultado = new Titulo(bookTitle.getvalue().trim());
 		if (StringUtils.isNotBlank(bookTitle.getBook())) {
-			resultado.setLibroId(bookTitle.getBook().trim());
+			resultado.setBookId(bookTitle.getBook().trim());
 		}
 		if (StringUtils.isNotBlank(bookTitle.getPart())) {
-			resultado.setLibroId(bookTitle.getPart().trim());
+			resultado.setBookId(bookTitle.getPart().trim());
 		}
 		if (StringUtils.isNotBlank(bookTitle.getSec())) {
-			resultado.setLibroId(bookTitle.getSec().trim());
+			resultado.setBookId(bookTitle.getSec().trim());
 		}
 		
 		return resultado;
@@ -583,13 +591,13 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 		Titulo resultado = new Titulo(collectionTitle.getvalue().trim());
 		if (StringUtils.isNotBlank(collectionTitle.getBook())) {
-			resultado.setLibroId(collectionTitle.getBook().trim());
+			resultado.setBookId(collectionTitle.getBook().trim());
 		}
 		if (StringUtils.isNotBlank(collectionTitle.getPart())) {
-			resultado.setLibroId(collectionTitle.getPart().trim());
+			resultado.setBookId(collectionTitle.getPart().trim());
 		}
 		if (StringUtils.isNotBlank(collectionTitle.getSec())) {
-			resultado.setLibroId(collectionTitle.getSec().trim());
+			resultado.setBookId(collectionTitle.getSec().trim());
 		}
 		
 		return resultado;
@@ -604,8 +612,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (	(generalNote == null) ||
 				(generalNote.isEmpty())) return null;
 
-		String type = Articulo.OBSERVATIONS;
-		int order = Articulo.OBSERVATIONS_START;
+		TextType type = TextType.OBSERVATIONS;
+		int order = Texto.ORDER_OBSERVATIONS;
 		
 		AtomicInteger atomicorder = new AtomicInteger(order);
 		List<Texto> result = generalNote.
@@ -623,8 +631,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 		if (articleAbstract == null) return null;
 
-		String type = Articulo.ABSTRACT;
-		int order = Articulo.ABSTRACT_START;
+		TextType type = TextType.ABSTRACT;
+		int order = Texto.ORDER_ABSTRACT;
 		String subtype = null;
 		String language = "en";
 		String copyright = articleAbstract.getCopyrightInformation();
@@ -641,8 +649,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (	(otherAbstract == null) ||
 				(otherAbstract.isEmpty())) return null;
 		
-		String type = Articulo.OTHER_ABSTRACT;
-		int order = Articulo.OTHER_ABSTRACT_START;
+		TextType type = TextType.OTHER_ABSTRACT;
+		int order = Texto.ORDER_OTHER_ABSTRACT;
 		List<Texto> result = otherAbstract.
 			stream().
 			filter(	p -> p!= null &&
@@ -662,7 +670,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 	
 	private List<Texto> makeTextos(
-			String type,
+			TextType type,
 			String subtype,
 			String language,
 			String copyright,
@@ -697,8 +705,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (	(articleTitle == null) ||
 				(StringUtils.isBlank(articleTitle.getvalue()))) return null;
 	
-		String type = Articulo.TITLE;
-		int order = Articulo.TITLE_START;
+		TextType type = TextType.TITLE;
+		int order = Texto.ORDER_TITLE;
 		String subtype = null;
 		String language = null;
 		String copyright = null;
@@ -734,7 +742,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 	
 	private Texto makeTexto(
-			String type,
+			TextType type,
 			int order,
 			String text) {
 		return new Texto(
@@ -751,7 +759,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	// -------------------------------------------------------------------------------
 	// IDENTIFICACION
 
-	private Entry<String, String> makeId(ISSN issn) {
+	private Entry<IdType, String> makeId(ISSN issn) {
 		
 		if (	(issn == null) ||
 				(StringUtils.isBlank(issn.getIssnType())) ||
@@ -760,53 +768,54 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		}
 		//issn.getIssnType()  Electronic | Print, 
 
-		return new SimpleEntry<String, String>(
-					Articulo.ISSN_ID_NAME,
+		return new SimpleEntry<IdType, String>(
+					IdType.ISSN,
 					issn.getvalue());
 		
 	}
 
-	private Entry<String, String> makeId(PMID pmid) {
+	private Entry<IdType, String> makeId(PMID pmid) {
 		
 		if (	(pmid == null) || 
 				(StringUtils.isBlank(pmid.getvalue()))) return null;
 
-		return new SimpleEntry<String, String>(
-				Articulo.PUBMED_ID_NAME, 
+		return new SimpleEntry<IdType, String>(
+				IdType.PUBMED, 
 				pmid.getvalue());
 		
 	}
 
-	private Entry<String, String> makeId(String type, String value) {
+	private Entry<IdType, String> makeId(IdType type, String value) {
 		
-		if (	(StringUtils.isBlank(type)) ||
+		if (	(type == null) ||
+				(IdType.NONE.equals(type)) ||
 				(StringUtils.isBlank(value)) ) return null;
 		
-		return new SimpleEntry<String, String>(
+		return new SimpleEntry<IdType, String>(
 					type, 
 					value);
 		
 	}
 
 	Pattern IS_NUMERIC = Pattern.compile("-?\\d+(\\.\\d+)?");
-	private List<Entry<String, String>> makeIds(ArticleIdList articleIdList) {
+	private List<Entry<IdType, String>> makeIds(ArticleIdList articleIdList) {
 
 		if (	(articleIdList == null)  ||
 				(articleIdList.getArticleId() == null) ||
 				(articleIdList.getArticleId().isEmpty())) return null; 
 		
-		List<Entry<String, String>> resultado = articleIdList.getArticleId().
+		List<Entry<IdType, String>> resultado = articleIdList.getArticleId().
 			stream().
 			filter(p ->		(p != null) &&
 							(StringUtils.isNotBlank(p.getIdType())) &&
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance ->	{
-				String type = null;
-		    	if ((type == null) && (IS_NUMERIC.matcher(instance.getIdType()).matches())) type = Articulo.PUBMED_ID_NAME;
-		    	if ((type == null) && ("pubmed".equals(instance.getIdType()))) type = Articulo.PUBMED_ID_NAME;
-		    	if ((type == null) && ("rspb".indexOf(instance.getIdType()) >= 0)) type = Articulo.DOI_ID_NAME;
-		    	if (type == null) type = instance.getIdType();
-				return new SimpleEntry<String, String>(
+				IdType type = null;
+		    	if ((type == null) && (IS_NUMERIC.matcher(instance.getIdType()).matches())) type = IdType.PUBMED;
+		    	if ((type == null) && ("pubmed".equals(instance.getIdType()))) type = IdType.PUBMED;
+		    	if ((type == null) && ("rspb".indexOf(instance.getIdType()) >= 0)) type = IdType.DOI;
+		    	if (type == null) type = Articulo.ID_TYPES.get(instance.getIdType());
+				return new SimpleEntry<IdType, String>(
 							type,
 							instance.getvalue());
 			}).
@@ -818,21 +827,21 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 
 	}
 
-	private Map<String, String> makeIds(List<Identifier> identifiers) {
+	private Map<IdType, String> makeIds(List<Identifier> identifiers) {
 
 		if (	(identifiers == null)  ||
 				(identifiers.isEmpty())) {
 			return null; 
 		}
 
-		Map<String, String> resultado = identifiers.
+		Map<IdType, String> resultado = identifiers.
 			stream().
 			filter(p ->		(p != null) &&
 							(StringUtils.isNotBlank(p.getSource())) &&
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> 	{
-				return new SimpleEntry<String, String>(
-						instance.getSource(),
+				return new SimpleEntry<IdType, String>(
+						Articulo.ID_TYPES.get(instance.getSource(), IdType.ORCID),
 						instance.getvalue());
 			}).
 			filter(p -> 	(p != null)).
@@ -846,18 +855,18 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 	}
 
-	private Map<String, String> makeIdsELocation(List<ELocationID> eLocationIds) {
+	private Map<IdType, String> makeIdsELocation(List<ELocationID> eLocationIds) {
 		
 		if (	(eLocationIds == null) ||
 				(eLocationIds.isEmpty()) ) return null;
 		
-		Map<String, String> resultado = eLocationIds.
+		Map<IdType, String> resultado = eLocationIds.
 			stream().
 			filter(p -> (p != null) &&
 						(YES.equals(p.getValidYN())) && 
 						(StringUtils.isNotBlank(p.getvalue())) ).
-			map(instance -> new SimpleEntry<String, String>(
-					instance.getEIdType(), // doi | pii
+			map(instance -> new SimpleEntry<IdType, String>(
+					Articulo.ID_TYPES.get(instance.getEIdType()), 
 					instance.getvalue())).
 			filter(p -> 	(p != null)).
 			collect(Collectors.toMap(	
@@ -897,18 +906,18 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 	}
 	
-	private Map<String, String> makeIdsIsbn(List<Isbn> isbn) {
+	private Map<IdType, String> makeIdsIsbn(List<Isbn> isbn) {
 
 		if (	(isbn == null)  ||
 				(isbn.isEmpty()))  return null; 
 		
-		Map<String, String> resultado = isbn.
+		Map<IdType, String> resultado = isbn.
 			stream().
 			filter(p ->	(p != null) &&
 						(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> 	{
-				return new SimpleEntry<String, String>(
-						Articulo.ISBN_ID_NAME,
+				return new SimpleEntry<IdType, String>(
+						IdType.ISBN,
 						instance.getvalue());
 			}).
 			filter(p -> (p != null)).
@@ -922,19 +931,19 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		
 	}
 
-	private Map<String, String> makeIdsOther(List<OtherID> otherIds) {
+	private Map<IdType, String> makeIdsOther(List<OtherID> otherIds) {
 
 		if (	(otherIds == null)  ||
 				(otherIds.isEmpty()))  return null; 
 
-		Map<String, String> resultado = otherIds.
+		Map<IdType, String> resultado = otherIds.
 			stream().
 			filter(p ->		(p != null) &&
 							(StringUtils.isNotBlank(p.getSource())) &&
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> 	{
-				return new SimpleEntry<String, String>(
-						instance.getSource(), // NASA | KIE | PIP | POP | ARPL | CPC | IND | CPFH | CLML | NRCBL | NLM | QCIM
+				return new SimpleEntry<IdType, String>(
+						Articulo.ID_TYPES.get(instance.getSource()),
 						instance.getvalue());
 			}).
 			filter(p -> 	(p != null)).
@@ -947,7 +956,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		return resultado;
 
 	}
-
+	
 	// -------------------------------------------------------------------------------
 	// FECHAS
 
@@ -994,15 +1003,15 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if (localdate != null) {
-			resultado = new Fecha(Articulo.FECHA_INICIO, localdate);
+			resultado = new Fecha(DateType.BEGIN, localdate);
 		}
 		
 		if (StringUtils.isNotBlank(ses)) {
 			if (resultado == null) {
-				resultado = new Fecha(Articulo.FECHA_INICIO);
-				resultado.setAnio(anio);
+				resultado = new Fecha(DateType.BEGIN);
+				resultado.setYear(anio);
 			}
-			resultado.setSesion(ses);
+			resultado.setSession(ses);
 		}
 			
 		return resultado;
@@ -1053,15 +1062,15 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if (localdate != null) {
-			resultado = new Fecha(Articulo.FECHA_CONTRIBUCION, localdate);
+			resultado = new Fecha(DateType.CONTRIBUTION, localdate);
 		}
 		
 		if (StringUtils.isNotBlank(ses)) {
 			if (resultado == null) {
-				resultado = new Fecha(Articulo.FECHA_CONTRIBUCION);
-				resultado.setAnio(anio);
+				resultado = new Fecha(DateType.CONTRIBUTION);
+				resultado.setYear(anio);
 			}
-			resultado.setSesion(ses);
+			resultado.setSession(ses);
 		}
 			
 		return resultado;
@@ -1089,7 +1098,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if (localdate != null) {
-			resultado = new Fecha(Articulo.FECHA_COMPLETA, localdate);
+			resultado = new Fecha(DateType.COMPLETE, localdate);
 		}
 	
 		return resultado;
@@ -1117,7 +1126,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if (localdate != null) {
-			resultado = new Fecha(Articulo.FECHA_REVISION, localdate);
+			resultado = new Fecha(DateType.REVISION, localdate);
 		}
 	
 		return resultado;
@@ -1167,15 +1176,15 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if (localdate != null) {
-			resultado = new Fecha(Articulo.FECHA_EDICION, localdate);
+			resultado = new Fecha(DateType.EDITION, localdate);
 		}
 		
 		if (StringUtils.isNotBlank(ses)) {
 			if (resultado == null) {
-				resultado = new Fecha(Articulo.FECHA_EDICION);
-				resultado.setAnio(anio);
+				resultado = new Fecha(DateType.EDITION);
+				resultado.setYear(anio);
 			}
-			resultado.setSesion(ses);
+			resultado.setSession(ses);
 		}
 
 		return resultado;
@@ -1230,24 +1239,24 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		Fecha resultado = null;
 		LocalDate localdate = LocalDate.of(year, month, dayOfMonth);
 		if ((localdate != null) && (localdate.getYear()>=2)) {
-			resultado = new Fecha(Articulo.FECHA_PUBLICACION, localdate);
+			resultado = new Fecha(DateType.PUBLICATION, localdate);
 		}
 		
 		if (StringUtils.isNotBlank(ses)) {
 			if (resultado == null) {
-				resultado = new Fecha(Articulo.FECHA_PUBLICACION);
-				resultado.setAnio(anio);
+				resultado = new Fecha(DateType.PUBLICATION);
+				resultado.setYear(anio);
 			}
-			resultado.setSesion(ses);
+			resultado.setSession(ses);
 		}
 		
 		if (StringUtils.isNotBlank(fecha)) {
 			if (resultado == null) {
-				resultado = new Fecha(Articulo.FECHA_PUBLICACION);
+				resultado = new Fecha(DateType.PUBLICATION);
 			}
-			if (StringUtils.isBlank(resultado.getAnio())) {
+			if (StringUtils.isBlank(resultado.getYear())) {
 				if (anio != null) {
-					resultado.setAnio(anio);
+					resultado.setYear(anio);
 				} else {
 					Matcher m = MEDLINE_DATE_PTR.matcher(fecha);
 					if (m.find()) {
@@ -1257,7 +1266,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							dayOfMonth = 1;
 							localdate = LocalDate.of(year, month, dayOfMonth);
 							if (localdate != null) {
-								resultado = new Fecha(Articulo.FECHA_PUBLICACION, localdate);
+								resultado = new Fecha(DateType.PUBLICATION, localdate);
 							}
 						} catch (Exception ex) {
 							System.out.println("DEBUG- makeFecha: " + fecha);
@@ -1266,11 +1275,11 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				}
 			}
 			StringBuffer sb = new StringBuffer();
-			if (StringUtils.isNotBlank(resultado.getSesion())) sb.append(resultado.getSesion());
+			if (StringUtils.isNotBlank(resultado.getSession())) sb.append(resultado.getSession());
 			sb.append("(");
 			sb.append(fecha);
 			sb.append(")");
-			resultado.setSesion(sb.toString());
+			resultado.setSession(sb.toString());
 		}
 
 		return resultado;
@@ -1295,9 +1304,10 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				Fecha fecha = null;
 				LocalDate localdate = makeDate(instance);
 				String dateType = instance.getDateType();
-				if (	(StringUtils.isNotBlank(dateType)) &&
-						(localdate != null)) {
-					fecha = new Fecha(dateType, localdate);
+				if (	localdate != null) {
+					fecha = new Fecha(
+							Fecha.DATE_TYPES.get(dateType, DateType.ELECTRONIC), 
+							localdate);
 				}
 				return fecha;
 			}).
@@ -1330,7 +1340,9 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				if (	(localdate == null)) {
 					return null;
 				}
-				return new Fecha(pubStatus, localdate.toLocalDate());
+				return new Fecha(
+						Fecha.DATE_TYPES.get(pubStatus), 
+						localdate.toLocalDate());
 			}).
 			filter(p ->		(p != null) ).
 			collect(Collectors.toList());
@@ -1384,11 +1396,11 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			filter(p -> (p != null) ).
 			map(instance ->		{
 				Autor autor = new Autor();
-				autor.setTipo(Articulo.AUTOR);
-				if (instance.getInitials() != null)	autor.setIniciales(	instance.getInitials().getvalue());
-				if (instance.getForeName() != null)	autor.setNombre(	instance.getForeName().getvalue());
-				if (instance.getLastName() != null)	autor.setApellidos(	instance.getLastName().getvalue());
-				if (instance.getSuffix() != null)	autor.setSufijo(	instance.getSuffix().getvalue());
+				autor.setType(AuthorType.AUTHOR);
+				if (instance.getInitials() != null)	autor.setInitials(	instance.getInitials().getvalue());
+				if (instance.getForeName() != null)	autor.setGivenName(	instance.getForeName().getvalue());
+				if (instance.getLastName() != null)	autor.setFamilyName(instance.getLastName().getvalue());
+				if (instance.getSuffix() != null)	autor.setSuffix(	instance.getSuffix().getvalue());
 				return autor;
 			}).
 			filter(p -> 	(p != null)).
@@ -1418,31 +1430,31 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			map(instance ->		{
 				Autor autor = new Autor();
 				if (StringUtils.isNotBlank(authorList.getType())) {
-					autor.setTipo(authorList.getType());
+					autor.setType(Autor.AUTHOR_TYPES.get(authorList.getType()));
 				} else {
-					autor.setTipo(Articulo.AUTOR);
+					autor.setType(AuthorType.AUTHOR);
 				}
 				instance.getEqualContrib();
 				autor.addIds(makeIds(instance.getIdentifier()));
 				if (instance.getLastNameOrForeNameOrInitialsOrSuffixOrCollectiveName() != null) {
 					instance.getLastNameOrForeNameOrInitialsOrSuffixOrCollectiveName().forEach(d -> {
 						if (d!=null) {
-							if (d instanceof Initials)			autor.setIniciales(((Initials)d).getvalue());
-							if (d instanceof Suffix)			autor.setSufijo(((Suffix)d).getvalue());
-							if (d instanceof ForeName)			autor.setNombre(((ForeName)d).getvalue());
-							if (d instanceof LastName)			autor.setApellidos(((LastName)d).getvalue());
+							if (d instanceof Initials)			autor.setInitials(((Initials)d).getvalue());
+							if (d instanceof Suffix)			autor.setSuffix(((Suffix)d).getvalue());
+							if (d instanceof ForeName)			autor.setGivenName(((ForeName)d).getvalue());
+							if (d instanceof LastName)			autor.setFamilyName(((LastName)d).getvalue());
 							if (d instanceof CollectiveName)	{
-								if (Articulo.AUTOR.equals(autor.getTipo())) {
-									autor.setTipo(Articulo.GRUPO);
-								} if (Articulo.EDITOR.equals(autor.getTipo())) {
-									autor.setTipo(Articulo.EDITORIAL);
+								if (AuthorType.AUTHOR.equals(autor.getType())) {
+									autor.setType(AuthorType.GROUP);
+								} if (AuthorType.EDITOR.equals(autor.getType())) {
+									autor.setType(AuthorType.EDITOR_GROUP);
 								}
-								autor.setNombre(((CollectiveName)d).getvalue());
+								autor.setGivenName(((CollectiveName)d).getvalue());
 							}
 						}
 					});
 				}
-				autor.addCentros(makeCentros(instance.getAffiliationInfo()));
+				autor.addCenters(makeCentros(instance.getAffiliationInfo()));
 				return autor;
 			}).
 			filter(p ->		(p != null) ).
@@ -1465,20 +1477,20 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(YES.equals(p.getValidYN())) ).
 			map(instance ->		{
 				Autor autor = new Autor();
-				autor.setTipo(Articulo.INVESTIGADOR);
+				autor.setType(AuthorType.INVESTIGATOR);
 				if (	(instance.getInitials() != null) &&
 						(StringUtils.isNotBlank(instance.getInitials().getvalue())) )
-					autor.setIniciales(		instance.getInitials().getvalue());
+					autor.setInitials(		instance.getInitials().getvalue());
 				if (	(instance.getSuffix() != null) &&
 						(StringUtils.isNotBlank(instance.getSuffix().getvalue())) )
-					autor.setSufijo(		instance.getSuffix().getvalue());
+					autor.setSuffix(		instance.getSuffix().getvalue());
 				if (	(instance.getForeName() != null) &&
 						(StringUtils.isNotBlank(instance.getForeName().getvalue())) )
-					autor.setNombre(		instance.getForeName().getvalue());
+					autor.setGivenName(		instance.getForeName().getvalue());
 				if (	(instance.getLastName() != null) &&
 						(StringUtils.isNotBlank(instance.getLastName().getvalue())) )
-					autor.setApellidos(		instance.getLastName().getvalue());
-				autor.addCentros(makeCentros(instance.getAffiliationInfo()));
+					autor.setFamilyName(		instance.getLastName().getvalue());
+				autor.addCenters(makeCentros(instance.getAffiliationInfo()));
 				return autor;
 			}).
 			filter(p ->		(p != null) ).
@@ -1500,7 +1512,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getAffiliation()))) ). 
 			map(instance ->	{
 				Centro centro = new Centro();
-				centro.setNombre(instance.getAffiliation());
+				centro.setName(instance.getAffiliation());
 				centro.addIds(	makeIds(instance.getIdentifier()));
 				return centro;
 			}).
@@ -1556,9 +1568,9 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (	(location == null) ||
 				(NO.equals(location.getValidYN()))) return null;
 
-		String tipo = location.getEIdType();
-		String path = location.getvalue();
-		return new Localizacion(tipo, path);
+		return new Localizacion(
+				Localizacion.LOCALIZATION_TYPES.get(location.getEIdType(), LocalizationType.NONE), 
+				location.getvalue());
 				
 	}
 
@@ -1685,10 +1697,10 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				(journal.getISSN() != null) )) return null;
 
 		Revista revista = new Revista();
-		revista.setTipo(			Articulo.REVISTA);
-		revista.setNombre(			journal.getTitle());
-		revista.setAbreviatura(		journal.getISOAbbreviation());
-		revista.setMedio(			(journal.getISSN() != null) ? journal.getISSN().getIssnType() : null);
+		revista.setType(			es.rcs.tfm.srv.model.Articulo.PublicationType.JOURNAL);
+		revista.setName(			journal.getTitle());
+		revista.setAbbreviation(	journal.getISOAbbreviation());
+		revista.setMedium(			Articulo.MEDIUM_TYPES.get(journal.getISSN().getIssnType(), MediumType.NONE));
 		revista.addId(				makeId(journal.getISSN()));
 		
 		return revista;
@@ -1709,11 +1721,11 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				(StringUtils.isBlank(medlineJournalInfo.getNlmUniqueID())) )) return null;
 
 		Revista revista = new Revista();
-		revista.setTipo(		Articulo.REVISTA);
-		revista.setAbreviatura(	medlineJournalInfo.getMedlineTA());
-		revista.setPais(		medlineJournalInfo.getCountry());
-		revista.addId(			makeId(Articulo.ISSN_ID_NAME, medlineJournalInfo.getISSNLinking()));
-		revista.addId(			makeId(Articulo.NLM_ID_NAME, medlineJournalInfo.getNlmUniqueID()));
+		revista.setType(			es.rcs.tfm.srv.model.Articulo.PublicationType.JOURNAL);
+		revista.setAbbreviation(	medlineJournalInfo.getMedlineTA());
+		revista.setCountry(			medlineJournalInfo.getCountry());
+		revista.addId(				makeId(IdType.ISSN, medlineJournalInfo.getISSNLinking()));
+		revista.addId(				makeId(IdType.NLM, medlineJournalInfo.getNlmUniqueID()));
 
 		return revista;
 		
@@ -1743,10 +1755,10 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 		if (journalIssue == null) return null;
 		
 		Fasciculo fasciculo = new Fasciculo();
-		fasciculo.setMedio(		journalIssue.getCitedMedium());
-		fasciculo.setVolumen(	journalIssue.getVolume());
-		fasciculo.setNumero(	journalIssue.getIssue());
-		fasciculo.setFecha( 	makeFecha(journalIssue.getPubDate()));
+		fasciculo.setMedium(	Articulo.MEDIUM_TYPES.get(journalIssue.getCitedMedium(), MediumType.NONE));
+		fasciculo.setVolume(	journalIssue.getVolume());
+		fasciculo.setNumber(	journalIssue.getIssue());
+		fasciculo.setDate( 		makeFecha(journalIssue.getPubDate()));
 		
 		return fasciculo;
 		
@@ -1775,8 +1787,8 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 				Vector<Descriptor> list = new Vector<>();
 				for (AccessionNumber number: instance.getAccessionNumberList().getAccessionNumber()) {
 					list.add(new Descriptor(
-						instance.getDataBankName(),
-						number.getvalue()));
+						OwnerType.DATABANK,
+						instance.getDataBankName() + "-" + number.getvalue()));
 				}
 				return list.stream();
 			}).
@@ -1798,7 +1810,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			filter(p ->		(p != null) &&
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> new Descriptor(
-					Descriptor.PUBMED,
+					OwnerType.PUBMED,
 					instance.getvalue())).
 			filter(p -> 	(p != null)).
 			collect(Collectors.toList());
@@ -1927,14 +1939,14 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(!p.getArticleIdList().getArticleId().isEmpty()) ). 
 			map(instance -> {
 				
-				Map<String, String> refIds = instance.getArticleIdList().getArticleId().
+				Map<IdType, String> refIds = instance.getArticleIdList().getArticleId().
 					stream().
 					filter(p -> (p != null) &&
 								(StringUtils.isNotBlank(p.getIdType())) &&
 								(StringUtils.isNotBlank(p.getvalue())) ).
 					map(id -> {
-						return new SimpleEntry<String, String>(
-									id.getIdType(),
+						return new SimpleEntry<IdType, String>(
+									Articulo.ID_TYPES.get(id.getIdType(), IdType.PUBMED),
 									id.getvalue());
 					}).
 					filter(p -> 	(p != null)).
@@ -2040,7 +2052,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 	}
 
 	/**
-	 * Establece tï¿½rminos de clase 2, 3 y 4 protocolos, dolencias y organismos
+	 * Establece términos de clase 2, 3 y 4 protocolos, dolencias y organismos
 	 * @param supplMeshList
 	 * @return
 	 */
@@ -2058,7 +2070,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			map(instance -> {
 				return new Termino(
 						TermType.SUPPLEMENTAL,
-						Termino.getSupplementalType(instance.getType()),
+						Termino.DESC_TYPES.get(instance.getType()),
 						instance.getUI(),
 						instance.getvalue());			
 			}).
@@ -2134,7 +2146,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(p.getKeyword() != null) &&
 							(!p.getKeyword().isEmpty())).
 			flatMap(list -> {
-				String tipo = list.getOwner();
+				OwnerType tipo = Articulo.OWNERS_TYPES.get(list.getOwner(), OwnerType.NLM);
 				return list.getKeyword().
 					stream().
 					filter(p ->		(p != null) &&
@@ -2166,7 +2178,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 			filter(p ->		(p != null) &&
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> {
-				return new Descriptor(Descriptor.PUBMED, instance.getvalue());
+				return new Descriptor(OwnerType.PUBMED_GENE, instance.getvalue());
 			}).
 			filter(p -> 	(p != null)).
 			collect(Collectors.toList());
@@ -2188,7 +2200,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(p.getItem() != null) &&
 							(!p.getItem().isEmpty()) ).
 			flatMap(list -> {
-				String tipo = list.getListType();
+				OwnerType tipo = Articulo.OWNERS_TYPES.get(list.getListType());
 				return list.getItem().
 					stream().
 					filter(p ->		(p != null) &&
@@ -2221,7 +2233,7 @@ public class PubmedXmlProcessor extends ArticleProcessor {
 							(StringUtils.isNotBlank(p.getvalue())) ).
 			map(instance -> {
 					return new Descriptor(
-							instance.getOwner(),
+							Articulo.OWNERS_TYPES.get(instance.getOwner(), OwnerType.NLM),
 							instance.getvalue());
 			}).
 			filter(p -> 	(p != null)).

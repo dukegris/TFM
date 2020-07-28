@@ -8,13 +8,19 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(
+		callSuper = false)
 public class Seccion {
-	String titulo;
-	String etiqueta;
-	public Seccion(String titulo, String etiqueta) {
+
+	String title;
+	String label;
+
+	public Seccion(
+			final String title,
+			final String label) {
 		super();
-		this.titulo = titulo;
-		this.etiqueta = etiqueta;
+		this.title = title;
+		this.label = label;
 	}
+
 }

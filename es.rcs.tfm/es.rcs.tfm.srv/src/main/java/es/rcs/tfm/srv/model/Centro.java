@@ -3,6 +3,7 @@ package es.rcs.tfm.srv.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.rcs.tfm.srv.model.Articulo.IdType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,13 +15,15 @@ import lombok.ToString;
 @EqualsAndHashCode(
 		callSuper = false)
 public class Centro {
-	
-	private HashMap<String, String> ids = new HashMap<String, String>();
-	private String tipo;
-	private String nombre;
 
-	public void addIds(Map<String, String> items) {
-		if ((items!= null) && (!items.isEmpty())) this.ids.putAll(items);
+	private Map<IdType, String> ids = new HashMap<>();
+	private String type;
+	private String name;
+
+	public void addIds(
+			final Map<IdType, String> items) {
+		if ((items!= null) && (!items.isEmpty()))
+			this.ids.putAll(items);
 	}
 
 }

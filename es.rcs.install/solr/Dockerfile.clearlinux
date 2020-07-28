@@ -26,7 +26,7 @@ RUN source /os-release && \
 	--path /install-root \
 	--statedir /swupd-state \
 	--no-boot-update \
-	--bundles=os-core,locales,curl,java13-runtime
+	--bundles=os-core,locales,curl,java11-basic
 
 # For some Host OS configuration with redirect_dir on,
 # extra data are saved on the upper layer when the same
@@ -63,8 +63,8 @@ ENV TZ=Europe/Madrid \
 	LANG=en_US.UTF-8
 
 # SOLR
-ENV TFM_USER="solr" \
-	TFM_GROUP="solr" \
+ENV TFM_USER="tfm" \
+	TFM_GROUP="tfm" \
 	TFM_BIN_DIR="/usr/local/solr" \
 	TFM_RUN_DIR="/run/solr" \
 	TFM_ETC_DIR="/var/etc/solr" \
@@ -100,10 +100,6 @@ ENV JAVA_HOME=/usr/lib/jvm/java-1.13.0-openjdk \
 
 ENV PATH=/usr/lib/jvm/java-1.13.0-openjdk/bin:/usr/local/solr/bin:$PATH
 
-# RUN solr start &&\
-#    solr create -c article_core -n data_driven_schema_configs -p 8983
-
 EXPOSE 8983
 VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
 CMD ["/usr/local/solr/bin/solr", "-f", "-p", "8983"]
-#CMD ["/bin/bash"]

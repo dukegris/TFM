@@ -8,20 +8,25 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(
+		callSuper = false)
 public class Permiso {
-	
-	private String pais;
-	private String agencia;
-	private String permiso;
-	private String codigo;
-	
-	public Permiso(String pais, String agencia, String permiso, String codigo) {
+
+	private String country;
+	private String agency;
+	private String grant;
+	private String code;
+
+	public Permiso(
+			final String country,
+			final String agency,
+			final String grant,
+			final String code) {
 		super();
-		this.pais = pais;
-		this.agencia = agencia;
-		this.permiso = permiso;
-		this.codigo = codigo;
+		this.country = country;
+		this.agency = agency;
+		this.grant = grant;
+		this.code = code;
 	}
 
 }

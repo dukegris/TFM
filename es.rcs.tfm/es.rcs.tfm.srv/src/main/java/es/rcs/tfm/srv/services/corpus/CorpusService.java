@@ -17,7 +17,7 @@ import es.rcs.tfm.db.model.PubFileEntity;
 import es.rcs.tfm.solr.model.PubArticleIdx;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.ArticuloBloque;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.repository.CorpusRepository;
 import es.rcs.tfm.srv.repository.DatabaseRepository;
@@ -47,8 +47,10 @@ public class CorpusService {
 	 * @return Modelo con la informacion del fichero a descargar
 	 */
 	public static Fichero download(
-			String server, int port,
-			String username, String password,
+			String server,
+			int port,
+			String username,
+			String password,
 			String sourceDirectory,
 			String dataDirectory,
 			String uncompressDirectory,
@@ -56,46 +58,46 @@ public class CorpusService {
 		
 		try {
 			
-			String sourceDir = FilenameUtils.normalize(FilenameUtils.concat(sourceDirectory, obj.getGzDirectorio()), true);
+			String sourceDir = FilenameUtils.normalize(FilenameUtils.concat(sourceDirectory, obj.getGzDirectory()), true);
 			
-			Path pathGZ = Paths.get(FilenameUtils.concat(dataDirectory, obj.getGzDirectorio()));
+			Path pathGZ = Paths.get(FilenameUtils.concat(dataDirectory, obj.getGzDirectory()));
 			CorpusRepository.makeDirectoryIfNeeded (pathGZ);
 
-			Path pathUNCOMPRESS = Paths.get(FilenameUtils.concat(uncompressDirectory, obj.getGzDirectorio()));
+			Path pathUNCOMPRESS = Paths.get(FilenameUtils.concat(uncompressDirectory, obj.getGzDirectory()));
 			CorpusRepository.makeDirectoryIfNeeded (pathUNCOMPRESS);
 			
 			boolean result = FtpRepository.download(
 					server, port,
 					username, password,
 					sourceDir,
-					obj.getGzFichero(),
+					obj.getGzFilename(),
 					pathGZ.toFile().getAbsolutePath(),
-					obj.getGzFichero());
+					obj.getGzFilename());
 			if (result && obj.isMd5()) {
 				result = FtpRepository.download(
 						server, port,
 						username, password,
 						sourceDir,
-						obj.getMd5Fichero(),
+						obj.getMd5Filename(),
 						pathGZ.toFile().getAbsolutePath(),
-						obj.getMd5Fichero());
+						obj.getMd5Filename());
 			}
 			if (result && obj.isMd5()) {
 				result = CorpusRepository.checkDownload(
 						pathGZ.toFile().getAbsolutePath(), 
-						obj.getGzFichero(), 
-						obj.getMd5Fichero());
+						obj.getGzFilename(), 
+						obj.getMd5Filename());
 			}
 			if (result) {
 				result = CorpusRepository.uncompress(
 						pathGZ.toFile().getAbsolutePath(), 
-						obj.getGzFichero(), 
+						obj.getGzFilename(), 
 						pathUNCOMPRESS.toFile().getAbsolutePath(), 
-						obj.getUncompressFichero());
+						obj.getUncompressFilename());
 			}
 			
-			obj.setHayCambiosEnDisco(result);
-			obj.setProcesoArticulosCompletado(!result);
+			obj.setChangesInDisk(result);
+			obj.setProcessCompleted(!result);
 
 		} catch (Exception ex) {
 			LOG.warn("updateDb-FILE " + obj + " EX:" + ex.getMessage());
@@ -124,9 +126,9 @@ public class CorpusService {
 		boolean fileUpdateNeeded = !CorpusRepository.checkFileAndSize(
 				Paths.get(
 						FilenameUtils.concat(dataDirectory, 
-						FilenameUtils.concat(obj.getGzDirectorio(), obj.getGzFichero()))).
+						FilenameUtils.concat(obj.getGzDirectory(), obj.getGzFilename()))).
 						toAbsolutePath().toString(),
-				obj.getGzTamanio());		
+				obj.getGzSize());		
 
 		// Buscar en la Base de datos el fichero
 		Optional<PubFileEntity> searchedDB = databaseRepository.searchFileInDB(obj);
@@ -145,22 +147,22 @@ public class CorpusService {
 		}
 
 		if (	(!dbUpdateNeeded) &&
-				(obj.getGzInstante() != null) &&
+				(obj.getGzInstant() != null) &&
 				(db.getGzTimeStamp() == null)) {
 			dbUpdateNeeded = true;
 		}
 
 		if (	(!dbUpdateNeeded) &&
-				(obj.getGzInstante() != null) &&
+				(obj.getGzInstant() != null) &&
 				(db.getGzTimeStamp() != null) &&
-				(obj.getGzInstante().compareTo(db.getGzTimeStamp()) != 0)) {
+				(obj.getGzInstant().compareTo(db.getGzTimeStamp()) != 0)) {
 			dbUpdateNeeded = true;
 		}
 
-		obj.setHayCambiosEnBD(dbUpdateNeeded);
-		obj.setHayCambiosEnDisco(fileUpdateNeeded);
-		obj.setProcesoArticulosCompletado(procesoArticulosCompletado);
-		obj.setEntidad(db);
+		obj.setChangesInDb(dbUpdateNeeded);
+		obj.setChangesInDisk(fileUpdateNeeded);
+		obj.setProcessCompleted(procesoArticulosCompletado);
+		obj.setEntity(db);
 		
 		return obj;
 
@@ -174,7 +176,8 @@ public class CorpusService {
 //	@Transactional(
 //			transactionManager = DbNames.DB_TX,
 //			propagation = Propagation.REQUIRED)
-	public Fichero updateDb(Fichero obj) {
+	public Fichero updateDb(
+			Fichero obj) {
 		
 		if (obj == null) return null;
 		return databaseRepository.updateDB(obj);
@@ -193,7 +196,8 @@ public class CorpusService {
 //	@Transactional(
 //			transactionManager = DbNames.DB_TX,
 //			propagation = Propagation.REQUIRED)
-	public Articulo calculateIfTheProcessIsNeeded(Articulo obj) {
+	public Articulo calculateIfTheProcessIsNeeded(
+			Articulo obj) {
 		
 		if (obj == null) return null;
 
@@ -201,19 +205,19 @@ public class CorpusService {
 		// Search Article in database
 		try {
 			
-			Optional<PubArticleEntity> searchedDB = Optional.ofNullable(obj.getEntidad());
+			Optional<PubArticleEntity> searchedDB = Optional.ofNullable(obj.getEntity());
 			if (!searchedDB.isPresent()) searchedDB = databaseRepository.searchArticleInDB(obj);
 			boolean dbUpdateNeeded = !searchedDB.isPresent();
 			if (searchedDB.isPresent()) {
 
 				PubArticleEntity db = searchedDB.get();
-				obj.setEntidad(db);
+				obj.setEntity(db);
 
 				// Check Articulo changes vs Database. 
 				dbUpdateNeeded = databaseRepository.anyDifferences(obj, db);
 
 			}
-			obj.setHayCambiosEnBD(dbUpdateNeeded);
+			obj.setChangesInDb(dbUpdateNeeded);
 			
 		} catch (Exception ex) {
 			LOG.warn("isProcessNeeded DB " + obj + " EX:" + ex.getMessage());
@@ -223,19 +227,19 @@ public class CorpusService {
 		// Search Article in index
 		try {
 
-			Optional<PubArticleIdx> searchedIDX = Optional.ofNullable(obj.getIndice());
+			Optional<PubArticleIdx> searchedIDX = Optional.ofNullable(obj.getIndex());
 			if (!searchedIDX.isPresent()) searchedIDX = indexRepository.searchArticuloInIdx(obj);
 			boolean idxUpdateNeeded = !searchedIDX.isPresent();
 			if (searchedIDX.isPresent()) {
 
 				PubArticleIdx idx = searchedIDX.get();
-				obj.setIndice(idx);
+				obj.setIndex(idx);
 
 				// Check Articulo changes vs Database. 
 				idxUpdateNeeded = indexRepository.anyDifferences(obj, idx);
 
 			}
-			obj.setHayCambiosEnIDX(idxUpdateNeeded);
+			obj.setChangesInIdx(idxUpdateNeeded);
 			
 		} catch (Exception ex) {
 			LOG.warn("isProcessNeeded IDX " + obj + " EX:" + ex.getMessage());
@@ -252,7 +256,8 @@ public class CorpusService {
 //	@Transactional(
 //			transactionManager = DbNames.DB_TX,
 //			propagation = Propagation.REQUIRED)
-	public Articulo updateDb(Articulo obj) {
+	public Articulo updateDb(
+			Articulo obj) {
 		
 		if (obj == null) return null;
 		return databaseRepository.updateDB(obj);
@@ -277,7 +282,8 @@ public class CorpusService {
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// BLOQUES
-	public BloqueAnotado updateDb(BloqueAnotado obj) {
+	public ArticuloBloque updateDb(
+			ArticuloBloque obj) {
 
 		if (obj == null) return null;
 		return databaseRepository.updateDB(obj);

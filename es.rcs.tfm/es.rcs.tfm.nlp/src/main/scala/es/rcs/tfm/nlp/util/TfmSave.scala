@@ -189,7 +189,8 @@ object TfmSave {
 		if (DEBUG) println(java.time.LocalTime.now + ": TFM-SAVE: BEGIN saveDsToCsv")
 
 		ds.
-			// repartition(1).
+			//repartition(1).
+      //coalesce(1).
 			write.
 			mode("overwrite").
 			format("csv").

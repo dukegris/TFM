@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
 
@@ -24,24 +23,6 @@ import es.rcs.tfm.srv.SrvException.SrvViolation;
 import es.rcs.tfm.srv.model.Articulo;
 
 public abstract class ArticleProcessor implements Iterator<Articulo>  {
-	
-	// "title", "abstract" and other passages
-	public static final Map<String, String> BLOCKS_NORMALIZE;
-	static {
-		BLOCKS_NORMALIZE = new HashMap<String, String>();
-		BLOCKS_NORMALIZE.put("t", "title");
-		BLOCKS_NORMALIZE.put("a", "abstract");
-		BLOCKS_NORMALIZE.put("title", "title");
-		BLOCKS_NORMALIZE.put("abstract", "abstract");
-	}
-
-	public static final Map<String, String> MUTATIONS_NORMALIZE;
-	static {
-		MUTATIONS_NORMALIZE = new HashMap<String, String>();
-		MUTATIONS_NORMALIZE.put("DNAMutation", "MUT_DNA");
-		MUTATIONS_NORMALIZE.put("ProteinMutation", "MUT_PRO");
-		MUTATIONS_NORMALIZE.put("SNP", "MUT_SNP");
-	}
 
 	public static SAXSource getSourceFromPath(Path path) {
 		
@@ -53,11 +34,20 @@ public abstract class ArticleProcessor implements Iterator<Articulo>  {
 		try {
 		    
 		    SAXParserFactory spf = SAXParserFactory.newInstance();
-	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
 	        spf.setNamespaceAware(true);
-	        //spf.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
+	        spf.setValidating(false);
+	        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+	        spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+	        spf.setFeature("http://xml.org/sax/features/validation", false);
 	        
-	        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+	        SAXParser parser = spf.newSAXParser();
+	        // protocols separated by comma: all,file,http,jar[:scheme]
+	        // deny se hace con ""
+	        //parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	        //parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+	        //parser.setProperty(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+	        XMLReader xmlReader = parser.getXMLReader();
 	        InputStream inputStream = new FileInputStream(path.toFile());
 	        Reader reader = new InputStreamReader(inputStream, "UTF-8");
 	        InputSource inputSource = new InputSource(reader);

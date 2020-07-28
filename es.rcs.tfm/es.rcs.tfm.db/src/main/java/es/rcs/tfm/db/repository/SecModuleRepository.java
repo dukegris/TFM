@@ -11,7 +11,6 @@ import com.querydsl.core.types.dsl.StringPath;
 
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.db.model.QSecModuleEntity;
-import es.rcs.tfm.db.model.SecFunctionEntity;
 import es.rcs.tfm.db.model.SecModuleEntity;
 
 @Repository(DbNames.DB_MOD_REP)

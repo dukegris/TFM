@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 
 import es.rcs.tfm.db.model.PubFileEntity;
+import es.rcs.tfm.srv.model.Articulo.IdType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,166 +22,143 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(
+		callSuper = false)
 public class Fichero {
-	
-	private String nombre;
-	private String tipo;
 
-	private String gzDirectorio;
-	private String gzFichero;
-	private LocalDateTime gzInstante;
-	private long gzTamanio;
+	private String filename;
+	private String type;
+
+	private String gzDirectory;
+	private String gzFilename;
+	private LocalDateTime gzInstant;
+	private long gzSize;
 
 	private boolean md5 = false;
-	private String md5Fichero;
+	private String md5Filename;
 
-	private String uncompressFichero;
-	
+	private String uncompressFilename;
+
 	private int numArticlesProcessed = 0;
 	private int numArticlesTotal = 0;
 
-	private boolean hayCambiosEnBD = false;
-	private boolean hayCambiosEnDisco = false;
-	private boolean procesoArticulosCompletado = false;
+	private boolean changesInDb = false;
+	private boolean changesInDisk = false;
+	
+	private boolean processCompleted = false;
 
-	private PubFileEntity entidad = null;
+	private PubFileEntity entity = null;
 
-	private List<Articulo> articulos;
+	private List<Articulo> articles;
 
 	public Fichero() {
 		super();
 	}
-/*	
-	public Fichero(
-			String filename, 
-			String type, 
-			String gzdirectorio,
-			String gzfilename,
-			ZonedDateTime timestamp, 
-			long size, 
-			String xmlfilename, 
-			boolean hasMd5, 
-			String md5filename) {
-		super();
-		this.nombre = filename;
-		this.tipo = type;
 
-		this.gzDirectorio = gzdirectorio;
-		this.gzFichero = gzfilename;
-		this.gzInstante = timestamp;
-		this.gzTamanio = size;
-
-		this.xmlFichero = xmlfilename;
-
-		this.tieneMd5 = hasMd5;
-		this.md5Fichero = md5filename;
-	}
-*/
 	private static Pattern PMC_PTR=Pattern.compile("PMC(\\d+)");
 	/**
-	 * Se encarga de instanciar un objeto fichero a partir de una linea 
-	 * de un fichero CSV. Necesario para la librería SFM-CSV
-	 * @param filename Ruta al fichero
-	 * @param title Título del artículo
+	 * Se encarga de instanciar un objeto fichero a partir de una linea
+	 * de un fichero CSV. Necesario para la librerï¿½a SFM-CSV
+	 * @param fullFilename Ruta al fichero
+	 * @param title Tï¿½tulo del artï¿½culo
 	 * @param pmcId Identificador en Pubmed Central
-	 * @param timestamp Fecha del artículo
-	 * @param pmid Identificador en Pubmed
+	 * @param timestamp Fecha del artï¿½culo
+	 * @param pubmed Identificador en Pubmed
 	 * @param license Tipo de licencia
 	 * @return El Fichero
 	 */
 	public static Fichero of(
-			String filename,
-			String title,
-			String pmcId,
-			LocalDateTime timestamp,
-			String pmid,
-			String license) {
-		
-		Matcher m = PMC_PTR.matcher(pmcId);
+			final String fullFilename,
+			final String title,
+			final String pmcId,
+			final LocalDateTime timestamp,
+			final String pubmed,
+			final String license) {
+
+		String pmc = pmcId;
+		final Matcher m = PMC_PTR.matcher(pmcId);
 		if (m.find()) {
-			pmcId = m.group(1);
+			pmc = m.group(1);
 		}
-		
-		String gzDirectorio = FilenameUtils.getFullPath(filename);
-		String gzFilename = FilenameUtils.getName(filename);
-		String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
-		String nombre = FilenameUtils.removeExtension(uncompressFilename);
+
+		final String directory = FilenameUtils.getFullPath(fullFilename);
+		final String gzFilename = FilenameUtils.getName(fullFilename);
+		final String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
+		final String filename = FilenameUtils.removeExtension(uncompressFilename);
 
 		/*
-		ZonedDateTime gztimestamp = ZonedDateTime.ofInstant(
-				timestamp.toInstant(), 
-				ZoneId.of("UTC"));
-		*/
-		
-		Fichero fichero = new Fichero();
-		fichero.setTipo(PubFileEntity.FTP_PMC);
-		fichero.setNombre(nombre);
-		fichero.setGzDirectorio(gzDirectorio);
-		fichero.setGzFichero(gzFilename);
-		fichero.setGzInstante(timestamp);
-		fichero.setMd5(false);
-		
-		fichero.setUncompressFichero(uncompressFilename);
-		
-		HashMap<String, String> ids = new HashMap<String, String>();
-		ids.put(Articulo.PUBMED_ID_NAME, pmid);
-		ids.put(Articulo.PMC_ID_NAME, pmcId);
-		
-		Articulo articulo = new Articulo();
-		articulo.setFicheroPmc(fichero);
-		articulo.setTitulo(new Titulo(title));
-		articulo.setFicheroPmc(fichero);
-		articulo.setPmid(pmid);
+		 * ZonedDateTime gztimestamp = ZonedDateTime.ofInstant( timestamp.toInstant(),
+		 * ZoneId.of("UTC"));
+		 */
+
+		final Map<IdType, String> ids = new HashMap<>();
+		ids.put(IdType.PUBMED, pubmed);
+		ids.put(IdType.PMC, pmc);
+
+		final Fichero fichero = new Fichero();
+
+		final Articulo articulo = new Articulo();
+		articulo.setPmcFile(fichero);
+		articulo.setTitle(new Titulo(title));
+		articulo.setPmid(pubmed);
 		articulo.setIds(ids);
-		
-		fichero.articulos = new ArrayList<Articulo>();
-		fichero.articulos.add(articulo);
-		
+
+		fichero.setType(PubFileEntity.FTP_PMC);
+		fichero.setFilename(filename);
+		fichero.setGzDirectory(directory);
+		fichero.setGzFilename(gzFilename);
+		fichero.setGzInstant(timestamp);
+		fichero.setMd5(false);
+		fichero.setUncompressFilename(uncompressFilename);
+		fichero.articles = new ArrayList<Articulo>();
+		fichero.articles.add(articulo);
+
 		return fichero;
-		
+
 	}
-	
 
 	/**
-	 * Se encarga de instanciar un objeto fichero a partir de un fichero del FTP de PubMed
-	 * @param filename Ruta al fichero
-	 * @param timestamp Fecha del artículo
-	 * @param size Tamanio del articulo
+	 * Se encarga de instanciar un objeto fichero a partir de un fichero del FTP de
+	 * PubMed
+	 *
+	 * @param fullFilename  Ruta al fichero
+	 * @param timestamp Fecha del artï¿½culo
+	 * @param size      Tamanio del articulo
 	 * @return El Fichero
 	 */
 	public static Fichero getInstance(
-			String filename, 
-			Calendar timestamp, 
-			long size) {
+			final String fullFilename,
+			final Calendar timestamp,
+			final long size) {
 
-		String gzDirectorio = FilenameUtils.getFullPath(filename);
-		String gzFilename = FilenameUtils.getName(filename);
-		String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
-		String nombre = FilenameUtils.removeExtension(uncompressFilename);
-		String md5Fichero = gzFilename + ".md5";
+		final String directory = FilenameUtils.getFullPath(fullFilename);
+		final String gzFilename = FilenameUtils.getName(fullFilename);
+		final String uncompressFilename = FilenameUtils.removeExtension(gzFilename);
+		final String filename = FilenameUtils.removeExtension(uncompressFilename);
+		final String md5Filename = gzFilename + ".md5";
 
 		/*
-		ZonedDateTime gztimestamp = ZonedDateTime.ofInstant(
-				timestamp.toInstant(), 
-				ZoneId.of("UTC"));
+		 * ZonedDateTime gztimestamp = ZonedDateTime.ofInstant( timestamp.toInstant(),
+		 * ZoneId.of("UTC"));
 		 */
-		
-		Fichero fichero = new Fichero();
-		fichero.setTipo(PubFileEntity.FTP_PUBMED);
-		fichero.setNombre(nombre);
-		fichero.setGzDirectorio(gzDirectorio);
-		fichero.setGzFichero(gzFilename);
+
+		final Fichero fichero = new Fichero();
+		fichero.setType(PubFileEntity.FTP_PUBMED);
+		fichero.setFilename(filename);
+		fichero.setGzDirectory(directory);
+		fichero.setGzFilename(gzFilename);
 		if (timestamp != null) {
-			fichero.setGzInstante(LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.of("UTC")));
+			fichero.setGzInstant(LocalDateTime.ofInstant(
+					timestamp.toInstant(), 
+					ZoneId.of("UTC")));
 		}
-		fichero.setGzTamanio(size);
-		fichero.setUncompressFichero(uncompressFilename);
+		fichero.setGzSize(size);
+		fichero.setUncompressFilename(uncompressFilename);
 		fichero.setMd5(true);
-		fichero.setMd5Fichero(md5Fichero);
-		
+		fichero.setMd5Filename(md5Filename);
+
 		return fichero;
-		
+
 	}
 
 }

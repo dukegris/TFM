@@ -1,6 +1,5 @@
 package es.rcs.tfm.srv;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Paths;
@@ -11,6 +10,7 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,8 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.setup.TmBiocXmlProcessor;
-import es.rcs.tfm.srv.setup.TmVarTxtProcessor;
+import es.rcs.tfm.srv.setup.TmVarBiocProcessor;
+import es.rcs.tfm.srv.setup.TmVarPubtatorProcessor;
 
 @RunWith(
 		SpringJUnit4ClassRunner.class)
@@ -30,84 +30,103 @@ import es.rcs.tfm.srv.setup.TmVarTxtProcessor;
 		TmVarProcessorTest.class })
 public class TmVarProcessorTest {
 
-	public static final String BIOC_FILE = "../es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.BioC.xml";
-	public static final String TMVAR_FILE = "../es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.PubTator.txt";
+	public static final String[] XMLFILES = {
+			"J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.BioC.xml",
+			"J:/BioC_Java_1.0.1/xml/everything.xml",
+			"J:/BioC_Java_1.0.1/xml/everything-sentence.xml",
+			"J:/BioC_Java_1.0.1/xml/PMID-8557975-simplified-sentences.xml",
+			"J:/BioC_Java_1.0.1/xml/PMID-8557975-simplified-sentences-tokens.xml",
+			"J:/BioC_Java_1.0.1/xml/sentence.xml"};
 
-//	public static final String BIOC_FILE = "../es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.BioC.xml";
-//	public static final String TMVAR_FILE = "../es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/test.PubTator.txt";
-	
+	public static final String[] FILES = {
+			"J:/Workspace-TFM/TFM/es.rcs.tfm/es.rcs.tfm.corpus/datasets/tmVar/tmVarCorpus/train.PubTator.txt"};
+
 	@Test
 	public void checkMethod() {
 		
-		
-		List<Articulo> tmvar = StreamSupport.
-				stream(
-						Spliterators.spliteratorUnknownSize(
-								new TmVarTxtProcessor(Paths.get(TMVAR_FILE)), 
-								Spliterator.DISTINCT), 
-								false).
-				collect(Collectors.toList());
+		for (String file: FILES) {
 
-		List<Articulo> bioc = StreamSupport.
-				stream(
-						Spliterators.spliteratorUnknownSize(
-								new TmBiocXmlProcessor(Paths.get(BIOC_FILE)), 
-								Spliterator.DISTINCT), 
-								false).
-				collect(Collectors.toList());
-		
-		Set<Articulo> resultBIOC = bioc.
-				stream().
-				distinct().
-				filter(tmvar::contains).
-				collect(Collectors.toSet());
-		
-		Set<Articulo> resultTMC = tmvar.
-				stream().
-				distinct().
-				filter(bioc::contains).
-				collect(Collectors.toSet());
-
-		for (int i=0; i<5; i++) {
-			tmvar.get(i).getBlocks().forEach(b -> {
-				b.getNotes().forEach((kn, n) -> {
-					if (n.getPos().size()>1) {
-						System.out.print("DEBUG");
-					}
-					n.getPos().forEach(p -> {
-						assertEquals(n.getText(), b.getText().substring(p.getOffset(), p.getEnd()));
+			List<Articulo> tmvar = StreamSupport.
+					stream(
+							Spliterators.spliteratorUnknownSize(
+									new TmVarPubtatorProcessor(Paths.get(file)), 
+									Spliterator.DISTINCT), 
+									false).
+					collect(Collectors.toList());
+			assertNotNull(tmvar);
+			
+			Set<Articulo> resultTMC = tmvar.
+					stream().
+					distinct().
+					filter(tmvar::contains).
+					collect(Collectors.toSet());
+			assertNotNull(resultTMC);
+			
+			int size = (tmvar.size() >= 5) ? 5 : tmvar.size();
+			for (int i=0; i<size; i++) {
+				tmvar.get(i).getBlocks().forEach(b -> {
+					b.getNotes().forEach((kn, n) -> {
+						if (n.getPos().size()>1) {
+							System.out.print("DEBUG");
+						}
+						n.getPos().forEach(p -> {
+							try {
+								String str = b.getText().substring(p.getOffset(), p.getEnd());
+								if (	(StringUtils.isNotBlank(str)) &&
+										(!str.equals(n.getText()))) {
+									System.out.println("DEBUG-DIF: " + str + "\t" + n.getText());
+								}
+							} catch(Exception ex) {
+								System.out.println("DEBUG-EX: " + b.getText() + "\t" + n.getText());
+							}
+						});
 					});
 				});
-			});
-		}
+			}
 
-		for (int i=0; i<5; i++) {
-			bioc.get(i).getBlocks().forEach(b -> {
-				b.getNotes().forEach((kn, n) -> {
-					if (n.getPos().size()>1) {
-						System.out.print("DEBUG");
-					}
-					n.getPos().forEach(p -> {
-						assertEquals(n.getText(), b.getText().substring(p.getOffset(), p.getEnd()));
+		}
+		
+		for (String file: XMLFILES) {
+			
+			List<Articulo> bioc = StreamSupport.
+					stream(
+							Spliterators.spliteratorUnknownSize(
+									new TmVarBiocProcessor(Paths.get(file)), 
+									Spliterator.DISTINCT), 
+									false).
+					collect(Collectors.toList());
+			assertNotNull(bioc);
+			
+			Set<Articulo> resultBIOC = bioc.
+					stream().
+					distinct().
+					filter(bioc::contains).
+					collect(Collectors.toSet());
+			assertNotNull(resultBIOC);
+			
+			int size = (bioc.size() >= 5) ? 5 : bioc.size();
+			for (int i=0; i<size; i++) {
+				bioc.get(i).getBlocks().forEach(b -> {
+					b.getNotes().forEach((kn, n) -> {
+						if (n.getPos().size()>1) {
+							System.out.print("DEBUG");
+						}
+						n.getPos().forEach(p -> {
+							try {
+								String str = b.getText().substring(p.getOffset(), p.getEnd());
+								if (	(StringUtils.isNotBlank(str)) &&
+										(!str.equals(n.getText()))) {
+									System.out.println("DEBUG-DIF: " + str + "\t" + n.getText());
+								}
+							} catch(Exception ex) {
+								System.out.println("DEBUG-EX: " + b.getText() + "\t" + n.getText());
+							}
+						});
 					});
 				});
-			});
+			}
+
 		}
-		assertNotNull(tmvar);
-		assertNotNull(bioc);
-
-		assertNotNull(resultBIOC);
-		assertNotNull(resultTMC);
-
-		//assertEquals(resultBIOC.size(), 0);
-
-		// Para entrenamiento
-		//assertEquals(tmvar.size()-1, bioc.size());
-		//assertEquals(resultTMC.size(), 1);
-
-		// Para test
-		//assertEquals(tmvar.size(), bioc.size());
-		//assertEquals(resultTMC.size(), 0);
 		
 	}
 

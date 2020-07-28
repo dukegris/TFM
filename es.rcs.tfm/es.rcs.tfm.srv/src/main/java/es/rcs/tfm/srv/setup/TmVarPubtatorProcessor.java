@@ -10,16 +10,27 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import es.rcs.tfm.srv.model.Anotacion;
 import es.rcs.tfm.srv.model.Articulo;
-import es.rcs.tfm.srv.model.BloqueAnotado;
-import es.rcs.tfm.srv.model.Posicion;
+import es.rcs.tfm.srv.model.ArticuloBloque;
+import es.rcs.tfm.srv.model.ArticuloBloque.BlockType;
+import es.rcs.tfm.srv.model.ArticuloBloqueAnotacion;
+import es.rcs.tfm.srv.model.ArticuloBloqueAnotacion.NoteType;
+import es.rcs.tfm.srv.model.ArticuloBloquePosicion;
+import es.rcs.tfm.srv.model.Tabla;
 
-public class TmVarTxtProcessor extends ArticleProcessor {
+public class TmVarPubtatorProcessor extends ArticleProcessor {
 
 	private static final Pattern LINE_PUBTATOR_PTRN = Pattern.compile("(\\d+)[\\|\\s].*");
 	private static final Pattern TEXT_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\|([ta])\\|(.*)$");
 	private static final Pattern DATA_PUBTATOR_PTRN = Pattern.compile("^(\\d+)\\t(\\d+)\\t(\\d+)\\t(.+)[\\s\\t]+(.+)\\s+(.+)$");
+
+	private static final String ZEROES_FORMAT = "%03d";
+
+	public static final Tabla<String, BlockType> BLOCKS_NORMALIZE = new Tabla<>(BlockType.NONE, BlockType.OTHER);
+	static {
+		BLOCKS_NORMALIZE.put("t", BlockType.TITLE);
+		BLOCKS_NORMALIZE.put("a", BlockType.ABSTRACT);
+	}
 
 	private BufferedReader input = null;
 	private long totalSize = -1;
@@ -27,7 +38,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 	private boolean allOk = false;
 	private StringBuffer nextItem = new StringBuffer();
 	
-	public TmVarTxtProcessor(
+	public TmVarPubtatorProcessor(
 			Path path) {
 
 		if (	(path == null) ||
@@ -48,19 +59,10 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 	@Override
 	public boolean hasNext() {
 
-		boolean more = 
-				(this.allOk) && 
+		return	(this.allOk) && 
 				(this.input != null) && (
 				(this.readedSize < this.totalSize) ||
 				(this.nextItem.length()>0));
-		
-		/*
-		if (!more) {
-			System.out.println("MUTACIONES");
-			MarkedText.MUTATIONS.forEach((e,v) -> System.out.println ("TYPE: " + e + ": " + v));
-		}
-		 */
-		return more;
 		
 	}
 
@@ -142,8 +144,8 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 
 		Articulo result = new Articulo();
 		
-		BloqueAnotado title = null;
-		BloqueAnotado summary = null;
+		ArticuloBloque title = null;
+		ArticuloBloque summary = null;
 		int noteId = 0;
 		for (String line: str.split("\r\n")) {
 
@@ -157,24 +159,21 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 					result.setPmid(pmid);
 				}
 
-				BloqueAnotado block = null;
+				ArticuloBloque block = null;
 
 				// TITLE/ABSTRACT
-				String type = m.group(2);
-				if (	(StringUtils.isNotBlank(type))) {
+				String typeStr = m.group(2);
+				if (	(StringUtils.isNotBlank(typeStr))) {
 					boolean found = false;
-					if (ArticleProcessor.BLOCKS_NORMALIZE.containsKey(type)) {
-						if (result.containsBlockOfType(ArticleProcessor.BLOCKS_NORMALIZE.get(type))) {
-							block = result.getBlocksOfType(ArticleProcessor.BLOCKS_NORMALIZE.get(type));
+					BlockType type = BLOCKS_NORMALIZE.get(typeStr, BlockType.NONE);
+					if (!BlockType.NONE.equals(type)) {
+						block = result.getBlocksOfType(type);
+						if (block != null) {
 							found = true;
 						} else {
-							block = new BloqueAnotado();
-							block.setType(ArticleProcessor.BLOCKS_NORMALIZE.get(type));
-						};
-					} else {
-						// TIPO DE BLOQUE DESCONOCIDO. NO SABRIAMOS COMO CONTAR
-						block = new BloqueAnotado();
-						block.setType(type);
+							block = new ArticuloBloque();
+							block.setType(type);
+						}
 					}
 					
 					String text = m.group(3);
@@ -182,8 +181,8 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 					if (!found) result.addBlock(block);
 				}
 				
-				if ((block != null) && BloqueAnotado.PASSAGE_TYPE_TITLE.equals(block.getType())) title = block;
-				if ((block != null) && BloqueAnotado.PASSAGE_TYPE_ABSTRACT.equals(block.getType())) summary = block;
+				if ((block != null) && BlockType.TITLE.equals(block.getType())) title = block;
+				if ((block != null) && BlockType.ABSTRACT.equals(block.getType())) summary = block;
 				
 			}
 
@@ -197,20 +196,17 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 					result.setPmid(pmid);
 				}
 
-				Anotacion note = new Anotacion();
-				note.setId(Integer.toString(noteId));
+				ArticuloBloqueAnotacion note = new ArticuloBloqueAnotacion();
+				note.setId(String.format(ZEROES_FORMAT, noteId));
 
 				// TOKEN
 				String text = m.group(4);
 				if (StringUtils.isNotBlank(text)) note.setText(text);
 				
 				// TYPE
-				String type = m.group(5);
-				if (ArticleProcessor.MUTATIONS_NORMALIZE.containsKey(type)) {
-					note.setType(ArticleProcessor.MUTATIONS_NORMALIZE.get(type));
-				} else {
-					ArticleProcessor.MUTATIONS_NORMALIZE.put(type, type);
-				}
+				String typeStr = m.group(5);
+				NoteType type = ArticuloBloqueAnotacion.NOTE_TYPES.get(typeStr, NoteType.NONE);
+				note.setType(type);
 				
 				// STD IDENTIFIER
 				String value = m.group(6);
@@ -227,9 +223,11 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 					int titleSize = (title.getText() != null) ? title.getText().length() : 0;
 					Long size = end - start; //OJO Marca el caracter siguiente aunque sea en blanco
 					if (start < titleSize) {
-						note.addPosition(new Posicion(start.intValue(), size.intValue()));
+						note.addPosition(new ArticuloBloquePosicion(start.intValue(), size.intValue()));
 						title.setOffset(0);
-						title.addNote(String.valueOf(noteId), note);
+						title.addNote(
+								String.format(ZEROES_FORMAT, noteId), 
+								note);
 					} else {
 						// offset: Title has an offset of zero, while the other passages 
 						// (e.g., abstract) are assumed to begin after the previous passages and one space
@@ -238,7 +236,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 						summary.setOffset((title.getText() != null) ? title.getText().length() : 0);
 						
 						// El offset del abstract incluye los parrafos anteriores + 1 caracter por parrafo
-						// en tmVar solo hay un titulo, por lo que hay que restar al offset el tamaï¿½o del tï¿½tulo y uno
+						// en tmVar solo hay un titulo, por lo que hay que restar al offset el tamaño del título y uno
 						/*
 						String fortest = title.text + " " + summary.text;
 						System.out.println(
@@ -249,7 +247,7 @@ public class TmVarTxtProcessor extends ArticleProcessor {
 								" y con " +
 								summary.text.substring(start.intValue()-title.text.length()-1, start.intValue()-title.text.length()-1 + size.intValue()));
 						 */
-						note.addPosition(new Posicion(start.intValue()-titleSize-1, size.intValue()));
+						note.addPosition(new ArticuloBloquePosicion(start.intValue()-titleSize-1, size.intValue()));
 						summary.addNote(String.valueOf(noteId), note);
 					}
 

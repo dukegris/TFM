@@ -29,8 +29,10 @@ import org.nlm.mesh.SupplementalRecordSet;
 
 import es.rcs.tfm.srv.SrvException;
 import es.rcs.tfm.srv.SrvException.SrvViolation;
+import es.rcs.tfm.srv.model.Articulo.OwnerType;
 import es.rcs.tfm.srv.model.Descriptor;
 import es.rcs.tfm.srv.model.Fecha;
+import es.rcs.tfm.srv.model.Fecha.DateType;
 import es.rcs.tfm.srv.model.Termino;
 import es.rcs.tfm.srv.model.Termino.DescType;
 import es.rcs.tfm.srv.model.Termino.TermType;
@@ -91,18 +93,8 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 
 	@Override
 	public boolean hasNext() {
-
-		boolean more = index < items.size() - 1;
-
-		if (!more) {
-			System.out.println("TEXTOS");
-			ArticleProcessor.BLOCKS_NORMALIZE.forEach((e, v) -> System.out.println("BLOCK: " + e + ": " + v));
-			System.out.println("MUTACIONES");
-			ArticleProcessor.MUTATIONS_NORMALIZE.forEach((e, v) -> System.out.println("TYPE: " + e + ": " + v));
-		}
-
-		return more;
-
+		if (items == null) return false;
+		return (index < items.size() - 1);
 	}
 
 	@Override
@@ -141,13 +133,13 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 		if ((item.getQualifierName() != null) && StringUtils.isNotBlank(item.getQualifierName().getString())) {
 			obj.setValue(item.getQualifierName().getString());
 		}
-		obj.addFecha(makeFecha(Termino.FECHA_CREACION, item.getDateCreated()));
-		obj.addFecha(makeFecha(Termino.FECHA_ESTABLECIMIENTO, item.getDateEstablished()));
-		obj.addFecha(makeFecha(Termino.FECHA_REVISION, item.getDateRevised()));
+		obj.addDate(makeFecha(DateType.CREATION, item.getDateCreated()));
+		obj.addDate(makeFecha(DateType.ESTABLISH, item.getDateEstablished()));
+		obj.addDate(makeFecha(DateType.REVISION, item.getDateRevised()));
 
-		obj.addNota(makeNota(Termino.NOTA_GENERAL, item.getAnnotation()));
-		obj.addNota(makeNota(Termino.NOTA_HISTORIA, item.getHistoryNote()));
-		obj.addNota(makeNota(Termino.NOTA_ONLINE, item.getOnlineNote()));
+		obj.addNote(makeNota(OwnerType.PUBMED_NOTE, item.getAnnotation()));
+		obj.addNote(makeNota(OwnerType.HISTORY_NOTE, item.getHistoryNote()));
+		obj.addNote(makeNota(OwnerType.ONLINE_NOTE, item.getOnlineNote()));
 
 /*
 		qualifierRecordSet.getLanguageCode();
@@ -168,20 +160,19 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 		if ((item.getDescriptorName() != null) && StringUtils.isNotBlank(item.getDescriptorName().getString())) {
 			obj.setValue(item.getDescriptorName().getString());
 		}
-		obj.addFecha(makeFecha(Termino.FECHA_CREACION, item.getDateCreated()));
-		obj.addFecha(makeFecha(Termino.FECHA_ESTABLECIMIENTO, item.getDateEstablished()));
-		obj.addFecha(makeFecha(Termino.FECHA_REVISION, item.getDateRevised()));
+		obj.addDate(makeFecha(DateType.CREATION, item.getDateCreated()));
+		obj.addDate(makeFecha(DateType.ESTABLISH, item.getDateEstablished()));
+		obj.addDate(makeFecha(DateType.REVISION, item.getDateRevised()));
 
-		obj.addNota(makeNota(Termino.NOTA_GENERAL, item.getAnnotation()));
-		obj.addNota(makeNota(Termino.NOTA_HISTORIA, item.getHistoryNote()));
-		obj.addNota(makeNota(Termino.NOTA_ONLINE, item.getOnlineNote()));
-		obj.addNota(makeNota(Termino.NOTA_MESH, item.getPublicMeSHNote()));
-		obj.addNotas(makeVersiones(Termino.NOTA_VERSION, item.getPreviousIndexingList()));
+		obj.addNote(makeNota(OwnerType.PUBMED_NOTE, item.getAnnotation()));
+		obj.addNote(makeNota(OwnerType.HISTORY_NOTE, item.getHistoryNote()));
+		obj.addNote(makeNota(OwnerType.ONLINE_NOTE, item.getOnlineNote()));
+		obj.addNote(makeNota(OwnerType.MESH_NOTE, item.getPublicMeSHNote()));
+		obj.addNotes(makeVersiones(OwnerType.INDEX_NOTE, item.getPreviousIndexingList()));
 
-		obj.addNotas(makeVease(item.getSeeRelatedList()));
-		
-		obj.addSubterminos(makeFarmacologia(item.getPharmacologicalActionList()));
-		obj.addSubterminos(makeRelaciones(item.getEntryCombinationList()));
+		obj.addSubterms(makeVease(item.getSeeRelatedList()));
+		obj.addSubterms(makeFarmacologia(item.getPharmacologicalActionList()));
+		obj.addSubterms(makeRelaciones(item.getEntryCombinationList()));
 		/*
 
 		obj.addClas(makeClass(item.getDescriptorClass()));
@@ -257,16 +248,53 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 			filter(p -> 	(p != null) && 
 							(p.getDescriptorReferredTo() != null)).
 			map(instance -> {
+				String code = instance.getDescriptorReferredTo().getDescriptorUI();
+				String value = null;
+				if (	(instance.getDescriptorReferredTo() != null) &&
+						(StringUtils.isNotBlank(instance.getDescriptorReferredTo().getDescriptorName().getString()))) {
+					value = instance.getDescriptorReferredTo().getDescriptorName().getString();
+				}
 				return new Termino(
 						TermType.DESCRIPTOR,
 						DescType.CHEMICAL,
-						instance.getDescriptorReferredTo().getDescriptorUI(),
-						instance.getDescriptorReferredTo().getDescriptorName().getString());
+						code, 
+						value);
 			}).
 			filter(p -> 	(p != null)).
 			collect(Collectors.toList());
 
 		return result;
+	}
+
+	private List<Termino> makeVease(SeeRelatedList list) {
+
+		if (	(list == null) || 
+				(list.getSeeRelatedDescriptor() == null) || 
+				(list.getSeeRelatedDescriptor().isEmpty())) return null;
+
+		List<Termino> result = list.
+			getSeeRelatedDescriptor().
+			stream().
+			filter(p -> 	(p != null) && 
+							(p.getDescriptorReferredTo() != null)).
+			map(instance -> {
+				String code = instance.getDescriptorReferredTo().getDescriptorUI();
+				String value = null;
+				if (	(instance.getDescriptorReferredTo() != null) &&
+						(StringUtils.isNotBlank(instance.getDescriptorReferredTo().getDescriptorName().getString()))) {
+					value = instance.getDescriptorReferredTo().getDescriptorName().getString();
+				}
+				return new Termino(
+						TermType.DESCRIPTOR,
+						DescType.RELATED,
+						code, 
+						value);
+			}).
+			filter(p -> 	(p != null)).
+			collect(Collectors.toList());
+
+		return result;
+
 	}
 
 	private List<Termino> makeRelaciones(EntryCombinationList list) {
@@ -284,51 +312,67 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 							).
 			flatMap(instance -> {
 				List<Termino> items = new ArrayList<>();
-				String key = null;
+				String code = null;
 				String value = null;
 				
 				if (	(instance.getECIN() != null) &&
 						(instance.getECIN().getDescriptorReferredTo() != null) &&
 						(instance.getECIN().getDescriptorReferredTo().getDescriptorUI() != null)) {
-					key = instance.getECIN().getDescriptorReferredTo().getDescriptorUI();
+					code = instance.getECIN().getDescriptorReferredTo().getDescriptorUI();
 					value = null;
 					if (	(StringUtils.isNotBlank(instance.getECIN().getDescriptorReferredTo().getDescriptorName().getString()))) {
 						value = instance.getECIN().getDescriptorReferredTo().getDescriptorName().getString();
 					}
-					items.add(new Termino(TermType.DESCRIPTOR, DescType.ECIN, key, value)); 
+					items.add(new Termino(
+							TermType.DESCRIPTOR, 
+							DescType.ECIN, 
+							code, 
+							value)); 
 				}
 
 				if (	(instance.getECIN() != null) &&
 						(instance.getECIN().getQualifierReferredTo() != null) &&
 						(instance.getECIN().getQualifierReferredTo().getQualifierUI() != null)) {
-					key = instance.getECIN().getQualifierReferredTo().getQualifierUI();
+					code = instance.getECIN().getQualifierReferredTo().getQualifierUI();
 					value = null;
 					if (	(StringUtils.isNotBlank(instance.getECIN().getQualifierReferredTo().getQualifierName().getString()))) {
 						value = instance.getECIN().getQualifierReferredTo().getQualifierName().getString();
 					}
-					items.add(new Termino(TermType.QUALIFIER, DescType.ECIN, key, value)); 
+					items.add(new Termino(
+							TermType.QUALIFIER, 
+							DescType.ECIN, 
+							code, 
+							value)); 
 				}
 				
 				if (	(instance.getECIN() != null) &&
 						(instance.getECIN().getDescriptorReferredTo() != null) &&
 						(instance.getECIN().getDescriptorReferredTo().getDescriptorUI() != null)) {
-					key = instance.getECIN().getDescriptorReferredTo().getDescriptorUI();
+					code = instance.getECIN().getDescriptorReferredTo().getDescriptorUI();
 					value = null;
 					if (	(StringUtils.isNotBlank(instance.getECIN().getDescriptorReferredTo().getDescriptorName().getString()))) {
 						value = instance.getECIN().getDescriptorReferredTo().getDescriptorName().getString();
 					}
-					items.add(new Termino(TermType.DESCRIPTOR, DescType.ECOUT, key, value)); 
+					items.add(new Termino(
+							TermType.DESCRIPTOR, 
+							DescType.ECOUT, 
+							code, 
+							value)); 
 				}
 
 				if (	(instance.getECIN() != null) &&
 						(instance.getECIN().getQualifierReferredTo() != null) &&
 						(instance.getECIN().getQualifierReferredTo().getQualifierUI() != null)) {
-					key = instance.getECIN().getQualifierReferredTo().getQualifierUI();
+					code = instance.getECIN().getQualifierReferredTo().getQualifierUI();
 					value = null;
 					if (	(StringUtils.isNotBlank(instance.getECIN().getQualifierReferredTo().getQualifierName().getString()))) {
 						value = instance.getECIN().getQualifierReferredTo().getQualifierName().getString();
 					}
-					items.add(new Termino(TermType.QUALIFIER, DescType.ECOUT, key, value)); 
+					items.add(new Termino(
+							TermType.QUALIFIER, 
+							DescType.ECOUT, 
+							code, 
+							value)); 
 				}
 
 				return items.stream();
@@ -340,34 +384,7 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 
 	}
 
-	private List<Descriptor> makeVease(SeeRelatedList list) {
-
-		if (	(list == null) || 
-				(list.getSeeRelatedDescriptor() == null) || 
-				(list.getSeeRelatedDescriptor().isEmpty())) return null;
-
-		List<Descriptor> result = list.
-			getSeeRelatedDescriptor().
-			stream().
-			filter(p -> 	(p != null) && 
-							(p.getDescriptorReferredTo() != null)).
-			map(instance -> {
-				String key = instance.getDescriptorReferredTo().getDescriptorUI();
-				String value = null;
-				if (	(instance.getDescriptorReferredTo() != null) &&
-						(StringUtils.isNotBlank(instance.getDescriptorReferredTo().getDescriptorName().getString()))) {
-							value = instance.getDescriptorReferredTo().getDescriptorName().getString();
-						}
-				return new Descriptor(key, value);
-			}).
-			filter(p -> 	(p != null)).
-			collect(Collectors.toList());
-
-		return result;
-
-	}
-
-	private List<Descriptor> makeVersiones(String type, PreviousIndexingList list) {
+	private List<Descriptor> makeVersiones(OwnerType type, PreviousIndexingList list) {
 
 		if (	(list == null) || 
 				(list.getPreviousIndexing() == null) || 
@@ -386,17 +403,18 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 
 	}
 
-	private Descriptor makeNota(String key, String value) {
+	private Descriptor makeNota(OwnerType owner, String value) {
 
-		if (	(StringUtils.isNotBlank(key))  ||
+		if (	(owner == null)  ||
+				(OwnerType.NONE.equals(owner))  ||
 				(StringUtils.isNotBlank(value))) {
 			return null; 
 		}
-		return new Descriptor(key, value);
+		return new Descriptor(owner, value);
 		
 	}
 
-	private Fecha makeFecha(String type, DateRevised date) {
+	private Fecha makeFecha(DateType type, DateRevised date) {
 		
 		if (date == null) return null;
 
@@ -419,7 +437,7 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 
 	}
 
-	private Fecha makeFecha(String type, DateEstablished date) {
+	private Fecha makeFecha(DateType type, DateEstablished date) {
 		
 		if (date == null) return null;
 
@@ -442,7 +460,7 @@ public class MeshXmlProcessor implements Iterator<Termino> {
 
 	}
 
-	private Fecha makeFecha(String type, DateCreated date) {
+	private Fecha makeFecha(DateType type, DateCreated date) {
 		
 		if (date == null) return null;
 

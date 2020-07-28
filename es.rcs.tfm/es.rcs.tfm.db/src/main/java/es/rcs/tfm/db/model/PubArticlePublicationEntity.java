@@ -65,7 +65,7 @@ public class PubArticlePublicationEntity {
 
 	public static final String RES_EDITIONTYPE		= "type";
 	public static final String RES_VOLUME			= "name";
-	public static final String RES_MEDIA			= "media";
+	public static final String RES_MEDIA_TYPE		= "mediaType";
 	public static final String RES_NUMBER			= "number";
 	public static final String RES_DATETYPE			= "dateType";
 	public static final String RES_DATE				= "date";
@@ -85,7 +85,7 @@ public class PubArticlePublicationEntity {
 
 	public static final String DB_EDITIONTYPE		= "jou_typ";
 	public static final String DB_VOLUME			= "jou_txt";
-	public static final String DB_MEDIA				= "jou_med";
+	public static final String DB_MEDIA_TYPE		= "jou_med";
 	public static final String DB_NUMBER			= "jou_num";
 	public static final String DB_DATETYPE			= "jou_dty";
 	public static final String DB_DATE				= "jou_dat";
@@ -141,17 +141,17 @@ public class PubArticlePublicationEntity {
 
 	
 	@JsonProperty(
-			value = RES_MEDIA,
+			value = RES_MEDIA_TYPE,
 			required = false)
 	@Column(
-			name = DB_MEDIA, 
+			name = DB_MEDIA_TYPE, 
 			unique = false,
 			nullable = true, 
-			length = 32)
+			length = 128)
 	@Size(
-			max = 32, 
-			message = "El tipo de soporte no puede sobrepasar los {max} caracteres.")
-	private String media;
+			max = 128, 
+			message = "El tipo de medio no puede sobrepasar los {max} caracteres.")
+	public String mediaType;
 
 	
 	@JsonProperty(

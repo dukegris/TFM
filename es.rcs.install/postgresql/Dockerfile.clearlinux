@@ -49,8 +49,8 @@ ENV TZ=Europe/Madrid \
 	LC_ALL=en_US.UTF-8 \
 	LANG=en_US.UTF-8
 	
-ENV TFM_USER="postgresql" \
-	TFM_GROUP="postgresql" \
+ENV TFM_USER="tfm" \
+	TFM_GROUP="tfm" \
 	TFM_BIN_DIR="/usr/bin" \
 	TFM_RUN_DIR="/run/postgresql" \
 	TFM_ETC_DIR="/var/lib/postgresql" \
@@ -107,8 +107,10 @@ RUN	set PGDATA=${TFM_METADATA_DIR} &&\
 # RUN echo "default_tablespace = 'tfm_tbl'" >> $TFM_ETC_DIR/postgresql.conf
 # RUN echo "search_path = '\"$user\",tfm'" >> $TFM_ETC_DIR/postgresql.conf
 
+#COPY docker-entrypoint.sh /usr/local/bin/
+#RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+#ENTRYPOINT ["docker-entrypoint.sh"]
+
 EXPOSE 5432
 VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
 CMD ["/usr/bin/postgres", "-D", "/var/lib/postgresql", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]
-
-#CMD ["/bin/bash"]

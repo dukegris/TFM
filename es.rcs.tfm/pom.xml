@@ -784,6 +784,20 @@
 			<version>${crnk.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		 -->
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-data-jpa</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
 			<artifactId>crnk-format</artifactId>
@@ -804,13 +818,13 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-meta</artifactId>
-			<version>${crnk.version}</version>
+			<artifactId>crnk-jpa</artifactId>
+			<version>2.11.20190113153635</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-security</artifactId>
+			<artifactId>crnk-meta</artifactId>
 			<version>${crnk.version}</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -828,33 +842,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-validation</artifactId>
-			<version>${crnk.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-data</artifactId>
-			<version>${crnk.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		 -->
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-data-jpa</artifactId>
-			<version>${crnk.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-jpa</artifactId>
-			<version>2.11.20190113153635</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-setup</artifactId>
+			<artifactId>crnk-security</artifactId>
 			<version>${crnk.version}</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -866,7 +854,31 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
 			<artifactId>crnk-setup-servlet</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring-boot1</artifactId>
+			<version>${crnk.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring-boot2</artifactId>
 			<version>${crnk.version}</version>
 			<scope>runtime</scope>
 		</dependency>
@@ -878,16 +890,11 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-setup-spring</artifactId>
+			<artifactId>crnk-validation</artifactId>
 			<version>${crnk.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
-			<artifactId>crnk-setup-spring-boot2</artifactId>
-			<version>${crnk.version}</version>
-			<scope>runtime</scope>
-		</dependency>
+
 		
 		<!-- DSL -->
 		<dependency>
@@ -1112,6 +1119,12 @@
 			<scope>runtime</scope>
 		</dependency>
 		<!-- SPARK -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-catalyst_${scala.main}</artifactId>
+			<version>${spark.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_${scala.main}</artifactId>

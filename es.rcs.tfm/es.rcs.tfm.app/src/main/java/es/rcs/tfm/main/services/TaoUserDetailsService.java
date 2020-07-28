@@ -95,7 +95,7 @@ public class TaoUserDetailsService implements UserDetailsService {
 
 	}
 	
-	private UserDetails getDetails(SecUserEntity user) {
+	public UserDetails getDetails(SecUserEntity user) {
 		
 		if (user == null) {
 			if (LOG.isInfoEnabled())

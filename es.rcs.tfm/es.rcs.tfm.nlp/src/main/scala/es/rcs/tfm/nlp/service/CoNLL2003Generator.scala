@@ -156,7 +156,8 @@ class CoNLL2003Generator(spark: SparkSession) {
 									))
 
 							// Nos quedamos con la primera anotacion encontrada y si la marcacion esta en varios token se pone
-							// en que apartado del IOB estamos B- I- E-
+							// en que apartado del IOB estamos B- I-
+							// This tagging scheme is the IOB scheme originally put forward by Ramshaw and Marcus (1995). 
 							// los datos de NER y los de substring de java funcionan diferentes ya que el rango en ner incluye al ultimo caracter:
 							// A11470C NNP O "(734,740) - (734,741)
 							if ((iob != null) && (iob.size > 0) && (iob(0)._4 != null) && (iob(0)._4.size > 0)) {
@@ -237,6 +238,7 @@ class CoNLL2003Generator(spark: SparkSession) {
 			// conll._8 -> enc si se ha encontrado una mutacion
 			// conll._9 -> numNotas
 
+		// CONLL2003: the word, its partof-speech tag, its chunk tag and its named entity tag
 		TfmSave.saveDsToCsv(ds = conll.select("_1", "_2", "_3", "_5"), sep = " ", targetFile = outputPath)
 		TfmSave.saveDsToCsv(ds = conll, sep = " ", targetFile = outputPath+".all")
 

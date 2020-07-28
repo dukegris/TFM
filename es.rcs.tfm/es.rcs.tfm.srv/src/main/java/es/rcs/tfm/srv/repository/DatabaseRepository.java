@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,13 +65,21 @@ import es.rcs.tfm.db.repository.PubReferenceRepository;
 import es.rcs.tfm.db.repository.PubTermRepository;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.model.Articulo;
+import es.rcs.tfm.srv.model.Articulo.IdType;
+import es.rcs.tfm.srv.model.Articulo.MediumType;
+import es.rcs.tfm.srv.model.Articulo.OwnerType;
+import es.rcs.tfm.srv.model.Articulo.PublicationType;
+import es.rcs.tfm.srv.model.Articulo.StatusType;
+import es.rcs.tfm.srv.model.ArticuloBloque.BlockType;
+import es.rcs.tfm.srv.model.ArticuloBloque;
 import es.rcs.tfm.srv.model.Autor;
-import es.rcs.tfm.srv.model.BloqueAnotado;
+import es.rcs.tfm.srv.model.Autor.AuthorType;
 import es.rcs.tfm.srv.model.Centro;
 import es.rcs.tfm.srv.model.Fasciculo;
 import es.rcs.tfm.srv.model.Fichero;
 import es.rcs.tfm.srv.model.Libro;
 import es.rcs.tfm.srv.model.Localizacion;
+import es.rcs.tfm.srv.model.Localizacion.LocalizationType;
 import es.rcs.tfm.srv.model.Referencia;
 import es.rcs.tfm.srv.model.Revista;
 import es.rcs.tfm.srv.model.Termino;
@@ -96,62 +102,16 @@ public class DatabaseRepository {
 	private static int NUMBER = 0;
 	private static LocalTime START_DATETIME = LocalTime.now();
 	private static Vector<Duration> STATS = new Vector<>();
-	private static final Map<String, String> STATUS = new HashMap<>();
-	private static final Map<String, String> MEDIA = new HashMap<>();
 	private static final Map<String, String> LANGUAGE = new HashMap<>();
-	private static final Map<String, String> DATE = new HashMap<>();
 	private static final Map<String, String> CATEGORY= new HashMap<>();
 
 	public static final Map<ProviderType, String> TERM_PRVDR = new HashMap<>();
 	public static final Map<TermType, String> TERM_TERM = new HashMap<>();
 	public static final Map<DescType, String> TERM_DESC = new HashMap<>();
 	static {
-		/*
-	private String estado; // Completed | In-Process | PubMed-not-MEDLINE | In-Data-Review | Publisher | MEDLINE | OLDMEDLINE
-	private Map<String, String> ids = new HashMap<String, String>(); // NASA | KIE | PIP | POP | ARPL | CPC | IND | CPFH | CLML | NRCBL | NLM | QCIM
-	private List<Autor> autores = new ArrayList<Autor>(); // 	investigators | authors | editors
-		 */
-		// https://dtd.nlm.nih.gov/ncbi/pubmed/att-PubStatus.html
-		STATUS.put(		"RECEIVED",				"RECIBIDO");
-		STATUS.put(		"ACCEPTED", 			"ACEPTADO");
-		STATUS.put(		"REVISED", 				"REVISADO");
-		STATUS.put(		"RETRACTED", 			"RETIRADO");
-
-		STATUS.put(		"PPUBLISH",				"EN ELECTRONICO");
-		STATUS.put(		"AHEADOFPRINT", 		"DISPONIBLE");
-
-		STATUS.put(		"ECOLLECTION", 			"ECOLLECTION");
-		STATUS.put(		"EPUBLISH", 			"EN PAPEL");
-		
-		STATUS.put(		"PMC", 					"PMC");
-		STATUS.put(		"PMCR", 				"PMCR");
-		STATUS.put(		"PMC-RELEASE", 			"PMC-RELEASE");
-			
-		STATUS.put(		"PUBMED", 				"PUBMED");
-		STATUS.put(		"PUBMEDR", 				"PUBMEDR");
-		
-		STATUS.put(		"PREMEDLINE", 			"PREMEDLINE");
-		STATUS.put(		"MEDLINE", 				"MEDLINE");
-		STATUS.put(		"MEDLINER", 			"MEDLINER");
-		
-		STATUS.put(		"ENTREZ", 				"ENTREZ");
-		
-		MEDIA.put(		"INTERNET",				"INTERNET");
-		MEDIA.put(		"PRINT",				"PAPEL");
-		MEDIA.put(		"PRINT-ELECTRONIC",		"PAPEL Y ELECTRONICO");
-		MEDIA.put(		"ELECTRONIC",			"ELECTRONICO");
-		MEDIA.put(		"ELECTRONIC-PRINT",		"IMPRESO DE ELECTRONICO");
-		MEDIA.put(		"ELECTRONIC-ECOLLECTION",	"COLECCION ELECTRONICA");
 		
 		// https://www.loc.gov/marc/languages/language_code.html
 		LANGUAGE.put(	"ENG",					"en");
-		
-		DATE.put(		"ACCEPTED",				"ACEPTADO");
-		DATE.put(		"REVISED",				"REVISADO");
-		DATE.put(		"RECEIVED",				"RECIBIDO");
-		DATE.put(		"PUBMED",				"EN PUBMED");
-		DATE.put(		"MEDLINE",				"EN MEDLINE");
-		DATE.put(		"ENTREZ",				"EN ENTREZ");
 
 		// 	En abstract: NlmCategory (BACKGROUND|OBJECTIVE|METHODS|RESULTS|CONCLUSIONS|UNASSIGNED) #IMPLIED
 		CATEGORY.put(	"BACKGROUND",			"BACKGROUND");
@@ -161,6 +121,7 @@ public class DatabaseRepository {
 		CATEGORY.put(	"CONCLUSIONS",			"CONCLUSIONS");
 		CATEGORY.put(	"UNASSIGNED", 			"UNASSIGNED");
 
+		/*
 		TERM_PRVDR.put(	ProviderType.MESH, 		"MESH");
 
 		TERM_TERM.put(	TermType.DESCRIPTOR, 	"DESCRIPTOR");
@@ -176,6 +137,7 @@ public class DatabaseRepository {
 		TERM_DESC.put(	DescType.PUBLICATION,	"PUBLICATION");
 		TERM_DESC.put(	DescType.ECIN,			"ECIN");
 		TERM_DESC.put(	DescType.ECOUT,			"ECOUT");
+		 */
 		
 	}
 	private static final String get(Map<String, String> map, String key) {
@@ -196,18 +158,8 @@ public class DatabaseRepository {
 		String result = StringUtils.abbreviate(byteBuffer.toString(), 2046);
 		return result;
 	}
-	private static final String getDateTypeField(String key) {
-		return get(DATE, key);
-	}
 	private static final String getLanguageField(String key) {
 		return get(LANGUAGE, key);
-	}
-	private static final String getMediaField(String key) {
-		return get(MEDIA, key);
-	}
-
-	private static final String getStatusField(String key) {
-		return get(STATUS, key);
 	}
 	
 	public static void saveStats(int FILE_ID) {
@@ -235,11 +187,11 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getPropietario(), destination.getOwner())) result = true;
 		if (!result && !StringUtils.equals(source.getPmid(), destination.getPmid())) result = true;
-		if (!result && !StringUtils.equals(getLanguageField(source.getIdioma()),destination.getLanguage())) result = true;
-		if (!result && !StringUtils.equals(getStatusField(source.getEstado()), destination.getStatus())) result = true;
-		if (!result && !StringUtils.equals(getMediaField(source.getMedio()), destination.getMediaType())) result = true;
+		if (!result && !StringUtils.equals(getLanguageField(source.getLanguage()),destination.getLanguage())) result = true;
+		if (!result && (source.getOwner() != null) && (destination.getOwner() != null) && (!source.getOwner().toString().equals(destination.getOwner()))) result = true;
+		if (!result && (source.getStatus() != null) && (destination.getStatus() != null) && (!source.getStatus().toString().equals(destination.getStatus()))) result = true;
+		if (!result && (source.getMedium() != null) && (destination.getMediaType() != null) && (!source.getMedium().toString().equals(destination.getMediaType()))) result = true;
 		if (!result && !StringUtils.equals(source.generateTitle(), destination.getTitle())) result = true;
 
 		return result;
@@ -266,10 +218,10 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getIniciales(), destination.getInitials())) result = true;
-		if (!result && !StringUtils.equals(source.getNombre(), destination.getName())) result = true;
-		if (!result && !StringUtils.equals(source.getSufijo(), destination.getSuffix())) result = true;
-		if (!result && !StringUtils.equals(source.getApellidos(), destination.getLastName())) result = true;
+		if (!result && !StringUtils.equals(source.getInitials(), destination.getInitials())) result = true;
+		if (!result && !StringUtils.equals(source.getGivenName(), destination.getName())) result = true;
+		if (!result && !StringUtils.equals(source.getSuffix(), destination.getSuffix())) result = true;
+		if (!result && !StringUtils.equals(source.getFamilyName(), destination.getLastName())) result = true;
 		
 		return result;
 		
@@ -297,8 +249,8 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getTipo(), destination.getCentretype())) result = true;
-		if (!result && !StringUtils.equals(getCentreName(source.getNombre()), destination.getName())) result = true;
+		if (!result && !StringUtils.equals(source.getType(), destination.getCentretype())) result = true;
+		if (!result && !StringUtils.equals(getCentreName(source.getName()), destination.getName())) result = true;
 
 		return result;
 		
@@ -311,14 +263,13 @@ public class DatabaseRepository {
 
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getMedio(), destination.getMedia())) result = true;
-		if (!result && !StringUtils.equals(source.getNumero(), destination.getNumber())) result = true;
-		if (!result && !StringUtils.equals(source.getTipo(), destination.getType())) result = true;
-		if (!result && !StringUtils.equals(source.getVolumen(), destination.getVolume())) result = true;
-		if (source.getFecha() != null) {
-			if (!result && (source.getFecha().getFecha() != null) && (!source.getFecha().getFecha().isEqual(destination.getDate()))) result = true;
+		if (!result && !StringUtils.equals(source.getNumber(), destination.getNumber())) result = true;
+		if (!result && !StringUtils.equals(source.getVolume(), destination.getVolume())) result = true;
+		if (!result && (source.getMedium() != null) && (destination.getMediaType() != null) && (!source.getMedium().toString().equals(destination.getMediaType()))) result = true;
+		if (source.getDate() != null) {
+			if (!result && (source.getDate().getDate() != null) && (!source.getDate().getDate().isEqual(destination.getDate()))) result = true;
 			try {
-				if (!result && (source.getFecha().getAnio() != null) && (Integer.parseInt(source.getFecha().getAnio()) != destination.getYear())) result = true;
+				if (!result && (source.getDate().getYear() != null) && (Integer.parseInt(source.getDate().getYear()) != destination.getYear())) result = true;
 			} catch (Exception ex) {}
 		}
 
@@ -333,16 +284,16 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getTipo(), destination.getSource())) result = true;
-		if (!result && !StringUtils.equals(source.getNombre(), destination.getFileName())) result = true;
-		if (!result && !StringUtils.equals(source.getGzDirectorio(), destination.getGzDirectory())) result = true;
-		if (!result && !StringUtils.equals(source.getGzFichero(), destination.getGzFileName())) result = true;
-		if (!result && !StringUtils.equals(source.getMd5Fichero(), destination.getMd5FileName())) result = true;
-		if (!result && !StringUtils.equals(source.getUncompressFichero(), destination.getUncompressedFileName())) result = true;
-		if (!result && (source.getGzInstante() != null) && source.getGzInstante().equals(destination.getGzTimeStamp())) result = true;
+		if (!result && !StringUtils.equals(source.getType(), destination.getSource())) result = true;
+		if (!result && !StringUtils.equals(source.getFilename(), destination.getFileName())) result = true;
+		if (!result && !StringUtils.equals(source.getGzDirectory(), destination.getGzDirectory())) result = true;
+		if (!result && !StringUtils.equals(source.getGzFilename(), destination.getGzFileName())) result = true;
+		if (!result && !StringUtils.equals(source.getMd5Filename(), destination.getMd5FileName())) result = true;
+		if (!result && !StringUtils.equals(source.getUncompressFilename(), destination.getUncompressedFileName())) result = true;
+		if (!result && (source.getGzInstant() != null) && source.getGzInstant().equals(destination.getGzTimeStamp())) result = true;
 		if (!result && (source.getNumArticlesProcessed() != destination.getNumArticlesProcessed())) result = true;
 		if (!result && (source.getNumArticlesTotal() != destination.getNumArticlesTotal())) result = true;
-		if (!result && source.isProcesoArticulosCompletado() && !PubFileEntity.PROCESSED.equals(destination.getStatus())) result = true;
+		if (!result && source.isProcessCompleted() && !PubFileEntity.PROCESSED.equals(destination.getStatus())) result = true;
 
 		return result;
 		
@@ -355,12 +306,12 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(getMediaField(source.getMedio()),destination.getMedia())) result = true;
-		if (!result && !StringUtils.equals(source.getEdicion(), destination.getEditionTitle())) result = true;
+		if (!result && !StringUtils.equals(source.getEdition(), destination.getEditionTitle())) result = true;
 		if (!result && !StringUtils.equals(source.getEditor(), destination.getEditionEditor())) result = true;
-		if (!result && !StringUtils.equals(source.getCiudad(), destination.getEditionCity())) result = true;
-		if (!result && !StringUtils.equals(source.getVolumen(), destination.getVolume())) result = true;
-		if (!result && !StringUtils.equals(source.getTituloVolumen(), destination.getVolumeTitle())) result = true;
+		if (!result && !StringUtils.equals(source.getCity(), destination.getEditionCity())) result = true;
+		if (!result && !StringUtils.equals(source.getVolume(), destination.getVolume())) result = true;
+		if (!result && !StringUtils.equals(source.getVolumeTitle(), destination.getVolumeTitle())) result = true;
+		if (!result && (source.getMedium() != null) && (destination.getMediaType() != null) && (!source.getMedium().toString().equals(destination.getMediaType()))) result = true;
 		// TODO Title
 
 		return result;
@@ -388,11 +339,11 @@ public class DatabaseRepository {
 		
 		boolean result = false;
 		if (destination.getId() == null) result = true;
-		if (!result && !StringUtils.equals(source.getAbreviatura(), destination.getAbbreviation())) result = true;
-		if (!result && !StringUtils.equals(getMediaField(source.getMedio()), destination.getMedia())) result = true;
-		if (!result && !StringUtils.equals(source.getPais(), destination.getCountry())) result = true;
-		if (!result && !StringUtils.equals(source.getTipo(), destination.getType())) result = true;
-		if (!result && !StringUtils.equals(source.getNombre(), destination.getTitle())) result = true;
+		if (!result && !StringUtils.equals(source.getAbbreviation(), destination.getAbbreviation())) result = true;
+		if (!result && !StringUtils.equals(source.getCountry(), destination.getCountry())) result = true;
+		if (!result && !StringUtils.equals(source.getName(), destination.getTitle())) result = true;
+		if (!result && (source.getType() != null) && (destination.getType() != null) && (!source.getType().toString().equals(destination.getType()))) result = true;
+		if (!result && (source.getMedium() != null) && (destination.getMediaType() != null) && (!source.getMedium().toString().equals(destination.getMediaType()))) result = true;
 
 		return result;
 
@@ -422,11 +373,11 @@ public class DatabaseRepository {
 		if (	(source == null) || 
 				(destination == null)) return null;
 		
-		if (StringUtils.isNotBlank(source.getPropietario())) destination.setOwner(source.getPropietario());
 		if (StringUtils.isNotBlank(source.getPmid())) destination.setPmid(source.getPmid());
-		if (StringUtils.isNotBlank(source.getEstado())) destination.setStatus(getStatusField(source.getEstado()));
-		if (StringUtils.isNotBlank(source.getIdioma())) destination.setLanguage(getLanguageField(source.getIdioma()));
-		if (StringUtils.isNotBlank(source.getMedio())) destination.setMediaType(getMediaField(source.getMedio()));
+		if (StringUtils.isNotBlank(source.getLanguage())) destination.setLanguage(getLanguageField(source.getLanguage()));
+		if ((source.getOwner() != null) && !(OwnerType.NONE.equals(source.getOwner()))) destination.setOwner(source.getOwner().toString());
+		if ((source.getStatus() != null) && !(StatusType.NONE.equals(source.getStatus()))) destination.setStatus(source.getStatus().toString());
+		if ((source.getMedium() != null) && !(MediumType.NONE.equals(source.getMedium()))) destination.setMediaType(source.getMedium().toString());
 
 		String str = source.generateTitle();
 		if (StringUtils.isNotBlank(str)) destination.setTitle(str);
@@ -441,46 +392,46 @@ public class DatabaseRepository {
 				(destination == null)) return null;
 
 		destination.setType(PubPublicationEntity.BOOK_TYPE);
-		if (StringUtils.isNotBlank(source.getMedio())) destination.setMedia(getMediaField(source.getMedio()));
-		if (StringUtils.isNotBlank(source.getEdicion())) destination.setEditionTitle(source.getEdicion());
+		if (StringUtils.isNotBlank(source.getEdition())) destination.setEditionTitle(source.getEdition());
 		if (StringUtils.isNotBlank(source.getEditor())) destination.setEditionEditor(source.getEditor());
-		if (StringUtils.isNotBlank(source.getCiudad())) destination.setEditionCity(source.getCiudad());
-		if (StringUtils.isNotBlank(source.getVolumen())) destination.setVolume(source.getVolumen());
-		if (StringUtils.isNotBlank(source.getTituloVolumen())) destination.setVolumeTitle(source.getTituloVolumen());
+		if (StringUtils.isNotBlank(source.getCity())) destination.setEditionCity(source.getCity());
+		if (StringUtils.isNotBlank(source.getVolume())) destination.setVolume(source.getVolume());
+		if (StringUtils.isNotBlank(source.getVolumeTitle())) destination.setVolumeTitle(source.getVolumeTitle());
+		if ((source.getMedium() != null) && !(MediumType.NONE.equals(source.getMedium()))) destination.setMediaType(source.getMedium().toString());
 
-		if (source.getTitulo() != null) {
+		if (source.getTitle() != null) {
 			//TODO
-			if (StringUtils.isNotBlank(source.getTitulo().getLibroId())) { 
-				System.out.print(" LB-" + source.getTitulo().getLibroId());
+			if (StringUtils.isNotBlank(source.getTitle().getBookId())) { 
+				System.out.print(" LB-" + source.getTitle().getBookId());
 			}
-			if (StringUtils.isNotBlank(source.getTitulo().getParteId())) { 
-				System.out.print(" PB-" + source.getTitulo().getParteId());
+			if (StringUtils.isNotBlank(source.getTitle().getPartId())) { 
+				System.out.print(" PB-" + source.getTitle().getPartId());
 			}
-			if (StringUtils.isNotBlank(source.getTitulo().getSeccionId())) { 
-				System.out.print(" SB-" + source.getTitulo().getSeccionId());
+			if (StringUtils.isNotBlank(source.getTitle().getSectionId())) { 
+				System.out.print(" SB-" + source.getTitle().getSectionId());
 			}
-			if (StringUtils.isNotBlank(source.getTitulo().getTitulo())) { 
-				System.out.println(" TB-" + source.getTitulo().getTitulo());
+			if (StringUtils.isNotBlank(source.getTitle().getTitle())) { 
+				System.out.println(" TB-" + source.getTitle().getTitle());
 			}
 		}
 		
-		if (source.getTituloColeccion() != null) {
+		if (source.getCollectionTitle() != null) {
 			//TODO
-			if (StringUtils.isNotBlank(source.getTituloColeccion().getLibroId())) { 
-				System.out.print(" LC-" + source.getTituloColeccion().getLibroId());
+			if (StringUtils.isNotBlank(source.getCollectionTitle().getBookId())) { 
+				System.out.print(" LC-" + source.getCollectionTitle().getBookId());
 			}
-			if (StringUtils.isNotBlank(source.getTituloColeccion().getParteId())) { 
-				System.out.print(" PC-" + source.getTituloColeccion().getParteId());
+			if (StringUtils.isNotBlank(source.getCollectionTitle().getPartId())) { 
+				System.out.print(" PC-" + source.getCollectionTitle().getPartId());
 			}
-			if (StringUtils.isNotBlank(source.getTituloColeccion().getSeccionId())) { 
-				System.out.print(" SC-" + source.getTituloColeccion().getSeccionId());
+			if (StringUtils.isNotBlank(source.getCollectionTitle().getSectionId())) { 
+				System.out.print(" SC-" + source.getCollectionTitle().getSectionId());
 			}
-			if (StringUtils.isNotBlank(source.getTituloColeccion().getTitulo())) { 
-				System.out.println(" TC-" + source.getTituloColeccion().getTitulo());
+			if (StringUtils.isNotBlank(source.getCollectionTitle().getTitle())) { 
+				System.out.println(" TC-" + source.getCollectionTitle().getTitle());
 			}
 		}
 
-		if (source.getLocalizacion() != null) {
+		if (source.getLocalization() != null) {
 			//TODO
 			System.out.print("LO");
 		}
@@ -494,10 +445,10 @@ public class DatabaseRepository {
 		if (	(source == null) || 
 				(destination == null)) return null;
 
-		if (StringUtils.isNotBlank(source.getIniciales())) destination.setInitials(source.getIniciales());
-		if (StringUtils.isNotBlank(source.getNombre())) destination.setName(source.getNombre());
-		if (StringUtils.isNotBlank(source.getSufijo())) destination.setSuffix(source.getSufijo());
-		if (StringUtils.isNotBlank(source.getApellidos())) destination.setLastName(source.getApellidos());
+		if (StringUtils.isNotBlank(source.getInitials())) destination.setInitials(source.getInitials());
+		if (StringUtils.isNotBlank(source.getGivenName())) destination.setName(source.getGivenName());
+		if (StringUtils.isNotBlank(source.getSuffix())) destination.setSuffix(source.getSuffix());
+		if (StringUtils.isNotBlank(source.getFamilyName())) destination.setLastName(source.getFamilyName());
 
 		if (	(source.getIds() != null) && 
 				(!source.getIds().isEmpty())) {
@@ -506,7 +457,7 @@ public class DatabaseRepository {
 					entrySet().
 					stream().
 					map(item -> new PubValuesSubentity(
-							item.getKey(), 
+							item.getKey().toString(), 
 							item.getValue())).
 					distinct().
 					collect(Collectors.toSet());
@@ -522,8 +473,8 @@ public class DatabaseRepository {
 		if (	(source == null) || 
 				(destination == null)) return null;
 
-		if (StringUtils.isNotBlank(source.getTipo())) destination.setCentretype(source.getTipo());
-		if (StringUtils.isNotBlank(source.getNombre())) destination.setName(getCentreName(source.getNombre()));
+		if (StringUtils.isNotBlank(source.getType())) destination.setCentretype(source.getType());
+		if (StringUtils.isNotBlank(source.getName())) destination.setName(getCentreName(source.getName()));
 
 		if (	(source.getIds() != null) && 
 				(!source.getIds().isEmpty())) {
@@ -532,7 +483,7 @@ public class DatabaseRepository {
 					entrySet().
 					stream().
 					map(item -> new PubValuesSubentity(
-							item.getKey(), 
+							item.getKey().toString(), 
 							item.getValue())).
 					distinct().
 					collect(Collectors.toSet());
@@ -548,15 +499,15 @@ public class DatabaseRepository {
 		if (	(source == null) || 
 				(destination == null)) return null;
 
-		if (StringUtils.isNotBlank(source.getTipo())) destination.setSource(source.getTipo());
-		if (StringUtils.isNotBlank(source.getNombre())) destination.setFileName(source.getNombre());
-		if (StringUtils.isNotBlank(source.getGzDirectorio())) destination.setGzDirectory(source.getGzDirectorio());
-		if (StringUtils.isNotBlank(source.getGzFichero())) destination.setGzFileName(source.getGzFichero());
-		if (StringUtils.isNotBlank(source.getMd5Fichero())) destination.setMd5FileName(source.getMd5Fichero());
-		if (StringUtils.isNotBlank(source.getUncompressFichero())) destination.setUncompressedFileName(source.getUncompressFichero());
-		if (source.getGzInstante() != null) destination.setGzTimeStamp(source.getGzInstante());
-		if (source.isProcesoArticulosCompletado()) destination.setStatus(PubFileEntity.PROCESSED);
-		destination.setGzSize(source.getGzTamanio());
+		if (StringUtils.isNotBlank(source.getType())) destination.setSource(source.getType());
+		if (StringUtils.isNotBlank(source.getFilename())) destination.setFileName(source.getFilename());
+		if (StringUtils.isNotBlank(source.getGzDirectory())) destination.setGzDirectory(source.getGzDirectory());
+		if (StringUtils.isNotBlank(source.getGzFilename())) destination.setGzFileName(source.getGzFilename());
+		if (StringUtils.isNotBlank(source.getMd5Filename())) destination.setMd5FileName(source.getMd5Filename());
+		if (StringUtils.isNotBlank(source.getUncompressFilename())) destination.setUncompressedFileName(source.getUncompressFilename());
+		if (source.getGzInstant() != null) destination.setGzTimeStamp(source.getGzInstant());
+		if (source.isProcessCompleted()) destination.setStatus(PubFileEntity.PROCESSED);
+		destination.setGzSize(source.getGzSize());
 		destination.setNumArticlesProcessed(source.getNumArticlesProcessed());
 		destination.setNumArticlesTotal(source.getNumArticlesTotal());
 		
@@ -570,11 +521,11 @@ public class DatabaseRepository {
 				(destination == null)) return null;
 		
 		destination.setType(PubPublicationEntity.JOURNAL_TYPE);
-		if (StringUtils.isNotBlank(source.getMedio())) destination.setMedia(getMediaField(source.getMedio()));
-		if (StringUtils.isNotBlank(source.getAbreviatura())) destination.setAbbreviation(source.getAbreviatura());
-		if (StringUtils.isNotBlank(source.getPais())) destination.setCountry(source.getPais());
-		if (StringUtils.isNotBlank(source.getTipo())) destination.setType(source.getTipo());
-		if (StringUtils.isNotBlank(source.getNombre())) destination.setTitle(source.getNombre());
+		if (StringUtils.isNotBlank(source.getAbbreviation())) destination.setAbbreviation(source.getAbbreviation());
+		if (StringUtils.isNotBlank(source.getCountry())) destination.setCountry(source.getCountry());
+		if (StringUtils.isNotBlank(source.getName())) destination.setTitle(source.getName());
+		if ((source.getType() != null) && !(PublicationType.NONE.equals(source.getType()))) destination.setType(source.getType().toString());
+		if ((source.getMedium() != null) && !(MediumType.NONE.equals(source.getMedium()))) destination.setMediaType(source.getMedium().toString());
 
 		if (	(source.getIds() != null) && 
 				(!source.getIds().isEmpty())) {
@@ -583,7 +534,7 @@ public class DatabaseRepository {
 					entrySet().
 					stream().
 					map(item -> new PubValuesSubentity(
-							item.getKey(), 
+							item.getKey().toString(), 
 							item.getValue())).
 					distinct().
 					collect(Collectors.toSet());
@@ -630,14 +581,14 @@ public class DatabaseRepository {
 		destination.setAuthor(sourceAuthorDB);
 		destination.setCentre(sourceCentreDB);
 		destination.setPublication(sourcePublicationDB);
-		if (StringUtils.isNotBlank(source.getTipo())) destination.setType(source.getTipo());
+		if ((source.getType() != null) && !(AuthorType.NONE.equals(source.getType()))) destination.setType(source.getType().toString());
 
 		return destination;
 		
 	}
 
 	private PubBlockSubentity buildRelation(
-			BloqueAnotado source, 
+			ArticuloBloque source, 
 			PubArticleEntity sourceArticleDB, 
 			PubBlockSubentity destination) {
 		
@@ -646,9 +597,12 @@ public class DatabaseRepository {
 				(destination == null)) return null;
 		
 		if (sourceArticleDB != null) destination.setArticle(sourceArticleDB);
-		if (StringUtils.isNotBlank(source.getType())) destination.setBlockType(source.getType());
 		if (StringUtils.isNotBlank(source.getText())) destination.setText(source.getText());
-		if (source.getOffset() != null) destination.setOffset(source.getOffset());
+		if (source.getOffset() != null) destination.setOffset(source.getOffset());		
+		if (	(source.getType() != null) && 
+				(!BlockType.NONE.equals(source.getType())) && 
+				!(source.getType().toString().equals(destination.getBlockType())))
+				destination.setBlockType(source.getType().toString());
 		
 		return destination;
 	}
@@ -667,16 +621,15 @@ public class DatabaseRepository {
 		destination.setArticle(sourceArticleDB);
 		destination.setPublication(sourcePublicationDB);
 
-		if (StringUtils.isNotBlank(source.getMedio())) destination.setMedia(source.getMedio());
-		if (StringUtils.isNotBlank(source.getNumero())) destination.setNumber(source.getNumero());
-		if (StringUtils.isNotBlank(source.getTipo())) destination.setType(source.getTipo());
-		if (StringUtils.isNotBlank(source.getVolumen())) destination.setVolume(source.getVolumen());
-		if (source.getFecha() != null) {
-			destination.setDate(source.getFecha().getFecha());
+		if (StringUtils.isNotBlank(source.getNumber())) destination.setNumber(source.getNumber());
+		if (StringUtils.isNotBlank(source.getVolume())) destination.setVolume(source.getVolume());
+		if ((source.getMedium() != null) && !(MediumType.NONE.equals(source.getMedium()))) destination.setMediaType(source.getMedium().toString());
+		if (source.getDate() != null) {
+			destination.setDate(source.getDate().getDate());
 			try {
-				destination.setYear(Integer.parseInt(source.getFecha().getAnio()));
+				destination.setYear(Integer.parseInt(source.getDate().getYear()));
 			} catch (Exception ex) {}
-			destination.setYearSesion(source.getFecha().getSesion());
+			destination.setYearSesion(source.getDate().getSession());
 		}
 		
 		return destination;
@@ -712,12 +665,14 @@ public class DatabaseRepository {
 		Set<PubValuesSubentity> items = new HashSet<>();
 		for (Localizacion source: sources) {
 			if (source != null) {
-				if (Localizacion.PAGINA.equals(source.getTipo())) {
-					if (StringUtils.isNotBlank(source.getPaginaInicial())) destination.setStartPage(source.getPaginaInicial());
-					if (StringUtils.isNotBlank(source.getPaginaFinal())) destination.setEndPage(source.getPaginaFinal());
-					if (StringUtils.isNotBlank(source.getReferencia())) destination.setReference(source.getReferencia());
+				if (LocalizationType.PAGE.equals(source.getType())) {
+					if (StringUtils.isNotBlank(source.getInitialPage())) destination.setStartPage(source.getInitialPage());
+					if (StringUtils.isNotBlank(source.getEndPage())) destination.setEndPage(source.getEndPage());
+					if (StringUtils.isNotBlank(source.getReference())) destination.setReference(source.getReference());
 				} else {
-					items.add(new PubValuesSubentity(source.getTipo(), source.getPath()));
+					items.add(new PubValuesSubentity(
+							source.getType().toString(), 
+							source.getPath()));
 				}
 			}
 		}
@@ -773,8 +728,8 @@ public class DatabaseRepository {
 		Set<PubArticleAuthorEntity> articuloAutores = new HashSet<>();
 		for (Autor autor: autores) {
 			PubAuthorEntity authorDB = updateDB(autor);
-			if ((autor.getCentros() != null) && !autor.getCentros().isEmpty()) {
-				for (Centro centro: autor.getCentros()) {
+			if ((autor.getCenters() != null) && !autor.getCenters().isEmpty()) {
+				for (Centro centro: autor.getCenters()) {
 					PubCenterEntity centreDB = updateDB(centro);
 					if ((centreDB != null) && (articleDB != null)) {
 						PubArticleAuthorEntity articuloAutor = buildRelation(
@@ -851,20 +806,20 @@ public class DatabaseRepository {
 		
 		if (	(obj == null) ||
 				(articleDB.getId() == null) ||
-				(obj.getFicheroPubmed() == null) || 
-				(obj.getFicheroPubmed().getEntidad() == null) ||
-				(obj.getFicheroPubmed().getEntidad().getId() == null)) return false;
+				(obj.getPubmedFile() == null) || 
+				(obj.getPubmedFile().getEntity() == null) ||
+				(obj.getPubmedFile().getEntity().getId() == null)) return false;
 		
 		// METODO 1: Hacemos la búsqueda de ficheros por ser NaN. No toca articulos por eso devuelve siempre false
 		boolean result = false;
 		
 		Optional<PubArticleFileEntity> searchedDB = searchArticleFileInDB (
 				articleDB.getId(), 
-				obj.getFicheroPubmed().getEntidad().getId());
+				obj.getPubmedFile().getEntity().getId());
 		
 		if (!searchedDB.isPresent()) {
 			PubArticleFileEntity db = new PubArticleFileEntity();
-			db = buildRelation(obj.getFicheroPubmed(), articleDB, obj.getFicheroPubmed().getEntidad(), db);
+			db = buildRelation(obj.getPubmedFile(), articleDB, obj.getPubmedFile().getEntity(), db);
 			try {
 				db = articleFileRep.save(db);
 			} catch (Exception ex) {
@@ -882,20 +837,20 @@ public class DatabaseRepository {
 	private boolean prepareArticlePublications(PubArticleEntity articleDB, Articulo obj) {
 		
 		if (	(obj == null) || (
-				(obj.getRevista() == null) &&
-				(obj.getLibro() == null))) return false;
+				(obj.getJournal() == null) &&
+				(obj.getBook() == null))) return false;
 		
 		Set<PubArticleAuthorEntity> articuloAutores = new HashSet<>();
-		if (obj.getLibro() != null) {
-			PubPublicationEntity bookDB = updateDB(obj.getLibro());
+		if (obj.getBook() != null) {
+			PubPublicationEntity bookDB = updateDB(obj.getBook());
 			updateDB(obj, articleDB, bookDB);
-			Set<PubArticleAuthorEntity> items = prepareArticleAuthors(articleDB, bookDB, obj.getLibro().getAutores());
+			Set<PubArticleAuthorEntity> items = prepareArticleAuthors(articleDB, bookDB, obj.getBook().getAuthors());
 			if ((items != null) && (!items.isEmpty())) articuloAutores.addAll(items);
 		}
-		if (obj.getRevista() != null) {
-			PubPublicationEntity journalDB = updateDB(obj.getRevista());
+		if (obj.getJournal() != null) {
+			PubPublicationEntity journalDB = updateDB(obj.getJournal());
 			updateDB(obj, articleDB, journalDB);
-			Set<PubArticleAuthorEntity> items = prepareArticleAuthors(articleDB, journalDB, obj.getAutores());
+			Set<PubArticleAuthorEntity> items = prepareArticleAuthors(articleDB, journalDB, obj.getAuthors());
 			if ((items != null) && (!items.isEmpty())) articuloAutores.addAll(items);
 		}
 		
@@ -941,8 +896,8 @@ public class DatabaseRepository {
 		
 		if (	(obj == null) ||
 				//(articleDB.getId() == null) ||
-				(obj.getReferencias() == null) || 
-				(obj.getReferencias().isEmpty())) return false;
+				(obj.getReferences() == null) || 
+				(obj.getReferences().isEmpty())) return false;
 
 		if (articleDB.getId() != null) {
 			System.out.println ("DEBUG articulo encontrado. Debiera cambiar la version");
@@ -950,7 +905,7 @@ public class DatabaseRepository {
 
 		// METODO 2: Hacemos un merge por ser 1aN EAGER
 		Set<PubReferenceSubentity> references =  obj.
-			getReferencias().
+			getReferences().
 			stream().
 			map(instance -> {
 				PubReferenceSubentity relation = buildRelation(instance, articleDB, new PubReferenceSubentity());
@@ -960,7 +915,7 @@ public class DatabaseRepository {
 							entrySet().
 							stream().
 							map(item -> new PubValuesSubentity(
-									item.getKey(), 
+									item.getKey().toString(), 
 									item.getValue())).
 							distinct().
 							collect(Collectors.toSet());
@@ -982,12 +937,12 @@ public class DatabaseRepository {
 		if (	(obj == null) ||
 				(articleDB == null) || 
 				//(articleDB.getId() == null) ||
-				(obj.getTerminos() == null) || 
-				(obj.getTerminos().isEmpty())) return false;
+				(obj.getTerms() == null) || 
+				(obj.getTerms().isEmpty())) return false;
 
 		// Hacemos la búsqueda de terminos por ser NaN
 		Set<PubArticleTermEntity> articuloTerminos = new HashSet<PubArticleTermEntity>();
-		for (Termino termino: obj.getTerminos()) {
+		for (Termino termino: obj.getTerms()) {
 			
 			PubTermEntity termDB = updateDB(termino, null);
 			if ((termDB != null) && (articleDB != null)) {
@@ -999,8 +954,8 @@ public class DatabaseRepository {
 				articuloTerminos.add(artTermDB);
 			}
 			
-			if ((termino.getSubterminos() != null) && !termino.getSubterminos().isEmpty()) {
-				for (Termino cualificador: termino.getSubterminos()){
+			if ((termino.getSubterms() != null) && !termino.getSubterms().isEmpty()) {
+				for (Termino cualificador: termino.getSubterms()){
 					PubTermEntity cualificadorDB = updateDB(cualificador, termDB);
 					if ((cualificadorDB != null) && (articleDB != null)) {
 						PubArticleTermEntity artCualDB = buildRelation (cualificador, articleDB, cualificadorDB, new PubArticleTermEntity());
@@ -1048,10 +1003,10 @@ public class DatabaseRepository {
 		if (	(obj == null) || ((
 				(obj.getIds() == null) ||
 				(obj.getIds().isEmpty())) &&
-				(obj.getEntidad() == null) &&
+				(obj.getEntity() == null) &&
 				(StringUtils.isBlank(obj.getPmid()))) ) return Optional.empty();
 
-		Optional<PubArticleEntity> searchedDB = Optional.ofNullable(obj.getEntidad());
+		Optional<PubArticleEntity> searchedDB = Optional.ofNullable(obj.getEntity());
 
 		try {
 			
@@ -1074,11 +1029,11 @@ public class DatabaseRepository {
 					searchedDB = Optional.ofNullable(find.get(0));
 				}
 				*/
-				for (Entry<String, String> id: obj.getIds().entrySet()) {
+				for (Entry<IdType, String> id: obj.getIds().entrySet()) {
 					// TODO Hay articulos con mismos identificadores en otras BBDD. Por ejemplo un articulo con un doi
 					// PubMed lo ha convertido en dos, generalmente ocurre en conferencias. En la carga igual hay que quitarlo y solo
 					// buscar por el pmid de la linea anterior
-					List<PubArticleEntity> find = articleRep.findByIdentifier(id.getKey(), id.getValue());
+					List<PubArticleEntity> find = articleRep.findByIdentifier(id.getKey().toString(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
 						break;
@@ -1228,8 +1183,8 @@ public class DatabaseRepository {
 				searchedDB = Optional.ofNullable(find.get(0));
 			}
 			*/
-			for (Entry<String, String> id: obj.getIds().entrySet()) {
-				List<PubAuthorEntity> find = authorRep.findByIdentifier(id.getKey(), id.getValue());
+			for (Entry<IdType, String> id: obj.getIds().entrySet()) {
+				List<PubAuthorEntity> find = authorRep.findByIdentifier(id.getKey().toString(), id.getValue());
 				if ((find != null) && (!find.isEmpty())) {
 					searchedDB = Optional.ofNullable(find.get(0));
 					break;
@@ -1254,20 +1209,20 @@ public class DatabaseRepository {
 	 */
 	private Optional<PubCenterEntity> searchCentreInDB(Centro obj) {
 		
-		if ("Molecular Biology Division, Bhabha Atomic Research Centre, Mumbai 400".indexOf(obj.getNombre())>-1 ) {
+		if ("Molecular Biology Division, Bhabha Atomic Research Centre, Mumbai 400".indexOf(obj.getName())>-1 ) {
 			System.out.println("DEBUG");
 		}
 		if (	(obj == null) || ((
 				(obj.getIds() == null) ||
 				(obj.getIds().isEmpty())) &&
-				(StringUtils.isBlank(obj.getNombre()))) ) return Optional.empty();
+				(StringUtils.isBlank(obj.getName()))) ) return Optional.empty();
 
 		Optional<PubCenterEntity> searchedDB = null;
 
 		try {
 			
-			if (StringUtils.isNotBlank(obj.getNombre())) {
-				searchedDB = centreRep.findByName(getCentreName(obj.getNombre()));
+			if (StringUtils.isNotBlank(obj.getName())) {
+				searchedDB = centreRep.findByName(getCentreName(obj.getName()));
 			}
 	
 			if (	(!searchedDB.isPresent()) && 
@@ -1284,8 +1239,8 @@ public class DatabaseRepository {
 					searchedDB = Optional.ofNullable(find.get(0));
 				}
 				*/
-				for (Entry<String, String> id: obj.getIds().entrySet()) {
-					List<PubCenterEntity> find = centreRep.findByIdentifier(id.getKey(), id.getValue());
+				for (Entry<IdType, String> id: obj.getIds().entrySet()) {
+					List<PubCenterEntity> find = centreRep.findByIdentifier(id.getKey().toString(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
 						break;
@@ -1351,8 +1306,8 @@ public class DatabaseRepository {
 //				searchedDB = publicationRep.findByName(obj.getTitle());
 //			}
 			
-			if ((obj.getTitulo() != null) && StringUtils.isNotBlank(obj.getTitulo().getTitulo())) {
-				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.BOOK_TYPE, obj.getTitulo().getTitulo());
+			if ((obj.getTitle() != null) && StringUtils.isNotBlank(obj.getTitle().getTitle())) {
+				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.BOOK_TYPE, obj.getTitle().getTitle());
 			}
 	
 			if (	(!searchedDB.isPresent()) && 
@@ -1369,8 +1324,8 @@ public class DatabaseRepository {
 					searchedDB = Optional.ofNullable(find.get(0));
 				}
 				 */
-				for (Entry<String, String> id: obj.getIds().entrySet()) {
-					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey(), id.getValue());
+				for (Entry<IdType, String> id: obj.getIds().entrySet()) {
+					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey().toString(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
 						break;
@@ -1399,19 +1354,19 @@ public class DatabaseRepository {
 	public Optional<PubFileEntity> searchFileInDB(Fichero obj) {
 		
 		if (	(obj == null) || (
-				(obj.getEntidad() == null) && (
-				(StringUtils.isBlank(obj.getTipo())) ||
-				(StringUtils.isBlank(obj.getNombre())))) ) return Optional.empty();
+				(obj.getEntity() == null) && (
+				(StringUtils.isBlank(obj.getType())) ||
+				(StringUtils.isBlank(obj.getFilename())))) ) return Optional.empty();
 
-		Optional<PubFileEntity> searchedDB = Optional.ofNullable(obj.getEntidad());
+		Optional<PubFileEntity> searchedDB = Optional.ofNullable(obj.getEntity());
 		
 		try {
 			
 			if (!searchedDB.isPresent()) {
 
 				searchedDB = fileRep.findBySourceAndFileName(
-					obj.getTipo(),
-					obj.getNombre());
+					obj.getType(),
+					obj.getFilename());
 
 			}
 			
@@ -1436,14 +1391,14 @@ public class DatabaseRepository {
 		if (	(obj == null) || ((
 				(obj.getIds() == null) ||
 				(obj.getIds().isEmpty())) &&
-				(StringUtils.isBlank(obj.getNombre()))) ) return Optional.empty();
+				(StringUtils.isBlank(obj.getName()))) ) return Optional.empty();
 
 		Optional<PubPublicationEntity> searchedDB = null;
 
 		try {
 			
-			if (StringUtils.isNotBlank(obj.getNombre())) {
-				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.JOURNAL_TYPE, obj.getNombre());
+			if (StringUtils.isNotBlank(obj.getName())) {
+				searchedDB = publicationRep.findByTypeAndTitle(PubPublicationEntity.JOURNAL_TYPE, obj.getName());
 			}
 	
 			if (	(!searchedDB.isPresent()) && 
@@ -1460,8 +1415,8 @@ public class DatabaseRepository {
 					searchedDB = Optional.ofNullable(find.get(0));
 				}
 				*/
-				for (Entry<String, String> id: obj.getIds().entrySet()) {
-					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey(), id.getValue());
+				for (Entry<IdType, String> id: obj.getIds().entrySet()) {
+					List<PubPublicationEntity> find = publicationRep.findByIdentifier(id.getKey().toString(), id.getValue());
 					if ((find != null) && (!find.isEmpty())) {
 						searchedDB = Optional.ofNullable(find.get(0));
 						break;
@@ -1530,8 +1485,8 @@ public class DatabaseRepository {
 		}
 		
 		if (	("31902960".equals(obj.getPmid())) || (
-				(obj.getEntidad() != null) &&
-				(obj.getEntidad().getId() == 755))) {
+				(obj.getEntity() != null) &&
+				(obj.getEntity().getId() == 755))) {
 			System.out.println("DEBUG Revisar ENCODING Chino");
 		}
 		PubArticleEntity articleDB = null;
@@ -1545,11 +1500,11 @@ public class DatabaseRepository {
 		}
 
 		// VERSION
-		if (StringUtils.isNotBlank(obj.getVersion())) {
+		if (StringUtils.isNotBlank(obj.getVersionId())) {
 			try {
-				Integer versionId = Integer.parseInt(obj.getVersion());
+				Integer versionId = Integer.parseInt(obj.getVersionId());
 				if ((articleDB.getVersionId() != null) && (versionId < articleDB.getVersionId())) {
-					obj.setEntidad(articleDB);
+					obj.setEntity(articleDB);
 					return obj;
 				} else {
 					articleDB.setVersionId(versionId);
@@ -1557,10 +1512,10 @@ public class DatabaseRepository {
 			} catch (Exception ex) {
 			}
 		}
-		if (obj.getVersionFecha() != null) {
-			LocalDate versionDate = obj.getVersionFecha();
+		if (obj.getVersionDate() != null) {
+			LocalDate versionDate = obj.getVersionDate();
 			if ((articleDB.getVersionDate() != null) && (versionDate.isBefore(articleDB.getVersionDate()))) {
-				obj.setEntidad(articleDB);
+				obj.setEntity(articleDB);
 				return obj;
 			} else {
 				articleDB.setVersionDate(versionDate);
@@ -1578,7 +1533,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1586,13 +1541,13 @@ public class DatabaseRepository {
 			}
 
 			// DATOS ADICIONALES embedded
-			if ((obj.getDatos() != null) && !obj.getDatos().isEmpty()) {
+			if ((obj.getData() != null) && !obj.getData().isEmpty()) {
 				Set<PubKeywordSubentity> items = obj.
-						getDatos().
+						getData().
 						stream().
 						map(item -> new PubKeywordSubentity(
 								DATA,
-								item.getPropietario(),
+								item.getOwner().toString(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1606,7 +1561,7 @@ public class DatabaseRepository {
 						stream().
 						map(item -> new PubKeywordSubentity(
 								GEN,
-								item.getPropietario(),
+								item.getOwner().toString(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1614,19 +1569,19 @@ public class DatabaseRepository {
 			}
 			
 			// TEXTOS
-			if ((obj.getTextos() != null) && !obj.getTextos().isEmpty()) {
+			if ((obj.getTexts() != null) && !obj.getTexts().isEmpty()) {
 				Set<PubTextSubentity> items = obj.
-						getTextos().
+						getTexts().
 						stream().
 						map(item -> new PubTextSubentity(
-								item.getTipo(),
-								item.getSubtipo(),
-								item.getIdioma(),
+								item.getType().toString(),
+								item.getSubtype(),
+								item.getLanguage(),
 								item.getCopyright(),
 								item.getOrder(),
-								item.getEtiqueta(),
-								item.getCategoria(),
-								item.getTexto())).
+								item.getLabel(),
+								item.getCategory(),
+								item.getText())).
 						distinct().
 						collect(Collectors.toSet());
 				update |= articleDB.mergeTextos(items);
@@ -1651,7 +1606,7 @@ public class DatabaseRepository {
 						stream().
 						map(item -> new PubKeywordSubentity(
 								NOTE,
-								item.getPropietario(),
+								item.getOwner(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1660,13 +1615,13 @@ public class DatabaseRepository {
 			*/
 			
 			// NOTAS embedded
-			if ((obj.getNotas() != null) && !obj.getNotas().isEmpty()) {
+			if ((obj.getNotes() != null) && !obj.getNotes().isEmpty()) {
 				Set<PubKeywordSubentity> items = obj.
-						getNotas().
+						getNotes().
 						stream().
 						map(item -> new PubKeywordSubentity(
 								NOTE,
-								item.getPropietario(),
+								item.getOwner().toString(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1674,13 +1629,13 @@ public class DatabaseRepository {
 			}
 			
 			// NASA FLIGHTS embedded
-			if ((obj.getVuelos() != null) && !obj.getVuelos().isEmpty()) {
+			if ((obj.getFlights() != null) && !obj.getFlights().isEmpty()) {
 				Set<PubKeywordSubentity> items = obj.
-						getVuelos().
+						getFlights().
 						stream().
 						map(item -> new PubKeywordSubentity(
 								NASA_FLIGHT,
-								item.getPropietario(),
+								item.getOwner().toString(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1695,7 +1650,7 @@ public class DatabaseRepository {
 						stream().
 						map(item -> new PubKeywordSubentity(
 								KEYWORD,
-								item.getPropietario(),
+								item.getOwner().toString(),
 								item.getDescriptor())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1722,14 +1677,14 @@ public class DatabaseRepository {
 			}
 
 			// FECHAS embedded
-			if ((obj.getFechas() != null) && !obj.getFechas().isEmpty()) {
+			if ((obj.getDates() != null) && !obj.getDates().isEmpty()) {
 				Set<PubDateSubentity> items = obj.
-						getFechas().
+						getDates().
 						stream().
-						filter(item -> item.getFecha() != null).
+						filter(item -> item.getDate() != null).
 						map(item -> new PubDateSubentity(
-								getDateTypeField(item.getTipo()),
-								item.getFecha())).
+								item.getType().toString(),
+								item.getDate())).
 						distinct().
 						collect(Collectors.toSet());
 				update |= articleDB.mergeDates(items);
@@ -1737,29 +1692,29 @@ public class DatabaseRepository {
 
 			// TODO ¿Pertenecen al artículo o son del libro?
 			// FECHAS
-			if ((obj.getLibro()!= null) && (obj.getLibro().getFechas() != null) && !obj.getLibro().getFechas().isEmpty()) {
+			if ((obj.getBook()!= null) && (obj.getBook().getDates() != null) && !obj.getBook().getDates().isEmpty()) {
 				Set<PubDateSubentity> items = obj.
-						getFechas().
+						getDates().
 						stream().
-						filter(item -> item.getFecha() != null).
+						filter(item -> item.getDate() != null).
 						map(item -> new PubDateSubentity(
-								getDateTypeField(item.getTipo()),
-								item.getFecha())).
+								item.getType().toString(),
+								item.getDate())).
 						distinct().
 						collect(Collectors.toSet());
 				update |= articleDB.mergeDates(items);
 			}
 
 			// PERMISOS embedded
-			if ((obj.getPermisos() != null) && !obj.getPermisos().isEmpty()) {
+			if ((obj.getGrants() != null) && !obj.getGrants().isEmpty()) {
 				Set<PubPermissionSubentity> items = obj.
-						getPermisos().
+						getGrants().
 						stream().
 						map(item -> new PubPermissionSubentity(
-								item.getPais(),
-								item.getAgencia(),
-								item.getPermiso(),
-								item.getCodigo())).
+								item.getCountry(),
+								item.getAgency(),
+								item.getGrant(),
+								item.getCode())).
 						distinct().
 						collect(Collectors.toSet());
 				update |= articleDB.mergePermissions(items);
@@ -1803,7 +1758,7 @@ public class DatabaseRepository {
 				System.out.println("DEBUG titulo corto");
 			}
 
-			obj.setHayCambiosEnBD(false);
+			obj.setChangesInDb(false);
 
 		} catch (Exception ex) {
 			LOG.warn("updateDB-ARTICLE " + 
@@ -1811,10 +1766,10 @@ public class DatabaseRepository {
 						"\r\n\t" + obj.toString() + 
 						"\r\n\t" + articleDB.toString() + 
 						"\r\n\t" + ex.getMessage());
-			obj.setHayCambiosEnBD(true);
+			obj.setChangesInDb(true);
 		}
 
-		obj.setEntidad(articleDB);
+		obj.setEntity(articleDB);
 		
 		return obj;
 		
@@ -1870,15 +1825,15 @@ public class DatabaseRepository {
 
 			if (searchedDB.isPresent()) {
 				db = searchedDB.get();
-				update = anyDifferences(obj.getFasciculo(), db);
+				update = anyDifferences(obj.getIssue(), db);
 			} else {
 				db = new PubArticlePublicationEntity();
 				update = true;
 			}
 
 			if (update) {
-				db = buildRelation(obj.getFasciculo(), articleDB, publicationDB, db);
-				db = buildRelation(obj.getLocalizaciones(), db);
+				db = buildRelation(obj.getIssue(), articleDB, publicationDB, db);
+				db = buildRelation(obj.getLocalizations(), db);
 				db = articlePublicationRep.save(db);
 			}
 			
@@ -1886,7 +1841,7 @@ public class DatabaseRepository {
 			LOG.warn("updateDB-ARTICLE-PUBLICATION "  + 
 					"\r\n\t" + articleDB + 
 					"\r\n\t" + publicationDB + 
-					"\r\n\t" + obj.getRevista() + 
+					"\r\n\t" + obj.getJournal() + 
 					"\r\n\t" + ex.getMessage());
 			db = null;
 		}
@@ -1920,7 +1875,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -1944,7 +1899,7 @@ public class DatabaseRepository {
 	}
 
 	// No requerido
-	protected PubBlockSubentity updateDB(BloqueAnotado obj, PubArticleEntity articleDB) {
+	protected PubBlockSubentity updateDB(ArticuloBloque obj, PubArticleEntity articleDB) {
 
 		if (obj == null) return null;
 
@@ -1999,7 +1954,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -2054,10 +2009,10 @@ public class DatabaseRepository {
 					"\r\n\t" + obj + 
 					"\r\n\t" + ex.getMessage());
 			db = null;
-			obj.setHayCambiosEnBD(true);
+			obj.setChangesInDb(true);
 		}
 		
-		obj.setEntidad(db);
+		obj.setEntity(db);
 		return obj;
 		
 	}
@@ -2086,7 +2041,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -2130,7 +2085,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -2178,7 +2133,7 @@ public class DatabaseRepository {
 						entrySet().
 						stream().
 						map(item -> new PubValuesSubentity(
-								item.getKey(), 
+								item.getKey().toString(), 
 								item.getValue())).
 						distinct().
 						collect(Collectors.toSet());
@@ -2244,7 +2199,7 @@ public class DatabaseRepository {
 		
 	}
 
-	public BloqueAnotado updateDB(BloqueAnotado obj) {
+	public ArticuloBloque updateDB(ArticuloBloque obj) {
 		// TODO Auto-generated method stub
 		return null;
 	}

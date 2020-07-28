@@ -288,17 +288,27 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-security</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.crnk</groupId>
 			<artifactId>crnk-data-jpa</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
-			<artifactId>crnk-spring</artifactId>
+			<artifactId>crnk-format</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-format-plain-json</artifactId>
+			<scope>runtime</scope>
+		</dependency>		
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-monitor</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-security</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -308,9 +318,20 @@
 		</dependency>
 		<dependency>
 			<groupId>io.crnk</groupId>
+			<artifactId>crnk-setup-spring-boot1</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
 			<artifactId>crnk-setup-spring-boot2</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.crnk</groupId>
+			<artifactId>crnk-spring</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- DSL -->
 		<dependency>
 			<groupId>com.querydsl</groupId>

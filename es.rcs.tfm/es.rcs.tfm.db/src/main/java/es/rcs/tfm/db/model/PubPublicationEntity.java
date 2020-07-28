@@ -85,7 +85,7 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	public static final String RES_PUBLICATIONTYPE			= "type";
 	public static final String RES_SUBTYPE					= "subtype";
 	public static final String RES_TITLE					= "title";
-	public static final String RES_MEDIA					= "media";
+	public static final String RES_MEDIA_TYPE				= "mediaType";
 	public static final String RES_ABBREVIATION				= "abbreviation";
 	public static final String RES_COUNTRY					= "country";
 	public static final String RES_IDENTIFIERS				= "identifiers";
@@ -113,7 +113,7 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 	public static final String DB_PUBLICATIONTYPE			= "pub_typ";
 	public static final String DB_SUBTYPE					= "pub_sub";
 	public static final String DB_TITLE						= "pub_txt";
-	public static final String DB_MEDIA						= "pub_med";
+	public static final String DB_MEDIA_TYPE				= "pub_med";
 	public static final String DB_ABBREVIATION				= "jou_abr";
 	public static final String DB_COUNTRY					= "jou_cou";
 	public static final String DB_REPORT					= "bok_rep_txt";
@@ -188,17 +188,17 @@ public class PubPublicationEntity extends AuditedBaseEntity {
 
 	
 	@JsonProperty(
-			value = RES_MEDIA,
+			value = RES_MEDIA_TYPE,
 			required = false)
 	@Column(
-			name = DB_MEDIA, 
+			name = DB_MEDIA_TYPE, 
 			unique = false,
 			nullable = true, 
-			length = 32)
+			length = 128)
 	@Size(
-			max = 32, 
-			message = "El tipo de soporte no puede sobrepasar los {max} caracteres.")
-	private String media;
+			max = 128, 
+			message = "El tipo de medio no puede sobrepasar los {max} caracteres.")
+	public String mediaType;
 
 	
 	@JsonProperty(
