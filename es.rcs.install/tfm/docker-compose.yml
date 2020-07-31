@@ -78,8 +78,21 @@ services:
       SPARK_MASTER_URL: spark://spark-master:7077
     ports:
       - 8081-8089:8080
+  nginx:
+    image: dukegris/tfm_nginx:1.0.2
+    networks: 
+      frontend:
+    volumes:
+      - type: volume
+        source: nginx-logs
+        target: /var/log/nginx
+        volume:
+          nocopy: false
+    ports:
+      - 80:80
 
 networks:
+  frontend:
   backend:
   spark:
             
@@ -108,3 +121,6 @@ volumes:
   spark-worker-logs:
     external: false
     name: spark-worker-logs
+  nginx-logs:
+    external: false
+    name: nginx-logs

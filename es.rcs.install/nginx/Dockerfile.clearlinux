@@ -11,22 +11,6 @@ ARG swupd_args
 RUN swupd clean
 RUN swupd update --no-boot-update $swupd_args
 
-# Utilities for the setup
-RUN swupd bundle-add curl \
-  --debug \
-  --no-progress \
-  --no-boot-update
-
-WORKDIR /usr/local
-
-# Download SOLR and install the necesary files in target directory 'install-root',
-# using the new os version
-ARG SOLR_VERSION="8.5.2"
-ARG SOLR_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz&action=download"
-ARG	SOLR_DIST_URL="https://www.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz"
-ARG SOLR_ARCHIVE_URL="https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz"
-RUN /usr/bin/curl "$SOLR_ARCHIVE_URL" --insecure --output solr.tgz
-
 # Grab os-release info from the minimal base image so
 # that the new content matches the exact OS version
 COPY --from=clearlinux/os-core:latest /usr/lib/os-release /
@@ -42,11 +26,7 @@ RUN source /os-release && \
   --path /install-root \
   --statedir /swupd-state \
   --no-boot-update \
-  --bundles=os-core,locales,java-runtime
-
-# SOLR
-RUN tar xf /usr/local/solr.tgz --directory /install-root/usr/local  &&\
-  mv /install-root/usr/local/solr-$SOLR_VERSION /install-root/usr/local/solr
+  --bundles=os-core,locales,nginx
 
 # For some Host OS configuration with redirect_dir on,
 # extra data are saved on the upper layer when the same
@@ -64,33 +44,36 @@ RUN cd / && \
 FROM clearlinux/os-core:latest
 COPY --from=tfm_os_builder /install-root /
 
-# SOLR
+# NGINX
 ARG TFM_USER="tfm"
 ARG TFM_GROUP="tfm"
-ARG TFM_BIN_DIR="/usr/local/solr"
-ARG TFM_RUN_DIR="/run/solr"
-ARG TFM_ETC_DIR="/var/etc/solr"
-ARG TFM_LOGS_DIR="/var/log/solr"
-ARG TFM_METADATA_DIR="/var/lib/solr"
+ARG TFM_BIN_DIR="/usr/share/nginx"
+ARG TFM_RUN_DIR="/run/nginx"
+ARG TFM_ETC_DIR="/etc/nginx"
+ARG TFM_LOGS_DIR="/var/log/nginx"
+ARG TFM_METADATA_DIR="/var/lib/nginx"
 ARG TFM_DATA_DIR="/var/lib/tfm"
 
 RUN groupadd -r $TFM_GROUP &&\
   useradd --no-log-init -r -g $TFM_GROUP $TFM_USER &&\
   mkdir -p $TFM_LOGS_DIR &&\
+  mkdir -p $TFM_BIN_DIR &&\
+  mkdir -p $TFM_ETC_DIR &&\
   mkdir -p $TFM_RUN_DIR &&\
   mkdir -p $TFM_METADATA_DIR &&\
   mkdir -p $TFM_DATA_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_BIN_DIR &&\
+  chown -R $TFM_USER:$TFM_GROUP $TFM_ETC_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_LOGS_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_RUN_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_METADATA_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_DATA_DIR &&\
+  chmod 700 "$TFM_BIN_DIR" &&\
+  chmod 700 "$TFM_ETC_DIR" &&\
   chmod 700 "$TFM_LOGS_DIR" &&\
   chmod 700 "$TFM_RUN_DIR" &&\
   chmod 700 "$TFM_METADATA_DIR" &&\
   chmod 700 "$TFM_DATA_DIR"
-
-USER $TFM_USER
 
 # OS LOCALES
 ENV TZ=Europe/Madrid \
@@ -98,15 +81,15 @@ ENV TZ=Europe/Madrid \
   LC_ALL=en_US.UTF-8 \
   LANG=en_US.UTF-8
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk \
-  SOLR_PID_DIR=/var/run/solr \
-  SOLR_HOME=/var/lib/solr \
-  SOLR_LOGS_DIR=/var/log/solr \
-  PATH=/usr/local/solr/bin:$PATH
-
 # APPLICATION
-ADD core_config/* /var/lib/solr/
+ADD RCS-Spa-0.0.4-SNAPSHOT-bundle.tar.gz $TFM_DATA_DIR
+COPY nginx.conf $TFM_ETC_DIR
+RUN sed -i "s|TFM_USER|${TFM_USER}|" $TFM_ETC_DIR/nginx.conf &&\
+  sed -i "s|TFM_RUN_DIR|${TFM_RUN_DIR}|" $TFM_ETC_DIR/nginx.conf &&\
+  sed -i "s|TFM_LOGS_DIR|${TFM_LOGS_DIR}|" $TFM_ETC_DIR/nginx.conf &&\
+  sed -i "s|TFM_DATA_DIR|${TFM_DATA_DIR}|" $TFM_ETC_DIR/nginx.conf &&\
+  sed -i "s|TFM_DEFAULT_PORT|80|" $TFM_ETC_DIR/nginx.conf
 
-EXPOSE 8983
-VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
-CMD ["/usr/local/solr/bin/solr", "-f", "-p", "8983"]
+EXPOSE 80
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_DATA_DIR"]
+CMD ["/bin/nginx", "-g", "daemon off;"]

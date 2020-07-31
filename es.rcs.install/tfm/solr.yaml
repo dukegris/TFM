@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tfm-solr
+  labels:
+    app: tfm
+spec:
+  selector:
+    app: tfm
+    tier: solr
+  ports:
+    - name: solr-port
+      protocol: TCP
+      port: 8983
+      targetPort: 8983
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-metadata-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-data-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-log-claim
+  labels:
+    app: tfm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 128Mi
+---
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: tfm-solr
+  labels:
+    app: tfm
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: tfm
+      tier: solr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tfm
+        tier: solr
+    spec:
+      containers:
+      - image: dukegris/tfm_solr:1.0.1/
+        name: solr
+        ports:
+        - containerPort: 8983
+          name: solr
+        volumeMounts:
+        - name: solr-metadata
+          mountPath: /var/lib/solr
+        - name: solr-data
+          mountPath: /var/lib/tfm
+        - name: solr-log
+          mountPath: /var/log/solr
+      volumes:
+      - name: solr-metadata
+        persistentVolumeClaim:
+          claimName: solr-metadata-claim
+      - name: solr-data
+        persistentVolumeClaim:
+          claimName: solr-data-claim
+      - name: solr-log
+        persistentVolumeClaim:
+          claimName: solr-log-claim
+      

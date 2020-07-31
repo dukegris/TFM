@@ -60,8 +60,7 @@
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg 
-line="/c &quot;npm install&quot;" />
+									<arg line="/c &quot;npm install&quot;" />
 								</exec>
 								<exec	executable="npm" 
 										dir="${project.basedir}"
@@ -85,20 +84,35 @@ line="/c &quot;npm install&quot;" />
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="windows">
-									<arg 
-line="/c &quot;ng build&quot;" />
+									<arg line="/c &quot;ng build --prod&quot;" />
 								</exec>
 								<exec	executable="ng" 
 										dir="${project.basedir}"
 										failonerror="true" 
 										osfamily="unix">
-									<arg line="build" />
+									<arg line="build --prod" />
 								</exec>
 							</target>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals><goal>single</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
 
 		</plugins>
 		

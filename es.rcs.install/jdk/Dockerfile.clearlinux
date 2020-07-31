@@ -18,14 +18,15 @@ COPY --from=clearlinux/os-core:latest /usr/lib/os-release /
 # Install clean os-core bundle in target directory 'install-root'
 # using the new os version
 RUN source /os-release && \
-	mkdir /install-root && \
-	swupd os-install \
-	-V ${VERSION_ID} \
-	--debug \
-	--no-progress \
-	--path /install-root \
-	--statedir /swupd-state \
-	--bundles=os-core,java13-runtime
+  mkdir /install-root && \
+  swupd os-install \
+  -V ${VERSION_ID} \
+  --debug \
+  --no-progress \
+  --path /install-root \
+  --statedir /swupd-state \
+  --no-boot-update \
+  --bundles=os-core,locales,java-runtime
 
 # For some Host OS configuration with redirect_dir on,
 # extra data are saved on the upper layer when the same
@@ -34,15 +35,13 @@ RUN source /os-release && \
 RUN mkdir /os-core-install
 COPY --from=clearlinux/os-core:latest / /os-core-install/
 RUN cd / && \
-	find os-core-install | \
-	sed -e 's/os-core-install/install-root/' | \
-	xargs rm -d &> /dev/null || true
+  find os-core-install | \
+  sed -e 's/os-core-install/install-root/' | \
+  xargs rm -d &> /dev/null || true
 
 # Copy the updated lastest version on the target system to the root,
 # Forgot the base and execute a cleaned flaten image
-FROM scratch
+FROM clearlinux/os-core:latest
 COPY --from=tfm_os_builder /install-root /
 
-ENV PATH=/usr/lib/jvm/java-1.13.0-openjdk/bin:$PATH
-
-CMD ["java"]
+CMD ["/bin/java"]
