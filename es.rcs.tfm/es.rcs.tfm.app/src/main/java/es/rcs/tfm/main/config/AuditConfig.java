@@ -14,12 +14,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import es.rcs.tfm.db.DbNames;
+import es.rcs.tfm.main.AppNames;
 
-@Configuration(
-		DbNames.DB_AUDIT_CONFIG )
 @EnableJpaAuditing(
 		auditorAwareRef = DbNames.DB_AUDIT_PROVIDER,
 		dateTimeProviderRef = DbNames.DB_DATE_PROVIDER)
+@Configuration(
+		AppNames.BBDD_AUDIT_CONFIG )
 public class AuditConfig {
 
 	@Bean(name = DbNames.DB_DATE_PROVIDER)

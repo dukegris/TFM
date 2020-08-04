@@ -19,8 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.rcs.tfm.main.AppNames;
 
-@Configuration( AppNames.WEB_CONFIG )
 @EnableWebMvc
+@Configuration(
+		AppNames.WEB_CONFIG )
 public class WebConfig implements WebMvcConfigurer {
 
 	@Override

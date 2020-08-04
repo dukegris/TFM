@@ -17,8 +17,9 @@ import es.rcs.tfm.srv.SrvNames;
  * @author raul
  *
  */
-@Component(value = SrvNames.PREPARE_CONLL_FROM_TXT_TASK)
-@DependsOn(value = {
+@Component(
+		SrvNames.PREPARE_CONLL_FROM_TXT_TASK)
+@DependsOn({
 		SrvNames.SPARK_SESSION_TRAIN,
 		SrvNames.TRAINING_SRVC})
 @Scope("prototype")

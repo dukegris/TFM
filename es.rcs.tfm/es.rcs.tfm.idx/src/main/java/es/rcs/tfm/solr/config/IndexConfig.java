@@ -6,13 +6,19 @@ import org.springframework.data.solr.repository.config.EnableSolrRepositories;
 
 import es.rcs.tfm.solr.IndexNames;
 
-@Configuration( IndexNames.IDX_CONFIG )
-@ComponentScan( IndexNames.IDX_SETUP_PKG )
 @EnableSolrRepositories(
-		namedQueriesLocation = "classpath:META-INF/solr-named-queries.properties",
-		basePackages = IndexNames.IDX_REPOSITORY_PKG,
-		solrClientRef = IndexNames.IDX_CLIENT,
-		solrTemplateRef = IndexNames.IDX_TEMPLATE)
+		solrClientRef = 
+				IndexNames.IDX_CLIENT,
+		solrTemplateRef = 
+				IndexNames.IDX_TEMPLATE,
+		namedQueriesLocation = 
+				"classpath:META-INF/solr-named-queries.properties",
+		basePackages = {
+				IndexNames.IDX_REPOSITORY_PKG })
+@Configuration(
+		IndexNames.IDX_CONFIG )
+@ComponentScan({
+		IndexNames.IDX_SETUP_PKG })
 public class IndexConfig {
     
 }

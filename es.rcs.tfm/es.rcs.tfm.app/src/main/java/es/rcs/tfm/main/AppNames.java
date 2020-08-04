@@ -4,15 +4,14 @@ public class AppNames {
 
 	// -------------------------------------------------------------------------------------
 	// CMD: CONFIG
-	public static final String CMD_CONFIG 						= "taoCommandConfig";
+	public static final String CMD_COMMANDS_CONFIG 				= "taoDefaultCommandConfig";
+	public static final String CMD_DOWNLOADER_CONFIG 			= "taoDownloaderCommandConfig";
+	public static final String CMD_WEBSERVER_CONFIG				= "taoWebserverCommandConfig";
 
 	// -------------------------------------------------------------------------------------
 	// APP: CONFIG
 	public static final String APP_NAME 						= "RCS TFM Web App";
-	public static final String APP_CONFIG 						= "taoConfig";
 	public static final String APP_CONFIG_PKG 					= "es.rcs.tfm.main.config";
-	public static final String APP_COMPONENTS_PKG 				= "es.rcs.tfm.main.components";
-	public static final String APP_SERVICES_PKG 				= "es.rcs.tfm.main.services";
 	public static final String APP_PROPERTIES_LOADER 			= "taoPropertiesLoader";
 	public static final String APP_MESSAGES_LOADER 				= "taoMessagesLoader";
 
@@ -20,11 +19,15 @@ public class AppNames {
 	public static final String APP_TEST 						= "test";
 	public static final String APP_DEVELOPMENT 					= "deveopment";
 
+	public static final String UTIL_CONFIG 						= "taoUtilConfig";
+
 	// -------------------------------------------------------------------------------------
 	// APP: SHELL
-	public static final String APP_SHELL 						= "taoShell";
 	public static final String BIOC								= "BIOC";
 	public static final String PUBTATOR							= "PUBTATOR";
+
+	public static final String APP_SHELL_CONFIG 				= "taoShellConfig";
+	public static final String APP_SHELL_PKG 					= "es.rcs.tfm.main.shell";
 	public static final String APP_TRAIN_COMMAND 				= "taoTrainCommand";
 	public static final String APP_CONLL_COMMAND 				= "taoConllCommand";
 	public static final String APP_DOWNLOAD_COMMAND 			= "taoDownloadCommand";
@@ -42,6 +45,9 @@ public class AppNames {
 	public static final int TRAIN_INVALID_TEST_FILE				= 4;
 	public static final int TRAIN_INVALID_DIRECTORY				= 5;
 	public static final int TRAIN_START_FAILED					= 98;
+
+	public static final int WEBSERVER_START_FAILED				= 97;
+	public static final int DOWNLOADER_START_FAILED				= 96;
 
 	// -------------------------------------------------------------------------------------
 	// J2EE: WEB SERVER
@@ -62,7 +68,7 @@ public class AppNames {
 	// J2EE: WEB SERVER APPLICATION
 	public static final String WEB_CONFIG						= "taoWebConf";
 
-	public static final String WEB_JACKSON_MAPPER				= "taoCrnkJsonMapper";
+	public static final String WEB_JACKSON_MAPPER				= "taoWebJsonMapper";
 	public static final String WEB_LOCALE_RESOLVER 				= "taoWebLocaleResolver";
 	
 	// -------------------------------------------------------------------------------------
@@ -78,6 +84,7 @@ public class AppNames {
 	// -------------------------------------------------------------------------------------
 	// J2EE: SECURITY
 	public static final String SEC_CONFIG						= "taoSecurityConfiguration";
+	public static final String SEC_SERVICES_PKG 				= "es.rcs.tfm.main.security";
 
 	public static final String SEC_CRYPT_PASSWORD				= "taoSecurityPasswordEncoder";
 	public static final String SEC_CORS_SETUP					= "taoSecurityCorsSetup";
@@ -120,6 +127,8 @@ public class AppNames {
 	// -------------------------------------------------------------------------------------
 	// APP: BASE DE DATOS
 	public static final String BBDD_CONFIG						= "taoBBDDConfig";
+	public static final String BBDD_AUDIT_CONFIG				= "taoBBDDAuditConfiguration";
+	public static final String BBDD_CACHE_CONFIG 				= "taoBBDDCacheConfig";
 
 	public static final String BBDD_PU							= "TFM_PU";
 	public static final String BBDD_DB							= "taoBBDDDB";
@@ -141,6 +150,15 @@ public class AppNames {
 	public static final String SPARK_CONFIG						= "taoSparkConfig";
 	public static final String SPARK_SESSION_TEST				= "taoSparkSession";
 	public static final String SPARK_APPNAME					= "SPARK TFM APP";
+
+	// -------------------------------------------------------------------------------------
+	// APP: NLP
+	public static final String NLP_CONFIG						= "taoNlpConfig";
+	/*
+	public static final String NLP_SRVC_CONFIG					= "taoNlpServicesConfig";
+	public static final String NLP_CONLL_SRVC_CONFIG			= "taoNlpConllServiceConfig";
+	public static final String NLP_TRAIN_SRVC_CONFIG			= "taoNlpTrainServiceConfig";
+	*/
 	
 	
 }

@@ -17,8 +17,9 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import es.rcs.tfm.xml.XmlNames;
 
-@Configuration( XmlNames.XML_CONFIG )
-@ComponentScan( basePackages = {
+@Configuration(
+		XmlNames.XML_CONFIG )
+@ComponentScan({
 		XmlNames.XML_SETUP_PKG} )
 public class XmlConfig {
 

@@ -20,11 +20,12 @@ import es.rcs.tfm.srv.services.train.PrepareCoNLL2003Task;
 import es.rcs.tfm.srv.services.train.TrainNerFromCoNLL2003Task;
 
 @EnableScheduling
-@DependsOn(value = {
+@Configuration(
+		AppNames.QUARTZ_CONFIG)
+@DependsOn({
 		SrvNames.PUBMED_LOADER_SRVC,
 		SrvNames.PMC_LOADER_SRVC,
 		SrvNames.TRAINING_SRVC})
-@Configuration(AppNames.QUARTZ_CONFIG)
 public class QuartzConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(QuartzConfig.class);

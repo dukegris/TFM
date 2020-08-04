@@ -35,8 +35,10 @@ import es.rcs.tfm.srv.repository.FtpRepository;
 import es.rcs.tfm.srv.services.train.TrainService;
 import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 
-@Service(value = SrvNames.PUBMED_LOADER_SRVC)
-@DependsOn(value = SrvNames.CORPUS_SRVC)
+@Service(
+		SrvNames.PUBMED_LOADER_SRVC)
+@DependsOn(
+		SrvNames.CORPUS_SRVC)
 @PropertySource(
 		{"classpath:/META-INF/service.properties"} )
 public class PubmedLoaderService {

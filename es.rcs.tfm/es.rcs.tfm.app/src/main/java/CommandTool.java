@@ -9,30 +9,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.spark.sql.SparkSession;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
 import es.rcs.tfm.main.AppNames;
-import es.rcs.tfm.main.config.SparkConfig;
-import es.rcs.tfm.nlp.NlpNames;
+import es.rcs.tfm.main.boot.CommandConfig;
+import es.rcs.tfm.main.boot.DownloaderConfig;
+import es.rcs.tfm.main.boot.WebserverConfig;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.services.train.TrainService;
-import es.rcs.tfm.xml.XmlNames;
 
-@ComponentScan(basePackages = {
-		XmlNames.XML_CONFIG_PKG,
-		NlpNames.NLP_CONFIG_PKG,
-		SrvNames.SRV_TRAIN_SERVICES_PKG})
-@ImportAutoConfiguration(classes = { 
-		SparkConfig.class })
-@Configuration(
-		AppNames.CMD_CONFIG)
 public class CommandTool {
-
-	private static Class<CommandTool> applicationClass = CommandTool.class;
-	private static AnnotationConfigApplicationContext context;
 
 	public static void main(String[] args) {
 
@@ -42,6 +31,20 @@ public class CommandTool {
 		Options options = new Options();
 
 		Option help = new Option("h", "help", false, "Este mensaje");
+
+		Option downloaderDaemon = Option.
+				builder("d").
+				longOpt("downloader").
+				desc(	"Inicia el proceso de descarga de ficheros diario").
+				hasArg(false).
+				build();
+
+		Option webServer = Option.
+				builder("w").
+				longOpt("web").
+				desc(	"Inicia el servidor web de contenidos").
+				hasArg(false).
+				build();
 
 		Option generate = Option.
 				builder("g").
@@ -72,6 +75,8 @@ public class CommandTool {
 		options.addOption(help);
 		options.addOption(generate);
 		options.addOption(train);
+		options.addOption(downloaderDaemon);
+		options.addOption(webServer);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd;
@@ -80,6 +85,10 @@ public class CommandTool {
 			if (cmd.hasOption("h")) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("CommandTool", options);
+			} else if (cmd.hasOption("d")) {
+				result = tool.downloader(args);
+			} else if (cmd.hasOption("w")) {
+				result = tool.webserver(args);
 			} else if (cmd.hasOption("g")) {
 				String[] data = cmd.getOptionValues("g");
 				if (data.length>2) {
@@ -129,6 +138,51 @@ public class CommandTool {
 		
 	}
 
+	private int webserver(String[] args) {
+
+		int result = AppNames.OK;
+
+		try {
+			
+			ConfigurableApplicationContext context = new SpringApplicationBuilder(WebserverConfig.class).
+					logStartupInfo(true).
+					build().
+					run(args);
+			
+			Thread.currentThread().wait();
+
+		} catch (Exception ex) {
+			result = AppNames.WEBSERVER_START_FAILED;
+			System.out.println("FAILED " + ex);
+		}
+	
+		return result;
+
+	}
+
+	private int downloader(String[] args) {
+
+		int result = AppNames.OK;
+
+		try {
+			
+			ConfigurableApplicationContext context = new SpringApplicationBuilder(DownloaderConfig.class).
+					web(WebApplicationType.NONE).
+					logStartupInfo(true).
+					build().
+					run(args);
+			
+			Thread.currentThread().wait();
+
+		} catch (Exception ex) {
+			result = AppNames.DOWNLOADER_START_FAILED;
+			System.out.println("FAILED " + ex);
+		}
+	
+		return result;
+
+	}
+
 	private int train(String trainFileName, String testFileName, String nerModelDirectoryName, String bertModelDirectoryName, String nerTensorFlowGraphDirectory) {
 
 		int result = AppNames.OK;
@@ -150,8 +204,8 @@ public class CommandTool {
 
 			try {
 				
-				context = new AnnotationConfigApplicationContext();
-				context.register(applicationClass);
+				AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+				context.register(CommandConfig.class);
 				context.refresh();
 				
 				SparkSession spark = context.getBean(SrvNames.SPARK_SESSION_TRAIN, SparkSession.class);
@@ -176,6 +230,8 @@ public class CommandTool {
 						null, 
 						null, 
 						null);
+				
+				context.close();
 
 			} catch (Exception ex) {
 				result = AppNames.TRAIN_START_FAILED;
@@ -208,8 +264,8 @@ public class CommandTool {
 			
 			try {
 				
-				context = new AnnotationConfigApplicationContext();
-				context.register(applicationClass);
+				AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+				context.register(CommandConfig.class);
 				context.refresh();
 				
 				TrainService train = context.getBean(SrvNames.TRAINING_SRVC, TrainService.class);
@@ -229,6 +285,8 @@ public class CommandTool {
 					}
 					
 				}
+				
+				context.close();
 
 			} catch (Exception ex) {
 				result = AppNames.GENERATE_START_FAILED;

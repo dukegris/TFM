@@ -18,11 +18,10 @@ import es.rcs.tfm.srv.SrvNames;
  *
  */
 @Component(
-		value = SrvNames.TRAIN_NER_MODEL_TASK)
-@DependsOn(
-		value = {
-				SrvNames.SPARK_SESSION_TRAIN,
-				SrvNames.TRAINING_SRVC})
+		SrvNames.TRAIN_NER_MODEL_TASK)
+@DependsOn({
+		SrvNames.SPARK_SESSION_TRAIN,
+		SrvNames.TRAINING_SRVC })
 @Scope("prototype")
 public class TrainNerFromCoNLL2003Task extends Thread{
 

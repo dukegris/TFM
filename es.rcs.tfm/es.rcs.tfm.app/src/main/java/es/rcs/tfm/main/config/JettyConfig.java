@@ -9,6 +9,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -30,8 +31,10 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import es.rcs.tfm.main.AppNames;
 
-@Configuration(  AppNames.JETTY_CONFIG )
-@PropertySource( {"classpath:/META-INF/jetty.properties"} )
+@Configuration(
+		AppNames.JETTY_CONFIG )
+@PropertySource({
+		"classpath:/META-INF/jetty.properties" })
 public class JettyConfig {
 
 	private @Value("${tao.web.keystore.location}") String KEYSTORE_LOCATION = "META-INF/keystore.jks";
@@ -54,6 +57,11 @@ public class JettyConfig {
 	@Bean( name = AppNames.JETTY_SERVLET_FACTORY )
 	public ServletWebServerFactory servletFactory() {
 		
+		String httpport = System.getProperty("HTTP_PORT") ;
+		if (StringUtils.isNotBlank(httpport)) HTTP_PORT = httpport;
+		String httspport = System.getProperty("HTTPS_PORT") ;
+		if (StringUtils.isNotBlank(httspport)) HTTPS_PORT = httspport;
+
 		JettyServletWebServerFactory bean =  new JettyServletWebServerFactory() {
 
 			@Override

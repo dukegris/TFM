@@ -25,9 +25,9 @@ import es.rcs.tfm.srv.repository.FtpRepository;
 import es.rcs.tfm.srv.repository.IndexRepository;
 
 @Service(
-		value = SrvNames.CORPUS_SRVC)
-@PropertySource(
-		{"classpath:/META-INF/service.properties"} )
+		SrvNames.CORPUS_SRVC)
+@PropertySource({
+		"classpath:/META-INF/service.properties"} )
 public class CorpusService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CorpusService.class);

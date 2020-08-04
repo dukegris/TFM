@@ -12,13 +12,11 @@ public class DbNames {
 	
 	// -------------------------------------------------------------------------------------
 	// DB: JPA AUDIT CONFIGURACION
-	public static final String DB_AUDIT_CONFIG			= "taoDatabaseAuditConfiguration";
 	public static final String DB_AUDIT_PROVIDER 		= "taoDatabaseAuditProvider";
 	public static final String DB_DATE_PROVIDER 		= "taoDatabaseDateTimeAuditProvider";
 
 	// -------------------------------------------------------------------------------------
 	// DB: CACHE CONFIGURACION
-	public static final String DB_CACHE_CONFIG 			= "taoDatabaseCacheConfig";
 	public static final String DB_CACHE_MANAGER 		= "taoDatabaseCacheManager";
 	public static final String DB_CACHE_SERVICE 		= "taoDatabaseCacheService";
 

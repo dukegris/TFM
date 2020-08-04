@@ -8,10 +8,12 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
+import org.apache.commons.lang.StringUtils;
 import org.h2.server.web.WebServlet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.jpa.JpaDialect;
@@ -30,8 +32,12 @@ import com.atomikos.jdbc.AtomikosDataSourceBean;
 import es.rcs.tfm.db.DbNames;
 import es.rcs.tfm.main.AppNames;
 
-@Configuration(value = AppNames.BBDD_CONFIG)
-@PropertySource({ "classpath:/META-INF/db.properties" })
+@Configuration(
+		AppNames.BBDD_CONFIG)
+@ComponentScan(basePackages = {
+		DbNames.DB_CONFIG_PKG })
+@PropertySource({ 
+		"classpath:/META-INF/db.properties" })
 public class DatabaseConfig {
 
 	@Value("${tfm.datasource.url}")
@@ -53,96 +59,61 @@ public class DatabaseConfig {
 
 	@Bean(name = AppNames.BBDD_JPA_DIALECT)
 	public JpaDialect getJpaDialect() {
+		
 		HibernateJpaDialect bean = new HibernateJpaDialect();
-
 		return bean;
+		
 	}
 
 	@Bean(name = AppNames.BBDD_JPA_VENDOR)
 	public HibernateJpaVendorAdapter getJpaVendorAdapter() {
 
-		HibernateJpaVendorAdapter bean = new HibernateJpaVendorAdapter();
+		String dialect = System.getProperty("JDBC_DIALECT") ;
+		if (StringUtils.isNotBlank(dialect)) dbDialect = dialect;
+		String driver = System.getProperty("JDBC_DRIVER") ;
+		if (StringUtils.isNotBlank(driver)) dbDriver = driver;
+		String datasource = System.getProperty("JDBC_DATASOURCE") ;
+		if (StringUtils.isNotBlank(datasource)) jtaDatasource = datasource;
+		String url = System.getProperty("JDBC_URL") ;
+		if (StringUtils.isNotBlank(url)) dbUrl = url;
+		String username = System.getProperty("JDBC_USERNAME") ;
+		if (StringUtils.isNotBlank(username)) dbUsername = username;
+		String password = System.getProperty("JDBC_PASSWORD") ;
+		if (StringUtils.isNotBlank(password)) dbPassword = password;
 
+		HibernateJpaVendorAdapter bean = new HibernateJpaVendorAdapter();
 		bean.setShowSql(true);
 		bean.setGenerateDdl(true);
 		bean.setDatabasePlatform(dbDialect);
-
 		return bean;
 
 	}
 
 	@Bean(name = AppNames.BBDD_CONSOLE)
 	public ServletRegistrationBean<HttpServlet> h2servletRegistration() {
-
+		
 		WebServlet servlet = new WebServlet();
-		// jdbc:h2:mem:SECURITY.DB
-
 		ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<HttpServlet>(servlet);
-
 		bean.addUrlMappings(AppNames.BBDD_URL);
-
 		return bean;
-
-	}
-
-	/*
-	@Bean(name = AppNames.BBDD_DATASOURCE)
-	public DataSource getDataSource() {
-
-		DataSourceBuilder<?> bean = DataSourceBuilder.create();
-		bean.driverClassName(dbDriver); 
-		bean.url(dbUrl); 
-		bean.username(dbUsernamer);
-		bean.password(dbPassword); 
 		
-		return bean.build();
-
 	}
 
 	@Bean(name = AppNames.BBDD_DATASOURCE)
 	public DataSource getDataSource() {
 
-		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-		EmbeddedDatabase bean = builder.
-			setType(EmbeddedDatabaseType.H2). //.H2 or .DERBY 
-			setName(AppNames.BBDD_NAME).
-			build();
-		
-		return bean;
-
-	}
-
-	@Bean(name = AppNames.BBDD_DATASOURCE)
-	public DataSource getDataSource() {
-
-		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl(dbUrl);
-		config.setDriverClassName(dbDriver);
-		config.setUsername(dbUsernamer);
-		config.setPassword(dbPassword);
-		config.addDataSourceProperty("cachePrepStmts", "true");
-		config.addDataSourceProperty("prepStmtCacheSize", "250");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-		HikariDataSource bean = new HikariDataSource(config);
-
-		return bean;
-
-	}
-	*/
-
-	@Bean(name = AppNames.BBDD_DATASOURCE)
-	public DataSource getDataSource() {
-
-		/*
-		AtomikosNonXADataSourceBean bean = new AtomikosNonXADataSourceBean();
-		bean.setUniqueResourceName("TFM_DB"); 
-		bean.setDriverClassName(dbDriver); 
-		bean.setUrl(dbUrl); 
-		bean.setUser(dbUsername);
-		bean.setPassword(dbPassword); 
-		bean.setPoolSize(dbPoolSize);
-		bean.setLocalTransactionMode(true);
-		*/
+		String dialect = System.getProperty("JDBC_DIALECT") ;
+		if (StringUtils.isNotBlank(dialect)) dbDialect = dialect;
+		String driver = System.getProperty("JDBC_DRIVER") ;
+		if (StringUtils.isNotBlank(driver)) dbDriver = driver;
+		String datasource = System.getProperty("JDBC_DATASOURCE") ;
+		if (StringUtils.isNotBlank(datasource)) jtaDatasource = datasource;
+		String url = System.getProperty("JDBC_URL") ;
+		if (StringUtils.isNotBlank(url)) dbUrl = url;
+		String username = System.getProperty("JDBC_USERNAME") ;
+		if (StringUtils.isNotBlank(username)) dbUsername = username;
+		String password = System.getProperty("JDBC_PASSWORD") ;
+		if (StringUtils.isNotBlank(password)) dbPassword = password;
 		
 		Properties xaProperties = new Properties();
 		xaProperties.setProperty("user", dbUsername);
@@ -157,7 +128,6 @@ public class DatabaseConfig {
 		bean.setLocalTransactionMode(true);
 		bean.setPoolSize(dbPoolSize);
 		//bean.setLogWriter(out);
-
 		return bean;
 
 	}
@@ -165,8 +135,20 @@ public class DatabaseConfig {
 	@Bean(name = DbNames.DB_EMF)
 	public LocalContainerEntityManagerFactoryBean getEntityManager() {
 
-		Properties jpaProperties = new Properties();
+		String dialect = System.getProperty("JDBC_DIALECT") ;
+		if (StringUtils.isNotBlank(dialect)) dbDialect = dialect;
+		String driver = System.getProperty("JDBC_DRIVER") ;
+		if (StringUtils.isNotBlank(driver)) dbDriver = driver;
+		String datasource = System.getProperty("JDBC_DATASOURCE") ;
+		if (StringUtils.isNotBlank(datasource)) jtaDatasource = datasource;
+		String url = System.getProperty("JDBC_URL") ;
+		if (StringUtils.isNotBlank(url)) dbUrl = url;
+		String username = System.getProperty("JDBC_USERNAME") ;
+		if (StringUtils.isNotBlank(username)) dbUsername = username;
+		String password = System.getProperty("JDBC_PASSWORD") ;
+		if (StringUtils.isNotBlank(password)) dbPassword = password;
 
+		Properties jpaProperties = new Properties();
 		jpaProperties.put("hibernate.show_sql", "true");
 		// jpaProperties.put("hibernate.format_sql", "false");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "create-drop");
@@ -174,9 +156,7 @@ public class DatabaseConfig {
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "validate");
 		// jpaProperties.put("hibernate.hbm2ddl.auto", "update");
 		jpaProperties.put("hibernate.hbm2ddl.auto", "update");
-
 		jpaProperties.put("hibernate.dialect", dbDialect);
-
 		// JTA
 		jpaProperties.put("javax.persistence.transactionType", "jta");
 		jpaProperties.put("hibernate.current_session_context_class", "jta");
@@ -189,31 +169,17 @@ public class DatabaseConfig {
 		jpaProperties.put("hibernate.connection.release_mode", "after_transaction");
 		
 		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
-
 		bean.setDataSource(getDataSource());
 		bean.setJpaVendorAdapter(getJpaVendorAdapter());
 		bean.setJpaDialect(getJpaDialect());
 		bean.setJpaProperties(jpaProperties);
-
 		bean.setPersistenceUnitName(AppNames.BBDD_PU);
 		//bean.setPersistenceXmlLocation("classpath:/META-INF/persistence.xml");
 		bean.setPackagesToScan(new String[] { DbNames.DB_MODEL_PKG });
-
 		return bean;
 
 	}
 
-	/*
-	 @Bean( name = DbNames.DB_TX) public PlatformTransactionManager
-	 getTransactionManager() {
-	 
-		JpaTransactionManager bean = new JpaTransactionManager();
-		bean.setEntityManagerFactory(getEntityManager().getObject());
-		
-		return bean;
-	 
-	 }
-	 */
 	@Bean(
 			name = AppNames.BBDD_TR_SERVICE,
 			initMethod = "init",
@@ -224,11 +190,9 @@ public class DatabaseConfig {
 		config.setProperty("com.atomikos.icatch.force_shutdown_on_vm_exit",	"true");
 		config.setProperty("com.atomikos.icatch.log_base_name",				"UserTransactionServiceImpLog");
 		config.setProperty("com.atomikos.icatch.log_base_dir",				jtaLogger);
-
 		config.setProperty("com.atomikos.icatch.enable_logging",			"false");
 
 		UserTransactionService bean = new UserTransactionServiceImp(config);
-		
 		return bean;
 
 	}
@@ -245,7 +209,6 @@ public class DatabaseConfig {
 		} catch (SystemException e) {
 			e.printStackTrace();
 		}
-		
 		return bean;
 
 	}
@@ -255,15 +218,6 @@ public class DatabaseConfig {
 	public UserTransaction getUserTransaction() {
 
 		UserTransaction bean = new UserTransactionImp();
-		
-		/*
-		try {
-			bean.setTransactionTimeout(1000);
-		} catch (SystemException e) {
-			e.printStackTrace();
-		}
-		*/
-		
 		return bean;
 
 	}
@@ -283,7 +237,6 @@ public class DatabaseConfig {
 		} catch (SystemException e) {
 			e.printStackTrace();
 		}
-		
 		return bean;
 		
 	}

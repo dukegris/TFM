@@ -78,8 +78,14 @@ import io.crnk.spring.setup.boot.security.SecurityModuleConfigurer;
 import io.crnk.spring.setup.boot.ui.CrnkUIAutoConfiguration;
 import io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration;
 
-@Order(value = 120)
-@Configuration( AppNames.CRNK_CONFIG )
+@EnableGlobalMethodSecurity(
+		prePostEnabled = true, 
+		securedEnabled = true, 
+		jsr250Enabled = true)
+@Order(
+		120)
+@Configuration(
+		AppNames.CRNK_CONFIG )
 @Import( {
 		CrnkHomeAutoConfiguration.class,
 		CrnkCoreAutoConfiguration.class,
@@ -93,10 +99,6 @@ import io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration;
 		//CrnkErrorControllerAutoConfiguration.class,
 		PlainJsonFormatAutoConfiguration.class,
 		CrnkTomcatAutoConfiguration.class } )
-@EnableGlobalMethodSecurity(
-		prePostEnabled = true, 
-		securedEnabled = true, 
-		jsr250Enabled = true)
 @DependsOn({
 		AppNames.WEB_JACKSON_MAPPER})
 public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBootConfigurer {

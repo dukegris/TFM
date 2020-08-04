@@ -5,10 +5,10 @@
 export const environment = {
 	production: false,
 	numRowsInPage: 20,
+	apiUrl: window["env"]["apiUrl"] || "default",
+	crnkApiUrl:  window["env"]["crnkApiUrl"] || "default",
 	accountLoginUrl: '/account/login',
 	accountMeUrl: '/account/me',
-	apiUrl: 'http://localhost:4101/api',
-	crnkApiUrl: 'http://localhost:4101/api/data',
 	applicationUrl: '/applications',
 	moduleUrl: '/modules',
 	functionUrl: '/functions',

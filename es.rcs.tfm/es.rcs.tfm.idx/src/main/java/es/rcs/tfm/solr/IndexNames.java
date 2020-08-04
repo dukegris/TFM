@@ -12,7 +12,13 @@ public class IndexNames {
 	// TFM-INDEX: server
 	public static final String IDX_CORE_SERVER =				"ARTICLES";
 	public static final String IDX_SERVER =						"taoIndexServer";
-	public static final String IDX_CLIENT =						"solrClient";// "taoIndexClient";
+	// Este nombre no se puede cambiar. En EnableSolrRepositories  	solrClientRef permite poner el 
+	// nombre que se quiera pero la implementación de SolrRepositoryConfigExtension solo se hace
+	// referencia al texto de un bean: BeanDefinitionName.SOLR_CLIENT.getBeanName(), por lo que no 
+	// recoge el valo
+	public static final String IDX_CLIENT =						"solrClient";
+	//public static final String IDX_CLIENT =						"taoIndexClient";
+	public static final String IDX_FACTORY =					"taoIndexFactory";
 	public static final String IDX_TEMPLATE =					"taoIndexTemplate";
 
 	// -------------------------------------------------------------------------------------

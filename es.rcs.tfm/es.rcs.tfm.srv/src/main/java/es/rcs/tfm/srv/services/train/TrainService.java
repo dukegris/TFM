@@ -22,8 +22,9 @@ import es.rcs.tfm.srv.setup.TmVarBiocProcessor;
 import es.rcs.tfm.srv.setup.TmVarPubtatorProcessor;
 import es.rcs.tfm.xml.XmlNames;
 
-@Service(value = SrvNames.TRAINING_SRVC)
-@DependsOn(value = {
+@Service(
+		SrvNames.TRAINING_SRVC)
+@DependsOn({
 		SrvNames.SPARK_SESSION_TRAIN,
 		XmlNames.BIOC_CONTEXT})
 @PropertySource(

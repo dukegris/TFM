@@ -1,4 +1,4 @@
-package es.rcs.tfm.main.components;
+package es.rcs.tfm.main.security;
 
 import java.io.IOException;
 
@@ -15,7 +15,8 @@ import es.rcs.tfm.main.AppNames;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Component(AppNames.SEC_AUTH_EX_EP)
+@Component(
+		AppNames.SEC_AUTH_EX_EP)
 public class RestExceptionAuthenticationEntryPoint extends BasicAuthenticationEntryPoint {// implements AuthenticationEntryPoint {
 
 	@Override

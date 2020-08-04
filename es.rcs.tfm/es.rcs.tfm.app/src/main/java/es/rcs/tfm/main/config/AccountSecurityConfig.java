@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.annotation.Order;
@@ -23,15 +24,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import es.rcs.tfm.api.controller.AccessController;
 import es.rcs.tfm.main.AppNames;
-import es.rcs.tfm.main.components.RestExceptionAuthenticationEntryPoint;
+import es.rcs.tfm.main.security.RestExceptionAuthenticationEntryPoint;
 import es.rcs.tfm.main.setup.JwtAuthenticationFilter;
 import es.rcs.tfm.main.setup.JwtAuthorizationFilter;
 import es.rcs.tfm.main.setup.TaoAuthenticationProvider;
 
-@Order(value = 110)
 @EnableWebSecurity
-@Configuration( AppNames.SEC_CONFIG )
-@PropertySource( {"classpath:/META-INF/security.properties"} ) 
+@Order(
+		110)
+@Configuration(
+		AppNames.SEC_CONFIG )
+@ComponentScan(basePackages = {
+		AppNames.SEC_SERVICES_PKG})
+@PropertySource({
+		"classpath:/META-INF/security.properties" }) 
 public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private @Value("${tao.security.rememberme.cookie}") String REMEMBERME_COOKIE_ID = "TAO-CLIENT-REMEMBER-COOKIE";
@@ -49,11 +55,8 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 			//	.anyRequest().requiresSecure()
 			//	.and()
 			.authorizeRequests()
-
 				.antMatchers(AccessController.API_LOGIN_ACTION + "/**").permitAll()
-				
 				.antMatchers(HttpMethod.GET, AccessController.API_ACCOUNTME_ACTION).fullyAuthenticated()
-				
 				/*
 				.antMatchers(HttpMethod.GET, SecNames.ACCOUNT_API_ACTION + "/**").permitAll()
 				.antMatchers(HttpMethod.POST, SecNames.ACCOUNT_API_ACTION + "/**").fullyAuthenticated()
@@ -61,7 +64,6 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.DELETE, SecNames.ACCOUNT_API_ACTION + "/**").fullyAuthenticated()
 				 */
 				//.anyRequest().authenticated()
-
 				.and()
 			.exceptionHandling()
 				.authenticationEntryPoint(restExceptionAuthenticationEntryPoint)
@@ -87,8 +89,7 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
         config.setAllowCredentials(true);
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        config.addAllowedOrigin("*");
-        
+        config.addAllowedOrigin("*");        
         // Permitir el acceso a esta cabecera
         config.addExposedHeader(AppNames.JWT_HEADER_AUTHORIZATION);
         //config.setAllowedMethods(Arrays.asList(new String[]{"*"}));
@@ -101,15 +102,16 @@ public class AccountSecurityConfig extends WebSecurityConfigurerAdapter {
     	
         final UrlBasedCorsConfigurationSource bean = new UrlBasedCorsConfigurationSource();
         bean.registerCorsConfiguration(AccessController.API_ACCOUNT_BASE + "/**", config);
-
         return bean;
         
     }
 
 	@Bean( name = AppNames.SEC_CRYPT_PASSWORD )
 	public PasswordEncoder getPasswordEncoder() {
+		
 		BCryptPasswordEncoder bean = new BCryptPasswordEncoder();
 		return bean;
+		
 	};
     
 	@Bean( AppNames.SEC_AUTH_PROVIDER )

@@ -1,4 +1,4 @@
-package es.rcs.tfm.main.components;
+package es.rcs.tfm.main.shell;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -14,7 +14,8 @@ import es.rcs.tfm.main.AppNames;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.services.train.TrainService;
 
-@ShellComponent( value =  AppNames.APP_CONLL_COMMAND )
+@ShellComponent( value =  
+		AppNames.APP_CONLL_COMMAND )
 public class ConllCommand {
 
     @ShellMethod("Genera ficheros CONLL a partir de textos en PubTaor o BioC.")

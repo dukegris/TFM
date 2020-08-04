@@ -23,8 +23,10 @@ import es.rcs.tfm.srv.repository.CorpusRepository;
 import es.rcs.tfm.srv.repository.FtpRepository;
 import es.rcs.tfm.srv.setup.PmcProcessor;
 
-@Service(value = SrvNames.PMC_LOADER_SRVC)
-@DependsOn(value = SrvNames.CORPUS_SRVC)
+@Service(
+		SrvNames.PMC_LOADER_SRVC)
+@DependsOn(
+		SrvNames.CORPUS_SRVC)
 @PropertySource(
 		{"classpath:/META-INF/service.properties"} )
 public class OspmcLoaderService {
