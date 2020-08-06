@@ -1,26 +1,69 @@
+docker system prune -a
+
+
+
 # CONTAINERS
-docker build --pull --rm -f "es.rcs.install/os/Dockerfile.clearlinux" -t dukegris/tfm_os:1.0.2 "es.rcs.install/os"
-docker pull dukegris/tfm_os:1.0.2
-docker build --pull --rm -f "es.rcs.install/jdk/Dockerfile.clearlinux" -t dukegris/tfm_java:1.0.2 "es.rcs.install/jdk"
-docker pull dukegris/tfm_java:1.0.2
-docker build --pull --rm -f "es.rcs.install/postgresql/Dockerfile.clearlinux" -t dukegris/tfm_postgresql:1.0.2 "es.rcs.install/postgresql"
-docker pull dukegris/tfm_postgresql:1.0.2
-docker build --pull --rm -f "es.rcs.install/solr/Dockerfile.clearlinux" -t dukegris/tfm_solr:1.0.2 "es.rcs.install/solr"
-docker pull dukegris/tfm_solr:1.0.2
-docker build --pull --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.2 "es.rcs.install/spark"
-docker pull dukegris/tfm_spark:1.0.2
+docker rmi --force dukegris/tfm_os:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/os/Dockerfile.clearlinux" -t dukegris/tfm_os:1.0.2 "es.rcs.install/os"
+docker push dukegris/tfm_os:1.0.2
+
+docker rmi --force dukegris/tfm_jdk:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/jdk/Dockerfile.clearlinux" -t dukegris/tfm_jdk:1.0.2 "es.rcs.install/jdk"
+docker push dukegris/tfm_jdk:1.0.2
+
+docker rmi --force dukegris/tfm_nginx:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/nginx/Dockerfile.clearlinux" -t dukegris/tfm_nginx:1.0.2 "es.rcs.install/nginx"
+docker push dukegris/tfm_nginx:1.0.2
+
+docker rmi --force dukegris/tfm_postgresql:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/postgresql/Dockerfile.clearlinux" -t dukegris/tfm_postgresql:1.0.2 "es.rcs.install/postgresql"
+docker push dukegris/tfm_postgresql:1.0.2
+
+docker rmi --force dukegris/tfm_solr:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/solr/Dockerfile.clearlinux" -t dukegris/tfm_solr:1.0.2 "es.rcs.install/solr"
+docker push dukegris/tfm_solr:1.0.2
+
+docker rmi --force dukegris/tfm_spark:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/spark/Dockerfile.clearlinux" -t dukegris/tfm_spark:1.0.2 "es.rcs.install/spark"
+docker push dukegris/tfm_spark:1.0.2
+
+docker rmi --force dukegris/tfm_hadoop:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/hadoop/Dockerfile.clearlinux" -t dukegris/tfm_hadoop:1.0.2 "es.rcs.install/hadoop"
+docker push dukegris/tfm_hadoop:1.0.2
+
+
+
+docker rmi --force dukegris/tfm_ui:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/tfm/ui/Dockerfile.clearlinux" -t dukegris/tfm_ui:1.0.2 "es.rcs.install/tfm/ui"
+docker push dukegris/tfm_ui:1.0.2
+
+docker rmi --force dukegris/tfm_db:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/tfm/db/Dockerfile.clearlinux" -t dukegris/tfm_db:1.0.2 "es.rcs.install/tfm/db"
+docker push dukegris/tfm_db:1.0.2
+
+docker rmi --force dukegris/tfm_idx:1.0.2
+docker build --no-cache --rm -f "es.rcs.install/tfm/idx/Dockerfile.clearlinux" -t dukegris/tfm_idx:1.0.2 "es.rcs.install/tfm/idx"
+docker push dukegris/tfm_idx:1.0.2
+
+
+
+
+
+
 
 
 
 
 # RUN CONTAINERS
-docker run --rm -it  dukegris/tfm_postgresql:1.0.2
-docker run --rm -it  dukegris/tfm_solr:1.0.2
-docker run --rm -it  dukegris/tfm_spark:1.0.2
+docker run --rm -it  -p 80:80/tcp dukegris/tfm_ui:1.0.2
+
+
 docker run --rm -it  -p 5432:5432/tcp dukegris/tfm_postgresql:1.0.2
 docker run --rm -it  -p 8983:8983/tcp dukegris/tfm_solr:1.0.2
 docker run --rm -it  -p 8080,7077:8080,7077/tcp dukegris/tfm_solr:1.0.2
 
+docker run --rm -it  -p 80:80/tcp dukegris/tfm_nginx:1.0.2
+docker run --rm -it  -p 80:80/tcp dukegris/tfm_ui:1.0.2
 
 
 

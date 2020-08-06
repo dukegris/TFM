@@ -82,8 +82,8 @@ ENV TZ=Europe/Madrid \
   LANG=en_US.UTF-8
 
 # APPLICATION
-ADD RCS-Spa-0.0.4-SNAPSHOT-bundle.tar.gz $TFM_DATA_DIR
-COPY nginx.conf $TFM_ETC_DIR
+COPY config/nginx.conf $TFM_ETC_DIR
+
 RUN sed -i "s|TFM_USER|${TFM_USER}|" $TFM_ETC_DIR/nginx.conf &&\
   sed -i "s|TFM_RUN_DIR|${TFM_RUN_DIR}|" $TFM_ETC_DIR/nginx.conf &&\
   sed -i "s|TFM_LOGS_DIR|${TFM_LOGS_DIR}|" $TFM_ETC_DIR/nginx.conf &&\

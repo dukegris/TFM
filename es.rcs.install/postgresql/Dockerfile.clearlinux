@@ -78,12 +78,11 @@ ENV TZ=Europe/Madrid \
   LANG=en_US.UTF-8
 
 # APPLICATION
-# tfm_user: TfmPassword
-# tfm_query: TfmQuery
+# tfmUser: TfmPassword
+# tfmQuery: TfmQuery
 RUN initdb --pgdata=$TFM_METADATA_DIR --username="$TFM_USER" --encoding=UTF-8 --locale=en_US.UTF-8 --text-search-config="english" &&\
   sed -i "s|#listen_addresses.*|listen_addresses = '*'|" $TFM_ETC_DIR/postgresql.conf &&\
   sed -i "s|#port.*|port = 5432|" $TFM_ETC_DIR/postgresql.conf &&\
-  sed -i "s|#default_tablespace.*|default_tablespace = 'tfm_tbl'|" $TFM_ETC_DIR/postgresql.conf &&\
   sed -i "s|#search_path.*|search_path = '\"$user\",tfm'|" $TFM_ETC_DIR/postgresql.conf &&\
   sed -i "s|host[ tab]\+all[ tab]\+all[ tab]\+127.*|host  all  all  0.0.0.0/0  md5|" $TFM_ETC_DIR/pg_hba.conf &&\
   sed -i "s|host[ tab]\+all[ tab]\+all[ tab]\+\:.*|#host  all  all  ::1/128  trust|" $TFM_ETC_DIR/pg_hba.conf &&\
@@ -91,16 +90,6 @@ RUN initdb --pgdata=$TFM_METADATA_DIR --username="$TFM_USER" --encoding=UTF-8 --
 
 RUN	set PGDATA=${TFM_METADATA_DIR} &&\
   pg_ctl --pgdata=$TFM_METADATA_DIR -w start &&\
-  psql -d postgres --command "CREATE ROLE tfm_admin SUPERUSER;" &&\
-  psql -d postgres --command "CREATE TABLESPACE tfm_tbl OWNER tfm_admin LOCATION '$TFM_DATA_DIR';" &&\
-  psql -d postgres --command "CREATE DATABASE tfm_db OWNER tfm_admin TABLESPACE tfm_tbl;" &&\
-  psql -d postgres --dbname tfm_db --command "CREATE SCHEMA tfm AUTHORIZATION tfm_admin;"  &&\
-  psql -d postgres --command "CREATE USER tfm_user INHERIT PASSWORD 'md52484a0b9e891fd2a0a73586d30e4a3da';" &&\
-  psql -d postgres --command "GRANT CONNECT ON DATABASE tfm_db TO tfm_user;" &&\
-  psql -d postgres --dbname tfm_db --command "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA tfm TO tfm_user;" &&\
-  psql -d postgres --dbname tfm_db --command "GRANT USAGE ON SCHEMA tfm TO tfm_user;" &&\
-  psql -d postgres --command "CREATE USER tfm_query INHERIT PASSWORD 'md58f4e7cdaf566f0766dfc67fe15f7348c';" &&\
-  psql -d postgres --dbname tfm_db --command "GRANT SELECT ON ALL TABLES IN SCHEMA tfm TO tfm_query;" &&\
   pg_ctl --pgdata=$TFM_METADATA_DIR -w stop
 
 EXPOSE 5432

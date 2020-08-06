@@ -1,0 +1,19 @@
+FROM dukegris/tfm_solr:1.0.2 AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+# SOLR
+ARG TFM_USER="tfm"
+ARG TFM_LOGS_DIR="/var/log/solr"
+ARG TFM_METADATA_DIR="/var/lib/solr"
+ARG TFM_DATA_DIR="/var/lib/tfm"
+
+USER $TFM_USER
+
+# APPLICATION
+ADD core_config/* /var/lib/solr/
+
+EXPOSE 8983
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
+CMD ["/usr/local/solr/bin/solr", "-f", "-p", "8983"]

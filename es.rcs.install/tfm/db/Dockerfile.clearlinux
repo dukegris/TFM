@@ -1,0 +1,32 @@
+FROM dukegris/tfm_postgresql:1.0.2 AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+# POSTGRESQL
+ARG TFM_USER="tfm"
+ARG TFM_ETC_DIR="/var/lib/postgresql"
+ARG TFM_LOGS_DIR="/var/log/postgresql"
+ARG TFM_METADATA_DIR="/var/lib/postgresql"
+ARG TFM_DATA_DIR="/var/lib/tfm"
+
+# APPLICATION
+USER $TFM_USER
+
+RUN	pg_ctl --pgdata=$TFM_METADATA_DIR -w start &&\
+  sed -i "s|#default_tablespace.*|default_tablespace = 'tfm_tbl'|" $TFM_ETC_DIR/postgresql.conf &&\
+  psql -d postgres --command "CREATE ROLE tfm_admin SUPERUSER;" &&\
+  psql -d postgres --command "CREATE TABLESPACE tfm_tbl OWNER tfm_admin LOCATION '$TFM_DATA_DIR';" &&\
+  psql -d postgres --command "CREATE DATABASE tfm_db OWNER tfm_admin TABLESPACE tfm_tbl;" &&\
+  psql -d postgres --dbname tfm_db --command "CREATE SCHEMA tfm AUTHORIZATION tfm_admin;"  &&\
+  psql -d postgres --dbname tfm_db --command "CREATE USER tfmUser INHERIT PASSWORD 'md52484a0b9e891fd2a0a73586d30e4a3da';" &&\
+  psql -d postgres --dbname tfm_db --command "GRANT CONNECT ON DATABASE tfm_db TO tfmUser;" &&\
+  psql -d postgres --dbname tfm_db --command "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA tfm TO tfmUser;" &&\
+  psql -d postgres --dbname tfm_db --command "GRANT USAGE ON SCHEMA tfm TO tfmUser;" &&\
+  psql -d postgres --dbname tfm_db --command "CREATE USER tfmQuery INHERIT PASSWORD 'md52484a0b9e891fd2a0a73586d30e4a3da';" &&\
+  psql -d postgres --dbname tfm_db --command "GRANT SELECT ON ALL TABLES IN SCHEMA tfm TO tfmQuery;" &&\
+  pg_ctl --pgdata=$TFM_METADATA_DIR -w stop
+
+EXPOSE 5432
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
+CMD ["/usr/bin/postgres", "-D", "/var/lib/postgresql", "-c", "config_file=/var/lib/postgresql/postgresql.conf"]

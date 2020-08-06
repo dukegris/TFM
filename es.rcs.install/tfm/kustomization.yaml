@@ -1,7 +1,0 @@
-secretGenerator:
-- name: tfm-pg-pass
-  literals:
-  - password=tfm_password
-resources:
-  - postgresql.yaml
-  - solr.yaml

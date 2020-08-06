@@ -1,0 +1,21 @@
+{
+  "authentication" : {
+    "class":"solr.BasicAuthPlugin",
+    "realm":"TFM SOLR Login",
+    "forwardCredentials":false,
+    "credentials":{
+      "tfmUser":"2tV9Zvne2h+BK+paq75QDdwKhFG5Sld+SUpw2Ig0ylc= SQOljzcwbW9pC9oBlvx1Ovs2VMLRxDDzN6D4xYdC3+I=",
+      "tfmQuery":"2tV9Zvne2h+BK+paq75QDdwKhFG5Sld+SUpw2Ig0ylc= SQOljzcwbW9pC9oBlvx1Ovs2VMLRxDDzN6D4xYdC3+I="}
+  },
+  "authorization": {
+    "class":"solr.RuleBasedAuthorizationPlugin",
+    "permissions":[{
+      "name":"all",
+      "role":"tfm_admin"},{
+      "name":"read",
+      "role":"tfm_query"}],
+    "user-role":{
+      "tfmUser":"tfm_admin",
+      "tfmQuery":"tfm_query"}
+  }
+}

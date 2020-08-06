@@ -1,0 +1,18 @@
+FROM dukegris/tfm_nginx:1.0.2 AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+# NGINX
+ARG TFM_USER="tfm"
+ARG TFM_LOGS_DIR="/var/log/nginx"
+ARG TFM_DATA_DIR="/var/lib/tfm"
+
+# APPLICATION
+ADD RCS-Spa-0.0.4-SNAPSHOT-bundle.tar.gz $TFM_DATA_DIR
+
+ENV SRV_URL=" http://localhost"
+
+EXPOSE 80
+VOLUME  ["$TFM_LOGS_DIR", "$TFM_DATA_DIR"]
+CMD ["/bin/sh",  "-c",  "envsubst < /var/lib/tfm/assets/env_template.ts > /var/lib/tfm/assets/env.js && exec nginx -g 'daemon off;'"]

@@ -27,7 +27,7 @@ RUN /usr/bin/curl "$SCALA_URL" --insecure --output scala.tgz
 
 # Download HADOOP and install the necesary files in target directory 'install-root',
 # using the new os version
-ARG HADOOP_VERSION="2.7.7"
+ARG HADOOP_VERSION="2.10.0"
 ARG HADOOP_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz&action=download"
 ARG HADOOP_DIST_URL="https://www.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
 ARG HADOOP_ARCHIVE_URL="https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
@@ -56,7 +56,7 @@ RUN source /os-release && \
   --path /install-root \
   --statedir /swupd-state \
   --no-boot-update \
-  --bundles=os-core,locales,java-runtime
+  --bundles=os-core,locales,which,java-runtime
 #	--bundles=os-core,os-core-plus,locales,curl,which,java11-basic
 
 # SCALA
@@ -70,8 +70,7 @@ RUN tar xf /usr/local/hadoop.tgz --directory /install-root/usr/local &&\
 # SPARK
 RUN tar xf /usr/local/spark.tgz --directory /install-root/usr/local &&\
   mv /install-root/usr/local/spark-$SPARK_VERSION-bin-without-hadoop /install-root/usr/local/spark &&\
-  mv /install-root/usr/local/spark/conf/spark-env.sh.template /install-root/usr/local/spark/conf/spark-env.sh &&\
-  echo "export SPARK_DIST_CLASSPATH=\$(hadoop classpath)" >> /install-root/usr/local/spark/conf/spark-env.sh
+  mv /install-root/usr/local/spark/conf/spark-env.sh.template /install-root/usr/local/spark/conf/spark-env.sh
 
 # For some Host OS configuration with redirect_dir on,
 # extra data are saved on the upper layer when the same
@@ -94,7 +93,7 @@ ARG TFM_USER="tfm"
 ARG TFM_GROUP="tfm"
 ARG TFM_BIN_DIR="/usr/local/spark"
 ARG TFM_RUN_DIR="/run/spark"
-ARG TFM_ETC_DIR="/var/etc/spark"
+ARG TFM_ETC_DIR="/usr/local/spark/conf"
 ARG TFM_LOGS_DIR="/var/log/spark"
 ARG TFM_METADATA_DIR="/var/lib/spark"
 ARG TFM_DATA_DIR="/var/lib/tfm"
@@ -106,6 +105,7 @@ RUN groupadd -r $TFM_GROUP &&\
   mkdir -p $TFM_METADATA_DIR &&\
   mkdir -p $TFM_DATA_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_BIN_DIR &&\
+  chown -R $TFM_USER:$TFM_GROUP $TFM_ETC_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_LOGS_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_RUN_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_METADATA_DIR &&\
@@ -126,7 +126,7 @@ ENV TZ=Europe/Madrid \
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk \
   SCALA_HOME=/usr/local/scala \
   HADOOP_HOME=/usr/local/hadoop \
-  HADOOP_CONF_DIR=/usr/local/hadoop/etc \
+  HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop \
   HADOOP_LIBEXEC_DIR=/usr/local/hadoop/libexec \
   SPARK_HOME=/usr/local/spark \
   SPARK_CONF_DIR=/usr/local/spark/conf \
@@ -138,11 +138,13 @@ ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk \
   SPARK_WORKER_WEBUI_PORT=8080 \
   SPARK_WORKER_DIR=/var/lib/spark \
   SPARK_MASTER_URL=$TFM_MASTER_URL \
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HADOOP_HOME/lib/native \
-  PATH=$SCALA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/sbin:$SPARK_HOME/bin:$PATH
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/hadoop/lib/native \
+  PATH=/usr/local/scala/bin:/usr/local/hadoop/bin:/usr/local/hadoop/sbin:/usr/local/spark/bin::/usr/local/spark/sbin:$PATH
+
+RUN export SPARK_DIST_CLASSPATH=$($HADOOP_HOME/bin/hadoop classpath);echo SPARK_DIST_CLASSPATH
 
 # APPLICATION
-ARG TFM_MASTER_URL="spark://spark_master:7077"
+COPY config/core-site.xml $HADOOP_CONF_DIR
 
 EXPOSE 8080 7077
 VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]

@@ -19,13 +19,13 @@ RUN swupd bundle-add curl \
 
 WORKDIR /usr/local
 
-# Download SOLR and install the necesary files in target directory 'install-root',
+# Download HADOOP and install the necesary files in target directory 'install-root',
 # using the new os version
-ARG SOLR_VERSION="8.6.0"
-ARG SOLR_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz&action=download"
-ARG	SOLR_DIST_URL="https://www.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz"
-ARG SOLR_ARCHIVE_URL="https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz"
-RUN /usr/bin/curl "$SOLR_ARCHIVE_URL" --insecure --output solr.tgz
+ARG HADOOP_VERSION="2.10.0"
+ARG HADOOP_CLOSER_URL="http://www.apache.org/dyn/closer.lua?filename=hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz&action=download"
+ARG HADOOP_DIST_URL="https://www.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
+ARG HADOOP_ARCHIVE_URL="https://archive.apache.org/dist/hadoop/core/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
+RUN /usr/bin/curl "$HADOOP_ARCHIVE_URL" --insecure --output hadoop.tgz
 
 # Grab os-release info from the minimal base image so
 # that the new content matches the exact OS version
@@ -42,11 +42,12 @@ RUN source /os-release && \
   --path /install-root \
   --statedir /swupd-state \
   --no-boot-update \
-  --bundles=os-core,os-core-plus,locales,java-runtime
+  --bundles=os-core,locales,which,openssh-server,java-runtime
+#	--bundles=os-core,os-core-plus,locales,curl,which,java11-basic
 
-# SOLR
-RUN tar xf /usr/local/solr.tgz --directory /install-root/usr/local  &&\
-  mv /install-root/usr/local/solr-$SOLR_VERSION /install-root/usr/local/solr
+# HADOOP
+RUN tar xf /usr/local/hadoop.tgz --directory /install-root/usr/local &&\
+  mv /install-root/usr/local/hadoop-$HADOOP_VERSION /install-root/usr/local/hadoop
 
 # For some Host OS configuration with redirect_dir on,
 # extra data are saved on the upper layer when the same
@@ -64,23 +65,26 @@ RUN cd / && \
 FROM clearlinux/os-core:latest
 COPY --from=tfm_os_builder /install-root /
 
-# SOLR
+# HADOOP
 ARG TFM_USER="tfm"
 ARG TFM_GROUP="tfm"
-ARG TFM_BIN_DIR="/usr/local/solr"
-ARG TFM_RUN_DIR="/run/solr"
-ARG TFM_ETC_DIR="/var/etc/solr"
-ARG TFM_LOGS_DIR="/var/log/solr"
-ARG TFM_METADATA_DIR="/var/lib/solr"
+ARG TFM_BIN_DIR="/usr/local/hadoop"
+ARG TFM_HOME_DIR="/home/$TFM_USER"
+ARG TFM_RUN_DIR="/run/hadoop"
+ARG TFM_ETC_DIR="/usr/local/hadoop/etc/hadoop"
+ARG TFM_LOGS_DIR="/var/log/hadoop"
+ARG TFM_METADATA_DIR="/var/lib/hadoop"
 ARG TFM_DATA_DIR="/var/lib/tfm"
 
 RUN groupadd -r $TFM_GROUP &&\
   useradd --no-log-init -r -g $TFM_GROUP $TFM_USER &&\
+  mkdir -p $TFM_HOME_DIR &&\
   mkdir -p $TFM_LOGS_DIR &&\
   mkdir -p $TFM_RUN_DIR &&\
   mkdir -p $TFM_METADATA_DIR &&\
   mkdir -p $TFM_DATA_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_BIN_DIR &&\
+  chown -R $TFM_USER:$TFM_GROUP $TFM_HOME_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_LOGS_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_RUN_DIR &&\
   chown -R $TFM_USER:$TFM_GROUP $TFM_METADATA_DIR &&\
@@ -99,13 +103,24 @@ ENV TZ=Europe/Madrid \
   LANG=en_US.UTF-8
 
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk \
-  SOLR_PID_DIR=/var/run/solr \
-  SOLR_HOME=/var/lib/solr \
-  SOLR_LOGS_DIR=/var/log/solr \
-  PATH=$TFM_BIN_DIR/bin:$PATH
+  HADOOP_HOME=/usr/local/hadoop \
+  HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop \
+  HADOOP_LIBEXEC_DIR=/usr/local/hadoop/libexec \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/hadoop/lib/native \
+  PATH=$TFM_BIN_DIR/bin:/usr/local/hadoop/sbin:$PATH
 
 # APPLICATION
+# ssh without key
+RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
-EXPOSE 8983
+COPY config/core-site.xml $TFM_ETC_DIR
+COPY config/hdfs-site.xml $TFM_ETC_DIR
+COPY config/mapred-site.xml $TFM_ETC_DIR
+COPY config/yarn-site.xml $TFM_ETC_DIR
+
+RUN hdfs namenode -format
+
+EXPOSE 9000
 VOLUME  ["$TFM_LOGS_DIR", "$TFM_METADATA_DIR", "$TFM_DATA_DIR"]
-CMD ["/usr/local/solr/bin/solr", "-f", "-p", "8983"]
+CMD ["/bin/bash"]

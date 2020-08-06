@@ -1,0 +1,14 @@
+FROM dukegris/tfm_jdk:1.0.2 AS tfm_os_builder
+
+LABEL maintainer "Raul Cuesta <raul.cuesta.sainz@gmail.com>"
+LABEL repository "https://github.com/dukegris/TFM"
+
+# TFM
+ARG TFM_USER="tfm"
+ARG TFM_GROUP="tfm"
+ARG TFM_BIN_DIR="/usr/local/tfm"
+ARG TFM_RUN_DIR="/run/tfm"
+ARG TFM_ETC_DIR="/usr/local/tfm/etc"
+ARG TFM_LOGS_DIR="/var/log/tfm"
+ARG TFM_METADATA_DIR="/var/lib/tfm"
+ARG TFM_DATA_DIR="/var/lib/tfm"

@@ -44,4 +44,10 @@ RUN cd / && \
 FROM clearlinux/os-core:latest
 COPY --from=tfm_os_builder /install-root /
 
+# OS LOCALES
+ENV TZ=Europe/Madrid \
+  LANGUAGE=en_US:en \
+  LC_ALL=en_US.UTF-8 \
+  LANG=en_US.UTF-8
+
 CMD ["/bin/java"]
