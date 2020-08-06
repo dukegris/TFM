@@ -203,7 +203,7 @@ public class CrnkConfig extends WebSecurityConfigurerAdapter implements CrnkBoot
 	public JpaModuleConfig jpaConfig() {
 		JpaModuleConfig bean = new JpaModuleConfig();
 		bean.setQueryFactory(QuerydslQueryFactory.newInstance());
-		//bean.exposeAllEntities(parEntityManagerFactory);
+		bean.exposeAllEntities(entityManagerFactory);
 		return bean;
 	}
     

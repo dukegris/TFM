@@ -9,6 +9,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.spark.sql.SparkSession;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -21,6 +22,7 @@ import es.rcs.tfm.main.boot.WebserverConfig;
 import es.rcs.tfm.srv.SrvNames;
 import es.rcs.tfm.srv.services.train.TrainService;
 
+@SpringBootConfiguration
 public class CommandTool {
 
 	public static void main(String[] args) {
@@ -149,8 +151,6 @@ public class CommandTool {
 					build().
 					run(args);
 			
-			Thread.currentThread().wait();
-
 		} catch (Exception ex) {
 			result = AppNames.WEBSERVER_START_FAILED;
 			System.out.println("FAILED " + ex);
@@ -172,8 +172,6 @@ public class CommandTool {
 					build().
 					run(args);
 			
-			Thread.currentThread().wait();
-
 		} catch (Exception ex) {
 			result = AppNames.DOWNLOADER_START_FAILED;
 			System.out.println("FAILED " + ex);

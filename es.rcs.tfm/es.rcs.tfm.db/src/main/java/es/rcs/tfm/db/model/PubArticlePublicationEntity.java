@@ -74,7 +74,7 @@ public class PubArticlePublicationEntity {
 	public static final String RES_START_PAGE		= "startPage";
 	public static final String RES_END_PAGE			= "endPage";
 	public static final String RES_REFERENCE		= "reference";
-	public static final String RES_IDENTIFIERS		= "identifiers";
+	public static final String RES_LOCATIONS		= "locations";
 	public static final String RES_PUBLICATION_ID	= "publicationId";
 	public static final String RES_PUBLICATION		= "publication";
 
@@ -299,7 +299,7 @@ public class PubArticlePublicationEntity {
 			lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
 	@JsonProperty(
-			value = RES_IDENTIFIERS,
+			value = RES_LOCATIONS,
 			required = false)
 	@CollectionTable(
 			name = DB_TABLE_IDS, 

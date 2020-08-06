@@ -39,8 +39,8 @@ import es.rcs.tfm.srv.setup.PubmedXmlProcessor;
 		SrvNames.PUBMED_LOADER_SRVC)
 @DependsOn(
 		SrvNames.CORPUS_SRVC)
-@PropertySource(
-		{"classpath:/META-INF/service.properties"} )
+@PropertySource({
+		"classpath:/META-INF/service.properties"} )
 public class PubmedLoaderService {
 
 	private @Value("${tfm.pubmed.ftp.host}") String FPT_HOST = "ftp.ncbi.nlm.nih.gov";

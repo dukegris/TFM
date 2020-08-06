@@ -496,7 +496,7 @@ public class PubArticleEntity extends AuditedBaseEntity {
 	@Transient
 	@ToString.Exclude
 	@EqualsAndHashCode.Exclude
-	private Set<Long> filesIds = null;
+	private Set<Long> fileIds = null;
 
 
 	@JsonApiRelation(

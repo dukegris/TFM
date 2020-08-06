@@ -27,8 +27,8 @@ import es.rcs.tfm.srv.setup.PmcProcessor;
 		SrvNames.PMC_LOADER_SRVC)
 @DependsOn(
 		SrvNames.CORPUS_SRVC)
-@PropertySource(
-		{"classpath:/META-INF/service.properties"} )
+@PropertySource({
+		"classpath:/META-INF/service.properties"} )
 public class OspmcLoaderService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OspmcLoaderService.class);

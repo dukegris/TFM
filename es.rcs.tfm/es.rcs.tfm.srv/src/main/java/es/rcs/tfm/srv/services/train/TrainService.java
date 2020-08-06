@@ -27,8 +27,8 @@ import es.rcs.tfm.xml.XmlNames;
 @DependsOn({
 		SrvNames.SPARK_SESSION_TRAIN,
 		XmlNames.BIOC_CONTEXT})
-@PropertySource(
-		{"classpath:/META-INF/service.properties"} )
+@PropertySource({
+		"classpath:/META-INF/service.properties"} )
 public class TrainService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(TrainService.class);
