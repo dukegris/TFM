@@ -676,7 +676,7 @@ public class PubArticleEntity extends AuditedBaseEntity {
 		this.files = items;
 		Set<Long> itemIds = items.stream().map(f -> f.getId()).collect(Collectors.toSet());
 		if ((itemIds != null) && !itemIds.isEmpty()) {
-			this.filesIds = itemIds;
+			this.fileIds = itemIds;
 		}
 
 	}
